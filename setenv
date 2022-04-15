@@ -1,4 +1,5 @@
 #!/bin/sh
+export FLASK_ENV=development
 export FLASK_APP=project
 export FLASK_DEBUG=1
 export BOT_TOKEN=5353775499:AAGrAqOE8-YW1hvhWXvVNOB5dgD0MTpIwvY
