@@ -6,7 +6,11 @@ from flask_login import LoginManager
 
 db = SQLAlchemy()
 
+from .telegram_sender import send_message
+
 def create_app():
+    send_message("The app is starting")
+
     app = Flask(__name__)
 
     app.config['SECRET_KEY'] = 'secret-key-goes-here'
