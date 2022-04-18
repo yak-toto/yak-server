@@ -5,7 +5,7 @@
 <nav class="navbar">
     <div class="container">
     <div id="navbarMenu" class="navbar-menu">
-        <div class="navbar-tabs center">
+        <div class="navbar">
             {% for group_name in groups %}
                 <a href="{{ url_for('main.group', group_name=group_name) }}" class="navbar-item">Groupe {{ group_name }}</a>
             {% endfor %}
@@ -15,24 +15,26 @@
 </nav>
 </div>
 <hr>
-<div>
+<div class="column is-8 is-offset-2">
     <h3 class="title">Groupe {{group_name}}</h3>
     <div class="box">
         <form method="POST" action="/group/{{group_name}}">
-            <table class="center">
-            {%- for match in matches %}
-                <tr>
-                    <td>{{match.team1}}</td>
-                    <td><input type="text" name="score_first_column[]" value="{{match.score1 if (match.score1 != None) else ''}}"></td>
-                    <td><input type="text" name="score_second_column[]" value="{{match.score2 if (match.score2 != None) else ''}}"></td>
-                    <td>{{match.team2}}</td>
-                </tr>
-            {% endfor %}
-            </table>
+            <div class="table-container">
+                <table class="table is-fullwidth is-striped">
+                {%- for match in matches %}
+                    <tr>
+                        <td>{{match.team1}}</td>
+                        <td><input class="input is-small" type="text" name="score_first_column[]" value="{{match.score1 if (match.score1 != None) else ''}}"></td>
+                        <td><input class="input is-small" type="text" name="score_second_column[]" value="{{match.score2 if (match.score2 != None) else ''}}"></td>
+                        <td>{{match.team2}}</td>
+                    </tr>
+                {% endfor %}
+                </table>
+            </div>
             <div>
-                <button>Submit</button>
+                <button class="button is-dark">Submit</button>
             </div>
         </form>
-    </div>
+        </div>
 </div>
 {% endblock %}

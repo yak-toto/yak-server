@@ -42,4 +42,4 @@ def group_post(group_name):
     (db.session.add(match) for match in matches)
     db.session.commit()
 
-    return render_template('group.html', group_name=group_name, matches=matches)
+    return render_template('group.html', group_name=group_name, groups=GROUPS, matches=matches)
