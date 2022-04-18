@@ -9,12 +9,12 @@ main = Blueprint('main', __name__)
 def index():
     return render_template('index.html')
 
+GROUPS = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H')
+
 @main.route('/profile')
 @login_required
 def profile():
-    return render_template('profile.html', name=current_user.name)
-
-GROUPS = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H')
+    return render_template('profile.html', name=current_user.name, groups=GROUPS)
 
 @main.route('/group/<group_name>')
 def group(group_name):
@@ -23,7 +23,7 @@ def group(group_name):
 
     matches = list(Match.query.filter_by(name=current_user.name, group_name=group_name))
 
-    return render_template('group.html', group_name=group_name, matches=matches)
+    return render_template('group.html', group_name=group_name, groups=GROUPS, matches=matches)
 
 @main.route('/group/<group_name>', methods=['POST'])
 def group_post(group_name):

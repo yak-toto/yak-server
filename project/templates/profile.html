@@ -7,14 +7,9 @@
     <div class="container">
       <div id="navbarMenu" class="navbar-menu">
         <div class="navbar-tabs center">
-          <a href="{{ url_for('main.group', group_name='A') }}" class="navbar-item">Groupe A</a>
-          <a href="{{ url_for('main.group', group_name='B') }}" class="navbar-item">Groupe B</a>
-          <a href="{{ url_for('main.group', group_name='C') }}" class="navbar-item">Groupe C</a>
-          <a href="{{ url_for('main.group', group_name='D') }}" class="navbar-item">Groupe D</a>
-          <a href="{{ url_for('main.group', group_name='E') }}" class="navbar-item">Groupe E</a>
-          <a href="{{ url_for('main.group', group_name='F') }}" class="navbar-item">Groupe F</a>
-          <a href="{{ url_for('main.group', group_name='G') }}" class="navbar-item">Groupe G</a>
-          <a href="{{ url_for('main.group', group_name='H') }}" class="navbar-item">Groupe H</a>
+          {% for group_name in groups %}
+            <a href="{{ url_for('main.group', group_name=group_name) }}" class="navbar-item">Groupe {{ group_name }}</a>
+          {% endfor %}
         </div>
       </div>
     </div>
