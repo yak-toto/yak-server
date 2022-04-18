@@ -1,25 +1,43 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div>
-        <h3 class="title">Groupe {{group_name}}</h3>
-        <hr>
-        <div class="box">
-            <form method="POST" action="/group/{{group_name}}">
-                <table class="center">
-                {%- for match in matches %}
-                    <tr>
-                        <td>{{match.team1}}</td>
-                        <td><input type="text" name="score_first_column[]" value="{{match.score1 if (match.score1 != None) else ''}}"></td>
-                        <td><input type="text" name="score_second_column[]" value="{{match.score2 if (match.score2 != None) else ''}}"></td>
-                        <td>{{match.team2}}</td>
-                    </tr>
-                {% endfor %}
-                </table>
-                <div>
-                    <button>Submit</button>
-                </div>
-            </form>
+<div>
+<nav class="navbar">
+    <div class="container">
+    <div id="navbarMenu" class="navbar-menu">
+        <div class="navbar-tabs center">
+        <a href="{{ url_for('main.group', group_name='A') }}" class="navbar-item">Groupe A</a>
+        <a href="{{ url_for('main.group', group_name='B') }}" class="navbar-item">Groupe B</a>
+        <a href="{{ url_for('main.group', group_name='C') }}" class="navbar-item">Groupe C</a>
+        <a href="{{ url_for('main.group', group_name='D') }}" class="navbar-item">Groupe D</a>
+        <a href="{{ url_for('main.group', group_name='E') }}" class="navbar-item">Groupe E</a>
+        <a href="{{ url_for('main.group', group_name='F') }}" class="navbar-item">Groupe F</a>
+        <a href="{{ url_for('main.group', group_name='G') }}" class="navbar-item">Groupe G</a>
+        <a href="{{ url_for('main.group', group_name='H') }}" class="navbar-item">Groupe H</a>
         </div>
     </div>
+    </div>
+</nav>
+</div>
+<hr>
+<div>
+    <h3 class="title">Groupe {{group_name}}</h3>
+    <div class="box">
+        <form method="POST" action="/group/{{group_name}}">
+            <table class="center">
+            {%- for match in matches %}
+                <tr>
+                    <td>{{match.team1}}</td>
+                    <td><input type="text" name="score_first_column[]" value="{{match.score1 if (match.score1 != None) else ''}}"></td>
+                    <td><input type="text" name="score_second_column[]" value="{{match.score2 if (match.score2 != None) else ''}}"></td>
+                    <td>{{match.team2}}</td>
+                </tr>
+            {% endfor %}
+            </table>
+            <div>
+                <button>Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
