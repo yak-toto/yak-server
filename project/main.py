@@ -23,4 +23,4 @@ def group(group_name):
 
     matches = list(Match.query.filter_by(name=current_user.name, group_name=group_name))
 
-    return render_template('group.html', matches=matches)
+    return render_template('group.html', group_name=group_name, matches=matches)

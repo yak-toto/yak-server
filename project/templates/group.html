@@ -1,14 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <table>
-    {%- for match in matches %}
-        <tr>
-            <td>{{match.team1}}</td>
-            <td><input type="text" name="name" id="name"></td>
-            <td><input type="text" name="name" id="name" required></td>
-            <td>{{match.team2}}</td>
-        </tr>
-    {% endfor %}
-    </table>
+    <div>
+        <h3 class="title">Groupe {{group_name}}</h3>
+        <hr>
+        <div>
+            <table class="center">
+            {%- for match in matches %}
+                <tr>
+                    <td>{{match.team1}}</td>
+                    <td><input type="text" value="{{match.score1 if (match.score1 != None) else ''}}"></td>
+                    <td><input type="text" value="{{match.score2 if (match.score2 != None) else ''}}"></td>
+                    <td>{{match.team2}}</td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
+        <div>
+            <button>Submit</button>
+        </div>
+    </div>
 {% endblock %}
