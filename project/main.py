@@ -21,6 +21,6 @@ def group(group_name):
     if group_name not in GROUPS:
         return 'bad request!', 404
 
-    matches = Match.query.filter_by(name=current_user.name, group_name=group_name)
+    matches = list(Match.query.filter_by(name=current_user.name, group_name=group_name))
 
-    return render_template('profile.html', name=current_user.name)
+    return render_template('group.html', matches=matches)

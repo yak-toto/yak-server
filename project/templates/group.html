@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <table>
+    {%- for match in matches %}
+        <tr>
+            <td>{{match.team1}}</td>
+            <td><input type="text" name="name" id="name"></td>
+            <td><input type="text" name="name" id="name" required></td>
+            <td>{{match.team2}}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endblock %}
