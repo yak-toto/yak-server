@@ -1,0 +1,66 @@
+{
+    "A": [
+        ["Sénégal", "Pays-Bas"],
+        ["Qatar", "Équateur"],
+        ["Qatar", "Sénégal"],
+        ["Pays-Bas", "Équateur"],
+        ["Pays-Bas", "Qatar"],
+        ["Équateur", "Sénégal"]
+    ],
+    "B": [
+        ["Angleterre", "Iran"],
+        ["États-Unis", "Pays de Galles"],
+        ["Pays de Galles", "Iran"],
+        ["Angleterre", "États-Unis"],
+        ["Pays de Galles", "Angleterre"],
+        ["Iran", "États-Unis"]
+    ], 
+    "C": [
+        ["Argentine", "Arabie Saoudite"],
+        ["Mexique", "Pologne"],
+        ["Pologne", "Arabie Saoudite"],
+        ["Argentine", "Mexique"],
+        ["Pologne", "Argentine"],
+        ["Arabie Saoudite", "Mexique"]
+    ],
+    "D": [
+        ["Danemark", "Tunisie"],
+        ["France", "Australie"],
+        ["Tunisie", "Australie"],
+        ["France", "Danemark"],
+        ["Australie", "Danemark"],
+        ["Tunisie", "France"]
+    ],
+    "E":[
+        ["Allemagne", "Japon"],
+        ["Espagne", "Costa Rica"],
+        ["Japon", "Costa Rica"],
+        ["Espagne", "Allemagne"],
+        ["Japon", "Espagne"],
+        ["Costa Rica", "Allemagne"]
+    ],
+    "F":[
+        ["Maroc", "Croatie"],
+        ["Belgique", "Canada"],
+        ["Belgique", "Maroc"],
+        ["Croatie", "Canada"],
+        ["Croatie", "Belgique"],
+        ["Canada", "Maroc"]
+    ],
+    "G":[
+        ["Suisse", "Cameroun"],
+        ["Brésil", "Serbie"],
+        ["Cameroun", "Serbie"],
+        ["Brésil", "Suisse"],
+        ["Serbie", "Suisse"],
+        ["Cameroun", "Brésil"]
+    ],
+    "H":[
+        ["Uruguay", "Corée du Sud"],
+        ["Portugal", "Ghana"],
+        ["Corée du Sud", "Ghana"],
+        ["Portugal", "Uruguay"],
+        ["Ghana", "Uruguay"],
+        ["Corée du Sud", "Portugal"]
+    ]
+}
