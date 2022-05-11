@@ -3,14 +3,17 @@ from flask_login import login_required, current_user
 from . import db
 from .models import Match
 from .telegram_sender import send_message
+import json
 
 main = Blueprint('main', __name__)
+
+with open('project/matches.json', mode='r') as file:
+    matches = json.load(file)
+    GROUPS = tuple(matches.keys())
 
 @main.route('/')
 def index():
     return render_template('index.html')
-
-GROUPS = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H')
 
 @main.route('/profile')
 @login_required
