@@ -24,8 +24,8 @@
                 {%- for match in matches %}
                     <tr>
                         <td>{{match.team1}}</td>
-                        <td><input class="input is-small" type="text" name="score_first_column[]" value="{{match.score1 if (match.score1 != None) else ''}}"></td>
-                        <td><input class="input is-small" type="text" name="score_second_column[]" value="{{match.score2 if (match.score2 != None) else ''}}"></td>
+                        <td><input class="input is-small" type="number" name="score_first_column[]" value="{{match.score1 if (match.score1 != None) else ''}}"></td>
+                        <td><input class="input is-small" type="number" name="score_second_column[]" value="{{match.score2 if (match.score2 != None) else ''}}"></td>
                         <td>{{match.team2}}</td>
                     </tr>
                 {% endfor %}

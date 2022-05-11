@@ -33,13 +33,18 @@ def group_post(group_name):
     score_first_column = request.form.getlist('score_first_column[]')
     score_second_column = request.form.getlist('score_second_column[]')
 
+    # if string not empty, convert to int, else None
+    score_first_column = [int(score) if score else None for score in score_first_column]
+    score_second_column = [int(score) if score else None for score in score_second_column]
+
     matches = Match.query.filter_by(name=current_user.name, group_name=group_name)
 
     for index, match in enumerate(matches):
-        match.score1 = score_first_column[index]
-        match.score2 = score_second_column[index]
+        if match.score1 != score_first_column[index] or match.score2 != score_second_column[index]:
+            match.score1 = score_first_column[index]
+            match.score2 = score_second_column[index]
+            db.session.add(match)
 
-    (db.session.add(match) for match in matches)
     db.session.commit()
 
     return render_template('group.html', group_name=group_name, groups=GROUPS, matches=matches)
