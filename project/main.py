@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from . import db
 from .models import Match
+from .telegram_sender import send_message
 
 main = Blueprint('main', __name__)
 
@@ -43,6 +44,13 @@ def group_post(group_name):
         if match.score1 != score_first_column[index] or match.score2 != score_second_column[index]:
             match.score1 = score_first_column[index]
             match.score2 = score_second_column[index]
+            send_message(
+                'User {} update match {} - {} with the score {} - {}.'.format(
+                                                    current_user.name,
+                                                    match.team1, match.team2,
+                                                    match.score1, match.score2
+                                                )
+            )
             db.session.add(match)
 
     db.session.commit()
