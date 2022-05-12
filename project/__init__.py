@@ -12,9 +12,8 @@ def create_app():
     send_message("The app is starting")
 
     app = Flask(__name__)
+    app.config.from_pyfile('config.py')
 
-    app.config['SECRET_KEY'] = 'secret-key-goes-here'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
     db.init_app(app)
 
     login_manager = LoginManager()
