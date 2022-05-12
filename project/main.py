@@ -51,12 +51,7 @@ def group_post(group_name):
             match.score1 = score_first_column[index]
             match.score2 = score_second_column[index]
             send_message(
-                'User {} update match {} - {} with the score {} - {}.'.format(
-                                                    current_user.name,
-                                                    match.team1, match.team2,
-                                                    match.score1, match.score2
-                                                )
-            )
+                f'User {current_user.name} update match {match.team1} - {match.team2} with the score {match.score1} - {match.score2}.')
             db.session.add(match)
 
     db.session.commit()

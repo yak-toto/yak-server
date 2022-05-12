@@ -28,7 +28,7 @@ def login_post():
 
     # if the above check passes, then we know the user has the right credentials
     login_user(user, remember=remember)
-    send_message('User {} login.'.format(user.name))
+    send_message(f'User {user.name} login.')
     return redirect(url_for('main.profile'))
 
 @auth.route('/signup')
@@ -53,7 +53,7 @@ def signup_post():
     # add the new user to the database
     db.session.add(new_user)
     db.session.commit()
-    send_message('New user created : username {}.\n'.format(new_user.name))
+    send_message(f'New user created : username {new_user.name}.')
 
     # create matches table for user
     with open('project/matches.json', mode='r') as f:
@@ -68,6 +68,6 @@ def signup_post():
 @auth.route('/logout')
 @login_required
 def logout():
-    send_message('User {} logout'.format(current_user.name))
+    send_message(f'User {current_user.name} logout')
     logout_user()
     return redirect(url_for('main.index'))
