@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from . import db
-from .models import Match
+from .models import User, Match
 from .telegram_sender import send_message
 import json
+from typing import Tuple
 
 main = Blueprint('main', __name__)
 
@@ -43,8 +44,10 @@ def group_post(group_name):
 
     matches = Match.query.filter_by(name=current_user.name, group_name=group_name)
 
+    is_matches_modified = False
     for index, match in enumerate(matches):
         if match.score1 != score_first_column[index] or match.score2 != score_second_column[index]:
+            is_matches_modified = True
             match.score1 = score_first_column[index]
             match.score2 = score_second_column[index]
             send_message(
@@ -58,4 +61,52 @@ def group_post(group_name):
 
     db.session.commit()
 
+    if current_user.name == 'admin' and is_matches_modified:
+        compute_points()
+
     return render_template('group.html', group_name=group_name, groups=GROUPS, matches=matches)
+
+def compute_points():
+    users = User.query.filter(User.name != 'admin')
+
+    for user in users:
+        points = 0
+        user_matches = Match.query.filter_by(name=user.name)
+
+        for match in user_matches:
+            admin_match = Match.query.filter_by(team1=match.team1, team2=match.team2).first()
+
+            if is_same_resuls((match.score1, match.score2), (admin_match.score1, admin_match.score2)):
+                points += 3
+                if is_same_scores((match.score1, match.score2), (admin_match.score1, admin_match.score2)):
+                    points += 5
+
+        user.points = points
+        db.session.add(user)
+
+    db.session.commit()
+
+def is_same_scores(user_score: Tuple[int, int], real_scores: Tuple[int, int]) -> bool:
+    return user_score == real_scores
+
+def is_same_resuls(user_score: Tuple[int, int], real_scores: Tuple[int, int]) -> bool:
+    return (
+            (is_1_win(user_score) and is_1_win(real_scores)) or 
+            (is_draw(user_score) and is_draw(real_scores)) or
+            (is_2_win(user_score) and is_2_win(real_scores))
+    )
+
+def is_1_win(scores: Tuple[int, int]) -> bool:
+    if None in scores:
+        return False
+    return scores[0] > scores[1]
+
+def is_draw(scores: Tuple[int, int]) -> bool:
+    if None in scores:
+        return False
+    return scores[0] == scores[1]
+
+def is_2_win(scores: Tuple[int, int]) -> bool:
+    if None in scores:
+        return False
+    return scores[0] < scores[1]
