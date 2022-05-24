@@ -69,12 +69,12 @@ def compute_points():
         user_matches = Match.query.filter_by(name=user.name)
 
         for match in user_matches:
-            admin_match = Match.query.filter_by(team1=match.team1, team2=match.team2).first()
+            admin_match = Match.query.filter_by(name='admin', team1=match.team1, team2=match.team2).first()
 
-            if is_same_resuls((match.score1, match.score2), (admin_match.score1, admin_match.score2)):
+            if is_same_scores((match.score1, match.score2), (admin_match.score1, admin_match.score2)):
+                points += 8
+            elif is_same_resuls((match.score1, match.score2), (admin_match.score1, admin_match.score2)):
                 points += 3
-                if is_same_scores((match.score1, match.score2), (admin_match.score1, admin_match.score2)):
-                    points += 5
 
         user.points = points
         db.session.add(user)
@@ -82,6 +82,8 @@ def compute_points():
     db.session.commit()
 
 def is_same_scores(user_score: Tuple[int, int], real_scores: Tuple[int, int]) -> bool:
+    if None in (user_score + real_scores):
+        return False
     return user_score == real_scores
 
 def is_same_resuls(user_score: Tuple[int, int], real_scores: Tuple[int, int]) -> bool:
