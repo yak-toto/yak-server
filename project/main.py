@@ -1,5 +1,6 @@
 from signal import signal
 from flask import Blueprint, render_template, request
+from sqlalchemy import select
 from flask_login import login_required, current_user
 from . import db
 from .models import User, Match
@@ -27,9 +28,11 @@ def group(group_name):
     if group_name not in GROUPS:
         return 'bad request!', 404
 
-    matches = list(Match.query.filter_by(name=current_user.name, group_name=group_name))
+    query = select(Match.team1, Match.score1, Match.score2, Match.team2).filter_by(
+                        name=current_user.name, group_name=group_name)
+    matches_resource = list(db.session.execute(query))
 
-    return render_template('group.html', group_name=group_name, groups=GROUPS, matches=matches)
+    return render_template('group.html', group_name=group_name, groups=GROUPS, matches=matches_resource)
 
 @main.route('/group/<group_name>', methods=['POST'])
 def group_post(group_name):
@@ -64,8 +67,6 @@ def group_post(group_name):
 
 @main.route('/score_board')
 def score_board():
-    from sqlalchemy import select
-
     query = select(User.name, User.points).order_by(User.points.desc()).filter(User.name!='admin')
     score_board_resource = list(db.session.execute(query))
 
