@@ -1,3 +1,4 @@
+from signal import signal
 from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from . import db
@@ -60,6 +61,15 @@ def group_post(group_name):
         compute_points()
 
     return render_template('group.html', group_name=group_name, groups=GROUPS, matches=matches)
+
+@main.route('/score_board')
+def score_board():
+    from sqlalchemy import select
+
+    query = select(User.name, User.points).order_by(User.points.desc()).filter(User.name!='admin')
+    score_board_resource = list(db.session.execute(query))
+
+    return render_template('score_board.html', groups=GROUPS, score_board_resource=score_board_resource)
 
 def compute_points():
     users = User.query.filter(User.name != 'admin')
