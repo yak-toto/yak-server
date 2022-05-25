@@ -7,7 +7,7 @@
     <div id="navbarMenu" class="navbar-menu">
         <div class="navbar">
             {% for group_name in groups %}
-                <a href="{{ url_for('main.group', group_name=group_name) }}" class="navbar-item">Groupe {{ group_name }}</a>
+                <a href="{{ url_for('main.groups', group_name=group_name) }}" class="navbar-item">Groupe {{ group_name }}</a>
             {% endfor %}
             <a href="{{ url_for('main.score_board') }}" class="navbar-item">Classement</a>
         </div>
@@ -19,7 +19,7 @@
 <div class="column is-8 is-offset-2">
     <h3 class="title">Groupe {{group_name}}</h3>
     <div class="box">
-        <form method="POST" action="/group/{{group_name}}">
+        <form method="POST" action="/groups/{{group_name}}">
             <div class="table-container">
                 <table class="table is-fullwidth is-striped">
                 {%- for match in matches %}

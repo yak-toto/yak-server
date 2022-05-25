@@ -31,8 +31,8 @@ def profile():
     return render_template("profile.html", name=current_user.name, groups=GROUPS)
 
 
-@main.route("/group/<group_name>")
-def group(group_name):
+@main.route("/groups/<group_name>")
+def groups(group_name):
     if group_name not in GROUPS:
         return "bad request!", 404
 
@@ -42,11 +42,11 @@ def group(group_name):
     matches_resource = list(db.session.execute(query))
 
     return render_template(
-        "group.html", group_name=group_name, groups=GROUPS, matches=matches_resource
+        "groups.html", group_name=group_name, groups=GROUPS, matches=matches_resource
     )
 
 
-@main.route("/group/<group_name>", methods=["POST"])
+@main.route("/groups/<group_name>", methods=["POST"])
 def group_post(group_name):
     if group_name not in GROUPS:
         return "bad request!", 404
@@ -83,7 +83,7 @@ def group_post(group_name):
         compute_points()
 
     return render_template(
-        "group.html", group_name=group_name, groups=GROUPS, matches=matches
+        "groups.html", group_name=group_name, groups=GROUPS, matches=matches
     )
 
 
