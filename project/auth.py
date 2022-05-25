@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
-from .models import User, Match
+from .models import User
 from . import db
 from .telegram_sender import send_message
-import json
+from .utils import initialize_matches
 
 auth = Blueprint("auth", __name__)
 
@@ -65,21 +65,8 @@ def signup_post():
     db.session.commit()
     send_message(f"New user created : username {new_user.name}.")
 
-    # create matches table for user
-    with open("project/matches.json", mode="r") as f:
-        matches = json.load(f)
-        for group_name, group_matches in matches.items():
-            for teams in group_matches:
-                db.session.add(
-                    Match(
-                        name=new_user.name,
-                        group_name=group_name,
-                        team1=teams[0],
-                        score1=None,
-                        score2=None,
-                        team2=teams[1],
-                    )
-                )
+    for match in initialize_matches(new_user.name):
+        db.session.add(match)
     db.session.commit()
 
     return render_template("signup.html")
