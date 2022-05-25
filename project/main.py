@@ -1,16 +1,21 @@
-from signal import signal
-from flask import Blueprint, render_template, request
-from sqlalchemy import select
-from flask_login import login_required, current_user
-from . import db
-from .models import User, Match
-from .telegram_sender import send_message
 import json
 from typing import Tuple
 
+from flask import Blueprint
+from flask import render_template
+from flask import request
+from flask_login import current_user
+from flask_login import login_required
+from sqlalchemy import select
+
+from . import db
+from .models import Match
+from .models import User
+from .telegram_sender import send_message
+
 main = Blueprint("main", __name__)
 
-with open("project/matches.json", mode="r") as file:
+with open("project/matches.json") as file:
     matches = json.load(file)
     GROUPS = tuple(matches.keys())
 
@@ -67,7 +72,8 @@ def group_post(group_name):
             match.score1 = score_first_column[index]
             match.score2 = score_second_column[index]
             send_message(
-                f"User {current_user.name} update match {match.team1} - {match.team2} with the score {match.score1} - {match.score2}."
+                f"User {current_user.name} update match {match.team1} - "
+                f"{match.team2} with the score {match.score1} - {match.score2}."
             )
             db.session.add(match)
 

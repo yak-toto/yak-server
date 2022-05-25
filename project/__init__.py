@@ -1,12 +1,10 @@
 from flask import Flask
-
+from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
-from flask_login import LoginManager
+from .telegram_sender import send_message
 
 db = SQLAlchemy()
-
-from .telegram_sender import send_message
 
 
 def create_app():
@@ -25,7 +23,6 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        # since the user_id is just the primary key of our user table, use it in the query for the user
         return User.query.get(int(user_id))
 
     from .auth import auth as auth_blueprint

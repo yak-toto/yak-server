@@ -1,10 +1,10 @@
 import json
-from tokenize import group
+
 from .models import Match
 
 
 def initialize_matches(user_name):
-    with open("project/matches.json", mode="r") as f:
+    with open("project/matches.json") as f:
         matches = json.load(f)
         return (
             Match(
