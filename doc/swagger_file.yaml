@@ -1,0 +1,84 @@
+openapi: 3.0.0
+info:
+  title: Sample API
+  description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.
+  version: 0.1.9
+servers:
+  - url: http://api.example.com/v1
+    description: Optional server description, e.g. Main (production) server
+  - url: http://staging-api.example.com
+    description: Optional server description, e.g. Internal staging server for testing
+paths:
+  /signup:
+    post:
+      summary: Create a account.
+      description: Sign up by giving a name and a password
+      parameters:
+        - in: path
+          name: name
+          description: Name of the new user
+          required: True
+          schema:
+            type: string
+        - in: path
+          name: password
+          description: Password of the new user
+          required: True
+          schema:
+            type: string
+      tags:
+        - authentification
+      responses:
+        '201':
+          description: smtg
+          content:
+            application/form-data:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  password:
+                    type: string
+    get:
+      summary:
+      tags:
+        - authentification
+  /login:
+    post:
+      summary:
+      tags:
+        - authentification
+    get:
+      summary:
+      tags:
+        - authentification
+  /logout:
+    get:
+      summary:
+      tags:
+        - authentification
+  /:
+    get:
+      summary:
+      tags:
+        - main
+  /profile:
+    get:
+      summary:
+      tags:
+        - main
+  /groups/{group_name}:
+    post:
+      summary:
+      tags:
+        - main
+    get:
+      summary:
+      tags:
+        - main
+  /score_board:
+    get:
+      summary:
+      tags:
+        - main
