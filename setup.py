@@ -4,7 +4,7 @@ setup(
     name="Yak Toto",
     version="1.0",
     long_description=__doc__,
-    packages=["project"],
+    packages=["server"],
     install_requires=[
         "Flask-Login >= 0.5",
         "Flask-SQLAlchemy >= 2.5",

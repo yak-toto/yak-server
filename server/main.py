@@ -15,7 +15,7 @@ from .telegram_sender import send_message
 
 main = Blueprint("main", __name__)
 
-with open("project/matches.json") as file:
+with open("server/matches.json") as file:
     matches = json.load(file)
     GROUPS = tuple(matches.keys())
 

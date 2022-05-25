@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from project import create_app
-from project import db
+from server import create_app
+from server import db
 
 db.create_all(app=create_app())

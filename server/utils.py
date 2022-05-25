@@ -4,7 +4,7 @@ from .models import Match
 
 
 def initialize_matches(user_name):
-    with open("project/matches.json") as f:
+    with open("server/matches.json") as f:
         matches = json.load(f)
         return (
             Match(
