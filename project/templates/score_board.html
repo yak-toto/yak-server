@@ -22,9 +22,14 @@
       <form method="GET" action="/score_board">
           <div class="table-container">
               <table class="table is-fullwidth is-striped">
+              <thead>
+                  <tr>
+                      <th>Joueur</th>
+                      <th>Points</th>
+                  </tr>
+              </thead>
               {%- for name, points in score_board_resource %}
                   <tr>
-                      <td></td>
                       <td><div>{{name}}</div></td>
                       <td><div>{{points if points != None else 0}}</div></td>
                   </tr>
