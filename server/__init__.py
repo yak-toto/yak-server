@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
@@ -32,5 +33,7 @@ def create_app():
     from .main import main as main_blueprint
 
     app.register_blueprint(main_blueprint)
+
+    CORS(app, resources={r"/*": {"origins": "*"}})
 
     return app
