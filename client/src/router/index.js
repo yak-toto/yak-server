@@ -1,8 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@/views/HomeView.vue';
-import LoginView from '@/views/LoginView.vue';
-import GroupView from '@/views/GroupView.vue';
-import SignupView from '@/views/SignupView.vue';
+import LoginComponent from '@/components/LoginComponent.vue';
+import GroupComponent from '@/components/GroupComponent.vue';
+import SignupComponent from '@/components/SignupComponent.vue';
+import ScoreBoardComponent from '@/components/ScoreBoardComponent.vue';
 
 const routes = [
   {
@@ -13,17 +14,22 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    component: LoginView,
+    component: LoginComponent,
   },
   {
-    path: '/group',
-    name: 'group',
-    component: GroupView,
+    path: '/groups/:group_name',
+    name: 'groups',
+    component: GroupComponent,
   },
   {
     path: '/signup',
     name: 'signup',
-    component: SignupView,
+    component: SignupComponent,
+  },
+  {
+    path: '/score_board',
+    name: 'score_board',
+    component: ScoreBoardComponent,
   },
 ];
 

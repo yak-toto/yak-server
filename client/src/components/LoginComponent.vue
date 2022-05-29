@@ -2,23 +2,25 @@
   <div class="column is-4 is-offset-4">
     <h3 class="title">Login</h3>
     <div class="box">
-      <form method="POST" action="/login">
-        <div class="field">
-          <label class="control">
-            <input class="input is-large" type="name"
-              name="name" placeholder="Your Name"/>
-          </label>
+      <div class="notification is-danger" v-if="invalidLogin">
+        Please check your login details and try again.
+      </div>
+
+      <form v-on:submit.prevent="login">
+        <div class="field control">
+          <label class="label" for="name">Name</label>
+          <input type="text" class="input is-large" id="name" name="name" placeholder="name" v-model="request_body.name" />
         </div>
 
-        <div class="field">
-          <label class="control">
-            <input class="input is-large" type="password"
-              name="password" placeholder="Your Password"/>
-          </label>
+        <div class="field control">
+          <label class="label" for="password">Password</label>
+          <input type="password" class="input is-large" name="password" placeholder="password"
+            v-model="request_body.password" />
         </div>
-        <div class="field">
-          <label class="checkbox">
-            <input type="checkbox">
+
+        <div class="field control">
+          <label class="label">
+            <input type="checkbox" class="checkbox" name="remember" v-model="request_body.remember" />
             Remember me
           </label>
         </div>
@@ -35,11 +37,31 @@ export default {
   name: 'LoginComponent',
   data() {
     return {
-      msg: 'Hello!',
+      request_body: {
+        name: '',
+        password: '',
+        remember: false,
+      },
+      invalidLogin: false,
     };
   },
   methods: {
+    login() {
+      const path = 'http://localhost:5000/login';
 
+      axios.post(path, this.request_body)
+        .then(() => {
+          this.invalidLogin = false;
+          this.$router.go('/groups/A');
+        })
+        .catch((error) => {
+          if (error.response) {
+            if (error.response.status === 404) {
+              this.invalidLogin = true;
+            }
+          }
+        });
+    },
   },
 };
 </script>

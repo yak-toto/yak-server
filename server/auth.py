@@ -1,9 +1,6 @@
 from flask import Blueprint
-from flask import flash
-from flask import redirect
 from flask import render_template
 from flask import request
-from flask import url_for
 from flask_login import current_user
 from flask_login import login_required
 from flask_login import login_user
@@ -26,19 +23,21 @@ def login():
 
 @auth.route("/login", methods=["POST"])
 def login_post():
-    password = request.form.get("password")
-    name = request.form.get("name")
-    remember = True if request.form.get("remember") else False
+    body = request.get_json()
+
+    name = body["name"]
+    password = body["password"]
+    remember = body.get("remember", False)
 
     user = User.query.filter_by(name=name).first()
 
     if not user or not check_password_hash(user.password, password):
-        flash("Please check your login details and try again.")
-        return redirect(url_for("auth.login"))
+        return "Login not found", 404
 
     login_user(user, remember=remember)
     send_message(f"User {user.name} login.")
-    return redirect(url_for("main.profile"))
+
+    return "Login successful", 200
 
 
 @auth.route("/signup")
@@ -48,14 +47,14 @@ def signup():
 
 @auth.route("/signup", methods=["POST"])
 def signup_post():
-    name = request.form.get("name")
-    password = request.form.get("password")
+    body = request.get_json()
+    name = body["name"]
+    password = body["password"]
 
     user = User.query.filter_by(name=name).first()
 
     if user:
-        flash("Name already exists")
-        return redirect(url_for("auth.signup"))
+        return "Name already exists", 409
 
     new_user = User(
         name=name, password=generate_password_hash(password, method="sha256")
@@ -70,7 +69,7 @@ def signup_post():
         db.session.add(match)
     db.session.commit()
 
-    return render_template("signup.html")
+    return "Signup successful", 201
 
 
 @auth.route("/logout")
@@ -78,4 +77,4 @@ def signup_post():
 def logout():
     send_message(f"User {current_user.name} logout")
     logout_user()
-    return redirect(url_for("main.index"))
+    return "Logout successful", 200

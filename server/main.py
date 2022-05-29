@@ -2,6 +2,7 @@ import json
 from typing import Tuple
 
 from flask import Blueprint
+from flask import jsonify
 from flask import render_template
 from flask import request
 from flask_login import current_user
@@ -41,8 +42,14 @@ def groups(group_name):
     )
     matches_resource = list(db.session.execute(query))
 
-    return render_template(
-        "groups.html", group_name=group_name, groups=GROUPS, matches=matches_resource
+    return jsonify(
+        [
+            [
+                {"team": match[0], "score": match[1]},
+                {"score": match[2], "team": match[3]},
+            ]
+            for match in matches_resource
+        ]
     )
 
 
@@ -85,6 +92,11 @@ def group_post(group_name):
     return render_template(
         "groups.html", group_name=group_name, groups=GROUPS, matches=matches
     )
+
+
+@main.route("/groups/names")
+def groups_names():
+    return jsonify(GROUPS), 200
 
 
 @main.route("/score_board")
