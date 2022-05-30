@@ -58,26 +58,19 @@ def group_post(group_name):
     if group_name not in GROUPS:
         return "bad request!", 404
 
-    score_first_column = request.form.getlist("score_first_column[]")
-    score_second_column = request.form.getlist("score_second_column[]")
-
-    # if string not empty, convert to int, else None
-    score_first_column = [int(score) if score else None for score in score_first_column]
-    score_second_column = [
-        int(score) if score else None for score in score_second_column
-    ]
+    body = request.get_json()
 
     matches = Match.query.filter_by(name=current_user.name, group_name=group_name)
 
     is_matches_modified = False
     for index, match in enumerate(matches):
         if (
-            match.score1 != score_first_column[index]
-            or match.score2 != score_second_column[index]
+            match.score1 != body[index][0]["score"]
+            or match.score2 != body[index][1]["score"]
         ):
             is_matches_modified = True
-            match.score1 = score_first_column[index]
-            match.score2 = score_second_column[index]
+            match.score1 = body[index][0]["score"]
+            match.score2 = body[index][1]["score"]
             send_message(
                 f"User {current_user.name} update match {match.team1} - "
                 f"{match.team2} with the score {match.score1} - {match.score2}."
@@ -89,9 +82,7 @@ def group_post(group_name):
     if current_user.name == "admin" and is_matches_modified:
         compute_points()
 
-    return render_template(
-        "groups.html", group_name=group_name, groups=GROUPS, matches=matches
-    )
+    return jsonify(body), 200
 
 
 @main.route("/groups/names")

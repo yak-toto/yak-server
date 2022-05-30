@@ -52,7 +52,7 @@ export default {
       axios.post(path, this.request_body)
         .then(() => {
           this.invalidLogin = false;
-          this.$router.go('/groups/A');
+          this.$router.push('/groups/A');
         })
         .catch((error) => {
           if (error.response) {
