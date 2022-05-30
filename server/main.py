@@ -90,6 +90,29 @@ def groups_names():
     return jsonify(GROUPS), 200
 
 
+@main.route("/match", methods=["POST", "GET"])
+def match_get():
+    team1 = request.args.get("team1")
+    team2 = request.args.get("team2")
+
+    if request.method == "POST":
+        match = Match.query.filter_by(
+            team1=team1, team2=team2, name=current_user.name
+        ).first()
+        body = request.get_json()
+        match.score1, match.score2 = body
+        db.session.add(match)
+        db.session.commit()
+        scores_resource = body
+    else:
+        query = select(Match.score1, Match.score2).filter_by(
+            team1=team1, team2=team2, name=current_user.name
+        )
+        scores_resource = list(db.session.execute(query))[0]
+
+    return jsonify([scores_resource[0], scores_resource[1]]), 200
+
+
 @main.route("/score_board")
 def score_board():
     query = (
