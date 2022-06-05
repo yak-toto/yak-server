@@ -77,8 +77,86 @@ paths:
       summary:
       tags:
         - main
+  /groups/names:
+    get:
+      summary: Retrieve a list containing all the groups names
+      tags:
+        - main
+      responses:
+        '200':
+          description: List of group names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
   /score_board:
     get:
       summary:
       tags:
         - main
+  /match:
+    post:
+      summary: Create or modify the results of a particuliar match
+      parameters:
+        - in: query
+          name: team1
+          schema:
+            type: string
+          description: Name of the team 1
+        - in: query
+          name: team2
+          schema:
+            type: string
+          description: Name of the team 2
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  description: result
+                  type: integer
+                minItems: 2
+                maxItems: 2
+      tags:
+        - main
+      responses:
+        '201':
+          description: smtg
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+                minItems: 2
+                maxItems: 2
+    get:
+      summary: Retrieve results of a particuliar match
+      parameters:
+        - in: query
+          name: team1
+          schema:
+            type: string
+          description: Name of the team 1
+        - in: query
+          name: team2
+          schema:
+            type: string
+          description: Name of the team 2
+      tags:
+        - main
+      responses:
+        '201':
+          description: smtg
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+                minItems: 2
+                maxItems: 2
