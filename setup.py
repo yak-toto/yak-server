@@ -6,8 +6,10 @@ setup(
     long_description=__doc__,
     packages=["server"],
     install_requires=[
-        "Flask-Login >= 0.5",
         "Flask-SQLAlchemy >= 2.5",
+        "Flask-Cors >= 3.0",
         "requests >= 2.25",
+        "DateTime >= 4.4",
+        "PyJWT >= 2.4.0",
     ],
 )

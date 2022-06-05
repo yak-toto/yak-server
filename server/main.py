@@ -1,12 +1,12 @@
 import json
+from functools import wraps
 from typing import Tuple
 
+import jwt
 from flask import Blueprint
+from flask import current_app
 from flask import jsonify
-from flask import render_template
 from flask import request
-from flask_login import current_user
-from flask_login import login_required
 from sqlalchemy import select
 
 from . import db
@@ -21,19 +21,47 @@ with open("server/matches.json") as file:
     GROUPS = tuple(matches.keys())
 
 
-@main.route("/")
-def index():
-    return render_template("index.html")
+def token_required(f):
+    @wraps(f)
+    def _verify(*args, **kwargs):
+        auth_headers = request.headers.get("Authorization", "").split()
+
+        print(len(auth_headers))
+
+        invalid_msg = {
+            "message": "Invalid token. Registeration and / or authentication required",
+            "authenticated": False,
+        }
+        expired_msg = {
+            "message": "Expired token. Reauthentication required.",
+            "authenticated": False,
+        }
+
+        if len(auth_headers) != 2:
+            return jsonify(invalid_msg), 401
+
+        try:
+            token = auth_headers[1]
+            print(current_app.config["SECRET_KEY"])
+            data = jwt.decode(
+                token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
+            )
+            user = User.query.filter_by(name=data["sub"]).first()
+            if not user:
+                raise RuntimeError("User not found")
+            return f(user, *args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify(expired_msg), 401  # 401 is Unauthorized HTTP status code
+        except (jwt.InvalidTokenError, Exception) as e:
+            print(e)
+            return jsonify(invalid_msg), 401
+
+    return _verify
 
 
-@main.route("/profile")
-@login_required
-def profile():
-    return render_template("profile.html", name=current_user.name, groups=GROUPS)
-
-
-@main.route("/groups/<group_name>")
-def groups(group_name):
+@main.route("/groups/<string:group_name>")
+@token_required
+def groups(current_user, group_name):
     if group_name not in GROUPS:
         return "bad request!", 404
 
@@ -53,8 +81,9 @@ def groups(group_name):
     )
 
 
-@main.route("/groups/<group_name>", methods=["POST"])
-def group_post(group_name):
+@main.route("/groups/<string:group_name>", methods=["POST"])
+@token_required
+def group_post(current_user, group_name=None):
     if group_name not in GROUPS:
         return "bad request!", 404
 
@@ -91,7 +120,8 @@ def groups_names():
 
 
 @main.route("/match", methods=["POST", "GET"])
-def match_get():
+@token_required
+def match(current_user):
     team1 = request.args.get("team1")
     team2 = request.args.get("team2")
 
@@ -122,9 +152,7 @@ def score_board():
     )
     score_board_resource = list(db.session.execute(query))
 
-    return render_template(
-        "score_board.html", groups=GROUPS, score_board_resource=score_board_resource
-    )
+    return jsonify([list(t) for t in score_board_resource]), 200
 
 
 def compute_points():
