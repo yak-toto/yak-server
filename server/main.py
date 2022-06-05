@@ -59,9 +59,29 @@ def token_required(f):
     return _verify
 
 
+@main.route("/groups")
+@token_required
+def groups(current_user):
+    query = select(
+        Match.group_name, Match.team1, Match.score1, Match.score2, Match.team2
+    ).filter_by(name=current_user.name)
+    matches_resource = list(db.session.execute(query))
+
+    results = {
+        group_name: list(filter(lambda match: match[0] == group_name, matches_resource))
+        for group_name in GROUPS
+    }
+    results = {
+        group_name: [{el[1]: el[2], el[4]: el[3]} for el in value]
+        for group_name, value in results.items()
+    }
+
+    return jsonify(results), 200
+
+
 @main.route("/groups/<string:group_name>")
 @token_required
-def groups(current_user, group_name):
+def group_get(current_user, group_name):
     if group_name not in GROUPS:
         return "bad request!", 404
 
@@ -70,14 +90,17 @@ def groups(current_user, group_name):
     )
     matches_resource = list(db.session.execute(query))
 
-    return jsonify(
-        [
+    return (
+        jsonify(
             [
-                {"team": match[0], "score": match[1]},
-                {"score": match[2], "team": match[3]},
+                {
+                    match[0]: match[1],
+                    match[3]: match[2],
+                }
+                for match in matches_resource
             ]
-            for match in matches_resource
-        ]
+        ),
+        200,
     )
 
 
@@ -111,7 +134,7 @@ def group_post(current_user, group_name=None):
     if current_user.name == "admin" and is_matches_modified:
         compute_points()
 
-    return jsonify(body), 200
+    return jsonify(body), 201
 
 
 @main.route("/groups/names")
