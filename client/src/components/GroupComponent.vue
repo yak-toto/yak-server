@@ -53,8 +53,6 @@ export default {
     postGroup() {
       const path = `http://localhost:5000/groups/${this.$route.params.group_name}`;
 
-      console.log(this.group_resource);
-
       axios.post(path, this.group_resource)
         .then(() => {
 
@@ -62,7 +60,7 @@ export default {
         .catch((error) => {
           // eslint-disable-next-line
           console.error(error);
-        })
+        });
     },
   },
   created() {

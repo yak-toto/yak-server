@@ -4,6 +4,7 @@ import LoginComponent from '@/components/LoginComponent.vue';
 import GroupComponent from '@/components/GroupComponent.vue';
 import SignupComponent from '@/components/SignupComponent.vue';
 import ScoreBoardComponent from '@/components/ScoreBoardComponent.vue';
+import LogoutComponent from '@/components/LogoutComponent.vue';
 
 const routes = [
   {
@@ -25,6 +26,11 @@ const routes = [
     path: '/signup',
     name: 'signup',
     component: SignupComponent,
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    component: LogoutComponent,
   },
   {
     path: '/score_board',
