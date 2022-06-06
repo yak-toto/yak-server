@@ -149,13 +149,7 @@ def match(current_user):
     return jsonify([scores_resource[0], scores_resource[1]]), 200
 
 
-@main.route(
-    "/match/<string:id>",
-    methods=(
-        "POST",
-        "GET",
-    ),
-)
+@main.route("/match/<string:id>", methods=["POST", "GET"])
 @token_required
 def match_get(current_user, id=None):
     match = Match.query.filter_by(user_id=current_user.id, id=id).first()
