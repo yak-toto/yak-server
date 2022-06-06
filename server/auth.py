@@ -27,7 +27,7 @@ def login_post():
 
     token = jwt.encode(
         {
-            "sub": user.name,
+            "sub": user.id,
             "iat": datetime.utcnow(),
             "exp": datetime.utcnow() + timedelta(minutes=30),
         },
