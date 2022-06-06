@@ -42,7 +42,6 @@ export default {
       this.$store.dispatch('getGroup', {group_name: this.$route.params.group_name})
         .then((res) => {
           this.group_resource = res.data
-          console.log(this.group_resource)
         })
     },
     postGroup() {
@@ -62,7 +61,9 @@ export default {
     this.$watch(
       () => this.$route.params,
       () => {
-        this.getGroup();
+        if (this.$route.params["group_name"]) {
+          this.getGroup();
+        }
       },
       { immediate: true },
     );

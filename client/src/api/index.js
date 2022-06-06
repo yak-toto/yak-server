@@ -42,6 +42,6 @@ export function getMatch(team1, team2) {
   return axios.get(`${URL}/match`, { params: { team1: team1, team2: team2 } })
 }
 
-export function getScoreBoard(team1, team2) {
-  return axios.get(`${URL}/score_board`)
+export function getScoreBoard(jwt) {
+  return axios.get(`${URL}/score_board`, { headers: { Authorization: `Bearer: ${jwt}` } })
 }

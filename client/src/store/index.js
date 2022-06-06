@@ -15,6 +15,9 @@ const actions = {
   getGroup(context, { group_name }) {
     return getGroup(group_name, context.state.jwt.token)
   },
+  getScoreBoard(context) {
+    return getScoreBoard(context.state.jwt.token)
+  },
   // asynchronous operations
   login(context, userData) {
     context.commit('setUserData', { userData })
