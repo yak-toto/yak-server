@@ -63,7 +63,7 @@ def token_required(f):
 @token_required
 def groups(current_user):
     query = select(
-        Match.group_name, Match.team1, Match.score1, Match.score2, Match.team2
+        Match.group_name, Match.team1, Match.score1, Match.score2, Match.team2, Match.id
     ).filter_by(name=current_user.name)
     matches_resource = list(db.session.execute(query))
 
@@ -72,7 +72,7 @@ def groups(current_user):
         for group_name in GROUPS
     }
     results = {
-        group_name: [{el[1]: el[2], el[4]: el[3]} for el in value]
+        group_name: [{"id": el[5], el[1]: el[2], el[4]: el[3]} for el in value]
         for group_name, value in results.items()
     }
 
@@ -85,15 +85,16 @@ def group_get(current_user, group_name):
     if group_name not in GROUPS:
         return "bad request!", 404
 
-    query = select(Match.team1, Match.score1, Match.score2, Match.team2).filter_by(
-        name=current_user.name, group_name=group_name
-    )
+    query = select(
+        Match.team1, Match.score1, Match.score2, Match.team2, Match.id
+    ).filter_by(name=current_user.name, group_name=group_name)
     matches_resource = list(db.session.execute(query))
 
     return (
         jsonify(
             [
                 {
+                    "id": match[4],
                     match[0]: match[1],
                     match[3]: match[2],
                 }
@@ -164,6 +165,45 @@ def match(current_user):
         scores_resource = list(db.session.execute(query))[0]
 
     return jsonify([scores_resource[0], scores_resource[1]]), 200
+
+
+@main.route(
+    "/match/<string:id>",
+    methods=(
+        "POST",
+        "GET",
+    ),
+)
+@token_required
+def match_get(current_user, id=None):
+    match = Match.query.filter_by(name=current_user.name, id=id).first()
+    if not match:
+        return (
+            jsonify(
+                {
+                    "message": "This match doesn't exist. "
+                    "Either it doesn't exist, either you are using the wrong user."
+                }
+            ),
+            404,
+        )
+
+    if request.method == "POST":
+        body = request.get_json()
+        results = body.get("results", [])
+        if (
+            len(results) == 2
+            and results[0].get("score") is not None
+            and results[1].get("score") is not None
+        ):
+            match.score1 = results[0].get("score")
+            match.score2 = results[1].get("score")
+            db.session.add(match)
+            db.session.commit()
+        else:
+            return jsonify({"message": "Wrong inputs"}), 401
+
+    return jsonify(match.to_dict()), 200
 
 
 @main.route("/score_board")
