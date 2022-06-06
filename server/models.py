@@ -14,6 +14,8 @@ class User(db.Model):
     name = db.Column(db.String(1000), unique=True, nullable=False)
     points = db.Column(db.Integer)
 
+    matches = db.relationship("Match", backref="user", lazy=False)
+
     def __init__(self, name, password) -> None:
         self.name = name
         self.password = generate_password_hash(password, method="sha256")
@@ -38,7 +40,7 @@ class User(db.Model):
 
 class Match(db.Model):
     id = db.Column(db.String(100), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = db.Column(db.String(1000))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     group_name = db.Column(db.String(1))
     team1 = db.Column(db.String(100))
     score1 = db.Column(db.Integer)
@@ -46,7 +48,6 @@ class Match(db.Model):
     team2 = db.Column(db.String(100))
 
     def to_dict(self):
-        print({id: self.id, self.team1: self.score1, self.team2: self.score2})
         return {
             "id": self.id,
             "results": [

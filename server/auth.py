@@ -42,7 +42,7 @@ def signup_post():
     user = User(**data)
     db.session.add(user)
     db.session.commit()
-    for match in initialize_matches(user.name):
+    for match in initialize_matches(user.id):
         db.session.add(match)
     db.session.commit()
     return jsonify(user.to_dict()), 201

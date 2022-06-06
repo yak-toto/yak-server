@@ -62,19 +62,11 @@ def token_required(f):
 @main.route("/groups")
 @token_required
 def groups(current_user):
-    query = select(
-        Match.group_name, Match.team1, Match.score1, Match.score2, Match.team2, Match.id
-    ).filter_by(name=current_user.name)
-    matches_resource = list(db.session.execute(query))
+    user_resource = list(Match.query.filter_by(user_id=current_user.id))
 
-    results = {
-        group_name: list(filter(lambda match: match[0] == group_name, matches_resource))
-        for group_name in GROUPS
-    }
-    results = {
-        group_name: [{"id": el[5], el[1]: el[2], el[4]: el[3]} for el in value]
-        for group_name, value in results.items()
-    }
+    results = {}
+    for match in user_resource:
+        results.setdefault(match.group_name, []).append(match.to_dict())
 
     return jsonify(results), 200
 
@@ -85,22 +77,12 @@ def group_get(current_user, group_name):
     if group_name not in GROUPS:
         return "bad request!", 404
 
-    query = select(
-        Match.team1, Match.score1, Match.score2, Match.team2, Match.id
-    ).filter_by(name=current_user.name, group_name=group_name)
-    matches_resource = list(db.session.execute(query))
+    group_resource = Match.query.filter_by(
+        user_id=current_user.id, group_name=group_name
+    )
 
     return (
-        jsonify(
-            [
-                {
-                    "id": match[4],
-                    match[0]: match[1],
-                    match[3]: match[2],
-                }
-                for match in matches_resource
-            ]
-        ),
+        jsonify([match.to_dict() for match in group_resource]),
         200,
     )
 
@@ -113,7 +95,7 @@ def group_post(current_user, group_name=None):
 
     body = request.get_json()
 
-    matches = Match.query.filter_by(name=current_user.name, group_name=group_name)
+    matches = Match.query.filter_by(user_id=current_user.id, group_name=group_name)
 
     is_matches_modified = False
     for index, match in enumerate(matches):
@@ -151,7 +133,7 @@ def match(current_user):
 
     if request.method == "POST":
         match = Match.query.filter_by(
-            team1=team1, team2=team2, name=current_user.name
+            team1=team1, team2=team2, user_id=current_user.id
         ).first()
         body = request.get_json()
         match.score1, match.score2 = body
@@ -160,7 +142,7 @@ def match(current_user):
         scores_resource = body
     else:
         query = select(Match.score1, Match.score2).filter_by(
-            team1=team1, team2=team2, name=current_user.name
+            team1=team1, team2=team2, user_id=current_user.id
         )
         scores_resource = list(db.session.execute(query))[0]
 
@@ -176,7 +158,7 @@ def match(current_user):
 )
 @token_required
 def match_get(current_user, id=None):
-    match = Match.query.filter_by(name=current_user.name, id=id).first()
+    match = Match.query.filter_by(user_id=current_user.id, id=id).first()
     if not match:
         return (
             jsonify(
@@ -223,7 +205,7 @@ def compute_points():
 
     for user in users:
         points = 0
-        user_matches = Match.query.filter_by(name=user.name)
+        user_matches = Match.query.filter_by(user_id=user.id)
 
         for match in user_matches:
             admin_match = Match.query.filter_by(
