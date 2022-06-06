@@ -5,6 +5,7 @@ import GroupComponent from '@/components/GroupComponent.vue';
 import SignupComponent from '@/components/SignupComponent.vue';
 import ScoreBoardComponent from '@/components/ScoreBoardComponent.vue';
 import LogoutComponent from '@/components/LogoutComponent.vue';
+import store from '@/store';
 
 const routes = [
   {
@@ -21,6 +22,14 @@ const routes = [
     path: '/groups/:group_name',
     name: 'groups',
     component: GroupComponent,
+    beforeEnter (to, from, next) {
+      if (!store.getters.isAuthenticated) {
+        next('/login')
+      }
+      else {
+        next()
+      }
+    }
   },
   {
     path: '/signup',

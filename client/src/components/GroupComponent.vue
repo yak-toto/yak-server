@@ -8,10 +8,10 @@
         <div class="table-container">
           <table class="table is-fullwidth is-striped">
             <tr v-for="match in group_resource">
-              <td>{{ match[0]["team"] }}</td>
-              <td><input class="input is-small" type="number" v-model="match[0]['score']"></td>
-              <td><input class="input is-small" type="number" v-model="match[1]['score']"></td>
-              <td>{{ match[1]["team"] }}</td>
+              <td>{{ match["results"][0]["team"] }}</td>
+              <td><input class="input is-small" type="number" v-model="match['results'][0]['score']"></td>
+              <td><input class="input is-small" type="number" v-model="match['results'][1]['score']"></td>
+              <td>{{ match["results"][1]["team"] }}</td>
             </tr>
           </table>
         </div>
@@ -39,16 +39,11 @@ export default {
   },
   methods: {
     getGroup() {
-      const path = `http://localhost:5000/groups/${this.$route.params.group_name}`;
-
-      axios.get(path)
+      this.$store.dispatch('getGroup', {group_name: this.$route.params.group_name})
         .then((res) => {
-          this.group_resource = res.data;
+          this.group_resource = res.data
+          console.log(this.group_resource)
         })
-        .catch((error) => {
-          // eslint-disable-next-line
-          console.error(error);
-        });
     },
     postGroup() {
       const path = `http://localhost:5000/groups/${this.$route.params.group_name}`;

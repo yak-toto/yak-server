@@ -9,18 +9,18 @@
       <form v-on:submit.prevent="login">
         <div class="field control">
           <label class="label" for="name">Name</label>
-          <input type="text" class="input is-large" id="name" name="name" placeholder="name" v-model="request_body.name" />
+          <input type="text" class="input is-large" id="name" name="name" placeholder="name" v-model="name" />
         </div>
 
         <div class="field control">
           <label class="label" for="password">Password</label>
           <input type="password" class="input is-large" name="password" placeholder="password"
-            v-model="request_body.password" />
+            v-model="password" />
         </div>
 
         <div class="field control">
           <label class="label">
-            <input type="checkbox" class="checkbox" name="remember" v-model="request_body.remember" />
+            <input type="checkbox" class="checkbox" name="remember" v-model="remember" />
             Remember me
           </label>
         </div>
@@ -31,36 +31,20 @@
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
   name: 'LoginComponent',
   data() {
     return {
-      request_body: {
-        name: '',
-        password: '',
-        remember: false,
-      },
+      name: '',
+      password: '',
+      remember: false,
       invalidLogin: false,
     };
   },
   methods: {
     login() {
-      const path = 'http://localhost:5000/login';
-
-      axios.post(path, this.request_body)
-        .then(() => {
-          this.invalidLogin = false;
-          this.$router.push('/groups/A');
-        })
-        .catch((error) => {
-          if (error.response) {
-            if (error.response.status === 404) {
-              this.invalidLogin = true;
-            }
-          }
-        });
+      this.$store.dispatch('login', { name: this.name, password: this.password })
+        .then(() => this.$router.push('/groups/A'))
     },
   },
 };
