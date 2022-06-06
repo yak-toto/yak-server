@@ -35,7 +35,7 @@ class User(db.Model):
         return user
 
     def to_dict(self):
-        return dict(id=self.id, name=self.name)
+        return dict(id=self.id, name=self.name, points=self.points)
 
 
 class Match(db.Model):

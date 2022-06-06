@@ -184,14 +184,10 @@ def match_get(current_user, id=None):
 
 @main.route("/score_board")
 def score_board():
-    query = (
-        select(User.name, User.points)
-        .order_by(User.points.desc())
-        .filter(User.name != "admin")
+    return (
+        jsonify([user.to_dict() for user in User.query.filter(User.name != "admin")]),
+        200,
     )
-    score_board_resource = list(db.session.execute(query))
-
-    return jsonify([list(t) for t in score_board_resource]), 200
 
 
 def compute_points():

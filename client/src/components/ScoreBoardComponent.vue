@@ -14,10 +14,10 @@
           </thead>
           <tr v-for="res in score_board_resource">
             <td>
-              <div>{{ res[0] }}</div>
+              <div>{{ res["name"] }}</div>
             </td>
             <td>
-              <div>{{ res[1] }}</div>
+              <div>{{ res["points"] }}</div>
             </td>
           </tr>
         </table>
