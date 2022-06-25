@@ -31,7 +31,6 @@ export function getGroup(group_name, jwt) {
 }
 
 export function postMatch(match_id, match_resource, jwt) {
-  console.log(jwt)
   return axios.post(`${URL}/match/${match_id}`, match_resource, { headers: { Authorization: `Bearer: ${jwt}` } })
 }
 

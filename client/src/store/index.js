@@ -16,7 +16,6 @@ const actions = {
     return getGroup(group_name, context.state.jwt.token)
   },
   postMatch(context, { match_id, match_resource }) {
-    console.log(context.state.jwt.token)
     return postMatch(match_id, match_resource, context.state.jwt.token)
   },
   getScoreBoard(context) {
@@ -51,16 +50,13 @@ const actions = {
 
 const mutations = {
   setUserData(state, payload) {
-    console.log('setUserData payload = ', payload)
     state.userData = payload.userData
   },
   setJwtToken(state, payload) {
-    console.log('setJwtToken payload = ', payload)
     localStorage.token = payload.jwt.token
     state.jwt = payload.jwt
   },
   eraseJwtToken(state) {
-    console.log('delete token')
     localStorage.token = "deleted"
     state.jwt = "deleted"
   }

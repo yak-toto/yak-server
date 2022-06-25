@@ -25,9 +25,6 @@ def token_required(f):
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get("Authorization", "").split()
 
-        print(len(auth_headers))
-        print(auth_headers)
-
         invalid_msg = {
             "message": "Invalid token. Registeration and / or authentication required",
             "authenticated": False,
@@ -42,7 +39,6 @@ def token_required(f):
 
         try:
             token = auth_headers[1]
-            print(current_app.config["SECRET_KEY"])
             data = jwt.decode(
                 token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
             )
