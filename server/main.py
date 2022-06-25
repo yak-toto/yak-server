@@ -7,7 +7,6 @@ from flask import Blueprint
 from flask import current_app
 from flask import jsonify
 from flask import request
-from sqlalchemy import select
 
 from . import db
 from .models import Match
@@ -27,6 +26,7 @@ def token_required(f):
         auth_headers = request.headers.get("Authorization", "").split()
 
         print(len(auth_headers))
+        print(auth_headers)
 
         invalid_msg = {
             "message": "Invalid token. Registeration and / or authentication required",
@@ -38,6 +38,7 @@ def token_required(f):
         }
 
         if len(auth_headers) != 2:
+            print("chien chien chien chien")
             return jsonify(invalid_msg), 401
 
         try:
@@ -125,33 +126,9 @@ def groups_names():
     return jsonify(GROUPS), 200
 
 
-@main.route("/match", methods=["POST", "GET"])
-@token_required
-def match(current_user):
-    team1 = request.args.get("team1")
-    team2 = request.args.get("team2")
-
-    if request.method == "POST":
-        match = Match.query.filter_by(
-            team1=team1, team2=team2, user_id=current_user.id
-        ).first()
-        body = request.get_json()
-        match.score1, match.score2 = body
-        db.session.add(match)
-        db.session.commit()
-        scores_resource = body
-    else:
-        query = select(Match.score1, Match.score2).filter_by(
-            team1=team1, team2=team2, user_id=current_user.id
-        )
-        scores_resource = list(db.session.execute(query))[0]
-
-    return jsonify([scores_resource[0], scores_resource[1]]), 200
-
-
 @main.route("/match/<string:id>", methods=["POST", "GET"])
 @token_required
-def match_get(current_user, id=None):
+def match_get(current_user, id):
     match = Match.query.filter_by(user_id=current_user.id, id=id).first()
     if not match:
         return (
@@ -167,15 +144,22 @@ def match_get(current_user, id=None):
     if request.method == "POST":
         body = request.get_json()
         results = body.get("results", [])
-        if (
-            len(results) == 2
-            and results[0].get("score") is not None
-            and results[1].get("score") is not None
-        ):
-            match.score1 = results[0].get("score")
-            match.score2 = results[1].get("score")
-            db.session.add(match)
-            db.session.commit()
+        if len(results) == 2:
+            if match.score1 != results[0].get("score") or match.score2 != results[
+                1
+            ].get("score"):
+                match.score1 = results[0].get("score")
+                match.score2 = results[1].get("score")
+                db.session.add(match)
+                db.session.commit()
+
+                send_message(
+                    f"User {current_user.name} update match {match.team1} - "
+                    f"{match.team2} with the score {match.score1} - {match.score2}."
+                )
+
+                if current_user.name == "admin":
+                    compute_points()
         else:
             return jsonify({"message": "Wrong inputs"}), 401
 

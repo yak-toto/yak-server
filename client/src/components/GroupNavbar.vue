@@ -31,16 +31,10 @@ export default {
   },
   methods: {
     getGroupList() {
-      const path = 'http://localhost:5000/groups/names';
-
-      axios.get(path)
+      this.$store.dispatch('getGroupNames')
         .then((res) => {
           this.groups_names = res.data;
         })
-        .catch((error) => {
-          // eslint-disable-next-line
-          console.error(error);
-        });
     },
   },
   created() {

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import { postSignup, postLogin, getGroupNames, postGroup, getGroup, postMatch, getMatch, getScoreBoard } from '@/api'
+import { postSignup, postLogin, getGroupNames, getGroup, postMatch, getMatch, getScoreBoard } from '@/api'
 import { isValidJwt, EventBus } from '@/utils'
 
 const state = {
@@ -15,8 +15,15 @@ const actions = {
   getGroup(context, { group_name }) {
     return getGroup(group_name, context.state.jwt.token)
   },
+  postMatch(context, { match_id, match_resource }) {
+    console.log(context.state.jwt.token)
+    return postMatch(match_id, match_resource, context.state.jwt.token)
+  },
   getScoreBoard(context) {
     return getScoreBoard(context.state.jwt.token)
+  },
+  getGroupNames(context) {
+    return getGroupNames(context.state.jwt.token)
   },
   // asynchronous operations
   login(context, userData) {

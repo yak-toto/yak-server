@@ -39,23 +39,16 @@ export default {
   },
   methods: {
     getGroup() {
-      this.$store.dispatch('getGroup', {group_name: this.$route.params.group_name})
+      this.$store.dispatch('getGroup', { group_name: this.$route.params.group_name })
         .then((res) => {
           this.group_resource = res.data
         })
     },
     postGroup() {
-      const path = `http://localhost:5000/groups/${this.$route.params.group_name}`;
-
-      axios.post(path, this.group_resource)
-        .then(() => {
-
-        })
-        .catch((error) => {
-          // eslint-disable-next-line
-          console.error(error);
-        });
-    },
+      for (let index = 0; index < this.group_resource.length; index++) {
+        this.$store.dispatch('postMatch', { match_id: this.group_resource[index]['id'], match_resource: this.group_resource[index] })
+      }
+    }
   },
   created() {
     this.$watch(

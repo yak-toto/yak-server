@@ -22,20 +22,17 @@ export function postLogin(userData) {
 // Main interface
 // ------------------------------
 
-export function getGroupNames() {
-  return axios.get(`${URL}/groups/names`)
-}
-
-export function postGroup(group_name, group_resource, jwt) {
-  return axios.post(`${URL}/groups/${group_name}`, group_resource, { headers: { Authorization: `Bearer: ${jwt}` } })
+export function getGroupNames(jwt) {
+  return axios.get(`${URL}/groups/names`, { headers: { Authorization: `Bearer: ${jwt}` } })
 }
 
 export function getGroup(group_name, jwt) {
   return axios.get(`${URL}/groups/${group_name}`, { headers: { Authorization: `Bearer: ${jwt}` } })
 }
 
-export function postMatch(team1, team2, jwt) {
-  return axios.post(`${URL}/match`, { params: { team1: team1, team2: team2 } }, { headers: { Authorization: `Bearer: ${jwt}` } })
+export function postMatch(match_id, match_resource, jwt) {
+  console.log(jwt)
+  return axios.post(`${URL}/match/${match_id}`, match_resource, { headers: { Authorization: `Bearer: ${jwt}` } })
 }
 
 export function getMatch(team1, team2) {
