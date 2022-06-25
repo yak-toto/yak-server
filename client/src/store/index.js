@@ -24,7 +24,6 @@ const actions = {
     return getGroupNames(context.state.jwt.token);
   },
   login(context, userData) {
-    context.commit('setUserData', { userData });
     return postLogin(userData)
       .then((response) => {
         context.commit('setJwtToken', { jwt: response.data });
@@ -35,7 +34,6 @@ const actions = {
       });
   },
   signup(context, userData) {
-    context.commit('setUserData', { userData });
     return postSignup(userData)
       .then((_) => context.dispatch('login', userData))
       .catch((error) => {
@@ -48,9 +46,6 @@ const actions = {
 };
 
 const mutations = {
-  setUserData(state, payload) {
-    state.userData = payload.userData;
-  },
   setUserName(state, payload) {
     state.userName = payload.userName;
   },
