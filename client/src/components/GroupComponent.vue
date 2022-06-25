@@ -10,10 +10,10 @@
             <tr v-for="match in groupResource">
               <td>{{ match["results"][0]["team"] }}</td>
               <td>
-                <input class="input is-small" type="number" v-model="match['results'][0]['score']">
+                <input class="input is-small" min="0" type="number" v-model="match['results'][0]['score']">
               </td>
               <td>
-                <input class="input is-small" type="number" v-model="match['results'][1]['score']">
+                <input class="input is-small" min="0" type="number" v-model="match['results'][1]['score']">
               </td>
               <td>{{ match["results"][1]["team"] }}</td>
             </tr>
