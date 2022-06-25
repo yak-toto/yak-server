@@ -5,8 +5,8 @@
         <div class="container">
           <div id="navbarMenuHeroA" class="navbar-menu">
             <div class="navbar-start">
-              <div v-if="getUserName" class="has-text-white navbar-item">
-                Utilisateur:&nbsp;<strong>{{ userName }}</strong>
+              <div v-if="res = getUserName" class="has-text-white navbar-item">
+                Utilisateur:&nbsp;<strong>{{ res }}</strong>
               </div>
             </div>
             <div class="navbar-end">
@@ -35,18 +35,12 @@
 
 <script>
 export default {
-  data() {
-    return {
-      userName: ''
-    };
-  },
   computed: {
     isAuthenticated() {
       return this.$store.getters.isAuthenticated;
     },
     getUserName() {
-      this.userName = this.$store.getters.getUserName;
-      return this.userName !== '';
+      return this.$store.getters.getUserName;
     },
   },
 };

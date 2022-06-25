@@ -53,6 +53,15 @@ export default {
       }
     },
   },
+  beforeRouteUpdate(to, from, next) {
+    if (!this.$store.getters.isAuthenticated) {
+      this.$store.dispatch('logout');
+      next('/login');
+    } else {
+      this.getGroup();
+      next();
+    }
+  },
   created() {
     this.$watch(
       () => this.$route.params,

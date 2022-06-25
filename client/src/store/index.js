@@ -72,7 +72,7 @@ const getters = {
   },
   getUserName(state) {
     return state.userName;
-  }
+  },
 };
 
 const store = new Vuex.Store({

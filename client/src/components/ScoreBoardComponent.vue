@@ -45,6 +45,14 @@ export default {
         .then((res) => { this.scoreBoardResource = res.data; });
     },
   },
+  beforeEnter(to, from, next) {
+    if (!this.$store.getters.isAuthenticated) {
+      this.$store.dispatch('logout');
+      next('/login');
+    } else {
+      next();
+    }
+  },
   created() {
     this.getScoreBoard();
   },

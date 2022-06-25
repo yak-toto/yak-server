@@ -17,18 +17,6 @@ const routes = [
     component: LoginComponent,
   },
   {
-    path: '/groups/:groupName',
-    name: 'groups',
-    component: GroupComponent,
-    beforeEnter(to, from, next) {
-      if (!store.getters.isAuthenticated) {
-        next('/login');
-      } else {
-        next();
-      }
-    },
-  },
-  {
     path: '/signup',
     name: 'signup',
     component: SignupComponent,
@@ -42,6 +30,11 @@ const routes = [
       }
       next('/login');
     },
+  },
+  {
+    path: '/groups/:groupName',
+    name: 'groups',
+    component: GroupComponent,
   },
   {
     path: '/score_board',
