@@ -14,7 +14,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 import GroupButton from './GroupButton.vue';
 import ScoreBoardButton from './ScoreBoardButton.vue';
 

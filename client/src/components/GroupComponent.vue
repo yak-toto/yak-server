@@ -24,7 +24,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 import GroupNavbar from './GroupNavbar.vue';
 
 export default {

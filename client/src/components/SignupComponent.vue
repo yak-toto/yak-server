@@ -9,12 +9,12 @@
       <form v-on:submit.prevent="signup">
         <div class="field control">
           <label class="label" for="name">Name</label>
-          <input type="text" class="input is-large" id="name" placeholder="Name" v-model="form.name">
+          <input type="text" class="input is-large" id="name" placeholder="Name" v-model="name">
         </div>
 
         <div class="field control">
           <label class="label" for="password">Password</label>
-          <input type="password" class="input is-large" placeholder="Password" v-model="form.password">
+          <input type="password" class="input is-large" placeholder="Password" v-model="password">
         </div>
 
         <button class="button is-block is-info is-large is-fullwidth">Sign Up</button>
@@ -24,35 +24,19 @@
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
   name: 'SignupComponent',
   data() {
     return {
-      form: {
-        name: '',
-        password: '',
-      },
+      name: '',
+      password: '',
       invalidSignup: false,
     };
   },
   methods: {
     signup() {
-      const path = 'http://localhost:5000/signup';
-
-      axios.post(path, this.form)
-        .then(() => {
-          this.invalidSignup = false;
-          this.$router.push('/login');
-        })
-        .catch((error) => {
-          if (error.response) {
-            if (error.response.status === 409) {
-              this.invalidSignup = true;
-            }
-          }
-        });
+      this.$store.dispatch('signup', { name: this.name, password: this.password })
+        .then(() => this.$router.push('/groups/A'))
     },
   },
 };

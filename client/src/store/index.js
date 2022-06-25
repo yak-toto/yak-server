@@ -38,7 +38,7 @@ const actions = {
   signup(context, userData) {
     context.commit('setUserData', { userData })
     return postSignup(userData)
-      .then(context.dispatch('login', userData))
+      .then(response => context.dispatch('login', userData))
       .catch(error => {
         console.log('Error Registering: ', error)
         // EventBus.emit('failedRegistering: ', error)
