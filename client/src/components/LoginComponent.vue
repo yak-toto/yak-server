@@ -3,7 +3,7 @@
     <h3 class="title">Se connecter</h3>
     <div class="box">
       <div class="notification is-danger" v-if="invalidLogin">
-        Please check your login details and try again.
+        Veuillez vérifier vos identifiants et réessayer.
       </div>
 
       <form v-on:submit.prevent="login">
@@ -37,7 +37,16 @@ export default {
   methods: {
     login() {
       this.$store.dispatch('login', { name: this.name, password: this.password })
-        .then(() => this.$router.push('/groups/A'));
+        .then((response) => {
+          console.log(response);
+          this.$store.commit('setJwtToken', { jwt: response.data });
+          this.$store.commit('setUserName', { userName: this.name });
+          this.$router.push('/groups/A');
+        })
+        .catch((error) => {
+          console.log('Error Authenticating: ', error);
+          this.invalidLogin = true;
+        });
     },
   },
 };

@@ -41,6 +41,11 @@ def login_post():
 def signup_post():
     data = request.get_json()
 
+    # Check existing user in db
+    existing_user = User.query.filter_by(name=data["name"]).first()
+    if existing_user:
+        return jsonify({"message": "Name already exists", "signup": False}), 401
+
     # Initialize user and integrate in db
     user = User(**data)
     db.session.add(user)

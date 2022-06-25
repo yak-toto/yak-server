@@ -58,8 +58,8 @@ export default {
       this.$store.dispatch('logout');
       next('/login');
     } else {
-      this.getGroup();
       next();
+      this.getGroup();
     }
   },
   created() {

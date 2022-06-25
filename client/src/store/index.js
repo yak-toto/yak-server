@@ -25,21 +25,10 @@ const actions = {
     return getGroupNames(context.state.jwt.token);
   },
   login(context, userData) {
-    return postLogin(userData)
-      .then((response) => {
-        context.commit('setJwtToken', { jwt: response.data });
-        context.commit('setUserName', { userName: userData.name });
-      })
-      .catch((error) => {
-        console.log('Error Authenticating: ', error);
-      });
+    return postLogin(userData);
   },
   signup(context, userData) {
-    return postSignup(userData)
-      .then((_) => context.dispatch('login', userData))
-      .catch((error) => {
-        console.log('Error Registering: ', error);
-      });
+    return postSignup(userData);
   },
   logout(context) {
     context.commit('eraseJwtToken');

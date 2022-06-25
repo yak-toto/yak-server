@@ -3,7 +3,7 @@
     <h3 class="title">Créer un compte</h3>
     <div class="box">
       <div class="notification is-danger" v-if="invalidSignup">
-        Name already exists.
+        Nom déjà existant
       </div>
 
       <form v-on:submit.prevent="signup">
@@ -36,7 +36,13 @@ export default {
   methods: {
     signup() {
       this.$store.dispatch('signup', { name: this.name, password: this.password })
-        .then(() => this.$router.push('/groups/A'));
+        .then((_) => {
+          this.$router.push('/login');
+        })
+        .catch((error) => {
+          console.log('Error Registering: ', error);
+          this.invalidSignup = true;
+        });
     },
   },
 };
