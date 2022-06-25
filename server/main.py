@@ -38,7 +38,6 @@ def token_required(f):
         }
 
         if len(auth_headers) != 2:
-            print("chien chien chien chien")
             return jsonify(invalid_msg), 401
 
         try:
@@ -176,6 +175,7 @@ def score_board():
 
 def compute_points():
     users = User.query.filter(User.name != "admin")
+    admin = User.query.filter_by(name="admin").first()
 
     for user in users:
         points = 0
@@ -183,7 +183,7 @@ def compute_points():
 
         for match in user_matches:
             admin_match = Match.query.filter_by(
-                name="admin", team1=match.team1, team2=match.team2
+                user_id=admin.id, team1=match.team1, team2=match.team2
             ).first()
 
             if is_same_scores(

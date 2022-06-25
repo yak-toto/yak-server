@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import { postSignup, postLogin, getGroupNames, getGroup, postMatch, getMatch, getScoreBoard } from '@/api'
+import { postSignup, postLogin, getGroupNames, getGroup, postMatch, getMatch, getScoreBoard, postLogout } from '@/api'
 import { isValidJwt, EventBus } from '@/utils'
 
 const state = {
@@ -44,17 +44,25 @@ const actions = {
         // EventBus.emit('failedRegistering: ', error)
       })
   },
+  logout(context) {
+    context.commit('eraseJwtToken')
+  },
 }
 
 const mutations = {
-  setUserData (state, payload) {
+  setUserData(state, payload) {
     console.log('setUserData payload = ', payload)
     state.userData = payload.userData
   },
-  setJwtToken (state, payload) {
+  setJwtToken(state, payload) {
     console.log('setJwtToken payload = ', payload)
     localStorage.token = payload.jwt.token
     state.jwt = payload.jwt
+  },
+  eraseJwtToken(state) {
+    console.log('delete token')
+    localStorage.token = "deleted"
+    state.jwt = "deleted"
   }
 }
 

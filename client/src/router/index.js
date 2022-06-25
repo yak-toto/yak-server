@@ -3,7 +3,6 @@ import LoginComponent from '@/components/LoginComponent.vue';
 import GroupComponent from '@/components/GroupComponent.vue';
 import SignupComponent from '@/components/SignupComponent.vue';
 import ScoreBoardComponent from '@/components/ScoreBoardComponent.vue';
-import LogoutComponent from '@/components/LogoutComponent.vue';
 import store from '@/store';
 
 const routes = [
@@ -38,7 +37,12 @@ const routes = [
   {
     path: '/logout',
     name: 'logout',
-    component: LogoutComponent,
+    beforeEnter(to, from, next) {
+      if (store.getters.isAuthenticated) {
+        store.dispatch('logout')
+      }
+      next('/login')
+    }
   },
   {
     path: '/score_board',
