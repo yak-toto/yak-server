@@ -5,9 +5,15 @@
         <div class="container">
           <div id="navbarMenuHeroA" class="navbar-menu">
             <div class="navbar-end">
-              <router-link v-if="!isAuthenticated" to="/login" class="navbar-item">Login</router-link>
-              <router-link v-if="!isAuthenticated" to="/signup" class="navbar-item">Signup</router-link>
-              <router-link v-if="isAuthenticated" to="/logout" class="navbar-item">Logout</router-link>
+              <router-link v-if="!isAuthenticated" to="/login" class="navbar-item">
+                Login
+              </router-link>
+              <router-link v-if="!isAuthenticated" to="/signup" class="navbar-item">
+                Signup
+              </router-link>
+              <router-link v-if="isAuthenticated" to="/logout" class="navbar-item">
+                Logout
+              </router-link>
             </div>
           </div>
         </div>
@@ -26,8 +32,8 @@
 export default {
   computed: {
     isAuthenticated() {
-      return this.$store.getters.isAuthenticated
-    }
-  }
-}
+      return this.$store.getters.isAuthenticated;
+    },
+  },
+};
 </script>

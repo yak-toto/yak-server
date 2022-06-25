@@ -12,7 +12,7 @@
               <th>Points</th>
             </tr>
           </thead>
-          <tr v-for="res in score_board_resource">
+          <tr v-for="res in scoreBoardResource">
             <td>
               <div>{{ res["name"] }}</div>
             </td>
@@ -36,18 +36,18 @@ export default {
   },
   data() {
     return {
-      score_board_resource: [],
+      scoreBoardResource: [],
     };
   },
   methods: {
     getScoreBoard() {
       this.$store.dispatch('getScoreBoard')
-        .then((res) => { this.score_board_resource = res.data })
+        .then((res) => { this.scoreBoardResource = res.data; });
     },
   },
   created() {
-    this.getScoreBoard()
-  }
+    this.getScoreBoard();
+  },
 };
 
 </script>

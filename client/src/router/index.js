@@ -9,7 +9,7 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    redirect: '/login'
+    redirect: '/login',
   },
   {
     path: '/login',
@@ -17,17 +17,16 @@ const routes = [
     component: LoginComponent,
   },
   {
-    path: '/groups/:group_name',
+    path: '/groups/:groupName',
     name: 'groups',
     component: GroupComponent,
-    beforeEnter (to, from, next) {
+    beforeEnter(to, from, next) {
       if (!store.getters.isAuthenticated) {
-        next('/login')
+        next('/login');
+      } else {
+        next();
       }
-      else {
-        next()
-      }
-    }
+    },
   },
   {
     path: '/signup',
@@ -39,10 +38,10 @@ const routes = [
     name: 'logout',
     beforeEnter(to, from, next) {
       if (store.getters.isAuthenticated) {
-        store.dispatch('logout')
+        store.dispatch('logout');
       }
-      next('/login')
-    }
+      next('/login');
+    },
   },
   {
     path: '/score_board',

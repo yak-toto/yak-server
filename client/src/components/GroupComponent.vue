@@ -2,15 +2,19 @@
   <GroupNavbar />
   <hr>
   <div class="column is-8 is-offset-2">
-    <h3 class="title">Groupe {{ $route.params.group_name }}</h3>
+    <h3 class="title">Groupe {{ $route.params.groupName }}</h3>
     <div class="box">
       <form v-on:submit.prevent="postGroup">
         <div class="table-container">
           <table class="table is-fullwidth is-striped">
-            <tr v-for="match in group_resource">
+            <tr v-for="match in groupResource">
               <td>{{ match["results"][0]["team"] }}</td>
-              <td><input class="input is-small" type="number" v-model="match['results'][0]['score']"></td>
-              <td><input class="input is-small" type="number" v-model="match['results'][1]['score']"></td>
+              <td>
+                <input class="input is-small" type="number" v-model="match['results'][0]['score']">
+              </td>
+              <td>
+                <input class="input is-small" type="number" v-model="match['results'][1]['score']">
+              </td>
               <td>{{ match["results"][1]["team"] }}</td>
             </tr>
           </table>
@@ -33,27 +37,27 @@ export default {
   },
   data() {
     return {
-      group_resource: [],
+      groupResource: [],
     };
   },
   methods: {
     getGroup() {
-      this.$store.dispatch('getGroup', { group_name: this.$route.params.group_name })
+      this.$store.dispatch('getGroup', { groupName: this.$route.params.groupName })
         .then((res) => {
-          this.group_resource = res.data
-        })
+          this.groupResource = res.data;
+        });
     },
     postGroup() {
-      for (let index = 0; index < this.group_resource.length; index++) {
-        this.$store.dispatch('postMatch', { match_id: this.group_resource[index]['id'], match_resource: this.group_resource[index] })
+      for (let index = 0; index < this.groupResource.length; index += 1) {
+        this.$store.dispatch('postMatch', { matchId: this.groupResource[index].id, matchResource: this.groupResource[index] });
       }
-    }
+    },
   },
   created() {
     this.$watch(
       () => this.$route.params,
       () => {
-        if (this.$route.params["group_name"]) {
+        if (this.$route.params.groupName) {
           this.getGroup();
         }
       },

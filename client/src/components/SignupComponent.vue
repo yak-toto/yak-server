@@ -36,7 +36,7 @@ export default {
   methods: {
     signup() {
       this.$store.dispatch('signup', { name: this.name, password: this.password })
-        .then(() => this.$router.push('/groups/A'))
+        .then(() => this.$router.push('/groups/A'));
     },
   },
 };

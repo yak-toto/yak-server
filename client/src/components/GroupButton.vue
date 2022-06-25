@@ -1,6 +1,6 @@
 <template>
   <a v-on:click="getGroup" class="navbar-item">Groupe {{
-      group_name
+      groupName
   }}</a>
 </template>
 
@@ -8,11 +8,11 @@
 export default {
   name: 'GroupButton',
   props: {
-    group_name: String,
+    groupName: String,
   },
   methods: {
     getGroup() {
-      this.$router.push(`/groups/${this.group_name}`);
+      this.$router.push(`/groups/${this.groupName}`);
     },
   },
 };

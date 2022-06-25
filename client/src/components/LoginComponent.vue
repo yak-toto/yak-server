@@ -44,7 +44,7 @@ export default {
   methods: {
     login() {
       this.$store.dispatch('login', { name: this.name, password: this.password })
-        .then(() => this.$router.push('/groups/A'))
+        .then(() => this.$router.push('/groups/A'));
     },
   },
 };

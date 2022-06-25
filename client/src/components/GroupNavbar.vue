@@ -4,7 +4,7 @@
       <div class="container">
         <div id="navbarMenu" class="navbar-menu">
           <div class="navbar">
-            <GroupButton v-for="group_name in groups_names" :group_name="group_name"></GroupButton>
+            <GroupButton v-for="groupName in groupsNames" :groupName="groupName"></GroupButton>
             <ScoreBoardButton />
           </div>
         </div>
@@ -25,15 +25,15 @@ export default {
   },
   data() {
     return {
-      groups_names: [],
+      groupsNames: [],
     };
   },
   methods: {
     getGroupList() {
       this.$store.dispatch('getGroupNames')
         .then((res) => {
-          this.groups_names = res.data;
-        })
+          this.groupsNames = res.data;
+        });
     },
   },
   created() {
