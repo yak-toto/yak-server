@@ -1,4 +1,5 @@
 import Vuex from 'vuex';
+import VuexPersistence from 'vuex-persist';
 
 import {
   postSignup, postLogin, getGroupNames, getGroup, postMatch, getScoreBoard,
@@ -50,18 +51,15 @@ const mutations = {
     state.userName = payload.userName;
   },
   setJwtToken(state, payload) {
-    localStorage.token = payload.jwt.token;
     state.jwt = payload.jwt;
   },
   eraseJwtToken(state) {
-    localStorage.token = 'deleted';
     state.jwt = 'deleted';
     state.userName = '';
   },
 };
 
 const getters = {
-  // reusable data accessors
   isAuthenticated(state) {
     return isValidJwt(state.jwt.token);
   },
@@ -70,11 +68,17 @@ const getters = {
   },
 };
 
+const vuexPersist = new VuexPersistence({
+  key: 'myStorage',
+  reducer: (state) => state,
+});
+
 const store = new Vuex.Store({
   state,
   actions,
   mutations,
   getters,
+  plugins: [vuexPersist.plugin],
 });
 
 export default store;
