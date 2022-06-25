@@ -5,9 +5,6 @@ import { postSignup, postLogin, getGroupNames, getGroup, postMatch, getMatch, ge
 import { isValidJwt, EventBus } from '@/utils'
 
 const state = {
-  matches: [],
-  currentMatches: [],
-  user: {},
   jwt: ''
 }
 
