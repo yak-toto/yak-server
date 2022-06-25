@@ -11,13 +11,13 @@
             </div>
             <div class="navbar-end">
               <router-link v-if="!isAuthenticated" to="/login" class="navbar-item">
-                Login
+                Se connecter
               </router-link>
               <router-link v-if="!isAuthenticated" to="/signup" class="navbar-item">
-                Signup
+                Créer un compte
               </router-link>
               <router-link v-if="isAuthenticated" to="/logout" class="navbar-item">
-                Logout
+                Se déconnecter
               </router-link>
             </div>
           </div>

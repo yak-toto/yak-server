@@ -20,7 +20,7 @@
           </table>
         </div>
         <div>
-          <button class="button is-dark">Submit</button>
+          <button class="button is-dark">Valider</button>
         </div>
       </form>
     </div>

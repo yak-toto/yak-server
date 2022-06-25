@@ -1,6 +1,6 @@
 <template>
   <div class="column is-4 is-offset-4">
-    <h3 class="title">Login</h3>
+    <h3 class="title">Se connecter</h3>
     <div class="box">
       <div class="notification is-danger" v-if="invalidLogin">
         Please check your login details and try again.
@@ -8,17 +8,17 @@
 
       <form v-on:submit.prevent="login">
         <div class="field control">
-          <label class="label" for="name">Name</label>
-          <input type="text" class="input is-large" id="name" name="name" placeholder="name" v-model="name" />
+          <label class="label" for="name">Nom</label>
+          <input type="text" class="input is-large" id="name" name="name" placeholder="nom" v-model="name" />
         </div>
 
         <div class="field control">
-          <label class="label" for="password">Password</label>
-          <input type="password" class="input is-large" name="password" placeholder="password"
+          <label class="label" for="password">Mot de passe</label>
+          <input type="password" class="input is-large" name="password" placeholder="mot de passe"
             v-model="password" />
         </div>
 
-        <button class="button is-block is-info is-large is-fullwidth">Login</button>
+        <button class="button is-block is-info is-large is-fullwidth">Se connecter</button>
       </form>
     </div>
   </div>
