@@ -8,6 +8,7 @@ from flask import jsonify
 from flask import request
 
 from . import db
+from .models import Result
 from .models import User
 from .telegram_sender import send_message
 from .utils import initialize_matches
@@ -39,10 +40,21 @@ def login_post():
 @auth.route("/signup", methods=["POST"])
 def signup_post():
     data = request.get_json()
+
+    # Initialize user and integrate in db
     user = User(**data)
     db.session.add(user)
     db.session.commit()
+
+    # Initialize matches and integrate in db
     for match in initialize_matches(user.id):
         db.session.add(match)
     db.session.commit()
+
+    # Initialize results and integrate in db
+    db.session.add(
+        Result(user_id=user.id, points=0, number_match_guess=0, number_score_guess=0)
+    )
+    db.session.commit()
+
     return jsonify(user.to_dict()), 201
