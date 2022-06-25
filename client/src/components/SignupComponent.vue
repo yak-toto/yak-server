@@ -9,12 +9,12 @@
       <form v-on:submit.prevent="signup">
         <div class="field control">
           <label class="label" for="name">Name</label>
-          <input type="text" class="input is-large" id="name" placeholder="Name" v-model="name">
+          <input type="text" class="input is-large" id="name" placeholder="name" v-model="name">
         </div>
 
         <div class="field control">
           <label class="label" for="password">Password</label>
-          <input type="password" class="input is-large" placeholder="Password" v-model="password">
+          <input type="password" class="input is-large" placeholder="password" v-model="password">
         </div>
 
         <button class="button is-block is-info is-large is-fullwidth">Sign Up</button>

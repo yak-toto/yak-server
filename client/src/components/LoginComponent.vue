@@ -18,12 +18,6 @@
             v-model="password" />
         </div>
 
-        <div class="field control">
-          <label class="label">
-            <input type="checkbox" class="checkbox" name="remember" v-model="remember" />
-            Remember me
-          </label>
-        </div>
         <button class="button is-block is-info is-large is-fullwidth">Login</button>
       </form>
     </div>
@@ -37,7 +31,6 @@ export default {
     return {
       name: '',
       password: '',
-      remember: false,
       invalidLogin: false,
     };
   },
