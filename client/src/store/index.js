@@ -6,6 +6,7 @@ import {
 import { isValidJwt } from '@/utils';
 
 const state = {
+  userName: '',
   jwt: '',
 };
 
@@ -25,7 +26,10 @@ const actions = {
   login(context, userData) {
     context.commit('setUserData', { userData });
     return postLogin(userData)
-      .then((response) => context.commit('setJwtToken', { jwt: response.data }))
+      .then((response) => {
+        context.commit('setJwtToken', { jwt: response.data });
+        context.commit('setUserName', { userName: userData.name });
+      })
       .catch((error) => {
         console.log('Error Authenticating: ', error);
       });
@@ -47,6 +51,9 @@ const mutations = {
   setUserData(state, payload) {
     state.userData = payload.userData;
   },
+  setUserName(state, payload) {
+    state.userName = payload.userName;
+  },
   setJwtToken(state, payload) {
     localStorage.token = payload.jwt.token;
     state.jwt = payload.jwt;
@@ -54,6 +61,7 @@ const mutations = {
   eraseJwtToken(state) {
     localStorage.token = 'deleted';
     state.jwt = 'deleted';
+    state.userName = '';
   },
 };
 
@@ -62,6 +70,9 @@ const getters = {
   isAuthenticated(state) {
     return isValidJwt(state.jwt.token);
   },
+  getUserName(state) {
+    return state.userName;
+  }
 };
 
 const store = new Vuex.Store({

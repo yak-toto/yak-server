@@ -4,6 +4,11 @@
       <nav class="navbar">
         <div class="container">
           <div id="navbarMenuHeroA" class="navbar-menu">
+            <div class="navbar-start">
+              <div v-if="getUserName" class="has-text-white navbar-item">
+                Utilisateur:&nbsp;<strong>{{ userName }}</strong>
+              </div>
+            </div>
             <div class="navbar-end">
               <router-link v-if="!isAuthenticated" to="/login" class="navbar-item">
                 Login
@@ -30,9 +35,18 @@
 
 <script>
 export default {
+  data() {
+    return {
+      userName: ''
+    };
+  },
   computed: {
     isAuthenticated() {
       return this.$store.getters.isAuthenticated;
+    },
+    getUserName() {
+      this.userName = this.$store.getters.getUserName;
+      return this.userName !== '';
     },
   },
 };
