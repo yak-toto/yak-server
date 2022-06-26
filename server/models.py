@@ -58,6 +58,8 @@ class Matches(db.Model):
     team1 = db.Column(db.String(100))
     team2 = db.Column(db.String(100))
 
+    match = db.relationship("Match", backref="match", lazy=False)
+
     def to_dict(self):
         return dict(
             id=self.id, group_name=self.group_name, teams=[self.team1, self.team2]
@@ -67,17 +69,18 @@ class Matches(db.Model):
 class Match(db.Model):
     id = db.Column(db.String(100), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
-    group_name = db.Column(db.String(1))
-    team1 = db.Column(db.String(100))
+    match_id = db.Column(db.Integer, db.ForeignKey("matches.id"), nullable=True)
     score1 = db.Column(db.Integer)
     score2 = db.Column(db.Integer)
-    team2 = db.Column(db.String(100))
 
     def to_dict(self):
+        match = Matches.query.filter_by(id=self.match_id).first()
+
         return {
             "id": self.id,
+            "match_id": self.match_id,
             "results": [
-                {"team": self.team1, "score": self.score1},
-                {"team": self.team2, "score": self.score2},
+                {"team": match.team1, "score": self.score1},
+                {"team": match.team2, "score": self.score2},
             ],
         }

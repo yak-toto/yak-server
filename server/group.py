@@ -1,5 +1,3 @@
-import json
-
 from flask import Blueprint
 from flask import jsonify
 from flask import request
@@ -13,10 +11,6 @@ from .models import Matches
 from .telegram_sender import send_message
 
 group = Blueprint("group", __name__)
-
-with open("server/matches.json") as file:
-    matches = json.load(file)
-    GROUPS = tuple(matches.keys())
 
 
 @group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups")
@@ -34,11 +28,11 @@ def groups(current_user):
 @group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_name>")
 @token_required
 def group_get(current_user, group_name):
-    if group_name not in GROUPS:
-        return "bad request!", 404
+    matches = Matches.query.filter_by(group_name=group_name)
 
-    group_resource = Match.query.filter_by(
-        user_id=current_user.id, group_name=group_name
+    group_resource = (
+        Match.query.filter_by(user_id=current_user.id, match_id=match.id).first()
+        for match in matches
     )
 
     return (
@@ -51,10 +45,7 @@ def group_get(current_user, group_name):
     f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_name>", methods=["POST"]
 )
 @token_required
-def group_post(current_user, group_name=None):
-    if group_name not in GROUPS:
-        return "bad request!", 404
-
+def group_post(current_user, group_name):
     body = request.get_json()
 
     matches = Match.query.filter_by(user_id=current_user.id, group_name=group_name)
@@ -86,10 +77,12 @@ def groups_names(current_user):
     )
 
 
-@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/match/<string:id>", methods=["POST", "GET"])
+@group.route(
+    f"/{GLOBAL_ENDPOINT}/{VERSION}/match/<string:match_id>", methods=["POST", "GET"]
+)
 @token_required
-def match_get(current_user, id):
-    match = Match.query.filter_by(user_id=current_user.id, id=id).first()
+def match_get(current_user, match_id):
+    match = Match.query.filter_by(user_id=current_user.id, match_id=match_id).first()
     if not match:
         return (
             jsonify(
@@ -101,6 +94,7 @@ def match_get(current_user, id):
             404,
         )
 
+    is_match_modified = False
     if request.method == "POST":
         body = request.get_json()
         results = body.get("results", [])
@@ -112,15 +106,20 @@ def match_get(current_user, id):
                 match.score2 = results[1].get("score")
                 db.session.add(match)
                 db.session.commit()
-
-                send_message(
-                    f"User {current_user.name} update match {match.team1} - "
-                    f"{match.team2} with the score {match.score1} - {match.score2}."
-                )
+                is_match_modified = True
         else:
             return jsonify({"message": "Wrong inputs"}), 401
 
-    return jsonify(match.to_dict()), 200
+    match_resource = match.to_dict()
+    team1 = match_resource["results"][0]["team"]
+    team2 = match_resource["results"][1]["team"]
+    if is_match_modified:
+        send_message(
+            f"User {current_user.name} update match {team1} - "
+            f"{team2} with the score {match.score1} - {match.score2}."
+        )
+
+    return jsonify(match_resource), 200
 
 
 @group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches", methods=["POST", "GET"])

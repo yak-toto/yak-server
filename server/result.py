@@ -71,7 +71,7 @@ def compute_points():
 
         for match in user_matches:
             admin_match = Match.query.filter_by(
-                user_id=admin.id, team1=match.team1, team2=match.team2
+                user_id=admin.id, match_id=match.match_id
             ).first()
 
             if is_same_scores(

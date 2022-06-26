@@ -11,9 +11,10 @@ from . import db
 from .auth_utils import token_required
 from .constants import GLOBAL_ENDPOINT
 from .constants import VERSION
+from .models import Match
+from .models import Matches
 from .models import User
 from .telegram_sender import send_message
-from .utils import initialize_matches
 
 auth = Blueprint("auth", __name__)
 
@@ -54,8 +55,10 @@ def signup_post():
     db.session.commit()
 
     # Initialize matches and integrate in db
-    for match in initialize_matches(user.id):
-        db.session.add(match)
+    for match in Matches.query.all():
+        db.session.add(
+            Match(user_id=user.id, match_id=match.id, score1=None, score2=None)
+        )
     db.session.commit()
 
     return jsonify(user.to_user_dict()), 201

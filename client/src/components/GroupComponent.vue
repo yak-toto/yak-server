@@ -52,7 +52,7 @@ export default {
     },
     postGroup() {
       for (let index = 0; index < this.groupResource.length; index += 1) {
-        this.$store.dispatch('postMatch', { matchId: this.groupResource[index].id, matchResource: this.groupResource[index] });
+        this.$store.dispatch('postMatch', { matchId: this.groupResource[index].match_id, matchResource: this.groupResource[index] });
       }
     },
   },
