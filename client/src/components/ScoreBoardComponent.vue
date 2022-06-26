@@ -11,16 +11,16 @@
             <thead>
               <tr>
                 <th>Joueur</th>
+                <th>Nombre de matchs trouvés</th>
+                <th>Nombre de scores trouvés</th>
                 <th>Points</th>
               </tr>
             </thead>
             <tr v-for="res in scoreBoardResource">
-              <td>
-                <div>{{ res["name"] }}</div>
-              </td>
-              <td>
-                <div>{{ res["points"] }}</div>
-              </td>
+              <td>{{ res["name"] }}</td>
+              <td>{{ res["number_match_guess"] }}</td>
+              <td>{{ res["number_score_guess"] }}</td>
+              <td>{{ res["points"] }}</td>
             </tr>
           </table>
         </div>
