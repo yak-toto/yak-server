@@ -14,13 +14,18 @@ def create_app():
     app.config.from_pyfile("config.py")
     db.init_app(app)
 
+    # Registrer blueprint
     from .auth import auth as auth_blueprint
 
     app.register_blueprint(auth_blueprint)
 
-    from .main import main as main_blueprint
+    from .group import group as group_blueprint
 
-    app.register_blueprint(main_blueprint)
+    app.register_blueprint(group_blueprint)
+
+    from .result import result as result_blueprint
+
+    app.register_blueprint(result_blueprint)
 
     CORS(app, resources={r"/*": {"origins": "*"}})
 

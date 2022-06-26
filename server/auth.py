@@ -8,6 +8,7 @@ from flask import jsonify
 from flask import request
 
 from . import db
+from .auth_utils import token_required
 from .models import User
 from .telegram_sender import send_message
 from .utils import initialize_matches
@@ -56,3 +57,9 @@ def signup_post():
     db.session.commit()
 
     return jsonify(user.to_user_dict()), 201
+
+
+@auth.route("/current_user")
+@token_required
+def current_user(current_user):
+    return jsonify(current_user.to_user_dict()), 200
