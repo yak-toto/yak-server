@@ -1,16 +1,22 @@
 <template>
-  <div>
-    <nav class="navbar">
-      <div class="container">
-        <div id="navbarMenu" class="navbar-menu">
-          <div class="navbar">
-            <GroupButton v-for="groupName in groupsNames" :groupName="groupName"></GroupButton>
-            <ScoreBoardButton />
-          </div>
-        </div>
-      </div>
-    </nav>
-  </div>
+  <aside class="menu">
+    <p class="menu-label">
+      Groupes
+    </p>
+    <ul class="menu-list">
+      <li>
+        <GroupButton v-for="groupName in groupsNames" :groupName="groupName"></GroupButton>
+      </li>
+    </ul>
+    <p class="menu-label">
+      Classement
+    </p>
+    <ul class="menu-list">
+      <li>
+        <ScoreBoardButton />
+      </li>
+    </ul>
+  </aside>
 </template>
 
 <script>
