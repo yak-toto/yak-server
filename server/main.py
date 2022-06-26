@@ -213,8 +213,10 @@ def compute_points():
     admin = User.query.filter_by(name="admin").first()
 
     for user in users:
-        points = 0
         user_matches = Match.query.filter_by(user_id=user.id)
+        user.number_score_guess = 0
+        user.number_match_guess = 0
+        user.points = 0
 
         for match in user_matches:
             admin_match = Match.query.filter_by(
@@ -224,13 +226,18 @@ def compute_points():
             if is_same_scores(
                 (match.score1, match.score2), (admin_match.score1, admin_match.score2)
             ):
-                points += 8
+                user.number_score_guess += 1
+                user.number_match_guess += 1
             elif is_same_resuls(
                 (match.score1, match.score2), (admin_match.score1, admin_match.score2)
             ):
-                points += 3
+                user.number_match_guess += 1
 
-        user.points = points
+            user.points = (
+                user.number_score_guess * 8
+                + (user.number_match_guess - user.number_score_guess) * 3
+            )
+
         db.session.add(user)
 
     db.session.commit()
