@@ -5,13 +5,15 @@ from flask import jsonify
 
 from . import db
 from .auth_utils import token_required
+from .constants import GLOBAL_ENDPOINT
+from .constants import VERSION
 from .models import Match
 from .models import User
 
 result = Blueprint("result", __name__)
 
 
-@result.route("/score_board")
+@result.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_board")
 @token_required
 def score_board(current_user):
     return (
@@ -27,7 +29,7 @@ def score_board(current_user):
     )
 
 
-@result.route("/results")
+@result.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/results")
 @token_required
 def results(current_user):
     return (
@@ -36,7 +38,7 @@ def results(current_user):
     )
 
 
-@result.route("/compute_points", methods=["POST"])
+@result.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/compute_points", methods=["POST"])
 @token_required
 def compute_points_post(current_user):
     if current_user.name == "admin":

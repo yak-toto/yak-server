@@ -6,6 +6,8 @@ from flask import request
 
 from . import db
 from .auth_utils import token_required
+from .constants import GLOBAL_ENDPOINT
+from .constants import VERSION
 from .models import Match
 from .telegram_sender import send_message
 
@@ -16,7 +18,7 @@ with open("server/matches.json") as file:
     GROUPS = tuple(matches.keys())
 
 
-@group.route("/groups")
+@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups")
 @token_required
 def groups(current_user):
     user_resource = list(Match.query.filter_by(user_id=current_user.id))
@@ -28,7 +30,7 @@ def groups(current_user):
     return jsonify(results), 200
 
 
-@group.route("/groups/<string:group_name>")
+@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_name>")
 @token_required
 def group_get(current_user, group_name):
     if group_name not in GROUPS:
@@ -44,7 +46,9 @@ def group_get(current_user, group_name):
     )
 
 
-@group.route("/groups/<string:group_name>", methods=["POST"])
+@group.route(
+    f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_name>", methods=["POST"]
+)
 @token_required
 def group_post(current_user, group_name=None):
     if group_name not in GROUPS:
@@ -72,12 +76,12 @@ def group_post(current_user, group_name=None):
     return jsonify(body), 201
 
 
-@group.route("/groups/names")
+@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/names")
 def groups_names():
     return jsonify(GROUPS), 200
 
 
-@group.route("/match/<string:id>", methods=["POST", "GET"])
+@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/match/<string:id>", methods=["POST", "GET"])
 @token_required
 def match_get(current_user, id):
     match = Match.query.filter_by(user_id=current_user.id, id=id).first()

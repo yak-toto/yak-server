@@ -9,6 +9,8 @@ from flask import request
 
 from . import db
 from .auth_utils import token_required
+from .constants import GLOBAL_ENDPOINT
+from .constants import VERSION
 from .models import User
 from .telegram_sender import send_message
 from .utils import initialize_matches
@@ -16,7 +18,7 @@ from .utils import initialize_matches
 auth = Blueprint("auth", __name__)
 
 
-@auth.route("/login", methods=["POST"])
+@auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/login", methods=["POST"])
 def login_post():
     data = request.get_json()
     user = User.authenticate(**data)
@@ -37,7 +39,7 @@ def login_post():
     return jsonify({"token": token})
 
 
-@auth.route("/signup", methods=["POST"])
+@auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/signup", methods=["POST"])
 def signup_post():
     data = request.get_json()
 
@@ -59,7 +61,7 @@ def signup_post():
     return jsonify(user.to_user_dict()), 201
 
 
-@auth.route("/current_user")
+@auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/current_user")
 @token_required
 def current_user(current_user):
     return jsonify(current_user.to_user_dict()), 200
