@@ -55,4 +55,4 @@ def signup_post():
         db.session.add(match)
     db.session.commit()
 
-    return jsonify(user.to_dict()), 201
+    return jsonify(user.to_user_dict()), 201

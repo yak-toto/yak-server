@@ -58,7 +58,7 @@ def token_required(f):
 @main.route("/current_user")
 @token_required
 def current_user(current_user):
-    return jsonify(current_user.to_dict()), 200
+    return jsonify(current_user.to_user_dict()), 200
 
 
 @main.route("/groups")

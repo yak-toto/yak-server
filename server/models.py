@@ -39,7 +39,7 @@ class User(db.Model):
 
         return user
 
-    def to_dict(self):
+    def to_user_dict(self):
         return dict(id=self.id, name=self.name)
 
     def to_result_dict(self):
