@@ -9,6 +9,7 @@ from .auth_utils import token_required
 from .constants import GLOBAL_ENDPOINT
 from .constants import VERSION
 from .models import Match
+from .models import Matches
 from .telegram_sender import send_message
 
 group = Blueprint("group", __name__)
@@ -77,8 +78,12 @@ def group_post(current_user, group_name=None):
 
 
 @group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/names")
-def groups_names():
-    return jsonify(GROUPS), 200
+@token_required
+def groups_names(current_user):
+    return (
+        jsonify(sorted(list({match.group_name for match in Matches.query.all()}))),
+        200,
+    )
 
 
 @group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/match/<string:id>", methods=["POST", "GET"])
@@ -116,3 +121,34 @@ def match_get(current_user, id):
             return jsonify({"message": "Wrong inputs"}), 401
 
     return jsonify(match.to_dict()), 200
+
+
+@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches", methods=["POST", "GET"])
+@token_required
+def matches(current_user):
+    if current_user.name == "admin":
+        if request.method == "POST":
+            body = request.get_json()
+
+            if Matches.query.first():
+                return jsonify("resource already exising"), 409
+
+            for group in body:
+                for match in group["matches"]:
+                    db.session.add(
+                        Matches(
+                            group_name=group["group_name"],
+                            team1=match["teams"][0],
+                            team2=match["teams"][1],
+                        )
+                    )
+
+            db.session.commit()
+
+        return (
+            jsonify([match.to_dict() for match in Matches.query.all()]),
+            201 if request.method == "POST" else 200,
+        )
+
+    else:
+        return jsonify("Unauthorized access to admin api"), 401

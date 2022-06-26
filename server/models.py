@@ -52,6 +52,18 @@ class User(db.Model):
         )
 
 
+class Matches(db.Model):
+    id = db.Column(db.String(100), primary_key=True, default=lambda: str(uuid.uuid4()))
+    group_name = db.Column(db.String(1))
+    team1 = db.Column(db.String(100))
+    team2 = db.Column(db.String(100))
+
+    def to_dict(self):
+        return dict(
+            id=self.id, group_name=self.group_name, teams=[self.team1, self.team2]
+        )
+
+
 class Match(db.Model):
     id = db.Column(db.String(100), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
