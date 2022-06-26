@@ -12,14 +12,17 @@ class User(db.Model):
     )  # primary keys are required by SQLAlchemy
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(1000), unique=True, nullable=False)
+    number_match_guess = db.Column(db.Integer)
+    number_score_guess = db.Column(db.Integer)
     points = db.Column(db.Integer)
 
     matches = db.relationship("Match", backref="user", lazy=False)
-    results = db.relationship("Result", backref="user", lazy=False)
 
     def __init__(self, name, password) -> None:
         self.name = name
         self.password = generate_password_hash(password, method="sha256")
+        self.number_match_guess = 0
+        self.number_score_guess = 0
         self.points = 0
 
     @classmethod
@@ -37,7 +40,16 @@ class User(db.Model):
         return user
 
     def to_dict(self):
-        return dict(id=self.id, name=self.name, points=self.points)
+        return dict(id=self.id, name=self.name)
+
+    def to_result_dict(self):
+        return dict(
+            id=self.id,
+            name=self.name,
+            number_match_guess=self.number_match_guess,
+            number_score_guess=self.number_score_guess,
+            points=self.points,
+        )
 
 
 class Match(db.Model):
@@ -57,19 +69,3 @@ class Match(db.Model):
                 {"team": self.team2, "score": self.score2},
             ],
         }
-
-
-class Result(db.Model):
-    id = db.Column(db.String(100), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
-    number_match_guess = db.Column(db.Integer)
-    number_score_guess = db.Column(db.Integer)
-    points = db.Column(db.Integer)
-
-    def to_dict(self):
-        return dict(
-            id=self.id,
-            points=self.points,
-            number_match_guess=self.number_match_guess,
-            number_score_guess=self.number_score_guess,
-        )

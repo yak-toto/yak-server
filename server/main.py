@@ -10,7 +10,6 @@ from flask import request
 
 from . import db
 from .models import Match
-from .models import Result
 from .models import User
 from .telegram_sender import send_message
 
@@ -172,7 +171,9 @@ def match_get(current_user, id):
 @token_required
 def score_board(current_user):
     return (
-        jsonify([user.to_dict() for user in User.query.filter(User.name != "admin")]),
+        jsonify(
+            [user.to_result_dict() for user in User.query.filter(User.name != "admin")]
+        ),
         200,
     )
 
@@ -180,8 +181,10 @@ def score_board(current_user):
 @main.route("/results")
 @token_required
 def results(current_user):
-    result = Result.query.filter_by(user_id=current_user.id).first()
-    return jsonify(result.to_dict()), 200
+    return (
+        jsonify(User.query.filter_by(id=current_user.id).first().to_result_dict()),
+        200,
+    )
 
 
 def compute_points():
