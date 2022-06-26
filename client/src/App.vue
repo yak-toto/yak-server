@@ -10,10 +10,10 @@
               </div>
             </div>
             <div class="navbar-end">
-              <router-link v-if="!isAuthenticated" to="/login" class="navbar-item">
+              <router-link v-if="!isAuthenticated && !isCurrentRouteLogin" to="/login" class="navbar-item">
                 Se connecter
               </router-link>
-              <router-link v-if="!isAuthenticated" to="/signup" class="navbar-item">
+              <router-link v-if="!isAuthenticated && !isCurrentRouteSignup" to="/signup" class="navbar-item">
                 Créer un compte
               </router-link>
               <router-link v-if="isAuthenticated" to="/logout" class="navbar-item">
@@ -41,6 +41,14 @@ export default {
     },
     getUserName() {
       return this.$store.getters.getUserName;
+    },
+    isCurrentRouteLogin() {
+      console.log(this.$route.name);
+      return this.$route.name == 'login';
+    },
+    isCurrentRouteSignup() {
+      console.log(this.$route.name);
+      return this.$route.name == 'signup';
     },
   },
 };
