@@ -99,13 +99,11 @@ def group_post(current_user, group_name=None):
 
     matches = Match.query.filter_by(user_id=current_user.id, group_name=group_name)
 
-    is_matches_modified = False
     for index, match in enumerate(matches):
         if (
             match.score1 != body[index][0]["score"]
             or match.score2 != body[index][1]["score"]
         ):
-            is_matches_modified = True
             match.score1 = body[index][0]["score"]
             match.score2 = body[index][1]["score"]
             send_message(
@@ -115,9 +113,6 @@ def group_post(current_user, group_name=None):
             db.session.add(match)
 
     db.session.commit()
-
-    if current_user.name == "admin" and is_matches_modified:
-        compute_points()
 
     return jsonify(body), 201
 
@@ -172,7 +167,12 @@ def match_get(current_user, id):
 def score_board(current_user):
     return (
         jsonify(
-            [user.to_result_dict() for user in User.query.filter(User.name != "admin")]
+            [
+                user.to_result_dict()
+                for user in User.query.order_by(User.points.desc()).filter(
+                    User.name != "admin"
+                )
+            ]
         ),
         200,
     )
@@ -185,6 +185,27 @@ def results(current_user):
         jsonify(User.query.filter_by(id=current_user.id).first().to_result_dict()),
         200,
     )
+
+
+@main.route("/compute_points", methods=["POST"])
+@token_required
+def compute_points_post(current_user):
+    if current_user.name == "admin":
+        compute_points()
+
+        return (
+            jsonify(
+                [
+                    user.to_result_dict()
+                    for user in User.query.order_by(User.points.desc()).filter(
+                        User.name != "admin"
+                    )
+                ]
+            ),
+            200,
+        )
+    else:
+        return jsonify("Unauthorized access to admin api"), 401
 
 
 def compute_points():
