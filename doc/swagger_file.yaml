@@ -243,6 +243,66 @@ paths:
                     points:
                       type: integer
                       description: user number of points
+  /compute_points:
+    post:
+      summary: Compute points of all users
+      description: From admin scores (which correspond to the real scores)
+                   compute the number of match guess, number of score guess and points
+                   for all users <br> This call is only available for admin user
+
+      tags:
+        - results
+      parameters:
+        - in: header
+          name: Authorization
+          description: Bearer token used by server to authenficate
+          schema:
+            type: string
+            format: bearer token
+          required: true
+      responses:
+        '200':
+          description: All results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                      description: user id
+                    name:
+                      type: string
+                      description: user name
+                    number_match_guess:
+                      type: integer
+                      description: number of match guess by user
+                    number_score_guess:
+                      type: integer
+                      description: number of score guess by user
+                    points:
+                      type: integer
+                      description: user number of points
+        '401':
+          description: Unauthorized for non admin user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    description: false since call fails
+                    default: false
+                  error_code:
+                    type: integer
+                    default: 401
+                  message:
+                    type: string
+                    default: Unauthorized access to admin API
 
   # /match:
   #   post:
