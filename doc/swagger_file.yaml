@@ -8,155 +8,303 @@ servers:
     description: Optional server description, e.g. Main (production) server
   - url: http://staging-api.example.com
     description: Optional server description, e.g. Internal staging server for testing
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
 paths:
   /signup:
     post:
       summary: Create a account.
       description: Sign up by giving a name and a password
-      parameters:
-        - in: path
-          name: name
-          description: Name of the new user
-          required: True
-          schema:
-            type: string
-        - in: path
-          name: password
-          description: Password of the new user
-          required: True
-          schema:
-            type: string
       tags:
         - authentification
+      requestBody:
+        description: All informations needed to create a account
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/signup.yaml'
       responses:
         '201':
-          description: smtg
+          description: Account successfully created
           content:
-            application/form-data:
+            application/json:
               schema:
                 type: object
                 properties:
-                  name:
+                  ok:
+                    type: boolean
+                    description: true if account successfully created
+                    default: true
+                  result:
+                    type: object
+                    description: result of REST call
+                    properties:
+                      name:
+                        type: string
+                        description: Name of user created
+                      id:
+                        type: string
+                        format: uuid
+                        description: id of the user created
+        '401':
+          description: Attempt to create a new user but his/her account already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    description: false if account creation failed
+                    default: false
+                  error_code:
+                    type: integer
+                    description: error code
+                    default: 401
+                  description:
                     type: string
-                  password:
-                    type: string
-    get:
-      summary:
-      tags:
-        - authentification
+                    description: description of the current error
+                    default : Name already exists
   /login:
     post:
-      summary:
+      summary: Login account
       tags:
         - authentification
+      requestBody:
+          description: All informations needed to log to a account
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/login.yaml'
+      responses:
+        '201':
+          description: Login sucessfull
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    description: true if account successfully created
+                    default: true
+                  result:
+                    type: object
+                    description: result of REST call
+                    properties:
+                      name:
+                        type: string
+                        description: Name of user created
+                      id:
+                        type: string
+                        format: uuid
+                        description: id of the user created
+                      token:
+                        type: string
+                        description: token
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    description: false if login not sucessfull
+                    default: false
+                  error_code:
+                    type: integer
+                    description: error code
+                    default: 401
+                  description:
+                    type: string
+                    description: description of the current error
+                    default : Invalid credentials
+  /current_user:
     get:
-      summary:
+      summary: Get current user informations
       tags:
         - authentification
-  /logout:
-    get:
-      summary:
-      tags:
-        - authentification
-  /:
-    get:
-      summary:
-      tags:
-        - main
-  /profile:
-    get:
-      summary:
-      tags:
-        - main
-  /groups/{group_name}:
-    post:
-      summary:
-      tags:
-        - main
-    get:
-      summary:
-      tags:
-        - main
-  /groups/names:
-    get:
-      summary: Retrieve a list containing all the groups names
-      tags:
-        - main
+      parameters:
+        - in: header
+          name: Authorization
+          description: Bearer token used by server to authenficate
+          schema:
+            type: string
+            format: bearer token
+          required: true
       responses:
         '200':
-          description: List of group names
+          description: User existing
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: integer
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    description: ok if user existing
+                    default: true
+                  result:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: user id
+                      name:
+                        type: string
+                        description: user name
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    description: false if login not sucessfull
+                    default: false
+                  error_code:
+                    type: integer
+                    default: 401
+                  description:
+                    type: string
+                    default : Invalid token. Registeration and / or authentication required
+  # /groups/{group_name}:
+  #   post:
+  #     summary:
+  #     tags:
+  #       - main
+  #   get:
+  #     summary:
+  #     tags:
+  #       - main
+  # /groups/names:
+  #   get:
+  #     summary: Retrieve a list containing all the groups names
+  #     tags:
+  #       - main
+  #     responses:
+  #       '200':
+  #         description: List of group names
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: array
+  #               items:
+  #                 type: integer
   /score_board:
     get:
-      summary:
+      summary: Get results of all players
       tags:
-        - main
-  /match:
-    post:
-      summary: Create or modify the results of a particuliar match
+        - results
       parameters:
-        - in: query
-          name: team1
+        - in: header
+          name: Authorization
+          description: Bearer token used by server to authenficate
           schema:
             type: string
-          description: Name of the team 1
-        - in: query
-          name: team2
-          schema:
-            type: string
-          description: Name of the team 2
-      requestBody:
-        required: true
-        content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  description: result
-                  type: integer
-                minItems: 2
-                maxItems: 2
-      tags:
-        - main
+            format: bearer token
+          required: true
       responses:
-        '201':
-          description: smtg
+        '200':
+          description: e
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: integer
-                minItems: 2
-                maxItems: 2
-    get:
-      summary: Retrieve results of a particuliar match
-      parameters:
-        - in: query
-          name: team1
-          schema:
-            type: string
-          description: Name of the team 1
-        - in: query
-          name: team2
-          schema:
-            type: string
-          description: Name of the team 2
-      tags:
-        - main
-      responses:
-        '201':
-          description: smtg
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: integer
-                minItems: 2
-                maxItems: 2
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                      description: user id
+                    name:
+                      type: string
+                      description: user name
+                    number_match_guess:
+                      type: integer
+                      description: number of match guess by user
+                    number_score_guess:
+                      type: integer
+                      description: number of score guess by user
+                    points:
+                      type: integer
+                      description: user number of points
+
+  # /match:
+  #   post:
+  #     summary: Create or modify the results of a particuliar match
+  #     parameters:
+  #       - in: query
+  #         name: team1
+  #         schema:
+  #           type: string
+  #         description: Name of the team 1
+  #       - in: query
+  #         name: team2
+  #         schema:
+  #           type: string
+  #         description: Name of the team 2
+  #     requestBody:
+  #       required: true
+  #       content:
+  #           application/json:
+  #             schema:
+  #               type: array
+  #               items:
+  #                 description: result
+  #                 type: integer
+  #               minItems: 2
+  #               maxItems: 2
+  #     tags:
+  #       - main
+  #     responses:
+  #       '201':
+  #         description: smtg
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: array
+  #               items:
+  #                 type: integer
+  #               minItems: 2
+  #               maxItems: 2
+  #   get:
+  #     summary: Retrieve results of a particuliar match
+  #     parameters:
+  #       - in: query
+  #         name: team1
+  #         schema:
+  #           type: string
+  #         description: Name of the team 1
+  #       - in: query
+  #         name: team2
+  #         schema:
+  #           type: string
+  #         description: Name of the team 2
+  #     tags:
+  #       - main
+  #     responses:
+  #       '201':
+  #         description: smtg
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: array
+  #               items:
+  #                 type: integer
+  #               minItems: 2
+  #               maxItems: 2
