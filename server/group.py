@@ -9,6 +9,8 @@ from .constants import VERSION
 from .models import Match
 from .models import Matches
 from .telegram_sender import send_message
+from .utils import failed_response
+from .utils import success_response
 
 group = Blueprint("group", __name__)
 
@@ -35,10 +37,7 @@ def group_get(current_user, group_name):
         for match in matches
     )
 
-    return (
-        jsonify([match.to_dict() for match in group_resource]),
-        200,
-    )
+    return success_response(200, [match.to_dict() for match in group_resource])
 
 
 @group.route(
@@ -71,9 +70,8 @@ def group_post(current_user, group_name):
 @group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/names")
 @token_required
 def groups_names(current_user):
-    return (
-        jsonify(sorted(list({match.group_name for match in Matches.query.all()}))),
-        200,
+    return success_response(
+        200, sorted(list({match.group_name for match in Matches.query.all()}))
     )
 
 
@@ -84,15 +82,7 @@ def groups_names(current_user):
 def match_get(current_user, match_id):
     match = Match.query.filter_by(user_id=current_user.id, match_id=match_id).first()
     if not match:
-        return (
-            jsonify(
-                {
-                    "message": "This match doesn't exist. "
-                    "Either it doesn't exist, either you are using the wrong user."
-                }
-            ),
-            404,
-        )
+        return failed_response(404, "This match doesn't exist.")
 
     is_match_modified = False
     if request.method == "POST":
@@ -108,18 +98,19 @@ def match_get(current_user, match_id):
                 db.session.commit()
                 is_match_modified = True
         else:
-            return jsonify({"message": "Wrong inputs"}), 401
+            return failed_response(401, "Wrong inputs")
 
     match_resource = match.to_dict()
-    team1 = match_resource["results"][0]["team"]
-    team2 = match_resource["results"][1]["team"]
+
     if is_match_modified:
+        team1 = match_resource["results"][0]["team"]
+        team2 = match_resource["results"][1]["team"]
         send_message(
             f"User {current_user.name} update match {team1} - "
             f"{team2} with the score {match.score1} - {match.score2}."
         )
 
-    return jsonify(match_resource), 200
+    return success_response(200, match_resource)
 
 
 @group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches", methods=["POST", "GET"])
@@ -130,7 +121,7 @@ def matches(current_user):
             body = request.get_json()
 
             if Matches.query.first():
-                return jsonify("resource already exising"), 409
+                return failed_response(409, "Resource already exising")
 
             for group in body:
                 for match in group["matches"]:
@@ -144,10 +135,10 @@ def matches(current_user):
 
             db.session.commit()
 
-        return (
-            jsonify([match.to_dict() for match in Matches.query.all()]),
+        return success_response(
             201 if request.method == "POST" else 200,
+            [match.to_dict() for match in Matches.query.all()],
         )
 
     else:
-        return jsonify("Unauthorized access to admin api"), 401
+        return failed_response(401, "Unauthorized access to admin API")

@@ -4,7 +4,6 @@ from datetime import timedelta
 import jwt
 from flask import Blueprint
 from flask import current_app
-from flask import jsonify
 from flask import request
 
 from . import db
@@ -15,6 +14,7 @@ from .models import Match
 from .models import Matches
 from .models import User
 from .telegram_sender import send_message
+from .utils import failed_response
 from .utils import success_response
 
 auth = Blueprint("auth", __name__)
@@ -26,7 +26,7 @@ def login_post():
     user = User.authenticate(**data)
 
     if not user:
-        return jsonify({"message": "Invalid credentials", "authenticated": False}), 401
+        return failed_response(401, "Invalid credentials")
 
     send_message(f"User {user.name} login.")
 
@@ -38,7 +38,7 @@ def login_post():
         },
         current_app.config["SECRET_KEY"],
     )
-    return jsonify({"token": token})
+    return success_response(201, {**user.to_user_dict(), **{"token": token}})
 
 
 @auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/signup", methods=["POST"])
@@ -48,7 +48,7 @@ def signup_post():
     # Check existing user in db
     existing_user = User.query.filter_by(name=data["name"]).first()
     if existing_user:
-        return jsonify({"message": "Name already exists", "signup": False}), 401
+        return failed_response(401, "Name already exists")
 
     # Initialize user and integrate in db
     user = User(**data)
@@ -62,7 +62,7 @@ def signup_post():
         )
     db.session.commit()
 
-    return jsonify(user.to_user_dict()), 201
+    return success_response(201, user.to_user_dict())
 
 
 @auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/current_user")

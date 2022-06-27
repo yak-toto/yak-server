@@ -38,7 +38,7 @@ export default {
     getGroupList() {
       this.$store.dispatch('getGroupNames')
         .then((res) => {
-          this.groupsNames = res.data;
+          this.groupsNames = res.data.result;
         });
     },
   },

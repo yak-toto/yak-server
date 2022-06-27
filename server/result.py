@@ -1,7 +1,6 @@
 from typing import Tuple
 
 from flask import Blueprint
-from flask import jsonify
 
 from . import db
 from .auth_utils import token_required
@@ -18,25 +17,22 @@ result = Blueprint("result", __name__)
 @result.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_board")
 @token_required
 def score_board(current_user):
-    return (
-        jsonify(
-            [
-                user.to_result_dict()
-                for user in User.query.order_by(User.points.desc()).filter(
-                    User.name != "admin"
-                )
-            ]
-        ),
+    return success_response(
         200,
+        [
+            user.to_result_dict()
+            for user in User.query.order_by(User.points.desc()).filter(
+                User.name != "admin"
+            )
+        ],
     )
 
 
 @result.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/results")
 @token_required
 def results(current_user):
-    return (
-        jsonify(User.query.filter_by(id=current_user.id).first().to_result_dict()),
-        200,
+    return success_response(
+        200, User.query.filter_by(id=current_user.id).first().to_result_dict()
     )
 
 
@@ -56,7 +52,7 @@ def compute_points_post(current_user):
             ],
         )
     else:
-        return failed_response(401, "Unauthorized access to admin api")
+        return failed_response(401, "Unauthorized access to admin API")
 
 
 def compute_points():

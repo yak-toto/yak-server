@@ -43,11 +43,9 @@ export default {
       return this.$store.getters.getUserName;
     },
     isCurrentRouteLogin() {
-      console.log(this.$route.name);
       return this.$route.name == 'login';
     },
     isCurrentRouteSignup() {
-      console.log(this.$route.name);
       return this.$route.name == 'signup';
     },
   },

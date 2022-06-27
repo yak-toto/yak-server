@@ -45,7 +45,7 @@ export default {
   methods: {
     getScoreBoard() {
       this.$store.dispatch('getScoreBoard')
-        .then((res) => { this.scoreBoardResource = res.data; });
+        .then((res) => { this.scoreBoardResource = res.data.result; });
     },
   },
   beforeEnter(to, from, next) {

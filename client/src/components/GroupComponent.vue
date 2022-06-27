@@ -47,7 +47,7 @@ export default {
     getGroup() {
       this.$store.dispatch('getGroup', { groupName: this.$route.params.groupName })
         .then((res) => {
-          this.groupResource = res.data;
+          this.groupResource = res.data.result;
         });
     },
     postGroup() {
