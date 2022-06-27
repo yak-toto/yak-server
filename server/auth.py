@@ -15,6 +15,7 @@ from .models import Match
 from .models import Matches
 from .models import User
 from .telegram_sender import send_message
+from .utils import success_response
 
 auth = Blueprint("auth", __name__)
 
@@ -67,4 +68,4 @@ def signup_post():
 @auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/current_user")
 @token_required
 def current_user(current_user):
-    return jsonify(current_user.to_user_dict()), 200
+    return success_response(200, current_user.to_user_dict())

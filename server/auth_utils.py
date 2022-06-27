@@ -2,10 +2,10 @@ from functools import wraps
 
 import jwt
 from flask import current_app
-from flask import jsonify
 from flask import request
 
 from .models import User
+from .utils import failed_response
 
 
 def token_required(f):
@@ -13,17 +13,13 @@ def token_required(f):
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get("Authorization", "").split()
 
-        invalid_msg = {
-            "message": "Invalid token. Registeration and / or authentication required",
-            "authenticated": False,
-        }
-        expired_msg = {
-            "message": "Expired token. Reauthentication required.",
-            "authenticated": False,
-        }
+        invalid_msg = failed_response(
+            401, "Invalid token. Registeration and / or authentication required"
+        )
+        expired_msg = failed_response(401, "Expired token. Reauthentication required.")
 
         if len(auth_headers) != 2:
-            return jsonify(invalid_msg), 401
+            return invalid_msg
 
         try:
             token = auth_headers[1]
@@ -35,9 +31,9 @@ def token_required(f):
                 raise RuntimeError("User not found")
             return f(user, *args, **kwargs)
         except jwt.ExpiredSignatureError:
-            return jsonify(expired_msg), 401  # 401 is Unauthorized HTTP status code
+            return expired_msg
         except (jwt.InvalidTokenError, Exception) as e:
             print(e)
-            return jsonify(invalid_msg), 401
+            return invalid_msg
 
     return _verify

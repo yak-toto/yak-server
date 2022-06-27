@@ -9,6 +9,8 @@ from .constants import GLOBAL_ENDPOINT
 from .constants import VERSION
 from .models import Match
 from .models import User
+from .utils import failed_response
+from .utils import success_response
 
 result = Blueprint("result", __name__)
 
@@ -44,19 +46,17 @@ def compute_points_post(current_user):
     if current_user.name == "admin":
         compute_points()
 
-        return (
-            jsonify(
-                [
-                    user.to_result_dict()
-                    for user in User.query.order_by(User.points.desc()).filter(
-                        User.name != "admin"
-                    )
-                ]
-            ),
+        return success_response(
             200,
+            [
+                user.to_result_dict()
+                for user in User.query.order_by(User.points.desc()).filter(
+                    User.name != "admin"
+                )
+            ],
         )
     else:
-        return jsonify("Unauthorized access to admin api"), 401
+        return failed_response(401, "Unauthorized access to admin api")
 
 
 def compute_points():
