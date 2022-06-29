@@ -11,10 +11,10 @@ from .models import User
 from .utils import failed_response
 from .utils import success_response
 
-result = Blueprint("result", __name__)
+results = Blueprint("results", __name__)
 
 
-@result.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_board")
+@results.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_board")
 @token_required
 def score_board(current_user):
     return success_response(
@@ -28,15 +28,15 @@ def score_board(current_user):
     )
 
 
-@result.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/results")
+@results.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/results")
 @token_required
-def results(current_user):
+def results_get(current_user):
     return success_response(
         200, User.query.filter_by(id=current_user.id).first().to_result_dict()
     )
 
 
-@result.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/compute_points", methods=["POST"])
+@results.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/compute_points", methods=["POST"])
 @token_required
 def compute_points_post(current_user):
     if current_user.name == "admin":

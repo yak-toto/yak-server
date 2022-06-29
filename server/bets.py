@@ -11,10 +11,10 @@ from .telegram_sender import send_message
 from .utils import failed_response
 from .utils import success_response
 
-group = Blueprint("group", __name__)
+bets = Blueprint("bets", __name__)
 
 
-@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/scores")
+@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/scores")
 @token_required
 def groups(current_user):
     return success_response(
@@ -23,7 +23,7 @@ def groups(current_user):
     )
 
 
-@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:group_name>")
+@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:group_name>")
 @token_required
 def group_get(current_user, group_name):
     matches = Matches.query.filter_by(group_name=group_name)
@@ -36,15 +36,7 @@ def group_get(current_user, group_name):
     return success_response(200, [match.to_dict() for match in group_resource])
 
 
-@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/names")
-@token_required
-def groups_names(current_user):
-    return success_response(
-        200, sorted(list({match.group_name for match in Matches.query.all()}))
-    )
-
-
-@group.route(
+@bets.route(
     f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/scores/<string:match_id>",
     methods=["POST", "GET"],
 )
@@ -81,34 +73,3 @@ def match_get(current_user, match_id):
         )
 
     return success_response(200, match_resource)
-
-
-@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches", methods=["POST", "GET"])
-@token_required
-def matches(current_user):
-    if current_user.name in ("admin", "db_admin"):
-        if request.method == "POST":
-            body = request.get_json()
-
-            if Matches.query.first():
-                return failed_response(409, "Resource already exising")
-
-            for group in body:
-                for match in group["matches"]:
-                    db.session.add(
-                        Matches(
-                            group_name=group["group_name"],
-                            team1=match["teams"][0],
-                            team2=match["teams"][1],
-                        )
-                    )
-
-            db.session.commit()
-
-        return success_response(
-            201 if request.method == "POST" else 200,
-            [match.to_dict() for match in Matches.query.all()],
-        )
-
-    else:
-        return failed_response(401, "Unauthorized access to admin API")

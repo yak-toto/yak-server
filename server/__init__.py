@@ -19,13 +19,17 @@ def create_app():
 
     app.register_blueprint(auth_blueprint)
 
-    from .group import group as group_blueprint
+    from .bets import bets as bets_blueprint
 
-    app.register_blueprint(group_blueprint)
+    app.register_blueprint(bets_blueprint)
 
-    from .result import result as result_blueprint
+    from .results import results as results_blueprint
 
-    app.register_blueprint(result_blueprint)
+    app.register_blueprint(results_blueprint)
+
+    from .groups import groups as groups_blueprint
+
+    app.register_blueprint(groups_blueprint)
 
     CORS(app, resources={r"/*": {"origins": "*"}})
 
