@@ -1,0 +1,194 @@
+[
+    {
+        "group_name": "A",
+        "teams": ["Sénégal", "Pays-Bas"]
+    },
+    {
+        "group_name": "A",
+        "teams": ["Qatar", "Équateur"]
+    },
+    {
+        "group_name": "A",
+        "teams": ["Qatar", "Sénégal"]
+    },
+    {
+        "group_name": "A",
+        "teams": ["Pays-Bas", "Équateur"]
+    },
+    {
+        "group_name": "A",
+        "teams": ["Pays-Bas", "Qatar"]
+    },
+    {
+        "group_name": "A",
+        "teams": ["Équateur", "Sénégal"]
+    },
+    {
+        "group_name": "B",
+        "teams": ["Angleterre", "Iran"]
+    },
+    {
+        "group_name": "B",
+        "teams": ["États-Unis", "Pays de Galles"]
+    },
+    {
+        "group_name": "B",
+        "teams": ["Pays de Galles", "Iran"]
+    },
+    {
+        "group_name": "B",
+        "teams": ["Angleterre", "États-Unis"]
+    },
+    {
+        "group_name": "B",
+        "teams": ["Pays de Galles", "Angleterre"]
+    },
+    {
+        "group_name": "B",
+        "teams": ["Iran", "États-Unis"]
+    },
+    {
+        "group_name": "C",
+        "teams": ["Argentine", "Arabie Saoudite"]
+    },
+    {
+        "group_name": "C",
+        "teams": ["Mexique", "Pologne"]
+    },
+    {
+        "group_name": "C",
+        "teams": ["Pologne", "Arabie Saoudite"]
+    },
+    {
+        "group_name": "C",
+        "teams": ["Argentine", "Mexique"]
+    },
+    {
+        "group_name": "C",
+        "teams": ["Pologne", "Argentine"]
+    },
+    {
+        "group_name": "C",
+        "teams": ["Arabie Saoudite", "Mexique"]
+    },
+    {
+        "group_name": "D",
+        "teams": ["Danemark", "Tunisie"]
+    },
+    {
+        "group_name": "D",
+        "teams": ["France", "Australie"]
+    },
+    {
+        "group_name": "D",
+        "teams": ["Tunisie", "Australie"]
+    },
+    {
+        "group_name": "D",
+        "teams": ["France", "Danemark"]
+    },
+    {
+        "group_name": "D",
+        "teams": ["Australie", "Danemark"]
+    },
+    {
+        "group_name": "D",
+        "teams": ["Tunisie", "France"]
+    },
+    {
+        "group_name": "E",
+        "teams": ["Allemagne", "Japon"]
+    },
+    {
+        "group_name": "E",
+        "teams": ["Espagne", "Costa Rica"]
+    },
+    {
+        "group_name": "E",
+        "teams": ["Japon", "Costa Rica"]
+    },
+    {
+        "group_name": "E",
+        "teams": ["Espagne", "Allemagne"]
+    },
+    {
+        "group_name": "E",
+        "teams": ["Japon", "Espagne"]
+    },
+    {
+        "group_name": "E",
+        "teams": ["Costa Rica", "Allemagne"]
+    },
+    {
+        "group_name": "F",
+        "teams": ["Maroc", "Croatie"]
+    },
+    {
+        "group_name": "F",
+        "teams": ["Belgique", "Canada"]
+    },
+    {
+        "group_name": "F",
+        "teams": ["Belgique", "Maroc"]
+    },
+    {
+        "group_name": "F",
+        "teams": ["Croatie", "Canada"]
+    },
+    {
+        "group_name": "F",
+        "teams": ["Croatie", "Belgique"]
+    },
+    {
+        "group_name": "F",
+        "teams": ["Canada", "Maroc"]
+    },
+    {
+        "group_name": "G",
+        "teams": ["Suisse", "Cameroun"]
+    },
+    {
+        "group_name": "G",
+        "teams": ["Brésil", "Serbie"]
+    },
+    {
+        "group_name": "G",
+        "teams": ["Cameroun", "Serbie"]
+    },
+    {
+        "group_name": "G",
+        "teams": ["Brésil", "Suisse"]
+    },
+    {
+        "group_name": "G",
+        "teams": ["Serbie", "Suisse"]
+    },
+    {
+        "group_name": "G",
+        "teams": ["Cameroun", "Brésil"]
+    },
+    {
+        "group_name": "H",
+        "teams": ["Uruguay", "Corée du Sud"]
+    },
+    {
+        "group_name": "H",
+        "teams": ["Portugal", "Ghana"]
+    },
+    {
+        "group_name": "H",
+        "teams": ["Corée du Sud", "Ghana"]
+    },
+    {
+        "group_name": "H",
+        "teams": ["Portugal", "Uruguay"]
+    },
+    {
+        "group_name": "H",
+        "teams": ["Ghana", "Uruguay"]
+    },
+    {
+        "group_name": "H",
+        "teams": ["Corée du Sud", "Portugal"]
+    }
+]
