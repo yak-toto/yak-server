@@ -2,10 +2,10 @@ import json
 import sqlite3
 import uuid
 
-con = sqlite3.connect("db.sqlite")
+con = sqlite3.connect("server/db.sqlite")
 cur = con.cursor()
 
-with open("matches.json") as file:
+with open("data/matches.json") as file:
     matches = json.loads(file.read())
 
 for match in matches:
