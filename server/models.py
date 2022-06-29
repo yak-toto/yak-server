@@ -79,6 +79,7 @@ class Match(db.Model):
         return {
             "id": self.id,
             "match_id": self.match_id,
+            "group_name": match.group_name,
             "results": [
                 {"team": match.team1, "score": self.score1},
                 {"team": match.team2, "score": self.score2},

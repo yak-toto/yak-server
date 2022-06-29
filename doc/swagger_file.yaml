@@ -181,29 +181,6 @@ paths:
                   description:
                     type: string
                     default : Invalid token. Registeration and / or authentication required
-  # /groups/{group_name}:
-  #   post:
-  #     summary:
-  #     tags:
-  #       - main
-  #   get:
-  #     summary:
-  #     tags:
-  #       - main
-  # /groups/names:
-  #   get:
-  #     summary: Retrieve a list containing all the groups names
-  #     tags:
-  #       - main
-  #     responses:
-  #       '200':
-  #         description: List of group names
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: array
-  #               items:
-  #                 type: integer
   /score_board:
     get:
       summary: Get results of all players

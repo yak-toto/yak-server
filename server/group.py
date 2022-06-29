@@ -18,13 +18,10 @@ group = Blueprint("group", __name__)
 @group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups")
 @token_required
 def groups(current_user):
-    user_resource = list(Match.query.filter_by(user_id=current_user.id))
-
-    results = {}
-    for match in user_resource:
-        results.setdefault(match.group_name, []).append(match.to_dict())
-
-    return jsonify(results), 200
+    return success_response(
+        200,
+        [match.to_dict() for match in Match.query.filter_by(user_id=current_user.id)],
+    )
 
 
 @group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_name>")
