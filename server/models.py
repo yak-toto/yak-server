@@ -16,7 +16,7 @@ class User(db.Model):
     number_score_guess = db.Column(db.Integer)
     points = db.Column(db.Integer)
 
-    matches = db.relationship("Match", backref="user", lazy=False)
+    matches = db.relationship("Scores", backref="user", lazy=False)
 
     def __init__(self, name, password) -> None:
         self.name = name
@@ -58,7 +58,7 @@ class Matches(db.Model):
     team1 = db.Column(db.String(100))
     team2 = db.Column(db.String(100))
 
-    match = db.relationship("Match", backref="match", lazy=False)
+    match = db.relationship("Scores", backref="match", lazy=False)
 
     def to_dict(self):
         return dict(
@@ -66,7 +66,7 @@ class Matches(db.Model):
         )
 
 
-class Match(db.Model):
+class Scores(db.Model):
     id = db.Column(db.String(100), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     match_id = db.Column(db.Integer, db.ForeignKey("matches.id"), nullable=True)

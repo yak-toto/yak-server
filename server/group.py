@@ -5,8 +5,8 @@ from . import db
 from .auth_utils import token_required
 from .constants import GLOBAL_ENDPOINT
 from .constants import VERSION
-from .models import Match
 from .models import Matches
+from .models import Scores
 from .telegram_sender import send_message
 from .utils import failed_response
 from .utils import success_response
@@ -19,7 +19,7 @@ group = Blueprint("group", __name__)
 def groups(current_user):
     return success_response(
         200,
-        [match.to_dict() for match in Match.query.filter_by(user_id=current_user.id)],
+        [match.to_dict() for match in Scores.query.filter_by(user_id=current_user.id)],
     )
 
 
@@ -29,7 +29,7 @@ def group_get(current_user, group_name):
     matches = Matches.query.filter_by(group_name=group_name)
 
     group_resource = (
-        Match.query.filter_by(user_id=current_user.id, match_id=match.id).first()
+        Scores.query.filter_by(user_id=current_user.id, match_id=match.id).first()
         for match in matches
     )
 
@@ -50,7 +50,7 @@ def groups_names(current_user):
 )
 @token_required
 def match_get(current_user, match_id):
-    match = Match.query.filter_by(user_id=current_user.id, match_id=match_id).first()
+    match = Scores.query.filter_by(user_id=current_user.id, match_id=match_id).first()
     if not match:
         return failed_response(404, "This match doesn't exist.")
 
@@ -86,7 +86,7 @@ def match_get(current_user, match_id):
 @group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches", methods=["POST", "GET"])
 @token_required
 def matches(current_user):
-    if current_user.name == "admin":
+    if current_user.name in ("admin", "db_admin"):
         if request.method == "POST":
             body = request.get_json()
 

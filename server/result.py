@@ -6,7 +6,7 @@ from . import db
 from .auth_utils import token_required
 from .constants import GLOBAL_ENDPOINT
 from .constants import VERSION
-from .models import Match
+from .models import Scores
 from .models import User
 from .utils import failed_response
 from .utils import success_response
@@ -60,13 +60,13 @@ def compute_points():
     admin = User.query.filter_by(name="admin").first()
 
     for user in users:
-        user_matches = Match.query.filter_by(user_id=user.id)
+        user_matches = Scores.query.filter_by(user_id=user.id)
         user.number_score_guess = 0
         user.number_match_guess = 0
         user.points = 0
 
         for match in user_matches:
-            admin_match = Match.query.filter_by(
+            admin_match = Scores.query.filter_by(
                 user_id=admin.id, match_id=match.match_id
             ).first()
 
