@@ -27,15 +27,11 @@ export function getGroupNames(jwt) {
 }
 
 export function getGroup(groupName, jwt) {
-  return axios.get(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/groups/${groupName}`, { headers: { Authorization: `Bearer: ${jwt}` } });
+  return axios.get(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/bets/groups/${groupName}`, { headers: { Authorization: `Bearer: ${jwt}` } });
 }
 
-export function postMatch(matchId, matchResource, jwt) {
-  return axios.post(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/match/${matchId}`, matchResource, { headers: { Authorization: `Bearer: ${jwt}` } });
-}
-
-export function getMatch(team1, team2) {
-  return axios.get(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/match`, { params: { team1, team2 } });
+export function postScores(matchId, matchResource, jwt) {
+  return axios.post(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/bets/scores/${matchId}`, matchResource, { headers: { Authorization: `Bearer: ${jwt}` } });
 }
 
 // ------------------------------

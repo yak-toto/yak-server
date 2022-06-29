@@ -1,5 +1,4 @@
 from flask import Blueprint
-from flask import jsonify
 from flask import request
 
 from . import db
@@ -15,7 +14,7 @@ from .utils import success_response
 group = Blueprint("group", __name__)
 
 
-@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups")
+@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/scores")
 @token_required
 def groups(current_user):
     return success_response(
@@ -24,7 +23,7 @@ def groups(current_user):
     )
 
 
-@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_name>")
+@group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:group_name>")
 @token_required
 def group_get(current_user, group_name):
     matches = Matches.query.filter_by(group_name=group_name)
@@ -37,33 +36,6 @@ def group_get(current_user, group_name):
     return success_response(200, [match.to_dict() for match in group_resource])
 
 
-@group.route(
-    f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_name>", methods=["POST"]
-)
-@token_required
-def group_post(current_user, group_name):
-    body = request.get_json()
-
-    matches = Match.query.filter_by(user_id=current_user.id, group_name=group_name)
-
-    for index, match in enumerate(matches):
-        if (
-            match.score1 != body[index][0]["score"]
-            or match.score2 != body[index][1]["score"]
-        ):
-            match.score1 = body[index][0]["score"]
-            match.score2 = body[index][1]["score"]
-            send_message(
-                f"User {current_user.name} update match {match.team1} - "
-                f"{match.team2} with the score {match.score1} - {match.score2}."
-            )
-            db.session.add(match)
-
-    db.session.commit()
-
-    return jsonify(body), 201
-
-
 @group.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/names")
 @token_required
 def groups_names(current_user):
@@ -73,7 +45,8 @@ def groups_names(current_user):
 
 
 @group.route(
-    f"/{GLOBAL_ENDPOINT}/{VERSION}/match/<string:match_id>", methods=["POST", "GET"]
+    f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/scores/<string:match_id>",
+    methods=["POST", "GET"],
 )
 @token_required
 def match_get(current_user, match_id):
