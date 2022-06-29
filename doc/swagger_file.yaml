@@ -181,6 +181,35 @@ paths:
                   description:
                     type: string
                     default : Invalid token. Registeration and / or authentication required
+  /bets/scores:
+    get:
+      summary: Retrive all scores of authenficated user
+      tags:
+        - bets
+      responses:
+        '200':
+  /bets/scores/{match_id}:
+    post:
+      tags:
+        - bets
+    get:
+      tags:
+        - bets
+  /bets/groups/{group_name}:
+    get:
+      tags:
+        - bets
+  /matches:
+    post:
+      tags:
+        - matches
+    get:
+      tags:
+        - matches
+  /groups/names:
+    get:
+      tags:
+        - matches
   /score_board:
     get:
       summary: Get results of all players
@@ -280,6 +309,10 @@ paths:
                   message:
                     type: string
                     default: Unauthorized access to admin API
+  /results:
+    get:
+      tags:
+        - results
 
   # /match:
   #   post:
