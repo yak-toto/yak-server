@@ -1,23 +1,30 @@
 import json
-import sqlite3
-import uuid
 
-con = sqlite3.connect("server/db.sqlite")
-cur = con.cursor()
+from server import create_app
+from server import db
+from server.models import Matches
 
-with open("data/matches.json") as file:
-    matches = json.loads(file.read())
+app = create_app()
 
-for match in matches:
-    cur.execute(
-        f"""INSERT INTO matches VALUES (
-            '{str(uuid.uuid4())}',
-            '{match["group_name"]}',
-            '{match["teams"][0]}',
-            '{match["teams"][1]}'
-        )"""
-    )
+with app.app_context():
+    with open("data/matches.json") as file:
+        matches = json.loads(file.read())
 
-con.commit()
+        matches_index = {}
 
-con.close()
+        for match in matches:
+            if match["group_name"] not in matches_index:
+                matches_index[match["group_name"]] = 0
+
+            db.session.add(
+                Matches(
+                    group_name=match["group_name"],
+                    team1=match["teams"][0],
+                    team2=match["teams"][1],
+                    match_index=matches_index[match["group_name"]],
+                )
+            )
+
+            matches_index[match["group_name"]] += 1
+
+        db.session.commit()

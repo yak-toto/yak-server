@@ -24,7 +24,12 @@ def matches(current_user):
     if current_user.name in ("admin"):
         return success_response(
             200,
-            [match.to_dict() for match in Matches.query.all()],
+            [
+                match.to_dict()
+                for match in Matches.query.order_by(
+                    Matches.group_name, Matches.match_index
+                )
+            ],
         )
 
     else:

@@ -1,6 +1,6 @@
 import uuid
-from sqlalchemy import CheckConstraint
 
+from sqlalchemy import CheckConstraint
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 
@@ -9,13 +9,22 @@ from . import db
 
 class User(db.Model):
     id = db.Column(
-        db.String(100), primary_key=True, nullable=False, default=lambda: str(uuid.uuid4())
+        db.String(100),
+        primary_key=True,
+        nullable=False,
+        default=lambda: str(uuid.uuid4()),
     )
-    name = db.Column(db.String(1000), unique=True, nullable=False)
+    name = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    number_match_guess = db.Column(db.Integer, CheckConstraint("number_match_guess>=0"), nullable=False, default=0)
-    number_score_guess = db.Column(db.Integer, CheckConstraint("number_score_guess>=0"), nullable=False, default=0)
-    points = db.Column(db.Integer, CheckConstraint("points>=0"), nullable=False, default=0)
+    number_match_guess = db.Column(
+        db.Integer, CheckConstraint("number_match_guess>=0"), nullable=False, default=0
+    )
+    number_score_guess = db.Column(
+        db.Integer, CheckConstraint("number_score_guess>=0"), nullable=False, default=0
+    )
+    points = db.Column(
+        db.Integer, CheckConstraint("points>=0"), nullable=False, default=0
+    )
 
     matches = db.relationship("Scores", backref="user", lazy=False)
 
@@ -51,10 +60,16 @@ class User(db.Model):
 
 
 class Matches(db.Model):
-    id = db.Column(db.String(100), primary_key=True, nullable=False, default=lambda: str(uuid.uuid4()))
+    id = db.Column(
+        db.String(100),
+        primary_key=True,
+        nullable=False,
+        default=lambda: str(uuid.uuid4()),
+    )
     group_name = db.Column(db.String(1), nullable=False)
     team1 = db.Column(db.String(100), nullable=False)
     team2 = db.Column(db.String(100), nullable=False)
+    match_index = db.Column(db.Integer, nullable=False)
 
     match = db.relationship("Scores", backref="match", lazy=False)
 
@@ -65,9 +80,14 @@ class Matches(db.Model):
 
 
 class Scores(db.Model):
-    id = db.Column(db.String(100), primary_key=True, nullable=False, default=lambda: str(uuid.uuid4()))
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    match_id = db.Column(db.Integer, db.ForeignKey("matches.id"), nullable=False)
+    id = db.Column(
+        db.String(100),
+        primary_key=True,
+        nullable=False,
+        default=lambda: str(uuid.uuid4()),
+    )
+    user_id = db.Column(db.String(100), db.ForeignKey("user.id"), nullable=False)
+    match_id = db.Column(db.String(100), db.ForeignKey("matches.id"), nullable=False)
     score1 = db.Column(db.Integer, CheckConstraint("score1>=0"))
     score2 = db.Column(db.Integer, CheckConstraint("score2>=0"))
 
@@ -77,6 +97,7 @@ class Scores(db.Model):
         return {
             "id": self.id,
             "match_id": self.match_id,
+            "match_index": match.match_index,
             "group_name": match.group_name,
             "results": [
                 {"team": match.team1, "score": self.score1},

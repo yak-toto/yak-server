@@ -182,3 +182,5 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw*
+
+credentials.json

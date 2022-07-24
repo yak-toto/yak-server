@@ -19,7 +19,13 @@ bets = Blueprint("bets", __name__)
 def groups(current_user):
     return success_response(
         200,
-        [match.to_dict() for match in Scores.query.filter_by(user_id=current_user.id)],
+        sorted(
+            (
+                match.to_dict()
+                for match in Scores.query.filter_by(user_id=current_user.id)
+            ),
+            key=lambda score: (score["group_name"], score["match_index"]),
+        ),
     )
 
 
@@ -33,7 +39,13 @@ def group_get(current_user, group_name):
         for match in matches
     )
 
-    return success_response(200, [match.to_dict() for match in group_resource])
+    return success_response(
+        200,
+        sorted(
+            (match.to_dict() for match in group_resource),
+            key=lambda score: score["match_index"],
+        ),
+    )
 
 
 @bets.route(
