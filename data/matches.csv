@@ -1,0 +1,48 @@
+A|Sénégal|Pays-Bas
+A|Qatar|Équateur
+A|Qatar|Sénégal
+A|Pays-Bas|Équateur
+A|Pays-Bas|Qatar
+A|Équateur|Sénégal
+B|Angleterre|Iran
+B|États-Unis|Pays de Galles
+B|Pays de Galles|Iran
+B|Angleterre|États-Unis
+B|Pays de Galles|Angleterre
+B|Iran|États-Unis
+C|Argentine|Arabie Saoudite
+C|Mexique|Pologne
+C|Pologne|Arabie Saoudite
+C|Argentine|Mexique
+C|Pologne|Argentine
+C|Arabie Saoudite|Mexique
+D|Danemark|Tunisie
+D|France|Australie
+D|Tunisie|Australie
+D|France|Danemark
+D|Australie|Danemark
+D|Tunisie|France
+E|Allemagne|Japon
+E|Espagne|Costa Rica
+E|Japon|Costa Rica
+E|Espagne|Allemagne
+E|Japon|Espagne
+E|Costa Rica|Allemagne
+F|Maroc|Croatie
+F|Belgique|Canada
+F|Belgique|Maroc
+F|Croatie|Canada
+F|Croatie|Belgique
+F|Canada|Maroc
+G|Suisse|Cameroun
+G|Brésil|Serbie
+G|Cameroun|Serbie
+G|Brésil|Suisse
+G|Serbie|Suisse
+G|Cameroun|Brésil
+H|Uruguay|Corée du Sud
+H|Portugal|Ghana
+H|Corée du Sud|Ghana
+H|Portugal|Uruguay
+H|Ghana|Uruguay
+H|Corée du Sud|Portugal
