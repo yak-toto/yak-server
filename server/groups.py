@@ -1,11 +1,11 @@
 from flask import Blueprint
 
-from .auth_utils import token_required
-from .constants import GLOBAL_ENDPOINT
-from .constants import VERSION
 from .models import Matches
-from .utils import failed_response
-from .utils import success_response
+from .utils.auth_utils import token_required
+from .utils.constants import GLOBAL_ENDPOINT
+from .utils.constants import VERSION
+from .utils.flask_utils import failed_response
+from .utils.flask_utils import success_response
 
 groups = Blueprint("group", __name__)
 

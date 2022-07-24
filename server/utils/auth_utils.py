@@ -4,8 +4,8 @@ import jwt
 from flask import current_app
 from flask import request
 
-from .models import User
-from .utils import failed_response
+from ..models import User
+from .flask_utils import failed_response
 
 
 def token_required(f):

@@ -7,15 +7,15 @@ from flask import current_app
 from flask import request
 
 from . import db
-from .auth_utils import token_required
-from .constants import GLOBAL_ENDPOINT
-from .constants import VERSION
 from .models import Matches
 from .models import Scores
 from .models import User
-from .telegram_sender import send_message
-from .utils import failed_response
-from .utils import success_response
+from .utils.auth_utils import token_required
+from .utils.constants import GLOBAL_ENDPOINT
+from .utils.constants import VERSION
+from .utils.flask_utils import failed_response
+from .utils.flask_utils import success_response
+from .utils.telegram_sender import send_message
 
 auth = Blueprint("auth", __name__)
 
