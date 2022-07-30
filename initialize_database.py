@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import csv
 
 from server import create_app

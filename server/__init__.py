@@ -16,20 +16,16 @@ def create_app():
 
     # Registrer blueprint
     from .auth import auth as auth_blueprint
+    from .bets import bets as bets_blueprint
+    from .results import results as results_blueprint
+    from .groups import groups as groups_blueprint
+    from .final_phase import final_phase as final_phase_blueprint
 
     app.register_blueprint(auth_blueprint)
-
-    from .bets import bets as bets_blueprint
-
     app.register_blueprint(bets_blueprint)
-
-    from .results import results as results_blueprint
-
     app.register_blueprint(results_blueprint)
-
-    from .groups import groups as groups_blueprint
-
     app.register_blueprint(groups_blueprint)
+    app.register_blueprint(final_phase_blueprint)
 
     CORS(app, resources={r"/*": {"origins": "*"}})
 
