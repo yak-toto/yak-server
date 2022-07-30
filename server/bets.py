@@ -7,6 +7,8 @@ from .models import Scores
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import VERSION
+from .utils.errors import match_not_found
+from .utils.errors import wrong_inputs
 from .utils.flask_utils import failed_response
 from .utils.flask_utils import success_response
 from .utils.telegram_sender import send_message
@@ -56,7 +58,7 @@ def group_get(current_user, group_name):
 def match_get(current_user, match_id):
     match = Scores.query.filter_by(user_id=current_user.id, match_id=match_id).first()
     if not match:
-        return failed_response(404, "This match doesn't exist.")
+        return failed_response(*match_not_found)
 
     is_match_modified = False
     if request.method == "POST":
@@ -72,7 +74,7 @@ def match_get(current_user, match_id):
                 db.session.commit()
                 is_match_modified = True
         else:
-            return failed_response(401, "Wrong inputs")
+            return failed_response(*wrong_inputs)
 
     match_resource = match.to_dict()
 

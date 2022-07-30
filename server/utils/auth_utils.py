@@ -5,6 +5,8 @@ from flask import current_app
 from flask import request
 
 from ..models import User
+from .errors import expired_token
+from .errors import invalid_token
 from .flask_utils import failed_response
 
 
@@ -13,10 +15,8 @@ def token_required(f):
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get("Authorization", "").split()
 
-        invalid_msg = failed_response(
-            401, "Invalid token. Registeration and / or authentication required"
-        )
-        expired_msg = failed_response(401, "Expired token. Reauthentication required.")
+        invalid_msg = failed_response(*invalid_token)
+        expired_msg = failed_response(*expired_token)
 
         if len(auth_headers) != 2:
             return invalid_msg
