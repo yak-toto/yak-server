@@ -10,14 +10,14 @@
           <div class="table-container">
             <table class="table is-fullwidth is-striped">
               <tr v-for="match in groupResource">
-                <td>{{ match["results"][0]["team"] }}</td>
+                <td>{{ match["team1"]["name"] }}</td>
                 <td>
-                  <input class="input is-small" min="0" type="number" v-model="match['results'][0]['score']">
+                  <input class="input is-small" min="0" type="number" v-model="match['team1']['score']">
                 </td>
                 <td>
-                  <input class="input is-small" min="0" type="number" v-model="match['results'][1]['score']">
+                  <input class="input is-small" min="0" type="number" v-model="match['team2']['score']">
                 </td>
-                <td>{{ match["results"][1]["team"] }}</td>
+                <td>{{ match["team2"]["name"] }}</td>
               </tr>
             </table>
           </div>

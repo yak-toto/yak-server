@@ -6,12 +6,12 @@ digraph G {
     label=<
       <table border="0" cellspacing="0" cellborder="1">
         <tr><td bgcolor="lightblue2" colspan="2"><font face="Times-bold" point-size="20">user</font></td></tr>
-        <tr><td bgcolor="grey96" align="left"><font face="Times-bold">id</font></td><td align="left"><font color="#535353">caracter varying (100) DEFAULT uuid4 NOT NULL</font></td></tr>
+        <tr><td bgcolor="grey96" align="left" port="id_left"><font face="Times-bold">id</font></td><td align="left"><font color="#535353">caracter varying (100) DEFAULT uuid4 NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left"><font face="Times-bold">name</font></td><td align="left"><font color="#535353">caracter varying (100) UNIQUE NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left"><font face="Times-bold">password</font></td><td align="left"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
-        <tr><td bgcolor="grey96" align="left"><font face="Times-bold">number_match_guess</font></td><td align="left"><font color="#535353">integer CHECK (number_match_guess&#62;&#61;0) NOT NULL</font></td></tr>
-        <tr><td bgcolor="grey96" align="left"><font face="Times-bold">number_score_guess</font></td><td align="left"><font color="#535353">integer CHECK (number_score_guess&#62;&#61;0) NOT NULL</font></td></tr>
-        <tr><td bgcolor="grey96" align="left"><font face="Times-bold">points</font></td><td align="left"><font color="#535353">integer CHECK (points&#62;&#61;0) NOT NULL</font></td></tr>
+        <tr><td bgcolor="grey96" align="left"><font face="Times-bold">number_match_guess</font></td><td align="left"><font color="#535353">integer CHECK (number_match_guess &ge; 0) NOT NULL</font></td></tr>
+        <tr><td bgcolor="grey96" align="left"><font face="Times-bold">number_score_guess</font></td><td align="left"><font color="#535353">integer CHECK (number_score_guess &ge; 0) NOT NULL</font></td></tr>
+        <tr><td bgcolor="grey96" align="left"><font face="Times-bold">points</font></td><td align="left"><font color="#535353">integer CHECK (points &ge; 0) NOT NULL</font></td></tr>
       </table>
     >];
 
@@ -22,9 +22,9 @@ digraph G {
         <tr><td bgcolor="lightblue2" colspan="2"><font face="Times-bold" point-size="20">matches</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="id"><font face="Times-bold">id</font></td><td align="left" port="id_right"><font color="#535353">caracter varying (100) DEFAULT uuid4 NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="group_name"><font face="Times-bold">group_name</font></td><td align="left" port="id_right"><font color="#535353">caracter varying (1) NOT NULL</font></td></tr>
-        <tr><td bgcolor="grey96" align="left" port="team1"><font face="Times-bold">team1</font></td><td align="left" port="team1_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
-        <tr><td bgcolor="grey96" align="left" port="team2"><font face="Times-bold">team2</font></td><td align="left" port="team2_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
-        <tr><td bgcolor="grey96" align="left" port="match_index"><font face="Times-bold">team2</font></td><td align="left" port="match_index_right"><font color="#535353">integer NOT NULL</font></td></tr>
+        <tr><td bgcolor="grey96" align="left" port="team1_id"><font face="Times-bold">team1_id</font></td><td align="left" port="team1_id_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
+        <tr><td bgcolor="grey96" align="left" port="team2_id"><font face="Times-bold">team2_id</font></td><td align="left" port="team2_id_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
+        <tr><td bgcolor="grey96" align="left" port="match_index"><font face="Times-bold">match_index</font></td><td align="left" port="match_index_right"><font color="#535353">integer NOT NULL</font></td></tr>
       </table>
     >];
 
@@ -36,11 +36,24 @@ digraph G {
         <tr><td bgcolor="grey96" align="left" port="id"><font face="Times-bold">id</font></td><td align="left" port="id_right"><font color="#535353">caracter varying (100) DEFAULT uuid4 NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="user_id"><font face="Times-bold">user_id</font></td><td align="left" port="user_id_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="match_id"><font face="Times-bold">match_id</font></td><td align="left" port="match_id_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
-        <tr><td bgcolor="grey96" align="left" port="score1"><font face="Times-bold">score1</font></td><td align="left" port="score1_right"><font color="#535353">integer CHECK (score1&#62;&#61;0)</font></td></tr>
-        <tr><td bgcolor="grey96" align="left" port="score2"><font face="Times-bold">score2</font></td><td align="left" port="score2_right"><font color="#535353">integer CHECK (score2&#62;&#61;0)</font></td></tr>
+        <tr><td bgcolor="grey96" align="left" port="score1"><font face="Times-bold">score1</font></td><td align="left" port="score1_right"><font color="#535353">integer CHECK (score1 &ge; 0)</font></td></tr>
+        <tr><td bgcolor="grey96" align="left" port="score2"><font face="Times-bold">score2</font></td><td align="left" port="score2_right"><font color="#535353">integer CHECK (score2 &ge; 0)</font></td></tr>
       </table>
     >];
 
-    "scores":user_id_right -> "user":id
+    team[
+      shape=none
+      label=<
+        <table border="0" cellspacing="0" cellborder="1">
+          <tr><td bgcolor="lightblue2" colspan="2"><font face="Times-bold" point-size="20">team</font></td></tr>
+          <tr><td bgcolor="grey96" align="left" port="id"><font face="Times-bold">id</font></td><td align="left" port="id_right"><font color="#535353">caracter varying (100) DEFAULT uuid4 NOT NULL</font></td></tr>
+          <tr><td bgcolor="grey96" align="left" port="team_id"><font face="Times-bold">name</font></td><td align="left" port="user_id_right"><font color="#535353">caracter varying (100) UNIQUE NOT NULL</font></td></tr>
+        </table>
+      >
+    ];
+
+    "scores":user_id_right -> "user":id_left
     "scores":match_id_right -> "matches":id
+    "matches":team1_id_right -> "team":id
+    "matches":team2_id_right -> "team":id
 }

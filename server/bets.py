@@ -22,10 +22,7 @@ def groups(current_user):
     return success_response(
         200,
         sorted(
-            (
-                match.to_dict()
-                for match in Scores.query.filter_by(user_id=current_user.id)
-            ),
+            (score.to_dict() for score in current_user.scores),
             key=lambda score: (score["group_name"], score["match_index"]),
         ),
     )
@@ -56,34 +53,33 @@ def group_get(current_user, group_name):
 )
 @token_required
 def match_get(current_user, match_id):
-    match = Scores.query.filter_by(user_id=current_user.id, match_id=match_id).first()
-    if not match:
+    score = Scores.query.filter_by(user_id=current_user.id, match_id=match_id).first()
+    if not score:
         return failed_response(*match_not_found)
 
-    is_match_modified = False
+    is_score_modified = False
     if request.method == "POST":
         body = request.get_json()
-        results = body.get("results", [])
-        if len(results) == 2:
-            if match.score1 != results[0].get("score") or match.score2 != results[
-                1
+        if "team1" in body and "team2" in body:
+            if score.score1 != body["team1"].get("score") or score.score2 != body[
+                "team2"
             ].get("score"):
-                match.score1 = results[0].get("score")
-                match.score2 = results[1].get("score")
-                db.session.add(match)
+                score.score1 = body["team1"].get("score")
+                score.score2 = body["team2"].get("score")
+                db.session.add(score)
                 db.session.commit()
-                is_match_modified = True
+                is_score_modified = True
         else:
             return failed_response(*wrong_inputs)
 
-    match_resource = match.to_dict()
+    score_resource = score.to_dict()
 
-    if is_match_modified:
-        team1 = match_resource["results"][0]["team"]
-        team2 = match_resource["results"][1]["team"]
+    if is_score_modified:
+        team1 = score_resource["team1"]["name"]
+        team2 = score_resource["team2"]["name"]
         send_message(
             f"User {current_user.name} update match {team1} - "
-            f"{team2} with the score {match.score1} - {match.score2}."
+            f"{team2} with the score {score.score1} - {score.score2}."
         )
 
-    return success_response(200, match_resource)
+    return success_response(200, score_resource)
