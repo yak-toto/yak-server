@@ -32,9 +32,7 @@ def score_board(current_user):
 @results.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/results")
 @token_required
 def results_get(current_user):
-    return success_response(
-        200, User.query.filter_by(id=current_user.id).first().to_result_dict()
-    )
+    return success_response(200, User.query.get(current_user.id).to_result_dict())
 
 
 @results.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/compute_points", methods=["POST"])

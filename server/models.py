@@ -27,7 +27,7 @@ class User(db.Model):
         db.Integer, CheckConstraint("points>=0"), nullable=False, default=0
     )
 
-    scores = db.relationship("Scores", back_populates="user")
+    scores = db.relationship("Scores", back_populates="user", lazy="dynamic")
 
     def __init__(self, name, password) -> None:
         self.name = name
@@ -69,20 +69,24 @@ class Matches(db.Model):
         default=lambda: str(uuid.uuid4()),
     )
     group_name = db.Column(db.String(1), nullable=False)
+
+    phase_id = db.Column(db.String(100), db.ForeignKey("phase.id"), nullable=False)
+    phase = db.relationship("Phase", foreign_keys=phase_id, backref="matches")
+
     match_index = db.Column(db.Integer, nullable=False)
 
     team1_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
-    team1 = db.relationship("Team", foreign_keys=team1_id)
+    team1 = db.relationship("Team", foreign_keys=team1_id, backref="match1")
 
     team2_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
-    team2 = db.relationship("Team", foreign_keys=team2_id)
+    team2 = db.relationship("Team", foreign_keys=team2_id, backref="match2")
 
     scores = db.relationship("Scores", back_populates="match")
 
     def to_dict(self):
         return {
             "id": self.id,
-            "group_name": self.group_name,
+            "phase": self.phase.to_dict(),
             "team1": self.team1.to_dict(),
             "team2": self.team2.to_dict(),
         }
@@ -102,15 +106,15 @@ class Scores(db.Model):
     match_id = db.Column(db.String(100), db.ForeignKey("match.id"), nullable=False)
     match = db.relationship("Matches", back_populates="scores")
 
-    score1 = db.Column(db.Integer, CheckConstraint("score1>=0"))
-    score2 = db.Column(db.Integer, CheckConstraint("score2>=0"))
+    score1 = db.Column(db.Integer, CheckConstraint("score1>=0"), default=None)
+    score2 = db.Column(db.Integer, CheckConstraint("score2>=0"), default=None)
 
     def to_dict(self):
         return {
             "id": self.id,
             "match_id": self.match_id,
             "match_index": self.match.match_index,
-            "group_name": self.match.group_name,
+            "phase": self.match.phase.to_dict(),
             "team1": {**self.match.team1.to_dict(), "score": self.score1},
             "team2": {**self.match.team2.to_dict(), "score": self.score2},
         }
@@ -124,7 +128,29 @@ class Team(db.Model):
         nullable=False,
         default=lambda: str(uuid.uuid4()),
     )
-    name = db.Column(db.String(100), unique=True, nullable=False)
+    code = db.Column(db.String(10), unique=True, nullable=False)
+    description = db.Column(db.String(100), unique=True, nullable=False)
 
     def to_dict(self):
-        return {"id": self.id, "name": self.name}
+        return {"id": self.id, "code": self.code, "description": self.description}
+
+
+class Phase(db.Model):
+    __tablename__ = "phase"
+    id = db.Column(
+        db.String(100),
+        primary_key=True,
+        nullable=False,
+        default=lambda: str(uuid.uuid4()),
+    )
+    code = db.Column(db.String(1), primary_key=True, unique=True, nullable=False)
+    phase_description = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(100), unique=True, nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "code": self.code,
+            "phase_description": self.phase_description,
+            "description": self.description,
+        }

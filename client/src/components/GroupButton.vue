@@ -1,14 +1,12 @@
 <template>
-  <a v-on:click="getGroup" class="navbar-item">Groupe {{
-      groupName
-  }}</a>
+  <a v-on:click="getGroup" class="navbar-item">{{ groupDescription }}</a>
 </template>
 
 <script>
 export default {
   name: 'GroupButton',
   props: {
-    groupName: String,
+    groupDescription: String,
   },
   methods: {
     getGroup() {

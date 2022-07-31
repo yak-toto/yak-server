@@ -10,14 +10,14 @@
           <div class="table-container">
             <table class="table is-fullwidth is-striped">
               <tr v-for="match in groupResource">
-                <td>{{ match["team1"]["name"] }}</td>
+                <td>{{ match["team1"]["description"] }}</td>
                 <td>
                   <input class="input is-small" min="0" type="number" v-model="match['team1']['score']">
                 </td>
                 <td>
                   <input class="input is-small" min="0" type="number" v-model="match['team2']['score']">
                 </td>
-                <td>{{ match["team2"]["name"] }}</td>
+                <td>{{ match["team2"]["description"] }}</td>
               </tr>
             </table>
           </div>
@@ -51,6 +51,7 @@ export default {
         });
     },
     postGroup() {
+      console.log(this.groupResource);
       for (let index = 0; index < this.groupResource.length; index += 1) {
         this.$store.dispatch('postScores', { matchId: this.groupResource[index].match_id, matchResource: this.groupResource[index] });
       }

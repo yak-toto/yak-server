@@ -1,5 +1,6 @@
 from flask import Blueprint
 from flask import request
+from sqlalchemy import and_
 
 from . import db
 from .models import Matches
@@ -23,7 +24,7 @@ def groups(current_user):
         200,
         sorted(
             (score.to_dict() for score in current_user.scores),
-            key=lambda score: (score["group_name"], score["match_index"]),
+            key=lambda score: (score["phase"]["code"], score["match_index"]),
         ),
     )
 
@@ -33,15 +34,17 @@ def groups(current_user):
 def group_get(current_user, group_name):
     matches = Matches.query.filter_by(group_name=group_name)
 
-    group_resource = (
-        Scores.query.filter_by(user_id=current_user.id, match_id=match.id).first()
-        for match in matches
+    scores = Scores.query.filter(
+        and_(
+            Scores.user_id == current_user.id,
+            Scores.match_id.in_(match.id for match in matches),
+        )
     )
 
     return success_response(
         200,
         sorted(
-            (match.to_dict() for match in group_resource),
+            (score.to_dict() for score in scores),
             key=lambda score: score["match_index"],
         ),
     )
@@ -75,8 +78,8 @@ def match_get(current_user, match_id):
     score_resource = score.to_dict()
 
     if is_score_modified:
-        team1 = score_resource["team1"]["name"]
-        team2 = score_resource["team2"]["name"]
+        team1 = score_resource["team1"]["description"]
+        team2 = score_resource["team2"]["description"]
         send_message(
             f"User {current_user.name} update match {team1} - "
             f"{team2} with the score {score.score1} - {score.score2}."

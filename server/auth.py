@@ -58,10 +58,9 @@ def signup_post():
     db.session.commit()
 
     # Initialize scores and integrate in db
-    for match in Matches.query.all():
-        db.session.add(
-            Scores(user_id=user.id, match_id=match.id, score1=None, score2=None)
-        )
+    db.session.add_all(
+        Scores(user_id=user.id, match_id=match.id) for match in Matches.query.all()
+    )
     db.session.commit()
 
     return success_response(201, user.to_user_dict())
