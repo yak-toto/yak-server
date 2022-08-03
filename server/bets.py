@@ -52,7 +52,7 @@ def group_get(current_user, group_name):
 
 @bets.route(
     f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/scores/<string:match_id>",
-    methods=["POST", "GET"],
+    methods=["PATCH", "GET"],
 )
 @token_required
 def match_get(current_user, match_id):
@@ -61,7 +61,7 @@ def match_get(current_user, match_id):
         return failed_response(*match_not_found)
 
     is_score_modified = False
-    if request.method == "POST":
+    if request.method == "PATCH":
         body = request.get_json()
         if "team1" in body and "team2" in body:
             if score.score1 != body["team1"].get("score") or score.score2 != body[

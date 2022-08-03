@@ -53,7 +53,7 @@ export default {
     postGroup() {
       console.log(this.groupResource);
       for (let index = 0; index < this.groupResource.length; index += 1) {
-        this.$store.dispatch('postScores', { matchId: this.groupResource[index].match_id, matchResource: this.groupResource[index] });
+        this.$store.dispatch('patchScores', { matchId: this.groupResource[index].match_id, matchResource: this.groupResource[index] });
       }
     },
   },

@@ -2,7 +2,7 @@ import Vuex from 'vuex';
 import VuexPersistence from 'vuex-persist';
 
 import {
-  postSignup, postLogin, getGroupNames, getGroup, postScores, getScoreBoard,
+  postSignup, postLogin, getGroupNames, getGroup, patchScores, getScoreBoard,
 } from '@/api';
 import { isValidJwt } from '@/utils';
 
@@ -15,8 +15,8 @@ const actions = {
   getGroup(context, { groupName }) {
     return getGroup(groupName, context.state.jwt.token);
   },
-  postScores(context, { matchId, matchResource }) {
-    return postScores(matchId, matchResource, context.state.jwt.token);
+  patchScores(context, { matchId, matchResource }) {
+    return patchScores(matchId, matchResource, context.state.jwt.token);
   },
   getScoreBoard(context) {
     return getScoreBoard(context.state.jwt.token);

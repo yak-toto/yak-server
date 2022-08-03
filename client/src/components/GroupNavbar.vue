@@ -5,7 +5,7 @@
     </p>
     <ul class="menu-list">
       <li>
-        <GroupButton v-for="groupName in groupsNames" :groupDescription="groupName['description']"></GroupButton>
+        <GroupButton v-for="groupName in groupsNames" :groupName="groupName['code']" :groupDescription="groupName['description']"></GroupButton>
       </li>
     </ul>
     <p class="menu-label">
