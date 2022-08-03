@@ -21,13 +21,11 @@ def teams_get():
 @teams.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams/<string:team_id>")
 def teams_get_by_id(team_id):
     if is_uuid4(team_id):
-        filter_param = {"id": team_id}
+        team = Team.query.get(team_id)
     elif is_iso_3166_1_alpha_2_code(team_id):
-        filter_param = {"code": team_id}
+        team = Team.query.filter_by(code=team_id).first()
     else:
         return failed_response(*invalid_team_id)
-
-    team = Team.query.filter_by(**filter_param).first()
 
     if not team:
         return failed_response(*team_not_found)
