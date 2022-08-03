@@ -3,12 +3,17 @@ from sqlalchemy import or_
 
 from .models import Matches
 from .models import Phase
+from .models import Team
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import VERSION
+from .utils.errors import invalid_team_id
 from .utils.errors import match_not_found
+from .utils.errors import team_not_found
 from .utils.errors import unauthorized_access_to_admin_api
 from .utils.flask_utils import failed_response
+from .utils.flask_utils import is_iso_3166_1_alpha_2_code
+from .utils.flask_utils import is_uuid4
 from .utils.flask_utils import success_response
 
 groups = Blueprint("group", __name__)
@@ -73,8 +78,20 @@ def matches_phases_get(current_user, phase_name):
 @groups.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/teams/<string:team_id>")
 @token_required
 def matches_teams_get(current_user, team_id):
+    if is_uuid4(team_id):
+        filter_param = {"id": team_id}
+    elif is_iso_3166_1_alpha_2_code(team_id):
+        filter_param = {"code": team_id}
+    else:
+        return failed_response(*invalid_team_id)
+
+    team = Team.query.filter_by(**filter_param).first()
+
+    if not team:
+        return failed_response(*team_not_found)
+
     matches = Matches.query.filter(
-        or_(Matches.team1_id == team_id, Matches.team2_id == team_id)
+        or_(Matches.team1_id == team.id, Matches.team2_id == team.id)
     )
 
     return success_response(200, [match.to_dict() for match in matches])
