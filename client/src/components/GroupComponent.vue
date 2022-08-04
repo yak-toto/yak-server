@@ -32,6 +32,7 @@
 
 <script>
 import GroupNavbar from './GroupNavbar.vue';
+import _ from 'lodash';
 
 export default {
   name: 'GroupComponent',
@@ -41,6 +42,8 @@ export default {
   data() {
     return {
       groupResource: [],
+      // keep copy of group resource to send only PATCH /match of updated match
+      groupResourceCopy: [],
     };
   },
   methods: {
@@ -48,13 +51,16 @@ export default {
       this.$store.dispatch('getGroup', { groupName: this.$route.params.groupName })
         .then((res) => {
           this.groupResource = res.data.result;
+          this.groupResourceCopy = JSON.parse(JSON.stringify(res.data.result));
         });
     },
     postGroup() {
-      console.log(this.groupResource);
       for (let index = 0; index < this.groupResource.length; index += 1) {
-        this.$store.dispatch('patchScores', { matchId: this.groupResource[index].match_id, matchResource: this.groupResource[index] });
+        if (!_.isEqual(this.groupResource[index], this.groupResourceCopy[index])) {
+          this.$store.dispatch('patchScores', { matchId: this.groupResource[index].match_id, matchResource: this.groupResource[index] });
+        }
       }
+      this.groupResourceCopy = this.groupResource
     },
   },
   beforeRouteUpdate(to, from, next) {
