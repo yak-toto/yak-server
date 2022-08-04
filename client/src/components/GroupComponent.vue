@@ -57,6 +57,12 @@ export default {
     postGroup() {
       for (let index = 0; index < this.groupResource.length; index += 1) {
         if (!_.isEqual(this.groupResource[index], this.groupResourceCopy[index])) {
+          if (this.groupResource[index]["team1"]["score"] === '') {
+            this.groupResource[index]["team1"]["score"] = null;
+          }
+          if (this.groupResource[index]["team2"]["score"] === '') {
+            this.groupResource[index]["team2"]["score"] = null;
+          }
           this.$store.dispatch('patchScores', { matchId: this.groupResource[index].match_id, matchResource: this.groupResource[index] });
         }
       }
