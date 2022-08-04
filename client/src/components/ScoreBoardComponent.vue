@@ -16,7 +16,7 @@
                 <th>Points</th>
               </tr>
             </thead>
-            <tr v-for="res in scoreBoardResource">
+            <tr v-for="res in scoreBoardResource" :key="res['name']">
               <td>{{ res["name"] }}</td>
               <td>{{ res["number_match_guess"] }}</td>
               <td>{{ res["number_score_guess"] }}</td>
@@ -47,14 +47,6 @@ export default {
       this.$store.dispatch('getScoreBoard')
         .then((res) => { this.scoreBoardResource = res.data.result; });
     },
-  },
-  beforeEnter(to, from, next) {
-    if (!this.$store.getters.isAuthenticated) {
-      this.$store.dispatch('logout');
-      next('/login');
-    } else {
-      next();
-    }
   },
   created() {
     this.getScoreBoard();

@@ -1,5 +1,5 @@
 <template>
-  <a v-on:click="getGroup" class="navbar-item">{{ groupDescription }}</a>
+  <router-link :to="`/groups/${groupName}`" class="navbar-item">{{ groupDescription }}</router-link>
 </template>
 
 <script>
@@ -8,11 +8,6 @@ export default {
   props: {
     groupName: String,
     groupDescription: String,
-  },
-  methods: {
-    getGroup() {
-      this.$router.push(`/groups/${this.groupName}`);
-    },
   },
 };
 </script>

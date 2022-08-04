@@ -26,7 +26,7 @@ const routes = [
     name: 'logout',
     beforeEnter(to, from, next) {
       if (store.getters.isAuthenticated) {
-        store.dispatch('logout');
+        store.commit('eraseJwtToken');
       }
       next('/login');
     },
@@ -46,6 +46,13 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.name !== 'login' && to.name !== 'signup' && !store.getters.isAuthenticated) {
+    store.commit('eraseJwtToken');
+    next({ name: 'login' });
+  } else next();
 });
 
 export default router;

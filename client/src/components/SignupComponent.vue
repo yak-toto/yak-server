@@ -8,13 +8,18 @@
 
       <form v-on:submit.prevent="signup">
         <div class="field control">
-          <label class="label" for="name">Nom</label>
-          <input type="text" class="input is-large" id="name" placeholder="nom" v-model="name">
+          <label class="label" for="name">
+            Nom
+            <input type="text" class="input is-large" id="name" placeholder="nom" v-model="name">
+          </label>
         </div>
 
         <div class="field control">
-          <label class="label" for="password">Mot de passe</label>
-          <input type="password" class="input is-large" placeholder="mot de passe" v-model="password">
+          <label class="label" for="password">
+            Mot de passe
+            <input type="password" class="input is-large"
+              placeholder="mot de passe" v-model="password">
+          </label>
         </div>
 
         <button class="button is-block is-info is-large is-fullwidth">Créer un compte</button>
@@ -36,11 +41,10 @@ export default {
   methods: {
     signup() {
       this.$store.dispatch('signup', { name: this.name, password: this.password })
-        .then((_) => {
+        .then(() => {
           this.$router.push('/login');
         })
-        .catch((error) => {
-          console.log('Error Registering: ', error);
+        .catch(() => {
           this.invalidSignup = true;
         });
     },

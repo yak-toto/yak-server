@@ -5,18 +5,24 @@
         <div class="container">
           <div id="navbarMenuHeroA" class="navbar-menu">
             <div class="navbar-start">
-              <div v-if="res = getUserName" class="has-text-white navbar-item">
-                Utilisateur:&nbsp;<strong>{{ res }}</strong>
+              <div v-if="$store.getters.isAuthenticated" class="has-text-white navbar-item">
+                Utilisateur:&nbsp;<strong>{{ $store.getters.getUserName }}</strong>
               </div>
             </div>
             <div class="navbar-end">
-              <router-link v-if="!isAuthenticated && !isCurrentRouteLogin" to="/login" class="navbar-item">
+              <router-link
+                  to="/login" class="navbar-item"
+                  v-if="!($store.getters.isAuthenticated) && !($route.name === 'login')">
                 Se connecter
               </router-link>
-              <router-link v-if="!isAuthenticated && !isCurrentRouteSignup" to="/signup" class="navbar-item">
+              <router-link
+                  to="/signup" class="navbar-item"
+                  v-if="!($store.getters.isAuthenticated) && !($route.name == 'signup')">
                 Créer un compte
               </router-link>
-              <router-link v-if="isAuthenticated" to="/logout" class="navbar-item">
+              <router-link
+                  to="/logout" class="navbar-item"
+                  v-if="($store.getters.isAuthenticated)">
                 Se déconnecter
               </router-link>
             </div>
@@ -32,22 +38,3 @@
     </div>
   </section>
 </template>
-
-<script>
-export default {
-  computed: {
-    isAuthenticated() {
-      return this.$store.getters.isAuthenticated;
-    },
-    getUserName() {
-      return this.$store.getters.getUserName;
-    },
-    isCurrentRouteLogin() {
-      return this.$route.name == 'login';
-    },
-    isCurrentRouteSignup() {
-      return this.$route.name == 'signup';
-    },
-  },
-};
-</script>

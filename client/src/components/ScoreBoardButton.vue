@@ -1,14 +1,3 @@
 <template>
-  <a v-on:click="getScoreBoard" class="navbar-item">Classement</a>
+  <router-link to="/score_board" class="navbar-item">Classement</router-link>
 </template>
-
-<script>
-export default {
-  name: 'ScoreBoardButton',
-  methods: {
-    getScoreBoard() {
-      this.$router.push('/score_board');
-    },
-  },
-};
-</script>

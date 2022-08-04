@@ -4,9 +4,9 @@ import VuexPersistence from 'vuex-persist';
 import {
   postSignup, postLogin, getGroupNames, getGroup, patchScores, getScoreBoard,
 } from '@/api';
-import { isValidJwt } from '@/utils';
+import isValidJwt from '@/utils';
 
-const state = {
+const stateObject = {
   userName: '',
   jwt: '',
 };
@@ -29,9 +29,6 @@ const actions = {
   },
   signup(context, userData) {
     return postSignup(userData);
-  },
-  logout(context) {
-    context.commit('eraseJwtToken');
   },
 };
 
@@ -63,7 +60,7 @@ const vuexPersist = new VuexPersistence({
 });
 
 const store = new Vuex.Store({
-  state,
+  stateObject,
   actions,
   mutations,
   getters,
