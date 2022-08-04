@@ -66,7 +66,7 @@ export default {
           this.$store.dispatch('patchScores', { matchId: this.groupResource[index].match_id, matchResource: this.groupResource[index] });
         }
       }
-      this.groupResourceCopy = this.groupResource;
+      this.groupResourceCopy = JSON.parse(JSON.stringify(this.groupResource));
     },
   },
   beforeRouteUpdate(to, from, next) {
