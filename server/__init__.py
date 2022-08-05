@@ -2,14 +2,10 @@ from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
-from .utils.telegram_sender import send_message
-
 db = SQLAlchemy()
 
 
 def create_app():
-    send_message("The app is starting")
-
     app = Flask(__name__)
     app.config.from_pyfile("config.py")
     db.init_app(app)
