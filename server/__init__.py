@@ -1,6 +1,12 @@
+import datetime
+
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+
+from .utils.constants import GLOBAL_ENDPOINT
+from .utils.constants import VERSION
+from .utils.flask_utils import success_response
 
 db = SQLAlchemy()
 
@@ -24,6 +30,10 @@ def create_app():
     app.register_blueprint(groups_blueprint)
     app.register_blueprint(final_phase_blueprint)
     app.register_blueprint(teams_blueprint)
+
+    @app.route(f"/{GLOBAL_ENDPOINT}/{VERSION}")
+    def ping():
+        return success_response(200, {"datetime": datetime.datetime.now()})
 
     CORS(app, resources={r"/*": {"origins": "*"}})
 
