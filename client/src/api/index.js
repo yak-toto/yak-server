@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 const URL = 'http://127.0.0.1:5000';
-const GLOBAL_ENDPOINT = 'yak_toto';
+const GLOBAL_ENDPOINT = 'api';
 const VERSION = 'v1';
 
 // ------------------------------

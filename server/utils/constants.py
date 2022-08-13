@@ -1,2 +1,2 @@
-GLOBAL_ENDPOINT = "yak_toto"
+GLOBAL_ENDPOINT = "api"
 VERSION = "v1"
