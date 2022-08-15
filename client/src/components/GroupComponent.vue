@@ -12,10 +12,12 @@
               <tr v-for="match in groupResource" :key="match['id']">
                 <td>{{ match["team1"]["description"] }}</td>
                 <td>
-                  <input class="input is-small" min="0" type="number" v-model="match['team1']['score']">
+                  <input class="input is-small" min="0" type="number"
+                    v-model="match['team1']['score']">
                 </td>
                 <td>
-                  <input class="input is-small" min="0" type="number" v-model="match['team2']['score']">
+                  <input class="input is-small" min="0" type="number"
+                    v-model="match['team2']['score']">
                 </td>
                 <td>{{ match["team2"]["description"] }}</td>
               </tr>
@@ -51,22 +53,23 @@ export default {
       this.$store.dispatch('getGroup', { groupName })
         .then((res) => {
           this.groupResource = res.data.result;
-          this.groupResourceCopy = JSON.parse(JSON.stringify(res.data.result));
+          this.groupResourceCopy = _.cloneDeep(this.groupResource);
         });
     },
     postGroup() {
-      for (let index = 0; index < this.groupResource.length; index += 1) {
-        if (!_.isEqual(this.groupResource[index], this.groupResourceCopy[index])) {
-          if (this.groupResource[index].team1.score === '') {
-            this.groupResource[index].team1.score = null;
+      for (const [group, groupCopy] of _.zip(this.groupResource, this.groupResourceCopy)) {
+        if (!_.isEqual(group, groupCopy)) {
+          if (group.team1.score === '') {
+            group.team1.score = null;
           }
-          if (this.groupResource[index].team2.score === '') {
-            this.groupResource[index].team2.score = null;
+          if (group.team2.score === '') {
+            group.team2.score = null;
           }
-          this.$store.dispatch('patchScores', { matchId: this.groupResource[index].match_id, matchResource: this.groupResource[index] });
+          this.$store.dispatch('patchScores', { matchId: group.match_id, matchResource: group });
         }
       }
-      this.groupResourceCopy = JSON.parse(JSON.stringify(this.groupResource));
+
+      this.groupResourceCopy = _.cloneDeep(this.groupResource);
     },
   },
   beforeRouteUpdate(to, from, next) {
