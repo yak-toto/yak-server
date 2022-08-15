@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from sqlalchemy import CheckConstraint
 from werkzeug.security import check_password_hash
@@ -92,6 +93,11 @@ class Matches(db.Model):
         }
 
 
+def is_locked(score):
+    locked_date = DateTime.query.filter_by(description="lock_date_time").first()
+    return score.user.name != "admin" and datetime.now() > locked_date.datetime
+
+
 class Scores(db.Model):
     __tablename__ = "score"
     id = db.Column(
@@ -114,6 +120,7 @@ class Scores(db.Model):
             "id": self.id,
             "match_id": self.match_id,
             "match_index": self.match.match_index,
+            "locked": is_locked(self),
             "phase": self.match.phase.to_dict(),
             "team1": {**self.match.team1.to_dict(), "score": self.score1},
             "team2": {**self.match.team2.to_dict(), "score": self.score2},
@@ -153,4 +160,23 @@ class Phase(db.Model):
             "code": self.code,
             "phase_description": self.phase_description,
             "description": self.description,
+        }
+
+
+class DateTime(db.Model):
+    __tablename__ = "datetime"
+    id = db.Column(
+        db.String(100),
+        primary_key=True,
+        nullable=False,
+        default=lambda: str(uuid.uuid4()),
+    )
+    datetime = db.Column(db.DateTime, unique=True, nullable=False)
+    description = db.Column(db.String(100), nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "description": self.description,
+            "date_time": self.datetime,
         }

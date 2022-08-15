@@ -13,11 +13,11 @@
                 <td>{{ match["team1"]["description"] }}</td>
                 <td>
                   <input class="input is-small" min="0" type="number"
-                    v-model="match['team1']['score']">
+                    v-model="match['team1']['score']" :readonly="match['locked']">
                 </td>
                 <td>
                   <input class="input is-small" min="0" type="number"
-                    v-model="match['team2']['score']">
+                    v-model="match['team2']['score']" :readonly="match['locked']">
                 </td>
                 <td>{{ match["team2"]["description"] }}</td>
               </tr>

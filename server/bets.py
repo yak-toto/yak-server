@@ -3,12 +3,14 @@ from flask import request
 from sqlalchemy import and_
 
 from . import db
+from .models import is_locked
 from .models import Matches
 from .models import Phase
 from .models import Scores
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import VERSION
+from .utils.errors import locked_bets
 from .utils.errors import match_not_found
 from .utils.errors import wrong_inputs
 from .utils.flask_utils import failed_response
@@ -65,6 +67,9 @@ def match_get(current_user, match_id):
 
     is_score_modified = False
     if request.method == "PATCH":
+        if is_locked(score):
+            return failed_response(*locked_bets)
+
         body = request.get_json()
         if "team1" in body and "team2" in body:
             if score.score1 != body["team1"].get("score") or score.score2 != body[

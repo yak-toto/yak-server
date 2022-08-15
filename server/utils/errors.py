@@ -10,3 +10,4 @@ invalid_team_id = (
     "Invalid team id. Retry with a uuid or ISO 3166-1 alpha-2 code.",
 )
 team_not_found = (404, "No team found for the requested id.")
+locked_bets = (401, "Cannot modify bets because locked date is exceeded.")
