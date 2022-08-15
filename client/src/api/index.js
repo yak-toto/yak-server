@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-const URL = 'http://127.0.0.1:5000';
+const URL = process.env.NODE_ENV === 'production' ? 'https://yak-toto.com' : 'http://127.0.0.1:5000';
 const GLOBAL_ENDPOINT = 'api';
 const VERSION = 'v1';
 
