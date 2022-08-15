@@ -31,26 +31,25 @@ with app.app_context():
         matches_index = {}
 
         for row in spamreader:
-            group_name, team1_name, team2_name = row
+            group_code, team1_name, team2_name = row
 
-            if group_name not in matches_index:
-                matches_index[group_name] = 0
+            if group_code not in matches_index:
+                matches_index[group_code] = 0
 
             team1 = Team.query.filter_by(description=team1_name).first()
             team2 = Team.query.filter_by(description=team2_name).first()
 
-            phase = Phase.query.filter_by(code=group_name).first()
+            phase = Phase.query.filter_by(code=group_code).first()
 
             db.session.add(
                 Matches(
-                    group_name=group_name,
                     phase_id=phase.id,
                     team1_id=team1.id,
                     team2_id=team2.id,
-                    match_index=matches_index[group_name],
+                    match_index=matches_index[group_code],
                 )
             )
 
-            matches_index[group_name] += 1
+            matches_index[group_code] += 1
 
         db.session.commit()

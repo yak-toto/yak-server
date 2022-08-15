@@ -44,12 +44,10 @@ def matches(current_user):
     if current_user.name == "admin":
         return success_response(
             200,
-            [
-                match.to_dict()
-                for match in Matches.query.order_by(
-                    Matches.group_name, Matches.match_index
-                )
-            ],
+            sorted(
+                (match.to_dict() for match in Matches.query.all()),
+                key=lambda match: (match["phase"]["code"], match["index"]),
+            ),
         )
 
     else:

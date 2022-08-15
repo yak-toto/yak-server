@@ -68,7 +68,6 @@ class Matches(db.Model):
         nullable=False,
         default=lambda: str(uuid.uuid4()),
     )
-    group_name = db.Column(db.String(1), nullable=False)
 
     phase_id = db.Column(db.String(100), db.ForeignKey("phase.id"), nullable=False)
     phase = db.relationship("Phase", foreign_keys=phase_id, backref="matches")
@@ -86,6 +85,7 @@ class Matches(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
+            "index": self.match_index,
             "phase": self.phase.to_dict(),
             "team1": self.team1.to_dict(),
             "team2": self.team2.to_dict(),

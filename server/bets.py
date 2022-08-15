@@ -4,6 +4,7 @@ from sqlalchemy import and_
 
 from . import db
 from .models import Matches
+from .models import Phase
 from .models import Scores
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
@@ -29,10 +30,12 @@ def groups(current_user):
     )
 
 
-@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:group_name>")
+@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:phase_code>")
 @token_required
-def group_get(current_user, group_name):
-    matches = Matches.query.filter_by(group_name=group_name)
+def group_get(current_user, phase_code):
+    phase = Phase.query.filter_by(code=phase_code).first()
+
+    matches = Matches.query.filter_by(phase_id=phase.id)
 
     scores = Scores.query.filter(
         and_(
