@@ -3,7 +3,7 @@
     <div class="hero-head">
       <nav class="navbar">
         <div class="container">
-          <div id="navbarMenuHeroA" class="navbar-menu">
+          <div id="navbarMenuHeroA" class="navbar-menu is-active">
             <div class="navbar-start">
               <div v-if="$store.getters.isAuthenticated" class="has-text-white navbar-item">
                 Utilisateur:&nbsp;<strong>{{ $store.getters.getUserName }}</strong>
