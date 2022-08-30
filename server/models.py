@@ -25,7 +25,7 @@ class User(db.Model):
         db.Integer, CheckConstraint("number_score_guess>=0"), nullable=False, default=0
     )
     points = db.Column(
-        db.Integer, CheckConstraint("points>=0"), nullable=False, default=0
+        db.Float, CheckConstraint("points>=0"), nullable=False, default=0
     )
 
     scores = db.relationship("Scores", back_populates="user", lazy="dynamic")
@@ -57,7 +57,7 @@ class User(db.Model):
             name=self.name,
             number_match_guess=self.number_match_guess,
             number_score_guess=self.number_score_guess,
-            points=self.points,
+            points=round(self.points, 3),
         )
 
 
@@ -114,6 +114,30 @@ class Scores(db.Model):
 
     score1 = db.Column(db.Integer, CheckConstraint("score1>=0"), default=None)
     score2 = db.Column(db.Integer, CheckConstraint("score2>=0"), default=None)
+
+    def is_invalid(self) -> bool:
+        return None in (self.score1, self.score2)
+
+    def is_1_win(self) -> bool:
+        return not self.is_invalid() and self.score1 > self.score2
+
+    def is_draw(self) -> bool:
+        return not self.is_invalid() and self.score1 == self.score2
+
+    def is_2_win(self) -> bool:
+        return not self.is_invalid() and self.score1 < self.score2
+
+    def is_same_results(self, other) -> bool:
+        return (
+            (self.is_1_win() and other.is_1_win())
+            or (self.is_draw() and other.is_draw())
+            or (self.is_2_win() and other.is_2_win())
+        )
+
+    def is_same_scores(self, other) -> bool:
+        if self.is_invalid() or other.is_invalid():
+            return False
+        return self.score1 == other.score1 and self.score2 == other.score2
 
     def to_dict(self):
         return {

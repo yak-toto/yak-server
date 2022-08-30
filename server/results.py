@@ -1,6 +1,5 @@
-from typing import Tuple
-
 from flask import Blueprint
+from sqlalchemy import and_
 
 from . import db
 from .models import Scores
@@ -55,67 +54,56 @@ def compute_points_post(current_user):
 
 
 def compute_points():
-    users = User.query.filter(User.name != "admin")
     admin = User.query.filter_by(name="admin").first()
 
+    results = []
+
+    for real_score in admin.scores:
+        number_correct_result = 0
+        number_correct_score = 0
+        user_ids_found_correct_result = []
+        user_ids_found_correct_score = []
+
+        for user_score in Scores.query.filter(
+            and_(Scores.match_id == real_score.match_id, Scores.user_id != admin.id)
+        ):
+            if user_score.is_same_results(real_score):
+                number_correct_result += 1
+                user_ids_found_correct_result.append(user_score.user_id)
+
+                if user_score.is_same_scores(real_score):
+                    number_correct_score += 1
+                    user_ids_found_correct_score.append(user_score.user_id)
+
+        results.append(
+            {
+                "match_id": real_score.match_id,
+                "number_correct_result": number_correct_result,
+                "user_ids_found_correct_result": user_ids_found_correct_result,
+                "number_correct_score": number_correct_score,
+                "user_ids_found_correct_score": user_ids_found_correct_score,
+            }
+        )
+
+    users = User.query.filter(User.name != "admin")
+    numbers_of_players = users.count()
+
     for user in users:
-        user_matches = Scores.query.filter_by(user_id=user.id)
         user.number_score_guess = 0
         user.number_match_guess = 0
         user.points = 0
 
-        for match in user_matches:
-            admin_match = Scores.query.filter_by(
-                user_id=admin.id, match_id=match.match_id
-            ).first()
+        for result in results:
+            if user.id in result["user_ids_found_correct_result"]:
+                user.number_match_guess += 1
+                user.points += 1 + 2 * (
+                    numbers_of_players - result["number_correct_result"]
+                ) / (numbers_of_players - 1)
 
-            if is_same_scores(
-                (match.score1, match.score2), (admin_match.score1, admin_match.score2)
-            ):
+            if user.id in result["user_ids_found_correct_score"]:
                 user.number_score_guess += 1
-                user.number_match_guess += 1
-            elif is_same_resuls(
-                (match.score1, match.score2), (admin_match.score1, admin_match.score2)
-            ):
-                user.number_match_guess += 1
-
-            user.points = (
-                user.number_score_guess * 8
-                + (user.number_match_guess - user.number_score_guess) * 3
-            )
-
-        db.session.add(user)
+                user.points += 3 + 7 * (
+                    numbers_of_players - result["number_correct_score"]
+                ) / (numbers_of_players - 1)
 
     db.session.commit()
-
-
-def is_same_scores(user_score: Tuple[int, int], real_scores: Tuple[int, int]) -> bool:
-    if None in (user_score + real_scores):
-        return False
-    return user_score == real_scores
-
-
-def is_same_resuls(user_score: Tuple[int, int], real_scores: Tuple[int, int]) -> bool:
-    return (
-        (is_1_win(user_score) and is_1_win(real_scores))
-        or (is_draw(user_score) and is_draw(real_scores))
-        or (is_2_win(user_score) and is_2_win(real_scores))
-    )
-
-
-def is_1_win(scores: Tuple[int, int]) -> bool:
-    if None in scores:
-        return False
-    return scores[0] > scores[1]
-
-
-def is_draw(scores: Tuple[int, int]) -> bool:
-    if None in scores:
-        return False
-    return scores[0] == scores[1]
-
-
-def is_2_win(scores: Tuple[int, int]) -> bool:
-    if None in scores:
-        return False
-    return scores[0] < scores[1]
