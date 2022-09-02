@@ -18,6 +18,8 @@ class User(db.Model):
         default=lambda: str(uuid.uuid4()),
     )
     name = db.Column(db.String(100), unique=True, nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(100), nullable=False)
     number_match_guess = db.Column(
         db.Integer, CheckConstraint("number_match_guess>=0"), nullable=False, default=0
@@ -31,8 +33,10 @@ class User(db.Model):
 
     scores = db.relationship("Scores", back_populates="user", lazy="dynamic")
 
-    def __init__(self, name, password) -> None:
+    def __init__(self, name, first_name, last_name, password) -> None:
         self.name = name
+        self.first_name = first_name
+        self.last_name = last_name
         self.password = generate_password_hash(password, method="sha256")
 
     @classmethod
@@ -50,16 +54,21 @@ class User(db.Model):
         return user
 
     def to_user_dict(self):
-        return dict(id=self.id, name=self.name)
+        return {
+            "id": self.id,
+            "name": self.name,
+        }
 
     def to_result_dict(self):
-        return dict(
-            id=self.id,
-            name=self.name,
-            number_match_guess=self.number_match_guess,
-            number_score_guess=self.number_score_guess,
-            points=round(self.points, 3),
-        )
+        return {
+            "id": self.id,
+            "name": self.name,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "number_match_guess": self.number_match_guess,
+            "number_score_guess": self.number_score_guess,
+            "points": round(self.points, 3),
+        }
 
 
 class Matches(db.Model):
@@ -98,7 +107,7 @@ def is_locked(score):
     locked_date = datetime.strptime(
         current_app.config["LOCK_DATETIME"], "%Y-%m-%d %H:%M:%S.%f"
     )
-    return score.user.name != "admin" and datetime.now() > locked_date.datetime
+    return score.user.name != "admin" and datetime.now() > locked_date
 
 
 class Scores(db.Model):

@@ -17,7 +17,7 @@
               </tr>
             </thead>
             <tr v-for="res in scoreBoardResource" :key="res['name']">
-              <td>{{ res["name"] }}</td>
+              <td>{{ `${res["first_name"]} ${res["last_name"]}` }}</td>
               <td>{{ res["number_match_guess"] }}</td>
               <td>{{ res["number_score_guess"] }}</td>
               <td>{{ res["points"] }}</td>
