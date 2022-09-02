@@ -3,7 +3,6 @@ import csv
 
 from server import create_app
 from server import db
-from server.models import DateTime
 from server.models import Matches
 from server.models import Phase
 from server.models import Team
@@ -52,20 +51,5 @@ with app.app_context():
             )
 
             matches_index[group_code] += 1
-
-        db.session.commit()
-
-    with open("data/date.csv", newline="") as csvfile:
-        spamreader = csv.reader(csvfile, delimiter="|")
-
-        for row in spamreader:
-            description, datetime = row
-
-            db.session.add(
-                DateTime(
-                    description=description,
-                    datetime=datetime,
-                )
-            )
 
         db.session.commit()

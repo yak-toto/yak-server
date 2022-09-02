@@ -1,4 +1,5 @@
 from flask import Blueprint
+from flask import current_app
 from sqlalchemy import and_
 
 from . import db
@@ -38,7 +39,12 @@ def results_get(current_user):
 @token_required
 def compute_points_post(current_user):
     if current_user.name == "admin":
-        compute_points()
+        compute_points(
+            current_app.config["BASE_CORRECT_RESULT"],
+            current_app.config["MULTIPLYING_FACTOR_CORRECT_RESULT"],
+            current_app.config["BASE_CORRECT_SCORE"],
+            current_app.config["MULTIPLYING_FACTOR_CORRECT_SCORE"],
+        )
 
         return success_response(
             200,
@@ -53,7 +59,12 @@ def compute_points_post(current_user):
         return failed_response(*unauthorized_access_to_admin_api)
 
 
-def compute_points():
+def compute_points(
+    base_correct_result,
+    multiplying_factor_correct_result,
+    base_correct_score,
+    multiplying_factor_correct_score,
+):
     admin = User.query.filter_by(name="admin").first()
 
     results = []
@@ -96,13 +107,16 @@ def compute_points():
         for result in results:
             if user.id in result["user_ids_found_correct_result"]:
                 user.number_match_guess += 1
-                user.points += 1 + 2 * (
-                    numbers_of_players - result["number_correct_result"]
-                ) / (numbers_of_players - 1)
+                user.points += (
+                    base_correct_result
+                    + multiplying_factor_correct_result
+                    * (numbers_of_players - result["number_correct_result"])
+                    / (numbers_of_players - 1)
+                )
 
             if user.id in result["user_ids_found_correct_score"]:
                 user.number_score_guess += 1
-                user.points += 3 + 7 * (
+                user.points += base_correct_score + multiplying_factor_correct_score * (
                     numbers_of_players - result["number_correct_score"]
                 ) / (numbers_of_players - 1)
 

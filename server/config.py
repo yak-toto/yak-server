@@ -15,3 +15,24 @@ with open("credentials.json") as file:
 
 # SQL Alchemy features
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
+def load_business_rules():
+    from configparser import ConfigParser
+
+    config = ConfigParser()
+    config.read("data/config.ini")
+    return config
+
+
+config = load_business_rules()
+
+LOCK_DATETIME = config.get("locking", "datetime")
+BASE_CORRECT_RESULT = config.getint("points", "base_correct_result")
+MULTIPLYING_FACTOR_CORRECT_RESULT = config.getint(
+    "points", "multiplying_factor_correct_result"
+)
+BASE_CORRECT_SCORE = config.getint("points", "base_correct_score")
+MULTIPLYING_FACTOR_CORRECT_SCORE = config.getint(
+    "points", "multiplying_factor_correct_score"
+)

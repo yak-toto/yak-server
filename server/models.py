@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 
+from flask import current_app
 from sqlalchemy import CheckConstraint
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
@@ -94,7 +95,9 @@ class Matches(db.Model):
 
 
 def is_locked(score):
-    locked_date = DateTime.query.filter_by(description="lock_date_time").first()
+    locked_date = datetime.strptime(
+        current_app.config["LOCK_DATETIME"], "%Y-%m-%d %H:%M:%S.%f"
+    )
     return score.user.name != "admin" and datetime.now() > locked_date.datetime
 
 
@@ -184,23 +187,4 @@ class Phase(db.Model):
             "code": self.code,
             "phase_description": self.phase_description,
             "description": self.description,
-        }
-
-
-class DateTime(db.Model):
-    __tablename__ = "datetime"
-    id = db.Column(
-        db.String(100),
-        primary_key=True,
-        nullable=False,
-        default=lambda: str(uuid.uuid4()),
-    )
-    datetime = db.Column(db.DateTime, unique=True, nullable=False)
-    description = db.Column(db.String(100), nullable=False)
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "description": self.description,
-            "date_time": self.datetime,
         }
