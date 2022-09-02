@@ -63,6 +63,8 @@ def signup_post():
     )
     db.session.commit()
 
+    send_message(f"User {user.name} created.")
+
     return success_response(201, user.to_user_dict())
 
 
