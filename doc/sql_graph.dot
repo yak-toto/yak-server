@@ -8,6 +8,8 @@ digraph G {
         <tr><td bgcolor="lightblue2" colspan="2"><font face="Times-bold" point-size="20">user</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="id_left"><font face="Times-bold">id</font></td><td align="left"><font color="#535353">caracter varying (100) DEFAULT uuid4 NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left"><font face="Times-bold">name</font></td><td align="left"><font color="#535353">caracter varying (100) UNIQUE NOT NULL</font></td></tr>
+        <tr><td bgcolor="grey96" align="left"><font face="Times-bold">first_name</font></td><td align="left"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
+        <tr><td bgcolor="grey96" align="left"><font face="Times-bold">last_name</font></td><td align="left"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left"><font face="Times-bold">password</font></td><td align="left"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left"><font face="Times-bold">number_match_guess</font></td><td align="left"><font color="#535353">integer CHECK (number_match_guess &ge; 0) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left"><font face="Times-bold">number_score_guess</font></td><td align="left"><font color="#535353">integer CHECK (number_score_guess &ge; 0) NOT NULL</font></td></tr>
@@ -15,11 +17,11 @@ digraph G {
       </table>
     >];
 
-    matches[
+    match[
     shape=none
     label=<
       <table border="0" cellspacing="0" cellborder="1">
-        <tr><td bgcolor="lightblue2" colspan="2"><font face="Times-bold" point-size="20">matches</font></td></tr>
+        <tr><td bgcolor="lightblue2" colspan="2"><font face="Times-bold" point-size="20">match</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="id"><font face="Times-bold">id</font></td><td align="left" port="id_right"><font color="#535353">caracter varying (100) DEFAULT uuid4 NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="phase_id"><font face="Times-bold">phase_id</font></td><td align="left" port="phase_id_right"><font color="#535353">caracter varying (1) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="team1_id"><font face="Times-bold">team1_id</font></td><td align="left" port="team1_id_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
@@ -28,11 +30,11 @@ digraph G {
       </table>
     >];
 
-    scores[
+    score[
     shape=none
     label=<
       <table border="0" cellspacing="0" cellborder="1">
-        <tr><td bgcolor="lightblue2" colspan="2"><font face="Times-bold" point-size="20">scores</font></td></tr>
+        <tr><td bgcolor="lightblue2" colspan="2"><font face="Times-bold" point-size="20">score</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="id"><font face="Times-bold">id</font></td><td align="left" port="id_right"><font color="#535353">caracter varying (100) DEFAULT uuid4 NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="user_id"><font face="Times-bold">user_id</font></td><td align="left" port="user_id_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="match_id"><font face="Times-bold">match_id</font></td><td align="left" port="match_id_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
@@ -66,10 +68,10 @@ digraph G {
       >
     ];
 
-    "scores":user_id_right -> "user":id_left
-    "scores":match_id_right -> "matches":id
-    "matches":team1_id_right -> "team":id
-    "matches":team2_id_right -> "team":id
+    "score":user_id_right -> "user":id_left
+    "score":match_id_right -> "match":id
+    "match":team1_id_right -> "team":id
+    "match":team2_id_right -> "team":id
 
-    "matches":phase_id_right -> "phase":id
+    "match":phase_id_right -> "phase":id
 }
