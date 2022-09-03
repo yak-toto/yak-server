@@ -31,7 +31,13 @@ class User(db.Model):
         db.Float, CheckConstraint("points>=0"), nullable=False, default=0
     )
 
-    scores = db.relationship("Scores", back_populates="user", lazy="dynamic")
+    scores = db.relationship(
+        "Scores",
+        back_populates="user",
+        lazy="dynamic",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
 
     def __init__(self, name, first_name, last_name, password) -> None:
         self.name = name
@@ -118,7 +124,9 @@ class Scores(db.Model):
         nullable=False,
         default=lambda: str(uuid.uuid4()),
     )
-    user_id = db.Column(db.String(100), db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(
+        db.String(100), db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
     user = db.relationship("User", back_populates="scores")
 
     match_id = db.Column(db.String(100), db.ForeignKey("match.id"), nullable=False)
