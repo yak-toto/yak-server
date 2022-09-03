@@ -4,6 +4,7 @@ from flask import Blueprint
 from sqlalchemy import and_
 from sqlalchemy import or_
 
+from .models import Group
 from .models import Matches
 from .models import Phase
 from .models import Scores
@@ -27,13 +28,13 @@ groups = Blueprint("group", __name__)
 @groups.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/names")
 @token_required
 def groups_names(current_user):
+    phase = Phase.query.filter_by(code="GROUP").first()
+
     return success_response(
         200,
         [
             phase.to_dict()
-            for phase in Phase.query.filter_by(
-                phase_description="Phase de groupe"
-            ).order_by(Phase.code)
+            for phase in Group.query.filter_by(phase_id=phase.id).order_by(Group.code)
         ],
     )
 
@@ -46,7 +47,7 @@ def matches(current_user):
             200,
             sorted(
                 (match.to_dict() for match in Matches.query.all()),
-                key=lambda match: (match["phase"]["code"], match["index"]),
+                key=lambda match: (match["group"]["phase"]["code"], match["index"]),
             ),
         )
 
@@ -59,8 +60,8 @@ def matches(current_user):
 def groups_results_by_group_id(current_user, group_id):
     # Retrieve admin scores for the specified group name
     admin = User.query.get(current_user.id)
-    phase = Phase.query.filter_by(code=group_id).first()
-    matches = Matches.query.filter_by(phase_id=phase.id)
+    group = Group.query.filter_by(code=group_id).first()
+    matches = Matches.query.filter_by(group_id=group.id)
     scores = Scores.query.filter(
         and_(
             Scores.user_id == admin.id,

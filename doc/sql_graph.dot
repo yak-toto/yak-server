@@ -23,7 +23,7 @@ digraph G {
       <table border="0" cellspacing="0" cellborder="1">
         <tr><td bgcolor="lightblue2" colspan="2"><font face="Times-bold" point-size="20">match</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="id"><font face="Times-bold">id</font></td><td align="left" port="id_right"><font color="#535353">caracter varying (100) DEFAULT uuid4 NOT NULL</font></td></tr>
-        <tr><td bgcolor="grey96" align="left" port="phase_id"><font face="Times-bold">phase_id</font></td><td align="left" port="phase_id_right"><font color="#535353">caracter varying (1) NOT NULL</font></td></tr>
+        <tr><td bgcolor="grey96" align="left" port="group_id"><font face="Times-bold">group_id</font></td><td align="left" port="group_id_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="team1_id"><font face="Times-bold">team1_id</font></td><td align="left" port="team1_id_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="team2_id"><font face="Times-bold">team2_id</font></td><td align="left" port="team2_id_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="index"><font face="Times-bold">index</font></td><td align="left" port="match_index_right"><font color="#535353">integer NOT NULL</font></td></tr>
@@ -55,14 +55,26 @@ digraph G {
       >
     ];
 
+    group[
+      shape=none
+      label=<
+        <table border="0" cellspacing="0" cellborder="1">
+          <tr><td bgcolor="lightblue2" colspan="2"><font face="Times-bold" point-size="20">group</font></td></tr>
+          <tr><td bgcolor="grey96" align="left" port="id"><font face="Times-bold">id</font></td><td align="left" port="id_right"><font color="#535353">caracter varying (100) DEFAULT uuid4 NOT NULL</font></td></tr>
+          <tr><td bgcolor="grey96" align="left" port="group_id"><font face="Times-bold">code</font></td><td align="left" port="group_id_right"><font color="#535353">caracter varying (1) UNIQUE NOT NULL</font></td></tr>
+          <tr><td bgcolor="grey96" align="left" port="group_id"><font face="Times-bold">description</font></td><td align="left" port="group_id_right"><font color="#535353">caracter varying (100) UNIQUE NOT NULL</font></td></tr>
+          <tr><td bgcolor="grey96" align="left" port="phase_id"><font face="Times-bold">phase_id</font></td><td align="left" port="phase_id_right"><font color="#535353">caracter varying (100) UNIQUE NOT NULL</font></td></tr>
+        </table>
+      >
+    ];
+
     phase[
       shape=none
       label=<
         <table border="0" cellspacing="0" cellborder="1">
           <tr><td bgcolor="lightblue2" colspan="2"><font face="Times-bold" point-size="20">phase</font></td></tr>
           <tr><td bgcolor="grey96" align="left" port="id"><font face="Times-bold">id</font></td><td align="left" port="id_right"><font color="#535353">caracter varying (100) DEFAULT uuid4 NOT NULL</font></td></tr>
-          <tr><td bgcolor="grey96" align="left" port="group_id"><font face="Times-bold">code</font></td><td align="left" port="group_id_right"><font color="#535353">caracter varying (1) UNIQUE NOT NULL</font></td></tr>
-          <tr><td bgcolor="grey96" align="left" port="group_id"><font face="Times-bold">phase_description</font></td><td align="left" port="group_id_right"><font color="#535353">caracter varying (100) UNIQUE NOT NULL</font></td></tr>
+          <tr><td bgcolor="grey96" align="left" port="code"><font face="Times-bold">code</font></td><td align="left" port="group_id_right"><font color="#535353">caracter varying (10) UNIQUE NOT NULL</font></td></tr>
           <tr><td bgcolor="grey96" align="left" port="group_id"><font face="Times-bold">description</font></td><td align="left" port="group_id_right"><font color="#535353">caracter varying (100) UNIQUE NOT NULL</font></td></tr>
         </table>
       >
@@ -73,5 +85,6 @@ digraph G {
     "match":team1_id_right -> "team":id
     "match":team2_id_right -> "team":id
 
-    "match":phase_id_right -> "phase":id
+    "match":group_id_right -> "group":id
+    "group":phase_id_right -> "phase":id
 }

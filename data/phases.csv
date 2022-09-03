@@ -1,13 +1,2 @@
-A|Phase de groupe|Groupe A
-B|Phase de groupe|Groupe B
-C|Phase de groupe|Groupe C
-D|Phase de groupe|Groupe D
-E|Phase de groupe|Groupe E
-F|Phase de groupe|Groupe F
-G|Phase de groupe|Groupe G
-H|Phase de groupe|Groupe H
-8|Phase finale|8ème de finale
-4|Phase finale|Quart de finale
-2|Phase finale|Demi-finale
-1|Phase finale|Finale
-3|Phase finale|Finale pour la troisième place
+GROUP|Phase de groupe
+FINAL|Phase finale

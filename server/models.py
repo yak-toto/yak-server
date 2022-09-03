@@ -86,8 +86,8 @@ class Matches(db.Model):
         default=lambda: str(uuid.uuid4()),
     )
 
-    phase_id = db.Column(db.String(100), db.ForeignKey("phase.id"), nullable=False)
-    phase = db.relationship("Phase", foreign_keys=phase_id, backref="matches")
+    group_id = db.Column(db.String(100), db.ForeignKey("group.id"), nullable=False)
+    group = db.relationship("Group", foreign_keys=group_id, backref="matches")
 
     index = db.Column(db.Integer, nullable=False)
 
@@ -103,7 +103,7 @@ class Matches(db.Model):
         return {
             "id": self.id,
             "index": self.index,
-            "phase": self.phase.to_dict(),
+            "group": self.group.to_dict(),
             "team1": self.team1.to_dict(),
             "team2": self.team2.to_dict(),
         }
@@ -165,7 +165,7 @@ class Scores(db.Model):
             "match_id": self.match_id,
             "index": self.match.index,
             "locked": is_locked(self),
-            "phase": self.match.phase.to_dict(),
+            "group": self.match.group.to_dict(),
             "team1": {**self.match.team1.to_dict(), "score": self.score1},
             "team2": {**self.match.team2.to_dict(), "score": self.score2},
         }
@@ -186,6 +186,29 @@ class Team(db.Model):
         return {"id": self.id, "code": self.code, "description": self.description}
 
 
+class Group(db.Model):
+    __tablename__ = "group"
+    id = db.Column(
+        db.String(100),
+        primary_key=True,
+        nullable=False,
+        default=lambda: str(uuid.uuid4()),
+    )
+    code = db.Column(db.String(1), primary_key=True, unique=True, nullable=False)
+    description = db.Column(db.String(100), unique=True, nullable=False)
+
+    phase_id = db.Column(db.String(100), db.ForeignKey("phase.id"), nullable=False)
+    phase = db.relationship("Phase", foreign_keys=phase_id)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "code": self.code,
+            "phase": self.phase.to_dict(),
+            "description": self.description,
+        }
+
+
 class Phase(db.Model):
     __tablename__ = "phase"
     id = db.Column(
@@ -194,14 +217,12 @@ class Phase(db.Model):
         nullable=False,
         default=lambda: str(uuid.uuid4()),
     )
-    code = db.Column(db.String(1), primary_key=True, unique=True, nullable=False)
-    phase_description = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.String(100), unique=True, nullable=False)
+    code = db.Column(db.String(10), primary_key=True, unique=True, nullable=False)
+    description = db.Column(db.String(100), nullable=False)
 
     def to_dict(self):
         return {
             "id": self.id,
             "code": self.code,
-            "phase_description": self.phase_description,
             "description": self.description,
         }

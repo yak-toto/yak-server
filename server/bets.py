@@ -3,9 +3,9 @@ from flask import request
 from sqlalchemy import and_
 
 from . import db
+from .models import Group
 from .models import is_locked
 from .models import Matches
-from .models import Phase
 from .models import Scores
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
@@ -27,17 +27,17 @@ def groups(current_user):
         200,
         sorted(
             (score.to_dict() for score in current_user.scores),
-            key=lambda score: (score["phase"]["code"], score["index"]),
+            key=lambda score: (score["group"]["phase"]["code"], score["index"]),
         ),
     )
 
 
-@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:phase_code>")
+@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:group_code>")
 @token_required
-def group_get(current_user, phase_code):
-    phase = Phase.query.filter_by(code=phase_code).first()
+def group_get(current_user, group_code):
+    group = Group.query.filter_by(code=group_code).first()
 
-    matches = Matches.query.filter_by(phase_id=phase.id)
+    matches = Matches.query.filter_by(group_id=group.id)
 
     scores = Scores.query.filter(
         and_(
