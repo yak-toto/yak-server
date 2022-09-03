@@ -1,38 +1,33 @@
-import json
+from flask import Blueprint
+from flask import current_app
 
-# Do not sort key in json response
-JSON_SORT_KEYS = False
+from .utils.auth_utils import token_required
+from .utils.constants import GLOBAL_ENDPOINT
+from .utils.constants import VERSION
+from .utils.errors import unauthorized_access_to_admin_api
+from .utils.flask_utils import failed_response
+from .utils.flask_utils import success_response
 
-# Read secret infos
-with open("credentials.json") as file:
-    config = json.loads(file.read())
-    SQLALCHEMY_DATABASE_URI = (
-        f"mysql+pymysql://{config['user']}:{config['password']}@localhost:3306/yak_toto"
-    )
-
-    # Load jwt secret key from credentials file
-    SECRET_KEY = config["secret_key"]
-
-# SQL Alchemy features
-SQLALCHEMY_TRACK_MODIFICATIONS = False
+config = Blueprint("config", __name__)
 
 
-def load_business_rules():
-    from configparser import ConfigParser
-
-    config = ConfigParser()
-    config.read("data/config.ini")
-    return config
-
-
-config = load_business_rules()
-
-LOCK_DATETIME = config.get("locking", "datetime")
-BASE_CORRECT_RESULT = config.getint("points", "base_correct_result")
-MULTIPLYING_FACTOR_CORRECT_RESULT = config.getint(
-    "points", "multiplying_factor_correct_result"
-)
-BASE_CORRECT_SCORE = config.getint("points", "base_correct_score")
-MULTIPLYING_FACTOR_CORRECT_SCORE = config.getint(
-    "points", "multiplying_factor_correct_score"
-)
+@config.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/config")
+@token_required
+def config_get(current_user):
+    if current_user.name != "admin":
+        return failed_response(*unauthorized_access_to_admin_api)
+    else:
+        return success_response(
+            200,
+            {
+                "locked_datetime": current_app.config["LOCK_DATETIME"],
+                "base_correct_result": current_app.config["BASE_CORRECT_RESULT"],
+                "multiplying_factor_correct_result": current_app.config[
+                    "MULTIPLYING_FACTOR_CORRECT_RESULT"
+                ],
+                "base_correct_score": current_app.config["BASE_CORRECT_SCORE"],
+                "multiplying_factor_correct_score": current_app.config[
+                    "MULTIPLYING_FACTOR_CORRECT_SCORE"
+                ],
+            },
+        )
