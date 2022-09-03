@@ -11,5 +11,6 @@ setup(
         "requests >= 2.25",
         "PyJWT >= 2.4.0",
         "PyMySQL >= 1.0.2",
+        "python-dotenv >= 0.20.0",
     ],
 )
