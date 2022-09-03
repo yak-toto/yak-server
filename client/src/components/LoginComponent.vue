@@ -43,8 +43,8 @@ export default {
     login() {
       this.$store.dispatch('login', { name: this.name, password: this.password })
         .then((response) => {
-          this.$store.commit({ type: 'setJwtToken', jwt: response.data.result });
-          this.$store.commit({ type: 'setUserName', userName: this.name });
+          this.$store.commit({ type: 'setJwtToken', jwt: response.data.result.token });
+          this.$store.commit({ type: 'setUserName', userName: response.data.result.name });
           this.$router.push('/groups/A');
         })
         .catch(() => {

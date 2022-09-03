@@ -2,7 +2,7 @@ import Vuex from 'vuex';
 import VuexPersistence from 'vuex-persist';
 
 import {
-  postSignup, postLogin, getGroupNames, getGroup, patchScores, getScoreBoard,
+  postSignup, postLogin, getGroupNames, getGroup, patchScores, getScoreBoard, postComputePoints
 } from '@/api';
 import isValidJwt from '@/utils';
 
@@ -13,22 +13,25 @@ const stateObject = {
 
 const actions = {
   getGroup(context, { groupName }) {
-    return getGroup(groupName, context.state.jwt.token);
+    return getGroup(groupName, context.state.jwt);
   },
   patchScores(context, { matchId, matchResource }) {
-    return patchScores(matchId, matchResource, context.state.jwt.token);
+    return patchScores(matchId, matchResource, context.state.jwt);
   },
   getScoreBoard(context) {
-    return getScoreBoard(context.state.jwt.token);
+    return getScoreBoard(context.state.jwt);
   },
   getGroupNames(context) {
-    return getGroupNames(context.state.jwt.token);
+    return getGroupNames(context.state.jwt);
   },
   login(context, userData) {
     return postLogin(userData);
   },
   signup(context, userData) {
     return postSignup(userData);
+  },
+  computePoints(context) {
+    return postComputePoints(context.state.jwt);
   },
 };
 
@@ -47,7 +50,7 @@ const mutations = {
 
 const getters = {
   isAuthenticated(state) {
-    return state.jwt && isValidJwt(state.jwt.token);
+    return state.jwt && isValidJwt(state.jwt);
   },
   getUserName(state) {
     return state.userName;

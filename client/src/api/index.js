@@ -41,3 +41,11 @@ export function patchScores(matchId, matchResource, jwt) {
 export function getScoreBoard(jwt) {
   return axios.get(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/score_board`, { headers: { Authorization: `Bearer: ${jwt}` } });
 }
+
+// ------------------------------
+// Admin interface
+// ------------------------------
+
+export function postComputePoints(jwt) {
+  return axios.post(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/compute_points`, null, { headers: { Authorization: `Bearer: ${jwt}` } })
+}

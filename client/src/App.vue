@@ -8,6 +8,10 @@
               <div v-if="$store.getters.isAuthenticated" class="has-text-white navbar-item">
                 Utilisateur:&nbsp;<strong>{{ $store.getters.getUserName }}</strong>
               </div>
+              <a @click="computePoints"
+                v-if="$store.getters.isAuthenticated && $store.getters.getUserName === 'admin'" class="navbar-item">
+                Calculer les points
+              </a>
             </div>
             <div class="navbar-end">
               <router-link
@@ -38,3 +42,14 @@
     </div>
   </section>
 </template>
+
+<script>
+export default {
+  name: 'GroupComponent',
+  methods: {
+    computePoints() {
+      this.$store.dispatch('computePoints');
+    }
+  },
+};
+</script>
