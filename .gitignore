@@ -183,5 +183,4 @@ yarn-error.log*
 *.sln
 *.sw*
 
-credentials.json
 .flaskenv
