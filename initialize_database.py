@@ -28,16 +28,11 @@ with app.app_context():
     with open("data/matches.csv", newline="") as csvfile:
         spamreader = csv.reader(csvfile, delimiter="|")
 
-        matches_index = {}
-
         for row in spamreader:
-            group_code, team1_name, team2_name = row
+            group_code, index, team1_code, team2_code = row
 
-            if group_code not in matches_index:
-                matches_index[group_code] = 0
-
-            team1 = Team.query.filter_by(description=team1_name).first()
-            team2 = Team.query.filter_by(description=team2_name).first()
+            team1 = Team.query.filter_by(code=team1_code).first()
+            team2 = Team.query.filter_by(code=team2_code).first()
 
             phase = Phase.query.filter_by(code=group_code).first()
 
@@ -46,10 +41,8 @@ with app.app_context():
                     phase_id=phase.id,
                     team1_id=team1.id,
                     team2_id=team2.id,
-                    match_index=matches_index[group_code],
+                    index=index,
                 )
             )
-
-            matches_index[group_code] += 1
 
         db.session.commit()

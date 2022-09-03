@@ -26,7 +26,7 @@ digraph G {
         <tr><td bgcolor="grey96" align="left" port="phase_id"><font face="Times-bold">phase_id</font></td><td align="left" port="phase_id_right"><font color="#535353">caracter varying (1) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="team1_id"><font face="Times-bold">team1_id</font></td><td align="left" port="team1_id_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left" port="team2_id"><font face="Times-bold">team2_id</font></td><td align="left" port="team2_id_right"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
-        <tr><td bgcolor="grey96" align="left" port="match_index"><font face="Times-bold">match_index</font></td><td align="left" port="match_index_right"><font color="#535353">integer NOT NULL</font></td></tr>
+        <tr><td bgcolor="grey96" align="left" port="index"><font face="Times-bold">index</font></td><td align="left" port="match_index_right"><font color="#535353">integer NOT NULL</font></td></tr>
       </table>
     >];
 

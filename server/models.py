@@ -89,7 +89,7 @@ class Matches(db.Model):
     phase_id = db.Column(db.String(100), db.ForeignKey("phase.id"), nullable=False)
     phase = db.relationship("Phase", foreign_keys=phase_id, backref="matches")
 
-    match_index = db.Column(db.Integer, nullable=False)
+    index = db.Column(db.Integer, nullable=False)
 
     team1_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
     team1 = db.relationship("Team", foreign_keys=team1_id, backref="match1")
@@ -102,7 +102,7 @@ class Matches(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
-            "index": self.match_index,
+            "index": self.index,
             "phase": self.phase.to_dict(),
             "team1": self.team1.to_dict(),
             "team2": self.team2.to_dict(),
@@ -163,7 +163,7 @@ class Scores(db.Model):
         return {
             "id": self.id,
             "match_id": self.match_id,
-            "match_index": self.match.match_index,
+            "index": self.match.index,
             "locked": is_locked(self),
             "phase": self.match.phase.to_dict(),
             "team1": {**self.match.team1.to_dict(), "score": self.score1},

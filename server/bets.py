@@ -27,7 +27,7 @@ def groups(current_user):
         200,
         sorted(
             (score.to_dict() for score in current_user.scores),
-            key=lambda score: (score["phase"]["code"], score["match_index"]),
+            key=lambda score: (score["phase"]["code"], score["index"]),
         ),
     )
 
@@ -50,7 +50,7 @@ def group_get(current_user, phase_code):
         200,
         sorted(
             (score.to_dict() for score in scores),
-            key=lambda score: score["match_index"],
+            key=lambda score: score["index"],
         ),
     )
 

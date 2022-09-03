@@ -1,48 +1,48 @@
-A|Sénégal|Pays-Bas
-A|Qatar|Équateur
-A|Qatar|Sénégal
-A|Pays-Bas|Équateur
-A|Pays-Bas|Qatar
-A|Équateur|Sénégal
-B|Angleterre|Iran
-B|États-Unis|Pays de Galles
-B|Pays de Galles|Iran
-B|Angleterre|États-Unis
-B|Pays de Galles|Angleterre
-B|Iran|États-Unis
-C|Argentine|Arabie Saoudite
-C|Mexique|Pologne
-C|Pologne|Arabie Saoudite
-C|Argentine|Mexique
-C|Pologne|Argentine
-C|Arabie Saoudite|Mexique
-D|Danemark|Tunisie
-D|France|Australie
-D|Tunisie|Australie
-D|France|Danemark
-D|Australie|Danemark
-D|Tunisie|France
-E|Allemagne|Japon
-E|Espagne|Costa Rica
-E|Japon|Costa Rica
-E|Espagne|Allemagne
-E|Japon|Espagne
-E|Costa Rica|Allemagne
-F|Maroc|Croatie
-F|Belgique|Canada
-F|Belgique|Maroc
-F|Croatie|Canada
-F|Croatie|Belgique
-F|Canada|Maroc
-G|Suisse|Cameroun
-G|Brésil|Serbie
-G|Cameroun|Serbie
-G|Brésil|Suisse
-G|Serbie|Suisse
-G|Cameroun|Brésil
-H|Uruguay|Corée du Sud
-H|Portugal|Ghana
-H|Corée du Sud|Ghana
-H|Portugal|Uruguay
-H|Ghana|Uruguay
-H|Corée du Sud|Portugal
+A|1|QA|EC
+A|2|SN|NL
+A|3|QA|SN
+A|4|NL|EC
+A|5|NL|QA
+A|6|EC|SN
+B|1|GB-ENG|IR
+B|2|US|GB-WLS
+B|3|GB-WLS|IR
+B|4|GB-ENG|US
+B|5|GB-WLS|GB-ENG
+B|6|IR|US
+C|1|AR|SA
+C|2|MX|PL
+C|3|PL|SA
+C|4|AR|MX
+C|5|PL|AR
+C|6|SA|MX
+D|1|DK|TN
+D|2|FR|AU
+D|3|TN|AU
+D|4|FR|DK
+D|5|AU|DK
+D|6|TN|FR
+E|1|DE|JP
+E|2|ES|CR
+E|3|JP|CR
+E|4|ES|DE
+E|5|JP|ES
+E|6|CR|DE
+F|1|MA|HR
+F|2|BE|CA
+F|3|BE|MA
+F|4|HR|CA
+F|5|HR|BE
+F|6|CA|MA
+G|1|CH|CM
+G|2|BR|RS
+G|3|CM|RS
+G|4|BR|CH
+G|5|RS|CH
+G|6|CM|BR
+H|1|UY|KR
+H|2|PT|GH
+H|3|KR|GH
+H|4|PT|UY
+H|5|GH|UY
+H|6|KR|PT
