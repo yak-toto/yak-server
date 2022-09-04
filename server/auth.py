@@ -7,8 +7,8 @@ from flask import current_app
 from flask import request
 
 from . import db
-from .models import Matches
-from .models import Scores
+from .models import Bet
+from .models import Match
 from .models import User
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
@@ -57,9 +57,9 @@ def signup_post():
     db.session.add(user)
     db.session.commit()
 
-    # Initialize scores and integrate in db
+    # Initialize bets and integrate in db
     db.session.add_all(
-        Scores(user_id=user.id, match_id=match.id) for match in Matches.query.all()
+        Bet(user_id=user.id, match_id=match.id) for match in Match.query.all()
     )
     db.session.commit()
 

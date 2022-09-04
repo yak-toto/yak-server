@@ -4,7 +4,7 @@ from flask import Blueprint
 from sqlalchemy import or_
 
 from .models import Group
-from .models import Matches
+from .models import Match
 from .models import Phase
 from .models import Team
 from .utils.auth_utils import token_required
@@ -43,7 +43,7 @@ def matches(current_user):
         return success_response(
             200,
             sorted(
-                (match.to_dict() for match in Matches.query.all()),
+                (match.to_dict() for match in Match.query.all()),
                 key=lambda match: (match["group"]["code"], match["index"]),
             ),
         )
@@ -56,7 +56,7 @@ def matches(current_user):
 @token_required
 def matches_get_by_id(current_user, match_id):
     if current_user.name in ("admin"):
-        match = Matches.query.filter_by(id=match_id).first()
+        match = Match.query.filter_by(id=match_id).first()
 
         if not match:
             return failed_response(*match_not_found)
@@ -74,7 +74,7 @@ def matches_phases_get(current_user, group_name):
     return success_response(
         200,
         sorted(
-            (match.to_dict() for match in Matches.query.filter_by(group_id=group.id)),
+            (match.to_dict() for match in Match.query.filter_by(group_id=group.id)),
             key=itemgetter("index"),
         ),
     )
@@ -93,8 +93,8 @@ def matches_teams_get(current_user, team_id):
     if not team:
         return failed_response(*team_not_found)
 
-    matches = Matches.query.filter(
-        or_(Matches.team1_id == team.id, Matches.team2_id == team.id)
+    matches = Match.query.filter(
+        or_(Match.team1_id == team.id, Match.team2_id == team.id)
     )
 
     return success_response(200, [match.to_dict() for match in matches])

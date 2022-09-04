@@ -3,10 +3,10 @@ from flask import request
 from sqlalchemy import and_
 
 from . import db
+from .models import Bet
 from .models import Group
 from .models import is_locked
-from .models import Matches
-from .models import Scores
+from .models import Match
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import VERSION
@@ -26,7 +26,7 @@ def groups(current_user):
     return success_response(
         200,
         sorted(
-            (score.to_dict() for score in current_user.scores),
+            (score.to_dict() for score in current_user.bets),
             key=lambda score: (score["group"]["phase"]["code"], score["index"]),
         ),
     )
@@ -37,19 +37,19 @@ def groups(current_user):
 def group_get(current_user, group_code):
     group = Group.query.filter_by(code=group_code).first()
 
-    matches = Matches.query.filter_by(group_id=group.id)
+    matches = Match.query.filter_by(group_id=group.id)
 
-    scores = Scores.query.filter(
+    bets = Bet.query.filter(
         and_(
-            Scores.user_id == current_user.id,
-            Scores.match_id.in_(match.id for match in matches),
+            Bet.user_id == current_user.id,
+            Bet.match_id.in_(match.id for match in matches),
         )
     )
 
     return success_response(
         200,
         sorted(
-            (score.to_dict() for score in scores),
+            (score.to_dict() for score in bets),
             key=lambda score: score["index"],
         ),
     )
@@ -61,7 +61,7 @@ def group_get(current_user, group_code):
 )
 @token_required
 def match_get(current_user, match_id):
-    score = Scores.query.filter_by(user_id=current_user.id, match_id=match_id).first()
+    score = Bet.query.filter_by(user_id=current_user.id, match_id=match_id).first()
     if not score:
         return failed_response(*match_not_found)
 

@@ -4,7 +4,7 @@ import csv
 from server import create_app
 from server import db
 from server.models import Group
-from server.models import Matches
+from server.models import Match
 from server.models import Phase
 from server.models import Team
 
@@ -47,7 +47,7 @@ with app.app_context():
             group = Group.query.filter_by(code=group_code).first()
 
             db.session.add(
-                Matches(
+                Match(
                     group_id=group.id,
                     team1_id=team1.id,
                     team2_id=team2.id,

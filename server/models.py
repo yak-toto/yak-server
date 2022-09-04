@@ -31,8 +31,8 @@ class User(db.Model):
         db.Float, CheckConstraint("points>=0"), nullable=False, default=0
     )
 
-    scores = db.relationship(
-        "Scores",
+    bets = db.relationship(
+        "Bet",
         back_populates="user",
         lazy="dynamic",
         cascade="all, delete",
@@ -77,7 +77,7 @@ class User(db.Model):
         }
 
 
-class Matches(db.Model):
+class Match(db.Model):
     __tablename__ = "match"
     id = db.Column(
         db.String(100),
@@ -97,7 +97,7 @@ class Matches(db.Model):
     team2_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
     team2 = db.relationship("Team", foreign_keys=team2_id, backref="match2")
 
-    scores = db.relationship("Scores", back_populates="match")
+    bets = db.relationship("Bet", back_populates="match")
 
     def to_dict(self):
         return {
@@ -116,8 +116,8 @@ def is_locked(score):
     return score.user.name != "admin" and datetime.now() > locked_date
 
 
-class Scores(db.Model):
-    __tablename__ = "score"
+class Bet(db.Model):
+    __tablename__ = "bet"
     id = db.Column(
         db.String(100),
         primary_key=True,
@@ -127,10 +127,10 @@ class Scores(db.Model):
     user_id = db.Column(
         db.String(100), db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
-    user = db.relationship("User", back_populates="scores")
+    user = db.relationship("User", back_populates="bets")
 
     match_id = db.Column(db.String(100), db.ForeignKey("match.id"), nullable=False)
-    match = db.relationship("Matches", back_populates="scores")
+    match = db.relationship("Match", back_populates="bets")
 
     score1 = db.Column(db.Integer, CheckConstraint("score1>=0"), default=None)
     score2 = db.Column(db.Integer, CheckConstraint("score2>=0"), default=None)
