@@ -5,11 +5,20 @@
         <div class="container">
           <div id="navbarMenuHeroA" class="navbar-menu is-active">
             <div class="navbar-start">
-              <div v-if="$store.getters.isAuthenticated" class="has-text-white navbar-item">
+              <div v-if="
+                $store.getters.isAuthenticated &&
+                $route.name !== 'login' && $route.name !== 'signup'"
+                class="has-text-white navbar-item"
+              >
                 Utilisateur:&nbsp;<strong>{{ $store.getters.getUserName }}</strong>
               </div>
               <a @click="computePoints"
-                v-if="$store.getters.isAuthenticated && $store.getters.getUserName === 'admin'" class="navbar-item">
+                v-if="
+                  $store.getters.isAuthenticated &&
+                  $route.name !== 'login' && $route.name !== 'signup' &&
+                  $store.getters.getUserName === 'admin'"
+                class="navbar-item"
+              >
                 Calculer les points
               </a>
             </div>
