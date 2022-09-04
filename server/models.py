@@ -138,14 +138,17 @@ class Scores(db.Model):
     def is_invalid(self) -> bool:
         return None in (self.score1, self.score2)
 
+    def is_valid(self) -> bool:
+        return not self.is_invalid()
+
     def is_1_win(self) -> bool:
-        return not self.is_invalid() and self.score1 > self.score2
+        return self.is_valid() and self.score1 > self.score2
 
     def is_draw(self) -> bool:
-        return not self.is_invalid() and self.score1 == self.score2
+        return self.is_valid() and self.score1 == self.score2
 
     def is_2_win(self) -> bool:
-        return not self.is_invalid() and self.score1 < self.score2
+        return self.is_valid() and self.score1 < self.score2
 
     def is_same_results(self, other) -> bool:
         return (
@@ -155,9 +158,12 @@ class Scores(db.Model):
         )
 
     def is_same_scores(self, other) -> bool:
-        if self.is_invalid() or other.is_invalid():
-            return False
-        return self.score1 == other.score1 and self.score2 == other.score2
+        return (
+            self.is_valid()
+            and other.is_valid()
+            and self.score1 == other.score1
+            and self.score2 == other.score2
+        )
 
     def to_dict(self):
         return {
