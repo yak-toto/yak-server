@@ -1,3 +1,6 @@
+from .constants import BINARY
+from .constants import SCORE
+
 invalid_credentials = (401, "Invalid credentials")
 invalid_name = (401, "Name already exists")
 match_not_found = (404, "Match not found")
@@ -11,3 +14,7 @@ invalid_team_id = (
 )
 team_not_found = (404, "No team found for the requested id.")
 locked_bets = (401, "Cannot modify bets because locked date is exceeded.")
+invalid_bet_type = (
+    401,
+    f"Invalid bet type. The available bet types are : {SCORE, BINARY}.",
+)

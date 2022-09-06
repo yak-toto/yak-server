@@ -15,8 +15,8 @@ const actions = {
   getGroup(context, { groupName }) {
     return getGroup(groupName, context.state.jwt);
   },
-  patchScores(context, { matchId, matchResource }) {
-    return patchScores(matchId, matchResource, context.state.jwt);
+  patchScores(context, { matchId, matchResource, type }) {
+    return patchScores(matchId, matchResource, type, context.state.jwt);
   },
   getScoreBoard(context) {
     return getScoreBoard(context.state.jwt);

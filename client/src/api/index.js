@@ -30,8 +30,8 @@ export function getGroup(groupName, jwt) {
   return axios.get(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/bets/groups/${groupName}`, { headers: { Authorization: `Bearer: ${jwt}` } });
 }
 
-export function patchScores(matchId, matchResource, jwt) {
-  return axios.patch(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/bets/scores/${matchId}`, matchResource, { headers: { Authorization: `Bearer: ${jwt}` } });
+export function patchScores(matchId, matchResource, type, jwt) {
+  return axios.patch(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/bets/scores/${matchId}`, matchResource, { params: { type: type }, headers: { Authorization: `Bearer: ${jwt}` } });
 }
 
 // ------------------------------

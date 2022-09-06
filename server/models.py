@@ -39,6 +39,14 @@ class User(db.Model):
         passive_deletes=True,
     )
 
+    binary_bets = db.relationship(
+        "BinaryBet",
+        back_populates="user",
+        lazy="dynamic",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
+
     def __init__(self, name, first_name, last_name, password) -> None:
         self.name = name
         self.first_name = first_name
@@ -98,6 +106,7 @@ class Match(db.Model):
     team2 = db.relationship("Team", foreign_keys=team2_id, backref="match2")
 
     bets = db.relationship("Bet", back_populates="match")
+    binary_bets = db.relationship("BinaryBet", back_populates="match")
 
     def to_dict(self):
         return {
@@ -174,6 +183,46 @@ class Bet(db.Model):
             "group": self.match.group.to_dict(),
             "team1": {**self.match.team1.to_dict(), "score": self.score1},
             "team2": {**self.match.team2.to_dict(), "score": self.score2},
+        }
+
+
+class BinaryBet(db.Model):
+    __tablename__ = "binary_bet"
+    id = db.Column(
+        db.String(100),
+        primary_key=True,
+        nullable=False,
+        default=lambda: str(uuid.uuid4()),
+    )
+    user_id = db.Column(
+        db.String(100), db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
+    user = db.relationship("User", back_populates="binary_bets")
+
+    match_id = db.Column(db.String(100), db.ForeignKey("match.id"), nullable=False)
+    match = db.relationship("Match", back_populates="binary_bets")
+
+    is_one_won = db.Column(db.Boolean, default=None)
+
+    def bet_from_is_one_won(self):
+        if self.is_one_won is None:
+            return (None, None)
+        elif self.is_one_won:
+            return (True, False)
+        else:
+            return (False, True)
+
+    def to_dict(self):
+        bet_results = self.bet_from_is_one_won()
+
+        return {
+            "id": self.id,
+            "match_id": self.match_id,
+            "index": self.match.index,
+            "locked": is_locked(self),
+            "group": self.match.group.to_dict(),
+            "team1": {**self.match.team1.to_dict(), "won": bet_results[0]},
+            "team2": {**self.match.team2.to_dict(), "won": bet_results[1]},
         }
 
 
