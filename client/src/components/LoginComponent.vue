@@ -8,10 +8,10 @@
 
       <form v-on:submit.prevent="login">
         <div class="field control">
-          <label class="label" for="name">
-            Nom
-            <input type="text" class="input is-large" id="name" name="name"
-              placeholder="nom" v-model="name" />
+          <label class="label" for="pseudo">
+            Pseudo
+            <input type="text" class="input is-large" id="pseudo" name="pseudo"
+              placeholder="pseudo" v-model="name" />
           </label>
         </div>
 

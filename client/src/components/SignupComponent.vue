@@ -8,9 +8,9 @@
 
       <form v-on:submit.prevent="signup">
         <div class="field control">
-          <label class="label" for="name">
-            Nom
-            <input type="text" class="input is-large" id="name" placeholder="nom" v-model="name">
+          <label class="label" for="pseudo">
+            Pseudo
+            <input type="text" class="input is-large" id="pseudo" placeholder="pseudo" v-model="name">
           </label>
         </div>
 
