@@ -115,8 +115,8 @@ def match_patch(current_user, match_id):
 
             log_score_bet(
                 current_user.name,
-                bet.match.team1,
-                bet.match.team2,
+                bet.match.team1.description,
+                bet.match.team2.description,
                 bet.score1,
                 bet.score2,
             )
