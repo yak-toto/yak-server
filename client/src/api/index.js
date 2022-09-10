@@ -31,7 +31,7 @@ export function getGroup(groupName, jwt) {
 }
 
 export function patchScores(matchId, matchResource, type, jwt) {
-  return axios.patch(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/bets/scores/${matchId}`, matchResource, { params: { type: type }, headers: { Authorization: `Bearer: ${jwt}` } });
+  return axios.patch(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/bets/scores/${matchId}`, matchResource, { params: { type }, headers: { Authorization: `Bearer: ${jwt}` } });
 }
 
 // ------------------------------
@@ -47,5 +47,5 @@ export function getScoreBoard(jwt) {
 // ------------------------------
 
 export function postComputePoints(jwt) {
-  return axios.post(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/compute_points`, null, { headers: { Authorization: `Bearer: ${jwt}` } })
+  return axios.post(`${URL}/${GLOBAL_ENDPOINT}/${VERSION}/compute_points`, null, { headers: { Authorization: `Bearer: ${jwt}` } });
 }

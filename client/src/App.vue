@@ -58,7 +58,7 @@ export default {
   methods: {
     computePoints() {
       this.$store.dispatch('computePoints');
-    }
+    },
   },
 };
 </script>

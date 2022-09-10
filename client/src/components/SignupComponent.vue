@@ -56,7 +56,9 @@ export default {
   },
   methods: {
     signup() {
-      this.$store.dispatch('signup', { name: this.name, first_name: this.firstName, last_name: this.lastName, password: this.password })
+      this.$store.dispatch('signup', {
+        name: this.name, first_name: this.firstName, last_name: this.lastName, password: this.password,
+      })
         .then(() => {
           this.$router.push('/login');
         })

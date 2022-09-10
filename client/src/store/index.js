@@ -2,7 +2,7 @@ import Vuex from 'vuex';
 import VuexPersistence from 'vuex-persist';
 
 import {
-  postSignup, postLogin, getGroupNames, getGroup, patchScores, getScoreBoard, postComputePoints
+  postSignup, postLogin, getGroupNames, getGroup, patchScores, getScoreBoard, postComputePoints,
 } from '@/api';
 import isValidJwt from '@/utils';
 
