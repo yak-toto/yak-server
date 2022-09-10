@@ -24,16 +24,25 @@ from .utils.flask_utils import success_response
 groups = Blueprint("group", __name__)
 
 
-@groups.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/names")
+@groups.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups")
 @token_required
-def groups_names(current_user):
-    phase = Phase.query.filter_by(code="GROUP").first()
+def get_groups(current_user):
+    return success_response(
+        200,
+        [group.to_dict() for group in Group.query.order_by(Group.code)],
+    )
+
+
+@groups.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_code>")
+@token_required
+def get_group_by_code(current_user, group_code):
+    phase = Phase.query.filter_by(code=group_code).first()
 
     return success_response(
         200,
         [
-            phase.to_dict()
-            for phase in Group.query.filter_by(phase_id=phase.id).order_by(Group.code)
+            group.to_dict()
+            for group in Group.query.filter_by(phase_id=phase.id).order_by(Group.code)
         ],
     )
 
