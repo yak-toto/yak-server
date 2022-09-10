@@ -1,8 +1,10 @@
 from operator import itemgetter
 
 from flask import Blueprint
+from flask import request
 from sqlalchemy import or_
 
+from . import db
 from .models import Group
 from .models import Match
 from .models import Phase
@@ -34,6 +36,30 @@ def groups_names(current_user):
             for phase in Group.query.filter_by(phase_id=phase.id).order_by(Group.code)
         ],
     )
+
+
+@groups.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches", methods=["POST"])
+@token_required
+def match_post(current_user):
+    if current_user.name == "admin":
+        body = request.get_json()
+
+        new_match = Match(
+            group_id=body["group"]["id"],
+            team1_id=body["team1"]["id"],
+            team2_id=body["team2"]["id"],
+            index=body["index"],
+        )
+
+        db.session.add(new_match)
+        db.session.commit()
+
+        return success_response(
+            200,
+            new_match.to_dict(),
+        )
+    else:
+        return failed_response(*unauthorized_access_to_admin_api)
 
 
 @groups.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches")
