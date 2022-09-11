@@ -1,8 +1,5 @@
 import os
 
-# Do not sort key in json response
-JSON_SORT_KEYS = False
-
 # Setup MySQL credentials
 SQLALCHEMY_DATABASE_URI = (
     f"mysql+pymysql://{os.environ['MYSQL_USER_NAME']}:"

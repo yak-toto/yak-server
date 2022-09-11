@@ -10,7 +10,10 @@ load_dotenv()
 
 def create_app():
     app = Flask(__name__)
+
     app.config.from_pyfile("config_file.py")
+    app.json.sort_keys = False
+
     db.init_app(app)
 
     # Registrer blueprint
