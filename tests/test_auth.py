@@ -33,7 +33,7 @@ def test_valid_auth(client, monkeypatch):
 
     # current user tests
     response_current_user = client.get(
-        "api/v1/current_user", headers=[("Authorization", f"Bearer {auth_token}")]
+        "api/v1/current_user", headers=[("Authorization", f"Bearer: {auth_token}")]
     )
     assert str(response_current_user.status_code) == "200"
     assert response_current_user.json == {
@@ -78,4 +78,27 @@ def test_double_signup(client, monkeypatch):
         "ok": False,
         "error_code": 401,
         "description": "Name already exists",
+    }
+
+
+def test_login_wrong_password(client):
+    client.post(
+        "api/v1/signup",
+        json={
+            "name": "glepape",
+            "first_name": "Guillaume",
+            "last_name": "Le Pape",
+            "password": "admin",
+        },
+    )
+
+    response_login = client.post(
+        "api/v1/login", json={"name": "glepape", "password": "wrong_password"}
+    )
+
+    assert str(response_login.status_code) == "401"
+    assert response_login.json == {
+        "ok": False,
+        "error_code": 401,
+        "description": "Invalid credentials",
     }
