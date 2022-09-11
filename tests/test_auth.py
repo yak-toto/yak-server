@@ -50,13 +50,13 @@ def test_valid_auth(client, monkeypatch):
 def test_double_signup(client, monkeypatch):
     # signup test
     monkeypatch.setattr(
-        "uuid.uuid4", Mock(return_value="b31d9d4f-22f5-4122-85dd-48089d42fd0a")
+        "uuid.uuid4", Mock(return_value="a9e14635-8983-45ab-8afa-eb920866c60e")
     )
 
     response_signup = client.post(
         "/api/v1/signup",
         json={
-            "name": "admin",
+            "name": "user2",
             "first_name": "admin",
             "last_name": "admin",
             "password": "admin",
@@ -65,7 +65,7 @@ def test_double_signup(client, monkeypatch):
     assert str(response_signup.status_code) == "201"
     assert response_signup.json == {
         "ok": True,
-        "result": {"id": "b31d9d4f-22f5-4122-85dd-48089d42fd0a", "name": "admin"},
+        "result": {"id": "a9e14635-8983-45ab-8afa-eb920866c60e", "name": "user2"},
     }
 
     monkeypatch.delattr("uuid.uuid4")
@@ -74,7 +74,7 @@ def test_double_signup(client, monkeypatch):
     response_second_signup = client.post(
         "/api/v1/signup",
         json={
-            "name": "admin",
+            "name": "user2",
             "first_name": "admin",
             "last_name": "admin",
             "password": "admin",

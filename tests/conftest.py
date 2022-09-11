@@ -1,12 +1,14 @@
+import os
+
 import pytest
 from server import create_app
 from server import db
 
 
-@pytest.fixture
-def app(monkeypatch):
+@pytest.fixture(scope="session")
+def app():
     # Override MYSQL_DB environment to push data to a different database
-    monkeypatch.setenv("MYSQL_DB", "yak_toto_test")
+    os.environ["MYSQL_DB"] = "yak_toto_test"
 
     # Create app and set TESTING config
     app = create_app()
@@ -26,6 +28,6 @@ def app(monkeypatch):
     db.drop_all(app=app)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def client(app):
     return app.test_client()
