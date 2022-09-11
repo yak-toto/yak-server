@@ -1,5 +1,12 @@
 #!/usr/bin/env python
-from server import create_app
 from server import db
 
-db.create_all(app=create_app())
+
+def script(app):
+    db.create_all(app=app)
+
+
+if __name__ == "__main__":
+    from server import create_app
+
+    script(create_app())
