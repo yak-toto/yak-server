@@ -1,6 +1,11 @@
+from unittest.mock import Mock
+
+
 def test_valid_auth(client, monkeypatch):
     # signup test
-    monkeypatch.setattr("uuid.uuid4", lambda: "b31d9d4f-22f5-4122-85dd-48089d42fd0a")
+    monkeypatch.setattr(
+        "uuid.uuid4", Mock(return_value="b31d9d4f-22f5-4122-85dd-48089d42fd0a")
+    )
 
     response_signup = client.post(
         "/api/v1/signup",
@@ -44,7 +49,9 @@ def test_valid_auth(client, monkeypatch):
 
 def test_double_signup(client, monkeypatch):
     # signup test
-    monkeypatch.setattr("uuid.uuid4", lambda: "b31d9d4f-22f5-4122-85dd-48089d42fd0a")
+    monkeypatch.setattr(
+        "uuid.uuid4", Mock(return_value="b31d9d4f-22f5-4122-85dd-48089d42fd0a")
+    )
 
     response_signup = client.post(
         "/api/v1/signup",
