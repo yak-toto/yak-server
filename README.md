@@ -69,3 +69,13 @@ And then start backend with:
 ```bash
 flask run
 ```
+
+### Data initialization
+
+To run local testing, you can use the script `create_database.py` and `initialize_database.py`. To select, set `COMPETITION` environment variable in `.flaskenv`. It will read data from `data/{COMPETITION}/`.
+
+### Testing
+
+To set up test, please add a MySQL database named `yak_toto_test`. It will contain all the records created during unit tests. This database is cleaned everytime you run test. That's why a different database is created to avoid deleting records you use for your local testing.
+
+Yak-server is using `pytest` to run tests and can run using `pytest` command into root folder.

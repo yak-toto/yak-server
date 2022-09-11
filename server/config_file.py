@@ -16,6 +16,9 @@ SECRET_KEY = os.environ["JWT_SECRET_KEY"]
 # SQL Alchemy features
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+# Name of the competition to load initiliazition data
+COMPETITION = os.environ["COMPETITION"]
+
 
 def load_business_rules():
     from configparser import ConfigParser

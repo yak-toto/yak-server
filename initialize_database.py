@@ -9,15 +9,16 @@ from server.models import Phase
 from server.models import Team
 
 app = create_app()
+COMPETITION = app.config["COMPETITION"]
 
 with app.app_context():
-    with open("data/phases.csv", newline="") as csvfile:
+    with open(f"data/{COMPETITION}/phases.csv", newline="") as csvfile:
         spamreader = csv.reader(csvfile, delimiter="|")
 
         db.session.add_all(Phase(code=row[0], description=row[1]) for row in spamreader)
         db.session.commit()
 
-    with open("data/groups.csv", newline="") as csvfile:
+    with open(f"data/{COMPETITION}/groups.csv", newline="") as csvfile:
         spamreader = csv.reader(csvfile, delimiter="|")
 
         for row in spamreader:
@@ -29,13 +30,13 @@ with app.app_context():
 
         db.session.commit()
 
-    with open("data/teams.csv", newline="") as csvfile:
+    with open(f"data/{COMPETITION}/teams.csv", newline="") as csvfile:
         spamreader = csv.reader(csvfile, delimiter="|")
 
         db.session.add_all(Team(code=row[0], description=row[1]) for row in spamreader)
         db.session.commit()
 
-    with open("data/matches.csv", newline="") as csvfile:
+    with open(f"data/{COMPETITION}/matches.csv", newline="") as csvfile:
         spamreader = csv.reader(csvfile, delimiter="|")
 
         for row in spamreader:
