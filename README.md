@@ -10,11 +10,12 @@
 
 ### Database
 
-Install and start mysql server on port 3306. Add a database named `yak_toto`. In root folder, create a dotenv file named `.flaskenv` and fill your MySQL user name and password. When backend start, this configuration is automaticaly loaded.
+Install and start mysql server on port 3306. Add a database named `yak_toto`. In root folder, create a dotenv file named `.flaskenv` and fill your MySQL user name, password and database. When backend start, this configuration is automaticaly loaded.
 
 ```text
 MYSQL_USER_NAME=my_user_name
 MYSQL_PASSWORD=my_password
+MYSQL_DB=my_database_name
 ```
 
 ### Backend

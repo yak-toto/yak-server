@@ -6,7 +6,7 @@ JSON_SORT_KEYS = False
 # Setup MySQL credentials
 SQLALCHEMY_DATABASE_URI = (
     f"mysql+pymysql://{os.environ['MYSQL_USER_NAME']}:"
-    f"{os.environ['MYSQL_PASSWORD']}@localhost:3306/yak_toto"
+    f"{os.environ['MYSQL_PASSWORD']}@localhost:3306/{os.environ['MYSQL_DB']}"
 )
 
 # Load jwt secret key from credentials file
