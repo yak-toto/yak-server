@@ -1,12 +1,8 @@
-import os
-
 import requests
-
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-CHAT_ID = os.environ.get("CHAT_ID")
+from flask import current_app
 
 
 def send_message(msg):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    params = {"chat_id": CHAT_ID, "text": msg}
+    url = f"https://api.telegram.org/bot{current_app.config['BOT_TOKEN']}/sendMessage"
+    params = {"chat_id": current_app.config["CHAT_ID"], "text": msg}
     requests.get(url, params=params)
