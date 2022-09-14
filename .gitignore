@@ -184,3 +184,4 @@ yarn-error.log*
 *.sw*
 
 .flaskenv
+*.sql
