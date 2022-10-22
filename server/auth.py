@@ -65,7 +65,16 @@ def signup_post():
 
     send_message(f"User {user.name} created.")
 
-    return success_response(201, user.to_user_dict())
+    token = jwt.encode(
+        {
+            "sub": user.id,
+            "iat": datetime.utcnow(),
+            "exp": datetime.utcnow() + timedelta(minutes=30),
+        },
+        current_app.config["SECRET_KEY"],
+    )
+
+    return success_response(201, {**user.to_user_dict(), "token": token})
 
 
 @auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/current_user")
