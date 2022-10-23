@@ -32,7 +32,7 @@ class User(db.Model):
     )
 
     bets = db.relationship(
-        "Bet",
+        "ScoreBet",
         back_populates="user",
         lazy="dynamic",
         cascade="all, delete",
@@ -105,7 +105,7 @@ class Match(db.Model):
     team2_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
     team2 = db.relationship("Team", foreign_keys=team2_id, backref="match2")
 
-    bets = db.relationship("Bet", back_populates="match")
+    bets = db.relationship("ScoreBet", back_populates="match")
     binary_bets = db.relationship("BinaryBet", back_populates="match")
 
     def to_dict(self):
@@ -125,8 +125,8 @@ def is_locked(score):
     return score.user.name != "admin" and datetime.now() > locked_date
 
 
-class Bet(db.Model):
-    __tablename__ = "bet"
+class ScoreBet(db.Model):
+    __tablename__ = "score_bet"
     id = db.Column(
         db.String(100),
         primary_key=True,
