@@ -3,7 +3,7 @@ from flask import current_app
 from sqlalchemy import and_
 
 from . import db
-from .models import Bet
+from .models import ScoreBet
 from .models import User
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
@@ -75,8 +75,8 @@ def compute_points(
         user_ids_found_correct_result = []
         user_ids_found_correct_score = []
 
-        for user_score in Bet.query.filter(
-            and_(Bet.match_id == real_score.match_id, Bet.user_id != admin.id)
+        for user_score in ScoreBet.query.filter(
+            and_(ScoreBet.match_id == real_score.match_id, ScoreBet.user_id != admin.id)
         ):
             if user_score.is_same_results(real_score):
                 number_correct_result += 1
