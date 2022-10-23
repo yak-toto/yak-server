@@ -7,7 +7,7 @@ from flask import current_app
 from flask import request
 
 from . import db
-from .models import Bet
+from .models import ScoreBet
 from .models import Match
 from .models import User
 from .utils.auth_utils import token_required
@@ -59,7 +59,7 @@ def signup_post():
 
     # Initialize bets and integrate in db
     db.session.add_all(
-        Bet(user_id=user.id, match_id=match.id) for match in Match.query.all()
+        ScoreBet(user_id=user.id, match_id=match.id) for match in Match.query.all()
     )
     db.session.commit()
 

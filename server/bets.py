@@ -5,7 +5,7 @@ from flask import request
 from sqlalchemy import and_
 
 from . import db
-from .models import Bet
+from .models import ScoreBet
 from .models import BinaryBet
 from .models import Group
 from .models import is_locked
@@ -49,10 +49,10 @@ def group_get(current_user, group_code):
 
     matches = Match.query.filter_by(group_id=group.id)
 
-    bets = Bet.query.filter(
+    bets = ScoreBet.query.filter(
         and_(
-            Bet.user_id == current_user.id,
-            Bet.match_id.in_(match.id for match in matches),
+            ScoreBet.user_id == current_user.id,
+            ScoreBet.match_id.in_(match.id for match in matches),
         )
     )
 
@@ -83,7 +83,7 @@ def match_patch(current_user, match_id):
     bet_type = request.args.get("type")
 
     if bet_type == SCORE:
-        bet = Bet.query.filter_by(user_id=current_user.id, match_id=match_id).first()
+        bet = ScoreBet.query.filter_by(user_id=current_user.id, match_id=match_id).first()
 
         if "score" not in body["team1"] and "score" not in body["team2"]:
             return failed_response(*wrong_inputs)
@@ -160,7 +160,7 @@ def bet_get(current_user, match_id):
     bet_type = request.args.get("type")
 
     if bet_type == "score":
-        bet = Bet.query.filter_by(user_id=current_user.id, match_id=match_id).first()
+        bet = ScoreBet.query.filter_by(user_id=current_user.id, match_id=match_id).first()
     elif bet_type == "binary":
         bet = BinaryBet.query.filter_by(
             user_id=current_user.id, match_id=match_id
