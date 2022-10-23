@@ -17,10 +17,9 @@ def test_valid_auth(client, monkeypatch):
         },
     )
     assert str(response_signup.status_code) == "201"
-    assert response_signup.json == {
-        "ok": True,
-        "result": {"id": "b31d9d4f-22f5-4122-85dd-48089d42fd0a", "name": "admin"},
-    }
+    assert response_signup.json["ok"] == True
+    assert response_signup.json["result"]["id"] == "b31d9d4f-22f5-4122-85dd-48089d42fd0a"
+    assert response_signup.json["result"]["name"] == "admin"
 
     monkeypatch.delattr("uuid.uuid4")
 
@@ -63,10 +62,9 @@ def test_double_signup(client, monkeypatch):
         },
     )
     assert str(response_signup.status_code) == "201"
-    assert response_signup.json == {
-        "ok": True,
-        "result": {"id": "a9e14635-8983-45ab-8afa-eb920866c60e", "name": "user2"},
-    }
+    assert response_signup.json["ok"] == True
+    assert response_signup.json["result"]["id"] == "a9e14635-8983-45ab-8afa-eb920866c60e"
+    assert response_signup.json["result"]["name"] == "user2"
 
     monkeypatch.delattr("uuid.uuid4")
 

@@ -19,13 +19,15 @@ def app():
     )
 
     # Clean database before running test
-    db.drop_all(app=app)
-    db.create_all(app=app)
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
 
     yield app
 
     # Clean database after running test
-    db.drop_all(app=app)
+    with app.app_context():
+        db.drop_all()
 
 
 @pytest.fixture(scope="session")
