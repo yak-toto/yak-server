@@ -69,7 +69,7 @@ def test_matches_db(app, client, monkeypatch):
     assert match_response.json["result"] == match_result
 
     group_response = client.get(
-        "api/v1/groups/GROUP", headers=[("Authorization", f"Bearer {auth_token}")]
+        "api/v1/groups/phases/GROUP", headers=[("Authorization", f"Bearer {auth_token}")]
     )
 
     with open(f"tests/{testcase}/group_result.json") as file:
