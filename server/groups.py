@@ -36,7 +36,15 @@ def get_groups(current_user):
 @groups.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_code>")
 @token_required
 def get_group_by_code(current_user, group_code):
-    phase = Phase.query.filter_by(code=group_code).first()
+    return success_response(
+        200,
+        Group.query.filter_by(code=group_code).first().to_dict()
+    )
+
+@groups.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/phases/<string:phase_code>")
+@token_required
+def get_groups_by_phase_code(current_user, phase_code):
+    phase = Phase.query.filter_by(code=phase_code).first()
 
     return success_response(
         200,
