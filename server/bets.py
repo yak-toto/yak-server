@@ -15,9 +15,11 @@ from .utils.constants import BINARY
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import SCORE
 from .utils.constants import VERSION
+from .utils.errors import duplicated_ids
 from .utils.errors import invalid_bet_type
 from .utils.errors import locked_bets
 from .utils.errors import match_not_found
+from .utils.errors import missing_id
 from .utils.errors import wrong_inputs
 from .utils.flask_utils import failed_response
 from .utils.flask_utils import success_response
@@ -40,6 +42,89 @@ def groups(current_user):
             key=lambda score: (score["group"]["code"], score["index"]),
         ),
     )
+
+
+@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets", methods=["PATCH"])
+@token_required
+def modify_bets(current_user):
+    # Reject if any input bet does not contain id
+    if not all(bet.get("id") for bet in request.get_json()):
+        return failed_response(*missing_id)
+
+    bet_ids = [bet["id"] for bet in request.get_json()]
+
+    # Reject if there are duplicated ids in input bets
+    if len(bet_ids) != len(set(bet_ids)):
+        return failed_response(*duplicated_ids)
+
+    results = []
+    telegram_logs = {"score": [], "binary": []}
+
+    for bet in request.get_json():
+        # Deduce type bet from request
+        if (
+            "team1" in bet
+            and "team2" in bet
+            and "score" in bet["team1"]
+            and "score" in bet["team2"]
+        ):
+            bet_type = SCORE
+            original_bet = ScoreBet.query.filter_by(
+                match_id=bet["id"], user_id=current_user.id
+            ).first()
+        elif "is_one_won" in bet:
+            bet_type = BINARY
+            original_bet = BinaryBet.query.filter_by(
+                match_id=bet["id"], user_id=current_user.id
+            ).first()
+        else:
+            return failed_response(*wrong_inputs)
+
+        # No bet has been found
+        if not original_bet:
+            return failed_response(*match_not_found)
+
+        # Modify bet depending on their type if the bet has been changed
+        if bet_type == SCORE and (original_bet.score1, original_bet.score2) != (
+            bet["team1"]["score"],
+            bet["team2"]["score"],
+        ):
+            original_bet.score1 = bet["team1"]["score"]
+            original_bet.score2 = bet["team2"]["score"]
+
+            telegram_logs["score"].append(
+                (
+                    current_user.name,
+                    original_bet.match.team1.description,
+                    original_bet.match.team2.description,
+                    original_bet.score1,
+                    original_bet.score2,
+                )
+            )
+        elif bet_type == BINARY and original_bet.is_one_won != bet["is_one_won"]:
+            original_bet.is_one_won = bet["is_one_won"]
+
+            telegram_logs["binary"].append(
+                (
+                    current_user.name,
+                    original_bet.match.team1.description,
+                    original_bet.match.team2.description,
+                    original_bet.is_one_won,
+                )
+            )
+
+        results.append(original_bet.to_dict())
+
+    # Commit at the end to make sure all input are correct before pushing to db
+    db.session.commit()
+
+    for log in telegram_logs["score"]:
+        log_score_bet(*log)
+
+    for log in telegram_logs["binary"]:
+        log_score_bet(*log)
+
+    return success_response(200, results)
 
 
 @bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:group_code>")
@@ -87,7 +172,7 @@ def match_patch(current_user, match_id):
             user_id=current_user.id, match_id=match_id
         ).first()
 
-        if "score" not in body["team1"] and "score" not in body["team2"]:
+        if "score" not in body["team1"] or "score" not in body["team2"]:
             return failed_response(*wrong_inputs)
 
     elif bet_type == BINARY:
