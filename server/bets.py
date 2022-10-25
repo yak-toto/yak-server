@@ -5,11 +5,11 @@ from flask import request
 from sqlalchemy import and_
 
 from . import db
-from .models import ScoreBet
 from .models import BinaryBet
 from .models import Group
 from .models import is_locked
 from .models import Match
+from .models import ScoreBet
 from .utils.auth_utils import token_required
 from .utils.constants import BINARY
 from .utils.constants import GLOBAL_ENDPOINT
@@ -27,7 +27,7 @@ from .utils.telegram_sender import send_message
 bets = Blueprint("bets", __name__)
 
 
-@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/scores")
+@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets")
 @token_required
 def groups(current_user):
     return success_response(
@@ -73,7 +73,7 @@ def group_get(current_user, group_code):
 
 
 @bets.route(
-    f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/scores/<string:match_id>",
+    f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:match_id>",
     methods=["PATCH"],
 )
 @token_required
@@ -83,7 +83,9 @@ def match_patch(current_user, match_id):
     bet_type = request.args.get("type")
 
     if bet_type == SCORE:
-        bet = ScoreBet.query.filter_by(user_id=current_user.id, match_id=match_id).first()
+        bet = ScoreBet.query.filter_by(
+            user_id=current_user.id, match_id=match_id
+        ).first()
 
         if "score" not in body["team1"] and "score" not in body["team2"]:
             return failed_response(*wrong_inputs)
@@ -154,13 +156,15 @@ def log_binary_bet(user_name, team1, team2, is_one_won):
     )
 
 
-@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/scores/<string:match_id>")
+@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:match_id>")
 @token_required
 def bet_get(current_user, match_id):
     bet_type = request.args.get("type")
 
     if bet_type == "score":
-        bet = ScoreBet.query.filter_by(user_id=current_user.id, match_id=match_id).first()
+        bet = ScoreBet.query.filter_by(
+            user_id=current_user.id, match_id=match_id
+        ).first()
     elif bet_type == "binary":
         bet = BinaryBet.query.filter_by(
             user_id=current_user.id, match_id=match_id
