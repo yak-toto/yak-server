@@ -176,8 +176,7 @@ class ScoreBet(db.Model):
 
     def to_dict(self):
         return {
-            "id": self.id,
-            "match_id": self.match_id,
+            "id": self.match_id,
             "index": self.match.index,
             "locked": is_locked(self),
             "group": self.match.group.to_dict(),
@@ -216,8 +215,7 @@ class BinaryBet(db.Model):
         bet_results = self.bet_from_is_one_won()
 
         return {
-            "id": self.id,
-            "match_id": self.match_id,
+            "id": self.match_id,
             "index": self.match.index,
             "locked": is_locked(self),
             "group": self.match.group.to_dict(),
