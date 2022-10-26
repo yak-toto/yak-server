@@ -84,6 +84,10 @@ def modify_bets(current_user):
         if not original_bet:
             return failed_response(*match_not_found)
 
+        # Return error if bet is locked
+        if is_locked(original_bet):
+            return failed_response(*locked_bets)
+
         # Modify bet depending on their type if the bet has been changed
         if bet_type == SCORE and (original_bet.score1, original_bet.score2) != (
             bet["team1"]["score"],
@@ -189,10 +193,10 @@ def match_patch(current_user, match_id):
     if not bet:
         return failed_response(*match_not_found)
 
-    if bet_type == "score":
-        if is_locked(bet):
-            return failed_response(*locked_bets)
+    if is_locked(bet):
+        return failed_response(*locked_bets)
 
+    if bet_type == "score":
         if bet.score1 != body["team1"].get("score") or bet.score2 != body["team2"].get(
             "score"
         ):
@@ -209,9 +213,6 @@ def match_patch(current_user, match_id):
             )
 
     else:
-        if is_locked(bet):
-            return failed_response(*locked_bets)
-
         if bet.is_one_won != body["is_one_won"]:
             bet.is_one_won = body["is_one_won"]
             db.session.commit()
