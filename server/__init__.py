@@ -22,6 +22,7 @@ def create_app():
     from .bets import bets as bets_blueprint
     from .results import results as results_blueprint
     from .groups import groups as groups_blueprint
+    from .matches import matches as matches_blueprint
     from .teams import teams as teams_blueprint
 
     app.register_blueprint(auth_blueprint)
@@ -29,6 +30,7 @@ def create_app():
     app.register_blueprint(config_blueprint)
     app.register_blueprint(results_blueprint)
     app.register_blueprint(groups_blueprint)
+    app.register_blueprint(matches_blueprint)
     app.register_blueprint(teams_blueprint)
 
     CORS(app, resources={r"/*": {"origins": "*"}})
