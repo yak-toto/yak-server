@@ -24,7 +24,7 @@ def load_business_rules():
     from configparser import ConfigParser
 
     config = ConfigParser()
-    config.read("data/config.ini")
+    config.read(f"data/{COMPETITION}/config.ini")
     return config
 
 
