@@ -8,6 +8,7 @@ from .models import User
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import VERSION
+from .utils.errors import no_results_for_admin_user
 from .utils.errors import unauthorized_access_to_admin_api
 from .utils.flask_utils import failed_response
 from .utils.flask_utils import success_response
@@ -32,7 +33,20 @@ def score_board(current_user):
 @results.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/results")
 @token_required
 def results_get(current_user):
-    return success_response(200, User.query.get(current_user.id).to_result_dict())
+    if current_user.name == "admin":
+        return failed_response(*no_results_for_admin_user)
+
+    results = User.query.order_by(User.points.desc()).filter(User.name != "admin")
+
+    rank = [
+        index
+        for index, user_result in enumerate(results, start=1)
+        if user_result.id == current_user.id
+    ][0]
+
+    return success_response(
+        200, User.query.get(current_user.id).to_result_dict() | {"rank": rank}
+    )
 
 
 @results.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/compute_points", methods=["POST"])

@@ -20,3 +20,4 @@ invalid_bet_type = (
     401,
     f"Invalid bet type. The available bet types are : {SCORE, BINARY}.",
 )
+no_results_for_admin_user = (401, "No results for admin user.")
