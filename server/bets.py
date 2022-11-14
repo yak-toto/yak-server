@@ -161,6 +161,93 @@ def group_get(current_user, group_code):
     )
 
 
+@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/results/<string:group_code>")
+@token_required
+def group_result_get(current_user, group_code):
+    group = Group.query.filter_by(code=group_code).first()
+
+    matches = Match.query.filter_by(group_id=group.id)
+
+    score_bets = ScoreBet.query.filter(
+        and_(
+            ScoreBet.user_id == current_user.id,
+            ScoreBet.match_id.in_(match.id for match in matches),
+        )
+    )
+
+    results = {}
+
+    for score_bet in score_bets:
+        if score_bet.match.team1.id not in results:
+            results[score_bet.match.team1.id] = {
+                **(score_bet.match.team1.to_dict()),
+                "played": 0,
+                "won": 0,
+                "drawn": 0,
+                "lost": 0,
+                "goals_for": 0,
+                "goals_against": 0,
+                "goals_difference": 0,
+                "points": 0,
+            }
+
+        if score_bet.match.team2.id not in results:
+            results[score_bet.match.team2.id] = {
+                **(score_bet.match.team2.to_dict()),
+                "played": 0,
+                "won": 0,
+                "drawn": 0,
+                "lost": 0,
+                "goals_for": 0,
+                "goals_against": 0,
+                "goals_difference": 0,
+                "points": 0,
+            }
+
+        if score_bet.score1 is not None and score_bet.score2 is not None:
+            results[score_bet.match.team1.id]["played"] += 1
+            results[score_bet.match.team2.id]["played"] += 1
+
+            results[score_bet.match.team1.id]["goals_for"] += score_bet.score1
+            results[score_bet.match.team1.id]["goals_against"] += score_bet.score2
+            results[score_bet.match.team1.id]["goals_difference"] += (
+                score_bet.score1 - score_bet.score2
+            )
+
+            results[score_bet.match.team2.id]["goals_for"] += score_bet.score2
+            results[score_bet.match.team2.id]["goals_against"] += score_bet.score1
+            results[score_bet.match.team2.id]["goals_difference"] += (
+                score_bet.score2 - score_bet.score1
+            )
+
+            if score_bet.score1 > score_bet.score2:
+                results[score_bet.match.team1.id]["won"] += 1
+                results[score_bet.match.team2.id]["lost"] += 1
+                results[score_bet.match.team1.id]["points"] += 3
+            elif score_bet.score1 < score_bet.score2:
+                results[score_bet.match.team2.id]["won"] += 1
+                results[score_bet.match.team1.id]["lost"] += 1
+                results[score_bet.match.team2.id]["points"] += 3
+            else:
+                results[score_bet.match.team1.id]["drawn"] += 1
+                results[score_bet.match.team2.id]["drawn"] += 1
+                results[score_bet.match.team1.id]["points"] += 1
+                results[score_bet.match.team2.id]["points"] += 1
+
+    return success_response(
+        200,
+        sorted(
+            results.values(),
+            key=lambda team: (
+                team["points"],
+                team["goals_difference"],
+                team["goals_for"],
+            ),
+            reverse=True,
+        ),
+    )
+
+
 @bets.route(
     f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:match_id>",
     methods=["PATCH"],
