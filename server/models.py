@@ -117,6 +117,23 @@ class Match(db.Model):
             "team2": self.team2.to_dict(),
         }
 
+    def to_dict_with_group_id(self):
+        return {
+            "id": self.id,
+            "index": self.index,
+            "group": {"id": self.group_id},
+            "team1": self.team1.to_dict(),
+            "team2": self.team2.to_dict(),
+        }
+
+    def to_dict_without_group(self):
+        return {
+            "id": self.id,
+            "index": self.index,
+            "team1": self.team1.to_dict(),
+            "team2": self.team2.to_dict(),
+        }
+
 
 def is_locked(score):
     locked_date = datetime.strptime(
@@ -176,10 +193,32 @@ class ScoreBet(db.Model):
 
     def to_dict(self):
         return {
-            "id": self.match_id,
+            "id": self.id,
+            "match_id": self.match_id,
             "index": self.match.index,
             "locked": is_locked(self),
             "group": self.match.group.to_dict(),
+            "team1": {**self.match.team1.to_dict(), "score": self.score1},
+            "team2": {**self.match.team2.to_dict(), "score": self.score2},
+        }
+
+    def to_dict_with_group_id(self):
+        return {
+            "id": self.id,
+            "match_id": self.match_id,
+            "index": self.match.index,
+            "locked": is_locked(self),
+            "group": {"id": self.match.group_id},
+            "team1": {**self.match.team1.to_dict(), "score": self.score1},
+            "team2": {**self.match.team2.to_dict(), "score": self.score2},
+        }
+
+    def to_dict_without_group(self):
+        return {
+            "id": self.id,
+            "match_id": self.match_id,
+            "index": self.match.index,
+            "locked": is_locked(self),
             "team1": {**self.match.team1.to_dict(), "score": self.score1},
             "team2": {**self.match.team2.to_dict(), "score": self.score2},
         }
@@ -215,10 +254,36 @@ class BinaryBet(db.Model):
         bet_results = self.bet_from_is_one_won()
 
         return {
-            "id": self.match_id,
+            "id": self.id,
+            "match_id": self.match_id,
             "index": self.match.index,
             "locked": is_locked(self),
             "group": self.match.group.to_dict(),
+            "team1": {**self.match.team1.to_dict(), "won": bet_results[0]},
+            "team2": {**self.match.team2.to_dict(), "won": bet_results[1]},
+        }
+
+    def to_dict_with_group_id(self):
+        bet_results = self.bet_from_is_one_won()
+
+        return {
+            "id": self.id,
+            "match_id": self.match_id,
+            "index": self.match.index,
+            "locked": is_locked(self),
+            "group": {"id": self.match.group_id},
+            "team1": {**self.match.team1.to_dict(), "won": bet_results[0]},
+            "team2": {**self.match.team2.to_dict(), "won": bet_results[1]},
+        }
+
+    def to_dict_without_group(self):
+        bet_results = self.bet_from_is_one_won()
+
+        return {
+            "id": self.id,
+            "match_id": self.match_id,
+            "index": self.match.index,
+            "locked": is_locked(self),
             "team1": {**self.match.team1.to_dict(), "won": bet_results[0]},
             "team2": {**self.match.team2.to_dict(), "won": bet_results[1]},
         }
@@ -258,6 +323,21 @@ class Group(db.Model):
             "id": self.id,
             "code": self.code,
             "phase": self.phase.to_dict(),
+            "description": self.description,
+        }
+
+    def to_dict_with_phase_id(self):
+        return {
+            "id": self.id,
+            "code": self.code,
+            "phase": {"id": self.phase_id},
+            "description": self.description,
+        }
+
+    def to_dict_without_phase(self):
+        return {
+            "id": self.id,
+            "code": self.code,
             "description": self.description,
         }
 

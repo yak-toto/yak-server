@@ -1,12 +1,12 @@
-from operator import itemgetter
-
 from flask import Blueprint
 from flask import request
+from sqlalchemy import desc
 from sqlalchemy import or_
 
 from . import db
 from .models import Group
 from .models import Match
+from .models import Phase
 from .models import Team
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
@@ -29,19 +29,25 @@ def match_post(current_user):
     if current_user.name == "admin":
         body = request.get_json()
 
-        new_match = Match(
+        match = Match(
             group_id=body["group"]["id"],
             team1_id=body["team1"]["id"],
             team2_id=body["team2"]["id"],
             index=body["index"],
         )
 
-        db.session.add(new_match)
+        db.session.add(match)
         db.session.commit()
+
+        group = Group.query.filter_by(id=match.group_id).first()
 
         return success_response(
             200,
-            new_match.to_dict(),
+            {
+                "phase": group.phase.to_dict(),
+                "group": group.to_dict_without_phase(),
+                "match": match.to_dict_without_group(),
+            },
         )
     else:
         return failed_response(*unauthorized_access_to_admin_api)
@@ -50,44 +56,64 @@ def match_post(current_user):
 @matches.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches")
 @token_required
 def matches_get_all(current_user):
-    if current_user.name == "admin":
-        return success_response(
-            200,
-            sorted(
-                (match.to_dict() for match in Match.query.all()),
-                key=lambda match: (match["group"]["code"], match["index"]),
-            ),
-        )
+    match_query = (
+        Match.query.join(Match.group)
+        .join(Group.phase)
+        .order_by(desc(Phase.code), Group.code, Match.index)
+    )
+    matches = [match.to_dict_with_group_id() for match in match_query]
 
-    else:
-        return failed_response(*unauthorized_access_to_admin_api)
+    group_query = Group.query.join(Group.phase).order_by(desc(Phase.code), Group.code)
+    groups = [group.to_dict_with_phase_id() for group in group_query]
+
+    phase_query = Phase.query.order_by(desc(Phase.code))
+    phases = [phase.to_dict() for phase in phase_query]
+
+    return success_response(
+        200,
+        {
+            "phases": phases,
+            "groups": groups,
+            "matches": matches,
+        },
+    )
 
 
 @matches.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/<string:match_id>")
 @token_required
 def matches_get_by_id(current_user, match_id):
-    if current_user.name in ("admin"):
-        match = Match.query.filter_by(id=match_id).first()
+    match = Match.query.filter_by(id=match_id).first()
 
-        if not match:
-            return failed_response(*match_not_found)
+    if not match:
+        return failed_response(*match_not_found)
 
-        return success_response(200, match.to_dict())
-    else:
-        return failed_response(*unauthorized_access_to_admin_api)
+    group = Group.query.filter_by(id=match.group_id).first()
+
+    return success_response(
+        200,
+        {
+            "phase": group.phase.to_dict(),
+            "group": group.to_dict_without_phase(),
+            "match": match.to_dict_without_group(),
+        },
+    )
 
 
 @matches.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/groups/<string:group_name>")
 @token_required
 def matches_phases_get(current_user, group_name):
     group = Group.query.filter_by(code=group_name).first()
+    phase = Phase.query.filter_by(id=group.phase_id).first()
+
+    matches = Match.query.filter_by(group_id=group.id).order_by(Match.index)
 
     return success_response(
         200,
-        sorted(
-            (match.to_dict() for match in Match.query.filter_by(group_id=group.id)),
-            key=itemgetter("index"),
-        ),
+        {
+            "phase": phase.to_dict(),
+            "group": group.to_dict_without_phase(),
+            "matches": [match.to_dict_without_group() for match in matches],
+        },
     )
 
 
@@ -104,8 +130,31 @@ def matches_teams_get(current_user, team_id):
     if not team:
         return failed_response(*team_not_found)
 
-    matches = Match.query.filter(
-        or_(Match.team1_id == team.id, Match.team2_id == team.id)
+    matches = (
+        Match.query.join(Match.group)
+        .join(Group.phase)
+        .filter(or_(Match.team1_id == team.id, Match.team2_id == team.id))
+        .order_by(desc(Phase.code), Group.code, Match.index)
     )
 
-    return success_response(200, [match.to_dict() for match in matches])
+    group_query = (
+        Group.query.join(Group.phase)
+        .order_by(desc(Phase.code), Group.code)
+        .filter(Group.id.in_(match.group_id for match in matches))
+    )
+
+    groups = [group.to_dict_with_phase_id() for group in group_query]
+
+    phase_query = Phase.query.order_by(desc(Phase.code)).filter(
+        Phase.id.in_(group.phase_id for group in group_query)
+    )
+    phases = [phase.to_dict() for phase in phase_query]
+
+    return success_response(
+        200,
+        {
+            "phases": phases,
+            "groups": groups,
+            "matches": [match.to_dict_with_group_id() for match in matches],
+        },
+    )

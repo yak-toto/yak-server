@@ -25,19 +25,21 @@ def teams_post():
         db.session.add_all(teams)
         db.session.commit()
 
-        return success_response(201, [team.to_dict() for team in teams])
+        return success_response(201, {"teams": [team.to_dict() for team in teams]})
     else:
         team = Team(**body)
 
         db.session.add(team)
         db.session.commit()
 
-        return success_response(201, team.to_dict())
+        return success_response(201, {"team": team.to_dict()})
 
 
 @teams.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams")
 def teams_get():
-    return success_response(200, [team.to_dict() for team in Team.query.all()])
+    return success_response(
+        200, {"teams": [team.to_dict() for team in Team.query.all()]}
+    )
 
 
 @teams.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams/<string:team_id>")
@@ -52,4 +54,4 @@ def teams_get_by_id(team_id):
     if not team:
         return failed_response(*team_not_found)
 
-    return success_response(200, team.to_dict())
+    return success_response(200, {"team": team.to_dict()})

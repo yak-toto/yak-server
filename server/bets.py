@@ -2,13 +2,14 @@ from itertools import chain
 
 from flask import Blueprint
 from flask import request
-from sqlalchemy import and_
+from sqlalchemy import desc
 
 from . import db
 from .models import BinaryBet
 from .models import Group
 from .models import is_locked
 from .models import Match
+from .models import Phase
 from .models import ScoreBet
 from .utils.auth_utils import token_required
 from .utils.constants import BINARY
@@ -32,15 +33,79 @@ bets = Blueprint("bets", __name__)
 @bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets")
 @token_required
 def groups(current_user):
+    binary_bets_query = (
+        current_user.binary_bets.filter_by(user_id=current_user.id)
+        .join(BinaryBet.match)
+        .join(Match.group)
+        .join(Group.phase)
+        .order_by(desc(Phase.code), Group.code, Match.index)
+    )
+    binary_bets = [
+        binary_bet.to_dict_with_group_id() for binary_bet in binary_bets_query
+    ]
+
+    score_bets_query = (
+        current_user.bets.filter_by(user_id=current_user.id)
+        .join(ScoreBet.match)
+        .join(Match.group)
+        .join(Group.phase)
+        .order_by(desc(Phase.code), Group.code, Match.index)
+    )
+    score_bets = [score_bet.to_dict_with_group_id() for score_bet in score_bets_query]
+
+    group_query = Group.query.join(Group.phase).order_by(desc(Phase.code), Group.code)
+    groups = [group.to_dict_with_phase_id() for group in group_query]
+
+    phase_query = Phase.query.order_by(desc(Phase.code))
+    phases = [phase.to_dict() for phase in phase_query]
+
     return success_response(
         200,
-        sorted(
-            (
-                score.to_dict()
-                for score in chain(current_user.bets, current_user.binary_bets)
-            ),
-            key=lambda score: (score["group"]["code"], score["index"]),
-        ),
+        {
+            "phases": phases,
+            "groups": groups,
+            "binary_bets": binary_bets,
+            "score_bets": score_bets,
+        },
+    )
+
+
+@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/phases/<string:phase_code>")
+@token_required
+def get_bets_by_phase(current_user, phase_code):
+    phase = Phase.query.filter_by(code=phase_code).first()
+
+    binary_bets_query = (
+        current_user.binary_bets.filter_by(user_id=current_user.id)
+        .filter(Group.phase_id == phase.id)
+        .join(BinaryBet.match)
+        .join(Match.group)
+        .order_by(Group.code, Match.index)
+    )
+    binary_bets = [
+        binary_bet.to_dict_with_group_id() for binary_bet in binary_bets_query
+    ]
+
+    score_bets_query = (
+        current_user.bets.filter_by(user_id=current_user.id)
+        .filter(Group.phase_id == phase.id)
+        .join(ScoreBet.match)
+        .join(Match.group)
+        .order_by(Group.code, Match.index)
+    )
+    score_bets = [score_bet.to_dict_with_group_id() for score_bet in score_bets_query]
+
+    group_query = Group.query.order_by(Group.code).filter(Group.phase_id == phase.id)
+    groups = [group.to_dict_without_phase() for group in group_query]
+
+    return success_response(
+        200,
+        {
+            "phase": phase.to_dict(),
+            "groups": groups,
+            "score_bets": score_bets,
+            "binary_bets": binary_bets,
+        },
     )
 
 
@@ -57,7 +122,8 @@ def modify_bets(current_user):
     if len(bet_ids) != len(set(bet_ids)):
         return failed_response(*duplicated_ids)
 
-    results = []
+    binary_bets = []
+    score_bets = []
     telegram_logs = {"score": [], "binary": []}
 
     for bet in request.get_json():
@@ -70,12 +136,12 @@ def modify_bets(current_user):
         ):
             bet_type = SCORE
             original_bet = ScoreBet.query.filter_by(
-                match_id=bet["id"], user_id=current_user.id
+                id=bet["id"], user_id=current_user.id
             ).first()
         elif "is_one_won" in bet:
             bet_type = BINARY
             original_bet = BinaryBet.query.filter_by(
-                match_id=bet["id"], user_id=current_user.id
+                id=bet["id"], user_id=current_user.id
             ).first()
         else:
             return failed_response(*wrong_inputs)
@@ -117,7 +183,10 @@ def modify_bets(current_user):
                 )
             )
 
-        results.append(original_bet.to_dict())
+        if bet_type == SCORE:
+            score_bets.append(original_bet)
+        elif bet_type == BINARY:
+            binary_bets.append(original_bet)
 
     # Commit at the end to make sure all input are correct before pushing to db
     db.session.commit()
@@ -126,9 +195,25 @@ def modify_bets(current_user):
         log_score_bet(*log)
 
     for log in telegram_logs["binary"]:
-        log_score_bet(*log)
+        log_binary_bet(*log)
 
-    return success_response(200, results)
+    return success_response(
+        200,
+        {
+            "phases": [
+                phase.to_dict()
+                for phase in {
+                    bet.match.group.phase for bet in chain(score_bets, binary_bets)
+                }
+            ],
+            "groups": [
+                group.to_dict_with_phase_id()
+                for group in {bet.match.group for bet in chain(score_bets, binary_bets)}
+            ],
+            "score_bets": [bet.to_dict_with_group_id() for bet in score_bets],
+            "binary_bets": [bet.to_dict_with_group_id() for bet in binary_bets],
+        },
+    )
 
 
 @bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:group_code>")
@@ -136,28 +221,28 @@ def modify_bets(current_user):
 def group_get(current_user, group_code):
     group = Group.query.filter_by(code=group_code).first()
 
-    matches = Match.query.filter_by(group_id=group.id)
-
-    bets = ScoreBet.query.filter(
-        and_(
-            ScoreBet.user_id == current_user.id,
-            ScoreBet.match_id.in_(match.id for match in matches),
-        )
+    score_bets = (
+        ScoreBet.query.filter_by(user_id=current_user.id)
+        .filter(Match.group_id == group.id)
+        .join(ScoreBet.match)
+        .order_by(Match.index)
     )
 
-    binary_bets = BinaryBet.query.filter(
-        and_(
-            BinaryBet.user_id == current_user.id,
-            BinaryBet.match_id.in_(match.id for match in matches),
-        )
+    binary_bets = (
+        BinaryBet.query.filter_by(user_id=current_user.id)
+        .filter(Match.group_id == group.id)
+        .join(BinaryBet.match)
+        .order_by(Match.index)
     )
 
     return success_response(
         200,
-        sorted(
-            (score.to_dict() for score in chain(bets, binary_bets)),
-            key=lambda score: score["index"],
-        ),
+        {
+            "phase": group.phase.to_dict(),
+            "group": group.to_dict_without_phase(),
+            "binary_bets": [bet.to_dict_without_group() for bet in binary_bets],
+            "score_bets": [bet.to_dict_without_group() for bet in score_bets],
+        },
     )
 
 
@@ -166,13 +251,11 @@ def group_get(current_user, group_code):
 def group_result_get(current_user, group_code):
     group = Group.query.filter_by(code=group_code).first()
 
-    matches = Match.query.filter_by(group_id=group.id)
-
-    score_bets = ScoreBet.query.filter(
-        and_(
-            ScoreBet.user_id == current_user.id,
-            ScoreBet.match_id.in_(match.id for match in matches),
-        )
+    score_bets = (
+        ScoreBet.query.filter_by(user_id=current_user.id)
+        .filter(Match.group_id == group.id)
+        .join(ScoreBet.match)
+        .order_by(Match.index)
     )
 
     results = {}
@@ -236,40 +319,40 @@ def group_result_get(current_user, group_code):
 
     return success_response(
         200,
-        sorted(
-            results.values(),
-            key=lambda team: (
-                team["points"],
-                team["goals_difference"],
-                team["goals_for"],
+        {
+            "phase": group.phase.to_dict(),
+            "group": group.to_dict_without_phase(),
+            "results": sorted(
+                results.values(),
+                key=lambda team: (
+                    team["points"],
+                    team["goals_difference"],
+                    team["goals_for"],
+                ),
+                reverse=True,
             ),
-            reverse=True,
-        ),
+        },
     )
 
 
 @bets.route(
-    f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:match_id>",
+    f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:bet_id>",
     methods=["PATCH"],
 )
 @token_required
-def match_patch(current_user, match_id):
+def match_patch(current_user, bet_id):
     body = request.get_json()
 
     bet_type = request.args.get("type")
 
     if bet_type == SCORE:
-        bet = ScoreBet.query.filter_by(
-            user_id=current_user.id, match_id=match_id
-        ).first()
+        bet = ScoreBet.query.filter_by(user_id=current_user.id, id=bet_id).first()
 
         if "score" not in body["team1"] or "score" not in body["team2"]:
             return failed_response(*wrong_inputs)
 
     elif bet_type == BINARY:
-        bet = BinaryBet.query.filter_by(
-            user_id=current_user.id, match_id=match_id
-        ).first()
+        bet = BinaryBet.query.filter_by(user_id=current_user.id, id=bet_id).first()
 
         if "is_one_won" not in body:
             return failed_response(*wrong_inputs)
@@ -311,7 +394,17 @@ def match_patch(current_user, match_id):
                 bet.is_one_won,
             )
 
-    return success_response(200, bet.to_dict())
+    response = {
+        "phase": bet.match.group.phase.to_dict(),
+        "group": bet.match.group.to_dict_without_phase(),
+    }
+
+    if bet_type == SCORE:
+        response["score_bet"] = bet.to_dict_without_group()
+    elif bet_type == BINARY:
+        response["binary_bet"] = bet.to_dict_without_group()
+
+    return success_response(200, response)
 
 
 def log_score_bet(user_name, team1, team2, score1, score2):
@@ -329,23 +422,29 @@ def log_binary_bet(user_name, team1, team2, is_one_won):
     )
 
 
-@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:match_id>")
+@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:bet_id>")
 @token_required
-def bet_get(current_user, match_id):
+def bet_get(current_user, bet_id):
     bet_type = request.args.get("type")
 
-    if bet_type == "score":
-        bet = ScoreBet.query.filter_by(
-            user_id=current_user.id, match_id=match_id
-        ).first()
-    elif bet_type == "binary":
-        bet = BinaryBet.query.filter_by(
-            user_id=current_user.id, match_id=match_id
-        ).first()
+    if bet_type == SCORE:
+        bet = ScoreBet.query.filter_by(user_id=current_user.id, id=bet_id).first()
+    elif bet_type == BINARY:
+        bet = BinaryBet.query.filter_by(user_id=current_user.id, id=bet_id).first()
     else:
         return failed_response(*invalid_bet_type)
 
     if not bet:
         return failed_response(*match_not_found)
 
-    return success_response(200, bet.to_dict())
+    response = {
+        "phase": bet.match.group.phase.to_dict(),
+        "group": bet.match.group.to_dict_without_phase(),
+    }
+
+    if bet_type == SCORE:
+        response["score_bet"] = bet.to_dict_without_group()
+    elif bet_type == BINARY:
+        response["score_bet"] = bet.to_dict_without_group()
+
+    return success_response(200, response)
