@@ -16,11 +16,13 @@ def test_valid_auth(client, monkeypatch):
             "password": "admin",
         },
     )
-    assert str(response_signup.status_code) == "201"
-    assert response_signup.json["ok"] == True
-    assert response_signup.json["result"]["id"] == "b31d9d4f-22f5-4122-85dd-48089d42fd0a"
+    assert response_signup.status_code == 201
+    assert response_signup.json["ok"]
+    assert (
+        response_signup.json["result"]["id"] == "b31d9d4f-22f5-4122-85dd-48089d42fd0a"
+    )
     assert response_signup.json["result"]["name"] == "admin"
-    
+
     monkeypatch.delattr("uuid.uuid4")
 
     # login test
@@ -29,7 +31,7 @@ def test_valid_auth(client, monkeypatch):
     )
     response_login_body = response_login.json
     auth_token = response_login_body["result"].pop("token")
-    assert str(response_login.status_code) == "201"
+    assert response_login.status_code == 201
     assert response_login_body == {
         "ok": True,
         "result": {"id": "b31d9d4f-22f5-4122-85dd-48089d42fd0a", "name": "admin"},
@@ -39,7 +41,7 @@ def test_valid_auth(client, monkeypatch):
     response_current_user = client.get(
         "api/v1/current_user", headers=[("Authorization", f"Bearer: {auth_token}")]
     )
-    assert str(response_current_user.status_code) == "200"
+    assert response_current_user.status_code == 200
     assert response_current_user.json == {
         "ok": True,
         "result": {"id": "b31d9d4f-22f5-4122-85dd-48089d42fd0a", "name": "admin"},
@@ -61,9 +63,11 @@ def test_double_signup(client, monkeypatch):
             "password": "admin",
         },
     )
-    assert str(response_signup.status_code) == "201"
-    assert response_signup.json["ok"] == True
-    assert response_signup.json["result"]["id"] == "a9e14635-8983-45ab-8afa-eb920866c60e"
+    assert response_signup.status_code == 201
+    assert response_signup.json["ok"]
+    assert (
+        response_signup.json["result"]["id"] == "a9e14635-8983-45ab-8afa-eb920866c60e"
+    )
     assert response_signup.json["result"]["name"] == "user2"
 
     monkeypatch.delattr("uuid.uuid4")
@@ -78,7 +82,7 @@ def test_double_signup(client, monkeypatch):
             "password": "admin",
         },
     )
-    assert str(response_second_signup.status_code) == "401"
+    assert response_second_signup.status_code == 401
     assert response_second_signup.json == {
         "ok": False,
         "error_code": 401,
@@ -101,7 +105,7 @@ def test_login_wrong_password(client):
         "api/v1/login", json={"name": "glepape", "password": "wrong_password"}
     )
 
-    assert str(response_login.status_code) == "401"
+    assert response_login.status_code == 401
     assert response_login.json == {
         "ok": False,
         "error_code": 401,

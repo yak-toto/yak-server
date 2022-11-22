@@ -1,12 +1,14 @@
-[
-    {
-        "code": "A",
-        "description": "Groupe A",
-        "id": "a963e889-57be-4c38-b65d-e28f196f7921",
-        "phase": {
-            "code": "GROUP",
-            "description": "Group stage",
-            "id": "8f781aac-b29b-47e7-b6d7-06dd5e4859bb"
+{
+    "phase": {
+        "id": "8f781aac-b29b-47e7-b6d7-06dd5e4859bb",
+        "code": "GROUP",
+        "description": "Group stage"
+    },
+    "groups": [
+        {
+            "code": "A",
+            "description": "Groupe A",
+            "id": "a963e889-57be-4c38-b65d-e28f196f7921"
         }
-    }
-]
+    ]
+}

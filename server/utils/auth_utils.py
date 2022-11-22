@@ -26,7 +26,7 @@ def token_required(f):
             data = jwt.decode(
                 token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
             )
-            user = User.query.get(data["sub"])
+            user = User.query.filter_by(id=data["sub"]).first()
             if not user:
                 raise RuntimeError("User not found")
             return f(user, *args, **kwargs)
