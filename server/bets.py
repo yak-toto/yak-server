@@ -249,10 +249,16 @@ def group_get(current_user, group_code):
 @bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/results/<string:group_code>")
 @token_required
 def group_result_get(current_user, group_code):
+    return success_response(
+        200, get_result_with_group_code(current_user.id, group_code)
+    )
+
+
+def get_result_with_group_code(user_id, group_code):
     group = Group.query.filter_by(code=group_code).first()
 
     score_bets = (
-        ScoreBet.query.filter_by(user_id=current_user.id)
+        ScoreBet.query.filter_by(user_id=user_id)
         .filter(Match.group_id == group.id)
         .join(ScoreBet.match)
         .order_by(Match.index)
@@ -317,22 +323,19 @@ def group_result_get(current_user, group_code):
                 results[score_bet.match.team1.id]["points"] += 1
                 results[score_bet.match.team2.id]["points"] += 1
 
-    return success_response(
-        200,
-        {
-            "phase": group.phase.to_dict(),
-            "group": group.to_dict_without_phase(),
-            "results": sorted(
-                results.values(),
-                key=lambda team: (
-                    team["points"],
-                    team["goals_difference"],
-                    team["goals_for"],
-                ),
-                reverse=True,
+    return {
+        "phase": group.phase.to_dict(),
+        "group": group.to_dict_without_phase(),
+        "results": sorted(
+            results.values(),
+            key=lambda team: (
+                team["points"],
+                team["goals_difference"],
+                team["goals_for"],
             ),
-        },
-    )
+            reverse=True,
+        ),
+    }
 
 
 @bets.route(
