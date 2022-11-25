@@ -1,3 +1,4 @@
+import json
 import os
 
 # Setup MySQL credentials
@@ -39,3 +40,6 @@ BASE_CORRECT_SCORE = config.getint("points", "base_correct_score")
 MULTIPLYING_FACTOR_CORRECT_SCORE = config.getint(
     "points", "multiplying_factor_correct_score"
 )
+
+with open(f"data/{COMPETITION}/finale_phase_config.json") as file:
+    FINALE_PHASE_CONFIG = json.loads(file.read())

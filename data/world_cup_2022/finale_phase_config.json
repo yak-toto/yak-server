@@ -1,0 +1,85 @@
+{
+    "first_group": "8",
+    "versus": [
+        {
+            "team1": {
+                "rank": 1,
+                "group": "A"
+            },
+            "team2": {
+                "rank": 2,
+                "group": "B"
+            }
+        },
+        {
+            "team1": {
+                "rank": 1,
+                "group": "C"
+            },
+            "team2": {
+                "rank": 2,
+                "group": "D"
+            }
+        },
+        {
+            "team1": {
+                "rank": 1,
+                "group": "E"
+            },
+            "team2": {
+                "rank": 2,
+                "group": "F"
+            }
+        },
+        {
+            "team1": {
+                "rank": 1,
+                "group": "G"
+            },
+            "team2": {
+                "rank": 2,
+                "group": "H"
+            }
+        },
+        {
+            "team1": {
+                "rank": 1,
+                "group": "B"
+            },
+            "team2": {
+                "rank": 2,
+                "group": "A"
+            }
+        },
+        {
+            "team1": {
+                "rank": 1,
+                "group": "D"
+            },
+            "team2": {
+                "rank": 2,
+                "group": "C"
+            }
+        },
+        {
+            "team1": {
+                "rank": 1,
+                "group": "F"
+            },
+            "team2": {
+                "rank": 2,
+                "group": "E"
+            }
+        },
+        {
+            "team1": {
+                "rank": 1,
+                "group": "H"
+            },
+            "team2": {
+                "rank": 2,
+                "group": "G"
+            }
+        }
+    ]
+}

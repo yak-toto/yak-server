@@ -1,7 +1,11 @@
 from itertools import chain
+from operator import attrgetter
+from uuid import uuid4
 
 from flask import Blueprint
+from flask import current_app
 from flask import request
+from sqlalchemy import and_
 from sqlalchemy import desc
 
 from . import db
@@ -451,3 +455,141 @@ def bet_get(current_user, bet_id):
         response["score_bet"] = bet.to_dict_without_group()
 
     return success_response(200, response)
+
+
+@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/finale_phase", methods=["POST"])
+@token_required
+def commit_finale_phase(current_user):
+    finale_phase_config = current_app.config["FINALE_PHASE_CONFIG"]
+
+    groups_result = {
+        group.code: get_result_with_group_code(current_user.id, group.code)["results"]
+        for group in Group.query.join(Group.phase).filter(Phase.code == "GROUP")
+    }
+
+    first_phase_phase_group = Group.query.filter_by(
+        code=finale_phase_config["first_group"]
+    ).first()
+
+    existing_binary_bets = BinaryBet.query.join(BinaryBet.match).filter(
+        and_(
+            BinaryBet.user_id == current_user.id,
+            Match.group_id == first_phase_phase_group.id,
+        )
+    )
+
+    existing_matches = map(attrgetter("match"), existing_binary_bets)
+
+    new_binary_bets = []
+    new_matches = []
+
+    for index, match_config in enumerate(finale_phase_config["versus"], 1):
+        if all(
+            team["played"] == 3
+            for team in groups_result[match_config["team1"]["group"]]
+        ) and all(
+            team["played"] == 3
+            for team in groups_result[match_config["team2"]["group"]]
+        ):
+            team1 = groups_result[match_config["team1"]["group"]][
+                match_config["team1"]["rank"] - 1
+            ]
+            team2 = groups_result[match_config["team2"]["group"]][
+                match_config["team2"]["rank"] - 1
+            ]
+
+            match = Match.query.filter_by(
+                group_id=first_phase_phase_group.id,
+                team1_id=team1["id"],
+                team2_id=team2["id"],
+                index=index,
+            ).first()
+
+            if not match:
+                match = Match(
+                    id=str(uuid4()),
+                    group_id=first_phase_phase_group.id,
+                    team1_id=team1["id"],
+                    team2_id=team2["id"],
+                    index=index,
+                )
+
+            new_matches.append(match)
+
+            bet = BinaryBet.query.filter_by(
+                user_id=current_user.id,
+                match_id=match.id,
+            ).first()
+
+            if not bet:
+                bet = BinaryBet(
+                    user_id=current_user.id,
+                    match_id=match.id,
+                )
+
+            new_binary_bets.append(bet)
+
+    # Compare existing matches/bets and new matches/bets
+    db.session.add_all(new_matches)
+    db.session.commit()
+
+    db.session.add_all(new_binary_bets)
+    db.session.commit()
+
+    is_bet_modified = False
+
+    for bet in existing_binary_bets:
+        if bet.id not in map(attrgetter("id"), new_binary_bets):
+            is_bet_modified = True
+            db.session.delete(bet)
+
+    db.session.commit()
+
+    for match in existing_matches:
+        if match.id not in map(attrgetter("id"), new_matches) and not match.binary_bets:
+            db.session.delete(match)
+
+    db.session.commit()
+
+    if is_bet_modified:
+        for bet in BinaryBet.query.filter_by(user_id=current_user.id):
+            if bet.match.group.code in Group.query.join(Group.phase).filter(
+                and_(Phase.code == "FINAL", Group.id == first_phase_phase_group.id)
+            ):
+                db.session.delete(bet)
+        db.session.commit()
+
+    phase = Phase.query.filter_by(code="FINAL").first()
+
+    binary_bets_query = (
+        current_user.binary_bets.filter_by(user_id=current_user.id)
+        .filter(Group.phase_id == phase.id)
+        .join(BinaryBet.match)
+        .join(Match.group)
+        .order_by(Group.code, Match.index)
+    )
+    binary_bets = [
+        binary_bet.to_dict_with_group_id() for binary_bet in binary_bets_query
+    ]
+
+    score_bets_query = (
+        current_user.bets.filter_by(user_id=current_user.id)
+        .filter(Group.phase_id == phase.id)
+        .join(ScoreBet.match)
+        .join(Match.group)
+        .order_by(Group.code, Match.index)
+    )
+    score_bets = [score_bet.to_dict_with_group_id() for score_bet in score_bets_query]
+
+    group_query = Group.query.order_by(Group.code).filter(Group.phase_id == phase.id)
+    groups = [group.to_dict_without_phase() for group in group_query]
+
+    return success_response(
+        200,
+        {
+            "phase": phase.to_dict(),
+            "groups": groups,
+            "score_bets": score_bets,
+            "binary_bets": binary_bets,
+        },
+    )
