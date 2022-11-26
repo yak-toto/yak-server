@@ -5,9 +5,8 @@ from . import db
 from .models import Team
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import VERSION
-from .utils.errors import invalid_team_id
-from .utils.errors import team_not_found
-from .utils.flask_utils import failed_response
+from .utils.errors import InvalidTeamId
+from .utils.errors import TeamNotFound
 from .utils.flask_utils import is_iso_3166_1_alpha_2_code
 from .utils.flask_utils import is_uuid4
 from .utils.flask_utils import success_response
@@ -49,9 +48,9 @@ def teams_get_by_id(team_id):
     elif is_iso_3166_1_alpha_2_code(team_id):
         team = Team.query.filter_by(code=team_id).first()
     else:
-        return failed_response(*invalid_team_id)
+        raise InvalidTeamId(team_id)
 
     if not team:
-        return failed_response(*team_not_found)
+        raise TeamNotFound(team_id)
 
     return success_response(200, {"team": team.to_dict()})

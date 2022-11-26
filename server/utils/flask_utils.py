@@ -7,13 +7,6 @@ def success_response(status_code, result):
     return jsonify(dict(ok=True, result=result)), status_code
 
 
-def failed_response(error_code, description):
-    return (
-        jsonify(dict(ok=False, error_code=error_code, description=description)),
-        error_code,
-    )
-
-
 def is_uuid4(uuid):
     regex = re.compile(
         r"^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}\Z"

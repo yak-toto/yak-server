@@ -7,15 +7,14 @@ from flask import current_app
 from flask import request
 
 from . import db
-from .models import ScoreBet
 from .models import Match
+from .models import ScoreBet
 from .models import User
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import VERSION
-from .utils.errors import invalid_credentials
-from .utils.errors import invalid_name
-from .utils.flask_utils import failed_response
+from .utils.errors import InvalidCredentials
+from .utils.errors import NameAlreadyExists
 from .utils.flask_utils import success_response
 from .utils.telegram_sender import send_message
 
@@ -28,7 +27,7 @@ def login_post():
     user = User.authenticate(**data)
 
     if not user:
-        return failed_response(*invalid_credentials)
+        raise InvalidCredentials()
 
     send_message(f"User {user.name} login.")
 
@@ -50,7 +49,7 @@ def signup_post():
     # Check existing user in db
     existing_user = User.query.filter_by(name=data["name"]).first()
     if existing_user:
-        return failed_response(*invalid_name)
+        raise NameAlreadyExists(data["name"])
 
     # Initialize user and integrate in db
     user = User(**data)

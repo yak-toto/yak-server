@@ -11,11 +11,10 @@ from .models import Team
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import VERSION
-from .utils.errors import invalid_team_id
-from .utils.errors import match_not_found
-from .utils.errors import team_not_found
-from .utils.errors import unauthorized_access_to_admin_api
-from .utils.flask_utils import failed_response
+from .utils.errors import InvalidTeamId
+from .utils.errors import MatchNotFound
+from .utils.errors import TeamNotFound
+from .utils.errors import UnauthorizedAccessToAdminAPI
 from .utils.flask_utils import is_iso_3166_1_alpha_2_code
 from .utils.flask_utils import is_uuid4
 from .utils.flask_utils import success_response
@@ -50,7 +49,7 @@ def match_post(current_user):
             },
         )
     else:
-        return failed_response(*unauthorized_access_to_admin_api)
+        raise UnauthorizedAccessToAdminAPI()
 
 
 @matches.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches")
@@ -85,7 +84,7 @@ def matches_get_by_id(current_user, match_id):
     match = Match.query.filter_by(id=match_id).first()
 
     if not match:
-        return failed_response(*match_not_found)
+        raise MatchNotFound(match_id)
 
     group = Group.query.filter_by(id=match.group_id).first()
 
@@ -125,10 +124,10 @@ def matches_teams_get(current_user, team_id):
     elif is_iso_3166_1_alpha_2_code(team_id):
         team = Team.query.filter_by(code=team_id).first()
     else:
-        return failed_response(*invalid_team_id)
+        raise InvalidTeamId(team_id)
 
     if not team:
-        return failed_response(*team_not_found)
+        raise TeamNotFound(team_id)
 
     matches = (
         Match.query.join(Match.group)

@@ -1,23 +1,159 @@
+from flask import json
+from flask import Response
+from jwt import ExpiredSignatureError
+from jwt import InvalidTokenError
+from werkzeug.exceptions import HTTPException
+
 from .constants import BINARY
 from .constants import SCORE
 
-invalid_credentials = (401, "Invalid credentials")
-invalid_name = (401, "Name already exists")
-match_not_found = (404, "Match not found")
-wrong_inputs = (401, "Wrong inputs")
-missing_id = (401, "Missing id(s) in one bet")
-duplicated_ids = (401, "Duplicated ids in request")
-unauthorized_access_to_admin_api = (401, "Unauthorized access to admin API")
-invalid_token = (401, "Invalid token. Registeration and / or authentication required")
-expired_token = (401, "Expired token. Reauthentication required.")
-invalid_team_id = (
-    400,
-    "Invalid team id. Retry with a uuid or ISO 3166-1 alpha-2 code.",
-)
-team_not_found = (404, "No team found for the requested id.")
-locked_bets = (401, "Cannot modify bets because locked date is exceeded.")
-invalid_bet_type = (
-    401,
-    f"Invalid bet type. The available bet types are : {SCORE, BINARY}.",
-)
-no_results_for_admin_user = (401, "No results for admin user.")
+
+class InvalidCredentials(HTTPException):
+    code = 401
+    description = "Invalid credentials"
+
+
+class NameAlreadyExists(HTTPException):
+    def __init__(self, name) -> None:
+        super().__init__(f"Name already exists: {name}")
+        self.code = 401
+
+
+class MatchNotFound(HTTPException):
+    def __init__(self, match_id) -> None:
+        super().__init__(f"Match not found: {match_id}")
+        self.code = 404
+
+
+class BetNotFound(HTTPException):
+    def __init__(self, bet_id) -> None:
+        super().__init__(f"Bet not found: {bet_id}")
+        self.code = 404
+
+
+class WrongInputs(HTTPException):
+    code = 401
+    description = "Wrong inputs"
+
+
+class MissingId(HTTPException):
+    code = 401
+    description = "Missing id(s) in request"
+
+
+class UserNotFound(HTTPException):
+    code = 404
+    description = "User not found"
+
+
+class DuplicatedIds(HTTPException):
+    def __init__(self, ids) -> None:
+        super().__init__(f"Duplicated ids in request: {', '.join(ids)}")
+        self.code = 401
+
+
+class UnauthorizedAccessToAdminAPI(HTTPException):
+    code = 401
+    description = "Unauthorized access to admin API"
+
+
+class InvalidTeamId(HTTPException):
+    def __init__(self, team_id):
+        super().__init__(
+            f"Invalid team id: {team_id}. Retry with a uuid or ISO 3166-1 alpha-2 code"
+        )
+        self.code = 400
+
+
+class TeamNotFound(HTTPException):
+    def __init__(self, team_id):
+        super().__init__(f"Team not found: {team_id}")
+        self.code = 404
+
+
+class LockedBets(HTTPException):
+    code = 401
+    description = "Cannot modify bets because locked date is exceeded"
+
+
+class InvalidBetType(HTTPException):
+    code = 401
+    description = f"Invalid bet type. The available bet types are : {SCORE, BINARY}"
+
+
+class NoResultsForAdminUser(HTTPException):
+    code = 401
+    description = "No results for admin user"
+
+
+def set_error_handler(app):
+    @app.errorhandler(HTTPException)
+    def handle_http_exception(e):
+        """Return JSON instead of HTML for HTTP errors."""
+        # start with the correct headers and status code from the error
+        response = e.get_response()
+
+        print(response)
+
+        # replace the body with JSON
+        response.data = json.dumps(
+            {
+                "ok": False,
+                "error_code": e.code,
+                "description": e.description,
+            }
+        )
+        response.content_type = "application/json"
+
+        return response
+
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        """Return JSON instead of HTML for generic errors."""
+
+        response = Response()
+
+        response.data = json.dumps(
+            {
+                "ok": False,
+                "error_code": 500,
+                "description": str(e),
+            }
+        )
+        response.status_code = 500
+        response.content_type = "application/json"
+
+        return response
+
+    @app.errorhandler(ExpiredSignatureError)
+    def handler_expired_signature_exception(e):
+        response = Response()
+
+        response.data = json.dumps(
+            {
+                "ok": False,
+                "error_code": 401,
+                "description": "Expired token. Reauthentication required.",
+            }
+        )
+        response.status_code = 401
+        response.content_type = "application/json"
+
+        return response
+
+    @app.errorhandler(InvalidTokenError)
+    def handler_invalid_token_exception(e):
+        response = Response()
+
+        response.data = json.dumps(
+            {
+                "ok": False,
+                "error_code": 401,
+                "description": "Invalid token. "
+                "Registeration and / or authentication required",
+            }
+        )
+        response.status_code = 401
+        response.content_type = "application/json"
+
+        return response

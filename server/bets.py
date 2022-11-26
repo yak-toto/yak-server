@@ -20,13 +20,12 @@ from .utils.constants import BINARY
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import SCORE
 from .utils.constants import VERSION
-from .utils.errors import duplicated_ids
-from .utils.errors import invalid_bet_type
-from .utils.errors import locked_bets
-from .utils.errors import match_not_found
-from .utils.errors import missing_id
-from .utils.errors import wrong_inputs
-from .utils.flask_utils import failed_response
+from .utils.errors import BetNotFound
+from .utils.errors import DuplicatedIds
+from .utils.errors import InvalidBetType
+from .utils.errors import LockedBets
+from .utils.errors import MissingId
+from .utils.errors import WrongInputs
 from .utils.flask_utils import success_response
 from .utils.telegram_sender import send_message
 
@@ -118,13 +117,14 @@ def get_bets_by_phase(current_user, phase_code):
 def modify_bets(current_user):
     # Reject if any input bet does not contain id
     if not all(bet.get("id") for bet in request.get_json()):
-        return failed_response(*missing_id)
+        raise MissingId()
 
     bet_ids = [bet["id"] for bet in request.get_json()]
 
     # Reject if there are duplicated ids in input bets
-    if len(bet_ids) != len(set(bet_ids)):
-        return failed_response(*duplicated_ids)
+    duplicated_ids = {bet_id for bet_id in bet_ids if bet_ids.count(bet_id) > 1}
+    if duplicated_ids:
+        raise DuplicatedIds(duplicated_ids)
 
     binary_bets = []
     score_bets = []
@@ -148,15 +148,15 @@ def modify_bets(current_user):
                 id=bet["id"], user_id=current_user.id
             ).first()
         else:
-            return failed_response(*wrong_inputs)
+            raise WrongInputs()
 
         # No bet has been found
         if not original_bet:
-            return failed_response(*match_not_found)
+            raise BetNotFound(bet["id"])
 
         # Return error if bet is locked
         if is_locked(original_bet):
-            return failed_response(*locked_bets)
+            raise LockedBets()
 
         # Modify bet depending on their type if the bet has been changed
         if bet_type == SCORE and (original_bet.score1, original_bet.score2) != (
@@ -356,22 +356,22 @@ def match_patch(current_user, bet_id):
         bet = ScoreBet.query.filter_by(user_id=current_user.id, id=bet_id).first()
 
         if "score" not in body["team1"] or "score" not in body["team2"]:
-            return failed_response(*wrong_inputs)
+            raise WrongInputs()
 
     elif bet_type == BINARY:
         bet = BinaryBet.query.filter_by(user_id=current_user.id, id=bet_id).first()
 
         if "is_one_won" not in body:
-            return failed_response(*wrong_inputs)
+            raise WrongInputs()
 
     else:
-        return failed_response(*invalid_bet_type)
+        raise InvalidBetType()
 
     if not bet:
-        return failed_response(*match_not_found)
+        raise BetNotFound(bet_id)
 
     if is_locked(bet):
-        return failed_response(*locked_bets)
+        raise LockedBets()
 
     if bet_type == "score":
         if bet.score1 != body["team1"].get("score") or bet.score2 != body["team2"].get(
@@ -439,10 +439,10 @@ def bet_get(current_user, bet_id):
     elif bet_type == BINARY:
         bet = BinaryBet.query.filter_by(user_id=current_user.id, id=bet_id).first()
     else:
-        return failed_response(*invalid_bet_type)
+        raise InvalidBetType()
 
     if not bet:
-        return failed_response(*match_not_found)
+        raise BetNotFound(bet_id)
 
     response = {
         "phase": bet.match.group.phase.to_dict(),

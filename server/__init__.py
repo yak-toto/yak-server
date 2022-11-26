@@ -3,6 +3,8 @@ from flask.cli import load_dotenv
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
+from .utils.errors import set_error_handler
+
 db = SQLAlchemy()
 
 load_dotenv()
@@ -15,6 +17,8 @@ def create_app():
     app.json.sort_keys = False
 
     db.init_app(app)
+
+    set_error_handler(app)
 
     # Registrer blueprint
     from .auth import auth as auth_blueprint

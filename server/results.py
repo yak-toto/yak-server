@@ -8,9 +8,8 @@ from .models import User
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import VERSION
-from .utils.errors import no_results_for_admin_user
-from .utils.errors import unauthorized_access_to_admin_api
-from .utils.flask_utils import failed_response
+from .utils.errors import NoResultsForAdminUser
+from .utils.errors import UnauthorizedAccessToAdminAPI
 from .utils.flask_utils import success_response
 
 results = Blueprint("results", __name__)
@@ -34,7 +33,7 @@ def score_board(current_user):
 @token_required
 def results_get(current_user):
     if current_user.name == "admin":
-        return failed_response(*no_results_for_admin_user)
+        raise NoResultsForAdminUser()
 
     results = User.query.order_by(User.points.desc()).filter(User.name != "admin")
 
@@ -70,7 +69,7 @@ def compute_points_post(current_user):
             ],
         )
     else:
-        return failed_response(*unauthorized_access_to_admin_api)
+        raise UnauthorizedAccessToAdminAPI()
 
 
 def compute_points(
