@@ -117,9 +117,12 @@ def set_error_handler(app):
             {
                 "ok": False,
                 "error_code": 500,
-                "description": str(e),
+                "description": str(e)
+                if app.config.get("DEBUG")
+                else "Unexcepted error",
             }
         )
+
         response.status_code = 500
         response.content_type = "application/json"
 
