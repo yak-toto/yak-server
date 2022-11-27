@@ -39,7 +39,7 @@ def login_post():
         },
         current_app.config["SECRET_KEY"],
     )
-    return success_response(201, {**user.to_user_dict(), "token": token})
+    return success_response(201, user.to_user_dict() | {"token": token})
 
 
 @auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/signup", methods=["POST"])
@@ -73,7 +73,7 @@ def signup_post():
         current_app.config["SECRET_KEY"],
     )
 
-    return success_response(201, {**user.to_user_dict(), "token": token})
+    return success_response(201, user.to_user_dict() | {"token": token})
 
 
 @auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/current_user")

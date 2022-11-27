@@ -198,8 +198,8 @@ class ScoreBet(db.Model):
             "index": self.match.index,
             "locked": is_locked(self),
             "group": self.match.group.to_dict(),
-            "team1": {**self.match.team1.to_dict(), "score": self.score1},
-            "team2": {**self.match.team2.to_dict(), "score": self.score2},
+            "team1": self.match.team1.to_dict() | {"score": self.score1},
+            "team2": self.match.team2.to_dict() | {"score": self.score2},
         }
 
     def to_dict_with_group_id(self):
@@ -209,8 +209,8 @@ class ScoreBet(db.Model):
             "index": self.match.index,
             "locked": is_locked(self),
             "group": {"id": self.match.group_id},
-            "team1": {**self.match.team1.to_dict(), "score": self.score1},
-            "team2": {**self.match.team2.to_dict(), "score": self.score2},
+            "team1": self.match.team1.to_dict() | {"score": self.score1},
+            "team2": self.match.team2.to_dict() | {"score": self.score2},
         }
 
     def to_dict_without_group(self):
@@ -219,8 +219,8 @@ class ScoreBet(db.Model):
             "match_id": self.match_id,
             "index": self.match.index,
             "locked": is_locked(self),
-            "team1": {**self.match.team1.to_dict(), "score": self.score1},
-            "team2": {**self.match.team2.to_dict(), "score": self.score2},
+            "team1": self.match.team1.to_dict() | {"score": self.score1},
+            "team2": self.match.team2.to_dict() | {"score": self.score2},
         }
 
 
@@ -259,8 +259,8 @@ class BinaryBet(db.Model):
             "index": self.match.index,
             "locked": is_locked(self),
             "group": self.match.group.to_dict(),
-            "team1": {**self.match.team1.to_dict(), "won": bet_results[0]},
-            "team2": {**self.match.team2.to_dict(), "won": bet_results[1]},
+            "team1": self.match.team1.to_dict() | {"won": bet_results[0]},
+            "team2": self.match.team2.to_dict() | {"won": bet_results[1]},
         }
 
     def to_dict_with_group_id(self):
@@ -272,8 +272,8 @@ class BinaryBet(db.Model):
             "index": self.match.index,
             "locked": is_locked(self),
             "group": {"id": self.match.group_id},
-            "team1": {**self.match.team1.to_dict(), "won": bet_results[0]},
-            "team2": {**self.match.team2.to_dict(), "won": bet_results[1]},
+            "team1": self.match.team1.to_dict() | {"won": bet_results[0]},
+            "team2": self.match.team2.to_dict() | {"won": bet_results[1]},
         }
 
     def to_dict_without_group(self):
@@ -284,8 +284,8 @@ class BinaryBet(db.Model):
             "match_id": self.match_id,
             "index": self.match.index,
             "locked": is_locked(self),
-            "team1": {**self.match.team1.to_dict(), "won": bet_results[0]},
-            "team2": {**self.match.team2.to_dict(), "won": bet_results[1]},
+            "team1": self.match.team1.to_dict() | {"won": bet_results[0]},
+            "team2": self.match.team2.to_dict() | {"won": bet_results[1]},
         }
 
 

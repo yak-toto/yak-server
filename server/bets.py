@@ -272,8 +272,7 @@ def get_result_with_group_code(user_id, group_code):
 
     for score_bet in score_bets:
         if score_bet.match.team1.id not in results:
-            results[score_bet.match.team1.id] = {
-                **(score_bet.match.team1.to_dict()),
+            results[score_bet.match.team1.id] = score_bet.match.team1.to_dict() | {
                 "played": 0,
                 "won": 0,
                 "drawn": 0,
@@ -285,8 +284,7 @@ def get_result_with_group_code(user_id, group_code):
             }
 
         if score_bet.match.team2.id not in results:
-            results[score_bet.match.team2.id] = {
-                **(score_bet.match.team2.to_dict()),
+            results[score_bet.match.team2.id] = score_bet.match.team2.to_dict() | {
                 "played": 0,
                 "won": 0,
                 "drawn": 0,
