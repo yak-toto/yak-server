@@ -86,7 +86,7 @@ def test_double_signup(client, monkeypatch):
     assert response_second_signup.json == {
         "ok": False,
         "error_code": 401,
-        "description": "Name already exists",
+        "description": "Name already exists: user2",
     }
 
 

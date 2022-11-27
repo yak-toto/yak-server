@@ -117,7 +117,7 @@ def set_error_handler(app):
             {
                 "ok": False,
                 "error_code": 500,
-                "description": str(e)
+                "description": f"{type(e).__name__}: {str(e)}"
                 if app.config.get("DEBUG")
                 else "Unexcepted error",
             }
