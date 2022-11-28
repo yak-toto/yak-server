@@ -3,6 +3,9 @@ from flask import current_app
 from sqlalchemy import and_
 
 from . import db
+from .bets import get_result_with_group_code
+from .models import Group
+from .models import Phase
 from .models import ScoreBet
 from .models import User
 from .utils.auth_utils import token_required
@@ -57,6 +60,8 @@ def compute_points_post(current_user):
             current_app.config["MULTIPLYING_FACTOR_CORRECT_RESULT"],
             current_app.config["BASE_CORRECT_SCORE"],
             current_app.config["MULTIPLYING_FACTOR_CORRECT_SCORE"],
+            current_app.config["TEAM_QUALIFIED"],
+            current_app.config["FIRST_TEAM_QUALIFIED"],
         )
 
         return success_response(
@@ -77,6 +82,8 @@ def compute_points(
     multiplying_factor_correct_result,
     base_correct_score,
     multiplying_factor_correct_score,
+    team_qualified,
+    first_team_qualified,
 ):
     admin = User.query.filter_by(name="admin").first()
 
@@ -109,7 +116,40 @@ def compute_points(
             }
         )
 
+    result_groups = {}
+
     users = User.query.filter(User.name != "admin")
+
+    for group in Group.query.join(Group.phase).filter(Phase.code == "GROUP"):
+        group_result_admin = get_result_with_group_code(admin.id, group.code)["results"]
+
+        if all(team["played"] == 3 for team in group_result_admin):
+            admin_first_team_id = group_result_admin[0]["id"]
+            admin_second_team_id = group_result_admin[1]["id"]
+
+            for user in users:
+                if user.id not in result_groups:
+                    result_groups[user.id] = {
+                        "number_qualified_teams_guess": 0,
+                        "number_first_qualified_guess": 0,
+                    }
+
+                group_result_user = get_result_with_group_code(user.id, group.code)[
+                    "results"
+                ]
+
+                if all(team["played"] == 3 for team in group_result_user):
+                    user_first_team_id = group_result_user[0]["id"]
+                    user_second_team_id = group_result_user[1]["id"]
+
+                    result_groups[user.id]["number_qualified_teams_guess"] += len(
+                        {user_first_team_id, user_second_team_id}
+                        & {admin_first_team_id, admin_second_team_id}
+                    )
+
+                    if user_first_team_id == admin_first_team_id:
+                        result_groups[user.id]["number_first_qualified_guess"] += 1
+
     numbers_of_players = users.count()
 
     for user in users:
@@ -132,5 +172,15 @@ def compute_points(
                 user.points += base_correct_score + multiplying_factor_correct_score * (
                     numbers_of_players - result["number_correct_score"]
                 ) / (numbers_of_players - 1)
+
+        user.number_qualified_teams_guess = result_groups.get(user.id, {}).get(
+            "number_qualified_teams_guess", 0
+        )
+        user.number_first_qualified_guess = result_groups.get(user.id, {}).get(
+            "number_first_qualified_guess", 0
+        )
+
+        user.points += user.number_qualified_teams_guess * team_qualified
+        user.points += user.number_first_qualified_guess * first_team_qualified
 
     db.session.commit()

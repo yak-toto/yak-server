@@ -40,6 +40,8 @@ BASE_CORRECT_SCORE = config.getint("points", "base_correct_score")
 MULTIPLYING_FACTOR_CORRECT_SCORE = config.getint(
     "points", "multiplying_factor_correct_score"
 )
+TEAM_QUALIFIED = config.getint("points", "team_qualified")
+FIRST_TEAM_QUALIFIED = config.getint("points", "first_team_qualified")
 
 with open(f"data/{COMPETITION}/finale_phase_config.json") as file:
     FINALE_PHASE_CONFIG = json.loads(file.read())

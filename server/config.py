@@ -28,5 +28,7 @@ def config_get(current_user):
                 "multiplying_factor_correct_score": current_app.config[
                     "MULTIPLYING_FACTOR_CORRECT_SCORE"
                 ],
+                "team_qualified": current_app.config["TEAM_QUALIFIED"],
+                "first_team_qualified": current_app.config["FIRST_TEAM_QUALIFIED"],
             },
         )
