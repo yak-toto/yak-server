@@ -13,6 +13,8 @@ digraph G {
         <tr><td bgcolor="grey96" align="left"><font face="Times-bold">password</font></td><td align="left"><font color="#535353">caracter varying (100) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left"><font face="Times-bold">number_match_guess</font></td><td align="left"><font color="#535353">integer CHECK (number_match_guess &ge; 0) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left"><font face="Times-bold">number_score_guess</font></td><td align="left"><font color="#535353">integer CHECK (number_score_guess &ge; 0) NOT NULL</font></td></tr>
+        <tr><td bgcolor="grey96" align="left"><font face="Times-bold">number_qualified_teams_guess</font></td><td align="left"><font color="#535353">integer CHECK (number_qualified_teams_guess &ge; 0) NOT NULL</font></td></tr>
+        <tr><td bgcolor="grey96" align="left"><font face="Times-bold">number_first_qualified_guess</font></td><td align="left"><font color="#535353">integer CHECK (number_first_qualified_guess &ge; 0) NOT NULL</font></td></tr>
         <tr><td bgcolor="grey96" align="left"><font face="Times-bold">points</font></td><td align="left"><font color="#535353">integer CHECK (points &ge; 0) NOT NULL</font></td></tr>
       </table>
     >];

@@ -93,8 +93,6 @@ def set_error_handler(app):
         # start with the correct headers and status code from the error
         response = e.get_response()
 
-        print(response)
-
         # replace the body with JSON
         response.data = json.dumps(
             {

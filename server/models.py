@@ -27,6 +27,18 @@ class User(db.Model):
     number_score_guess = db.Column(
         db.Integer, CheckConstraint("number_score_guess>=0"), nullable=False, default=0
     )
+    number_qualified_teams_guess = db.Column(
+        db.Integer,
+        CheckConstraint("number_qualified_teams_guess>=0"),
+        nullable=False,
+        default=0,
+    )
+    number_first_qualified_guess = db.Column(
+        db.Integer,
+        CheckConstraint("number_first_qualified_guess>=0"),
+        nullable=False,
+        default=0,
+    )
     points = db.Column(
         db.Float, CheckConstraint("points>=0"), nullable=False, default=0
     )
@@ -81,6 +93,8 @@ class User(db.Model):
             "last_name": self.last_name,
             "number_match_guess": self.number_match_guess,
             "number_score_guess": self.number_score_guess,
+            "number_qualified_teams_guess": self.number_qualified_teams_guess,
+            "number_first_qualified_guess": self.number_first_qualified_guess,
             "points": round(self.points, 3),
         }
 
