@@ -21,7 +21,7 @@ from .utils.telegram_sender import send_message
 auth = Blueprint("auth", __name__)
 
 
-@auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/login", methods=["POST"])
+@auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/login", methods=["POST"])
 def login_post():
     data = request.get_json()
     user = User.authenticate(**data)
@@ -42,7 +42,7 @@ def login_post():
     return success_response(201, user.to_user_dict() | {"token": token})
 
 
-@auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/signup", methods=["POST"])
+@auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/signup", methods=["POST"])
 def signup_post():
     data = request.get_json()
 
@@ -76,7 +76,7 @@ def signup_post():
     return success_response(201, user.to_user_dict() | {"token": token})
 
 
-@auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/current_user")
+@auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/users")
 @token_required
 def current_user(current_user):
     return success_response(200, current_user.to_user_dict())
