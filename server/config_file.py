@@ -32,6 +32,7 @@ def load_business_rules():
 config = load_business_rules()
 
 LOCK_DATETIME = config.get("locking", "datetime")
+LOCK_DATETIME_FINAL_PHASE = config.get("locking", "datetime_final_phase")
 BASE_CORRECT_RESULT = config.getint("points", "base_correct_result")
 MULTIPLYING_FACTOR_CORRECT_RESULT = config.getint(
     "points", "multiplying_factor_correct_result"

@@ -153,7 +153,25 @@ def is_locked(score):
     locked_date = datetime.strptime(
         current_app.config["LOCK_DATETIME"], "%Y-%m-%d %H:%M:%S.%f"
     )
+    if score.match.group.phase.code == "FINAL":
+        locked_date_final_phase = datetime.strptime(
+            current_app.config["LOCK_DATETIME_FINAL_PHASE"], "%Y-%m-%d %H:%M:%S.%f"
+        )
+
+        return score.user.name != "admin" and datetime.now() > locked_date_final_phase
+
     return score.user.name != "admin" and datetime.now() > locked_date
+
+
+def is_phase_locked(phase_code, user_name):
+    if phase_code == "FINAL":
+        locked_date_final_phase = datetime.strptime(
+            current_app.config["LOCK_DATETIME_FINAL_PHASE"], "%Y-%m-%d %H:%M:%S.%f"
+        )
+
+        return user_name != "admin" and datetime.now() > locked_date_final_phase
+
+    return False
 
 
 class ScoreBet(db.Model):

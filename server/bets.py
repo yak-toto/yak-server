@@ -12,6 +12,7 @@ from . import db
 from .models import BinaryBet
 from .models import Group
 from .models import is_locked
+from .models import is_phase_locked
 from .models import Match
 from .models import Phase
 from .models import ScoreBet
@@ -39,6 +40,9 @@ bets = Blueprint("bets", __name__)
 @token_required
 def create_bet(current_user, phase_code):
     phase = Phase.query.filter_by(code=phase_code).first()
+
+    if is_phase_locked(phase.code, current_user.name):
+        raise LockedBets()
 
     finale_phase_config = current_app.config["FINALE_PHASE_CONFIG"]
 
