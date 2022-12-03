@@ -1,10 +1,14 @@
+from itertools import chain
+
 from flask import Blueprint
 from flask import current_app
 from sqlalchemy import and_
 
 from . import db
 from .bets import get_result_with_group_code
+from .models import BinaryBet
 from .models import Group
+from .models import Match
 from .models import Phase
 from .models import ScoreBet
 from .models import User
@@ -150,6 +154,11 @@ def compute_points(
                     if user_first_team_id == admin_first_team_id:
                         result_groups[user.id]["number_first_qualified_guess"] += 1
 
+    quarter_finals_team = team_from_group_code(admin, "4")
+    semi_finals_team = team_from_group_code(admin, "2")
+    final_team = team_from_group_code(admin, "1")
+    winner = winner_from_user(admin)
+
     numbers_of_players = users.count()
 
     for user in users:
@@ -183,4 +192,42 @@ def compute_points(
         user.points += user.number_qualified_teams_guess * team_qualified
         user.points += user.number_first_qualified_guess * first_team_qualified
 
+        user.number_quarter_final_guess = len(
+            team_from_group_code(user, "4").intersection(quarter_finals_team)
+        )
+        user.number_semi_final_guess = len(
+            team_from_group_code(user, "2").intersection(semi_finals_team)
+        )
+        user.number_final_guess = len(
+            team_from_group_code(user, "1").intersection(final_team)
+        )
+        user.number_winner_guess = len(winner_from_user(user).intersection(winner))
+
+        user.points += 30 * user.number_quarter_final_guess
+        user.points += 60 * user.number_semi_final_guess
+        user.points += 120 * user.number_final_guess
+        user.points += 200 * user.number_winner_guess
+
     db.session.commit()
+
+
+def team_from_group_code(user, group_code):
+    return set(
+        chain(
+            *(
+                (bet.match.team1.id, bet.match.team2.id)
+                for bet in user.binary_bets.filter(Group.code == group_code)
+                .join(BinaryBet.match)
+                .join(Match.group)
+            )
+        )
+    )
+
+
+def winner_from_user(user):
+    return {
+        bet.match.team1.id if bet.is_one_won else bet.match.team2.id
+        for bet in user.binary_bets.filter(Group.code == "1")
+        .join(BinaryBet.match)
+        .join(Match.group)
+    }
