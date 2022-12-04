@@ -58,27 +58,27 @@ def results_get(current_user):
 @results.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/compute_points", methods=["POST"])
 @token_required
 def compute_points_post(current_user):
-    if current_user.name == "admin":
-        compute_points(
-            current_app.config["BASE_CORRECT_RESULT"],
-            current_app.config["MULTIPLYING_FACTOR_CORRECT_RESULT"],
-            current_app.config["BASE_CORRECT_SCORE"],
-            current_app.config["MULTIPLYING_FACTOR_CORRECT_SCORE"],
-            current_app.config["TEAM_QUALIFIED"],
-            current_app.config["FIRST_TEAM_QUALIFIED"],
-        )
-
-        return success_response(
-            200,
-            [
-                user.to_result_dict()
-                for user in User.query.order_by(User.points.desc()).filter(
-                    User.name != "admin"
-                )
-            ],
-        )
-    else:
+    if current_user.name != "admin":
         raise UnauthorizedAccessToAdminAPI()
+
+    compute_points(
+        current_app.config["BASE_CORRECT_RESULT"],
+        current_app.config["MULTIPLYING_FACTOR_CORRECT_RESULT"],
+        current_app.config["BASE_CORRECT_SCORE"],
+        current_app.config["MULTIPLYING_FACTOR_CORRECT_SCORE"],
+        current_app.config["TEAM_QUALIFIED"],
+        current_app.config["FIRST_TEAM_QUALIFIED"],
+    )
+
+    return success_response(
+        200,
+        [
+            user.to_result_dict()
+            for user in User.query.order_by(User.points.desc()).filter(
+                User.name != "admin"
+            )
+        ],
+    )
 
 
 def compute_points(

@@ -25,31 +25,31 @@ matches = Blueprint("matches", __name__)
 @matches.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches", methods=["POST"])
 @token_required
 def match_post(current_user):
-    if current_user.name == "admin":
-        body = request.get_json()
-
-        match = Match(
-            group_id=body["group"]["id"],
-            team1_id=body["team1"]["id"],
-            team2_id=body["team2"]["id"],
-            index=body["index"],
-        )
-
-        db.session.add(match)
-        db.session.commit()
-
-        group = Group.query.filter_by(id=match.group_id).first()
-
-        return success_response(
-            200,
-            {
-                "phase": group.phase.to_dict(),
-                "group": group.to_dict_without_phase(),
-                "match": match.to_dict_without_group(),
-            },
-        )
-    else:
+    if current_user.name != "admin":
         raise UnauthorizedAccessToAdminAPI()
+
+    body = request.get_json()
+
+    match = Match(
+        group_id=body["group"]["id"],
+        team1_id=body["team1"]["id"],
+        team2_id=body["team2"]["id"],
+        index=body["index"],
+    )
+
+    db.session.add(match)
+    db.session.commit()
+
+    group = Group.query.filter_by(id=match.group_id).first()
+
+    return success_response(
+        200,
+        {
+            "phase": group.phase.to_dict(),
+            "group": group.to_dict_without_phase(),
+            "match": match.to_dict_without_group(),
+        },
+    )
 
 
 @matches.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches")

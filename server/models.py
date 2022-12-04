@@ -104,6 +104,9 @@ class User(db.Model):
 
         return user
 
+    def change_password(self, new_password) -> None:
+        self.password = generate_password_hash(new_password, method="sha256")
+
     def to_user_dict(self):
         return {
             "id": self.id,
