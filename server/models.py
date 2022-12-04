@@ -309,10 +309,8 @@ class BinaryBet(db.Model):
     def bet_from_is_one_won(self):
         if self.is_one_won is None:
             return (None, None)
-        elif self.is_one_won:
-            return (True, False)
-        else:
-            return (False, True)
+
+        return (self.is_one_won, not self.is_one_won)
 
     def to_dict(self):
         bet_results = self.bet_from_is_one_won()

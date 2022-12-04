@@ -53,16 +53,16 @@ def create_bet(current_user, phase_code):
     )
 
     existing_binary_bets = (
-        current_user.binary_bets.filter_by(user_id=current_user.id)
-        .filter(Match.group_id.in_(map(attrgetter("id"), groups)))
+        current_user.binary_bets.filter(
+            Match.group_id.in_(map(attrgetter("id"), groups))
+        )
         .join(BinaryBet.match)
         .join(Match.group)
         .order_by(Group.code, Match.index)
     )
 
     existing_score_bets = (
-        current_user.bets.filter_by(user_id=current_user.id)
-        .filter(Match.group_id.in_(map(attrgetter("id"), groups)))
+        current_user.bets.filter(Match.group_id.in_(map(attrgetter("id"), groups)))
         .join(ScoreBet.match)
         .join(Match.group)
         .order_by(Group.code, Match.index)
@@ -156,8 +156,7 @@ def create_bet(current_user, phase_code):
     db.session.commit()
 
     binary_bets_query = (
-        current_user.binary_bets.filter_by(user_id=current_user.id)
-        .filter(Group.phase_id == phase.id)
+        current_user.binary_bets.filter(Group.phase_id == phase.id)
         .join(BinaryBet.match)
         .join(Match.group)
         .order_by(Group.code, Match.index)
@@ -167,8 +166,7 @@ def create_bet(current_user, phase_code):
     ]
 
     score_bets_query = (
-        current_user.bets.filter_by(user_id=current_user.id)
-        .filter(Group.phase_id == phase.id)
+        current_user.bets.filter(Group.phase_id == phase.id)
         .join(ScoreBet.match)
         .join(Match.group)
         .order_by(Group.code, Match.index)
@@ -193,8 +191,7 @@ def create_bet(current_user, phase_code):
 @token_required
 def groups(current_user):
     binary_bets_query = (
-        current_user.binary_bets.filter_by(user_id=current_user.id)
-        .join(BinaryBet.match)
+        current_user.binary_bets.join(BinaryBet.match)
         .join(Match.group)
         .join(Group.phase)
         .order_by(desc(Phase.code), Group.code, Match.index)
@@ -204,8 +201,7 @@ def groups(current_user):
     ]
 
     score_bets_query = (
-        current_user.bets.filter_by(user_id=current_user.id)
-        .join(ScoreBet.match)
+        current_user.bets.join(ScoreBet.match)
         .join(Match.group)
         .join(Group.phase)
         .order_by(desc(Phase.code), Group.code, Match.index)
@@ -235,8 +231,7 @@ def get_bets_by_phase(current_user, phase_code):
     phase = Phase.query.filter_by(code=phase_code).first()
 
     binary_bets_query = (
-        current_user.binary_bets.filter_by(user_id=current_user.id)
-        .filter(Group.phase_id == phase.id)
+        current_user.binary_bets.filter(Group.phase_id == phase.id)
         .join(BinaryBet.match)
         .join(Match.group)
         .order_by(Group.code, Match.index)
@@ -246,8 +241,7 @@ def get_bets_by_phase(current_user, phase_code):
     ]
 
     score_bets_query = (
-        current_user.bets.filter_by(user_id=current_user.id)
-        .filter(Group.phase_id == phase.id)
+        current_user.bets.filter(Group.phase_id == phase.id)
         .join(ScoreBet.match)
         .join(Match.group)
         .order_by(Group.code, Match.index)
@@ -382,15 +376,13 @@ def group_get(current_user, group_code):
     group = Group.query.filter_by(code=group_code).first()
 
     score_bets = (
-        ScoreBet.query.filter_by(user_id=current_user.id)
-        .filter(Match.group_id == group.id)
+        current_user.bets.filter(Match.group_id == group.id)
         .join(ScoreBet.match)
         .order_by(Match.index)
     )
 
     binary_bets = (
-        BinaryBet.query.filter_by(user_id=current_user.id)
-        .filter(Match.group_id == group.id)
+        current_user.binary_bets.filter(Match.group_id == group.id)
         .join(BinaryBet.match)
         .order_by(Match.index)
     )
@@ -716,8 +708,7 @@ def commit_finale_phase(current_user):
     phase = Phase.query.filter_by(code="FINAL").first()
 
     binary_bets_query = (
-        current_user.binary_bets.filter_by(user_id=current_user.id)
-        .filter(Group.phase_id == phase.id)
+        current_user.binary_bets.filter(Group.phase_id == phase.id)
         .join(BinaryBet.match)
         .join(Match.group)
         .order_by(Group.code, Match.index)
@@ -727,8 +718,7 @@ def commit_finale_phase(current_user):
     ]
 
     score_bets_query = (
-        current_user.bets.filter_by(user_id=current_user.id)
-        .filter(Group.phase_id == phase.id)
+        current_user.bets.filter(Group.phase_id == phase.id)
         .join(ScoreBet.match)
         .join(Match.group)
         .order_by(Group.code, Match.index)
