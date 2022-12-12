@@ -16,6 +16,8 @@ from .models import is_phase_locked
 from .models import Match
 from .models import Phase
 from .models import ScoreBet
+from .query import bets_from_group_code
+from .query import bets_from_phase_code
 from .utils.auth_utils import token_required
 from .utils.constants import BINARY
 from .utils.constants import GLOBAL_ENDPOINT
@@ -155,34 +157,21 @@ def create_bet(current_user, phase_code):
 
     db.session.commit()
 
-    binary_bets_query = (
-        current_user.binary_bets.filter(Group.phase_id == phase.id)
-        .join(BinaryBet.match)
-        .join(Match.group)
-        .order_by(Group.code, Match.index)
+    phase, groups, score_bets, binary_bets = bets_from_phase_code(
+        current_user, phase_code
     )
-    binary_bets = [
-        binary_bet.to_dict_with_group_id() for binary_bet in binary_bets_query
-    ]
-
-    score_bets_query = (
-        current_user.bets.filter(Group.phase_id == phase.id)
-        .join(ScoreBet.match)
-        .join(Match.group)
-        .order_by(Group.code, Match.index)
-    )
-    score_bets = [score_bet.to_dict_with_group_id() for score_bet in score_bets_query]
-
-    group_query = Group.query.order_by(Group.code).filter(Group.phase_id == phase.id)
-    groups = [group.to_dict_without_phase() for group in group_query]
 
     return success_response(
         200,
         {
             "phase": phase.to_dict(),
-            "groups": groups,
-            "score_bets": score_bets,
-            "binary_bets": binary_bets,
+            "groups": [group.to_dict_without_phase() for group in groups],
+            "score_bets": [
+                score_bet.to_dict_with_group_id() for score_bet in score_bets
+            ],
+            "binary_bets": [
+                binary_bet.to_dict_with_group_id() for binary_bet in binary_bets
+            ],
         },
     )
 
@@ -196,9 +185,6 @@ def groups(current_user):
         .join(Group.phase)
         .order_by(desc(Phase.code), Group.code, Match.index)
     )
-    binary_bets = [
-        binary_bet.to_dict_with_group_id() for binary_bet in binary_bets_query
-    ]
 
     score_bets_query = (
         current_user.bets.join(ScoreBet.match)
@@ -206,21 +192,22 @@ def groups(current_user):
         .join(Group.phase)
         .order_by(desc(Phase.code), Group.code, Match.index)
     )
-    score_bets = [score_bet.to_dict_with_group_id() for score_bet in score_bets_query]
 
     group_query = Group.query.join(Group.phase).order_by(desc(Phase.code), Group.code)
-    groups = [group.to_dict_with_phase_id() for group in group_query]
 
     phase_query = Phase.query.order_by(desc(Phase.code))
-    phases = [phase.to_dict() for phase in phase_query]
 
     return success_response(
         200,
         {
-            "phases": phases,
-            "groups": groups,
-            "binary_bets": binary_bets,
-            "score_bets": score_bets,
+            "phases": [phase.to_dict() for phase in phase_query],
+            "groups": [group.to_dict_with_phase_id() for group in group_query],
+            "score_bets": [
+                score_bet.to_dict_with_group_id() for score_bet in score_bets_query
+            ],
+            "binary_bets": [
+                binary_bet.to_dict_with_group_id() for binary_bet in binary_bets_query
+            ],
         },
     )
 
@@ -228,36 +215,21 @@ def groups(current_user):
 @bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/phases/<string:phase_code>")
 @token_required
 def get_bets_by_phase(current_user, phase_code):
-    phase = Phase.query.filter_by(code=phase_code).first()
-
-    binary_bets_query = (
-        current_user.binary_bets.filter(Group.phase_id == phase.id)
-        .join(BinaryBet.match)
-        .join(Match.group)
-        .order_by(Group.code, Match.index)
+    phase, groups, score_bets, binary_bets = bets_from_phase_code(
+        current_user, phase_code
     )
-    binary_bets = [
-        binary_bet.to_dict_with_group_id() for binary_bet in binary_bets_query
-    ]
-
-    score_bets_query = (
-        current_user.bets.filter(Group.phase_id == phase.id)
-        .join(ScoreBet.match)
-        .join(Match.group)
-        .order_by(Group.code, Match.index)
-    )
-    score_bets = [score_bet.to_dict_with_group_id() for score_bet in score_bets_query]
-
-    group_query = Group.query.order_by(Group.code).filter(Group.phase_id == phase.id)
-    groups = [group.to_dict_without_phase() for group in group_query]
 
     return success_response(
         200,
         {
             "phase": phase.to_dict(),
-            "groups": groups,
-            "score_bets": score_bets,
-            "binary_bets": binary_bets,
+            "groups": [group.to_dict_without_phase() for group in groups],
+            "score_bets": [
+                score_bet.to_dict_with_group_id() for score_bet in score_bets
+            ],
+            "binary_bets": [
+                binary_bet.to_dict_with_group_id() for binary_bet in binary_bets
+            ],
         },
     )
 
@@ -281,7 +253,7 @@ def modify_bets(current_user):
     telegram_logs = {"score": [], "binary": []}
 
     for bet in request.get_json():
-        # Deduce type bet from request
+        # Deduce bet type from request
         if (
             "team1" in bet
             and "team2" in bet
@@ -373,19 +345,7 @@ def modify_bets(current_user):
 @bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:group_code>")
 @token_required
 def group_get(current_user, group_code):
-    group = Group.query.filter_by(code=group_code).first()
-
-    score_bets = (
-        current_user.bets.filter(Match.group_id == group.id)
-        .join(ScoreBet.match)
-        .order_by(Match.index)
-    )
-
-    binary_bets = (
-        current_user.binary_bets.filter(Match.group_id == group.id)
-        .join(BinaryBet.match)
-        .order_by(Match.index)
-    )
+    group, score_bets, binary_bets = bets_from_group_code(current_user, group_code)
 
     return success_response(
         200,
@@ -418,30 +378,27 @@ def get_result_with_group_code(user_id, group_code):
 
     results = {}
 
+    result_base = {
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "goals_for": 0,
+        "goals_against": 0,
+        "goals_difference": 0,
+        "points": 0,
+    }
+
     for score_bet in score_bets:
         if score_bet.match.team1.id not in results:
-            results[score_bet.match.team1.id] = score_bet.match.team1.to_dict() | {
-                "played": 0,
-                "won": 0,
-                "drawn": 0,
-                "lost": 0,
-                "goals_for": 0,
-                "goals_against": 0,
-                "goals_difference": 0,
-                "points": 0,
-            }
+            results[score_bet.match.team1.id] = (
+                score_bet.match.team1.to_dict() | result_base
+            )
 
         if score_bet.match.team2.id not in results:
-            results[score_bet.match.team2.id] = score_bet.match.team2.to_dict() | {
-                "played": 0,
-                "won": 0,
-                "drawn": 0,
-                "lost": 0,
-                "goals_for": 0,
-                "goals_against": 0,
-                "goals_difference": 0,
-                "points": 0,
-            }
+            results[score_bet.match.team2.id] = (
+                score_bet.match.team2.to_dict() | result_base
+            )
 
         if score_bet.score1 is not None and score_bet.score2 is not None:
             results[score_bet.match.team1.id]["played"] += 1
@@ -705,35 +662,18 @@ def commit_finale_phase(current_user):
                 db.session.delete(bet)
         db.session.commit()
 
-    phase = Phase.query.filter_by(code="FINAL").first()
-
-    binary_bets_query = (
-        current_user.binary_bets.filter(Group.phase_id == phase.id)
-        .join(BinaryBet.match)
-        .join(Match.group)
-        .order_by(Group.code, Match.index)
-    )
-    binary_bets = [
-        binary_bet.to_dict_with_group_id() for binary_bet in binary_bets_query
-    ]
-
-    score_bets_query = (
-        current_user.bets.filter(Group.phase_id == phase.id)
-        .join(ScoreBet.match)
-        .join(Match.group)
-        .order_by(Group.code, Match.index)
-    )
-    score_bets = [score_bet.to_dict_with_group_id() for score_bet in score_bets_query]
-
-    group_query = Group.query.order_by(Group.code).filter(Group.phase_id == phase.id)
-    groups = [group.to_dict_without_phase() for group in group_query]
+    phase, groups, score_bets, binary_bets = bets_from_phase_code(current_user, "FINAL")
 
     return success_response(
         200,
         {
             "phase": phase.to_dict(),
-            "groups": groups,
-            "score_bets": score_bets,
-            "binary_bets": binary_bets,
+            "groups": [group.to_dict_without_phase() for group in groups],
+            "score_bets": [
+                score_bet.to_dict_with_group_id() for score_bet in score_bets
+            ],
+            "binary_bets": [
+                binary_bet.to_dict_with_group_id() for binary_bet in binary_bets
+            ],
         },
     )
