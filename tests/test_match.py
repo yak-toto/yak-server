@@ -39,27 +39,27 @@ def test_matches_db(app, client, monkeypatch):
     initialize_database.script(app)
 
     client.post(
-        "api/v1/signup",
+        "/api/v1/users/signup",
         json={
-            "name": "admin",
+            "name": "clepape",
             "first_name": "admin",
             "last_name": "admin",
-            "password": "admin",
+            "password": "clacla97",
         },
     )
 
     response_login = client.post(
-        "api/v1/login",
+        "/api/v1/users/login",
         json={
-            "name": "admin",
-            "password": "admin",
+            "name": "clepape",
+            "password": "clacla97",
         },
     )
 
     auth_token = response_login.json["result"]["token"]
 
     match_response = client.get(
-        "api/v1/matches", headers=[("Authorization", f"Bearer {auth_token}")]
+        "/api/v1/matches", headers=[("Authorization", f"Bearer {auth_token}")]
     )
 
     with open(f"tests/{testcase}/match_result.json") as file:
@@ -69,7 +69,7 @@ def test_matches_db(app, client, monkeypatch):
     assert match_response.json["result"] == match_result
 
     group_response = client.get(
-        "api/v1/groups/phases/GROUP",
+        "/api/v1/groups/phases/GROUP",
         headers=[("Authorization", f"Bearer {auth_token}")],
     )
 
@@ -79,7 +79,7 @@ def test_matches_db(app, client, monkeypatch):
     assert group_response.status_code == 200
     assert group_response.json["result"] == group_result
 
-    team_response = client.get("api/v1/teams")
+    team_response = client.get("/api/v1/teams")
 
     with open(f"tests/{testcase}/team_result.json") as file:
         team_result = json.loads(file.read())

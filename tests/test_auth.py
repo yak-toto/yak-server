@@ -8,7 +8,7 @@ def test_valid_auth(client, monkeypatch):
     )
 
     response_signup = client.post(
-        "/api/v1/signup",
+        "/api/v1/users/signup",
         json={
             "name": "admin",
             "first_name": "admin",
@@ -27,7 +27,7 @@ def test_valid_auth(client, monkeypatch):
 
     # login test
     response_login = client.post(
-        "/api/v1/login", json={"name": "admin", "password": "admin"}
+        "/api/v1/users/login", json={"name": "admin", "password": "admin"}
     )
     response_login_body = response_login.json
     auth_token = response_login_body["result"].pop("token")
@@ -39,7 +39,7 @@ def test_valid_auth(client, monkeypatch):
 
     # current user tests
     response_current_user = client.get(
-        "api/v1/current_user", headers=[("Authorization", f"Bearer: {auth_token}")]
+        "/api/v1/users", headers=[("Authorization", f"Bearer: {auth_token}")]
     )
     assert response_current_user.status_code == 200
     assert response_current_user.json == {
@@ -55,7 +55,7 @@ def test_double_signup(client, monkeypatch):
     )
 
     response_signup = client.post(
-        "/api/v1/signup",
+        "/api/v1/users/signup",
         json={
             "name": "user2",
             "first_name": "admin",
@@ -74,7 +74,7 @@ def test_double_signup(client, monkeypatch):
 
     # signup with same name test
     response_second_signup = client.post(
-        "/api/v1/signup",
+        "/api/v1/users/signup",
         json={
             "name": "user2",
             "first_name": "admin",
@@ -92,7 +92,7 @@ def test_double_signup(client, monkeypatch):
 
 def test_login_wrong_password(client):
     client.post(
-        "api/v1/signup",
+        "/api/v1/users/signup",
         json={
             "name": "glepape",
             "first_name": "Guillaume",
@@ -102,7 +102,7 @@ def test_login_wrong_password(client):
     )
 
     response_login = client.post(
-        "api/v1/login", json={"name": "glepape", "password": "wrong_password"}
+        "/api/v1/users/login", json={"name": "glepape", "password": "wrong_password"}
     )
 
     assert response_login.status_code == 401
