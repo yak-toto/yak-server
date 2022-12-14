@@ -225,9 +225,23 @@ def team_from_group_code(user, group_code):
 
 
 def winner_from_user(user):
-    return {
-        bet.match.team1.id if bet.is_one_won else bet.match.team2.id
+    finale_bet = [
+        bet
         for bet in user.binary_bets.filter(Group.code == "1")
         .join(BinaryBet.match)
         .join(Match.group)
+    ]
+
+    if not finale_bet:
+        return set()
+
+    finale_bet = finale_bet[0]
+
+    if finale_bet.is_one_won is None:
+        return set()
+
+    return {
+        finale_bet.match.team1.id
+        if finale_bet.is_one_won
+        else finale_bet.match.team2.id
     }
