@@ -17,6 +17,7 @@ from .utils.errors import InvalidCredentials
 from .utils.errors import NameAlreadyExists
 from .utils.errors import UnauthorizedAccessToAdminAPI
 from .utils.errors import UserNotFound
+from .utils.errors import WrongInputs
 from .utils.flask_utils import success_response
 from .utils.telegram_sender import send_message
 
@@ -78,23 +79,26 @@ def signup_post():
     return success_response(201, user.to_user_dict() | {"token": token})
 
 
-@auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/change_password", methods=["POST"])
+@auth.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/<string:user_id>")
 @token_required
-def change_password(current_user):
+def patch_user(current_user, user_id):
     if current_user.name != "admin":
         raise UnauthorizedAccessToAdminAPI()
 
     body = request.get_json()
 
-    existing_user = User.query.filter_by(name=body["name"]).first()
-    if not existing_user:
+    if not body.get("password"):
+        raise WrongInputs()
+
+    user = User.query.filter_by(id=user_id).first()
+    if not user:
         raise UserNotFound()
 
-    existing_user.change_password(body["password"])
+    user.change_password(body["password"])
 
     db.session.commit()
 
-    return success_response(200, existing_user.to_user_dict())
+    return success_response(200, user.to_user_dict())
 
 
 @auth.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/users")
