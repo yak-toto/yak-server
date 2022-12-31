@@ -25,7 +25,7 @@ from .utils.flask_utils import success_response
 matches = Blueprint("matches", __name__)
 
 
-@matches.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches")
+@matches.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches")
 @token_required
 def matches_get_all(current_user):
     binary_bets = (
@@ -59,7 +59,7 @@ def matches_get_all(current_user):
     )
 
 
-@matches.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/<string:match_id>")
+@matches.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/<string:match_id>")
 @token_required
 def matches_get_by_id(current_user, match_id):
     bet = current_user.binary_bets.filter_by(match_id=match_id).first()
@@ -80,7 +80,7 @@ def matches_get_by_id(current_user, match_id):
     )
 
 
-@matches.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/groups/<string:group_code>")
+@matches.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/groups/<string:group_code>")
 @token_required
 def matches_by_group_code(current_user, group_code):
     group, matches = matches_from_group_code(current_user, group_code)
@@ -95,7 +95,7 @@ def matches_by_group_code(current_user, group_code):
     )
 
 
-@matches.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/phases/<string:phase_code>")
+@matches.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/phases/<string:phase_code>")
 @token_required
 def matches_by_phase_code(current_user, phase_code):
     phase, groups, matches = matches_from_phase_code(current_user, phase_code)
@@ -110,7 +110,7 @@ def matches_by_phase_code(current_user, phase_code):
     )
 
 
-@matches.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/teams/<string:team_id>")
+@matches.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/teams/<string:team_id>")
 @token_required
 def matches_teams_get(current_user, team_id):
     if is_uuid4(team_id):

@@ -10,7 +10,7 @@ from .utils.flask_utils import success_response
 config = Blueprint("config", __name__)
 
 
-@config.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/config")
+@config.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/config")
 @token_required
 def config_get(current_user):
     if current_user.name != "admin":

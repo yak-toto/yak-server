@@ -11,7 +11,7 @@ from .utils.flask_utils import success_response
 groups = Blueprint("group", __name__)
 
 
-@groups.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups")
+@groups.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups")
 @token_required
 def get_groups(current_user):
     group_query = Group.query.join(Group.phase).order_by(desc(Phase.code), Group.code)
@@ -29,7 +29,7 @@ def get_groups(current_user):
     )
 
 
-@groups.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_code>")
+@groups.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_code>")
 @token_required
 def get_group_by_code(current_user, group_code):
     group = Group.query.filter_by(code=group_code).first()
@@ -43,7 +43,7 @@ def get_group_by_code(current_user, group_code):
     )
 
 
-@groups.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/phases/<string:phase_code>")
+@groups.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/phases/<string:phase_code>")
 @token_required
 def get_groups_by_phase_code(current_user, phase_code):
     phase = Phase.query.filter_by(code=phase_code).first()

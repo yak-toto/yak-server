@@ -22,7 +22,7 @@ from .utils.flask_utils import success_response
 results = Blueprint("results", __name__)
 
 
-@results.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_board")
+@results.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_board")
 @token_required
 def score_board(current_user):
     return success_response(
@@ -36,7 +36,7 @@ def score_board(current_user):
     )
 
 
-@results.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/results")
+@results.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/results")
 @token_required
 def results_get(current_user):
     if current_user.name == "admin":
@@ -55,7 +55,7 @@ def results_get(current_user):
     )
 
 
-@results.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/compute_points", methods=["POST"])
+@results.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/compute_points")
 @token_required
 def compute_points_post(current_user):
     if current_user.name != "admin":

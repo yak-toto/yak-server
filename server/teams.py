@@ -14,7 +14,7 @@ from .utils.flask_utils import success_response
 teams = Blueprint("team", __name__)
 
 
-@teams.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams", methods=["POST"])
+@teams.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams")
 def teams_post():
     body = request.get_json()
 
@@ -34,14 +34,14 @@ def teams_post():
         return success_response(201, {"team": team.to_dict()})
 
 
-@teams.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams")
+@teams.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams")
 def teams_get():
     return success_response(
         200, {"teams": [team.to_dict() for team in Team.query.all()]}
     )
 
 
-@teams.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams/<string:team_id>")
+@teams.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams/<string:team_id>")
 def teams_get_by_id(team_id):
     if is_uuid4(team_id):
         team = Team.query.get(team_id)

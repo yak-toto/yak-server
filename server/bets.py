@@ -36,9 +36,7 @@ from .utils.telegram_sender import send_message
 bets = Blueprint("bets", __name__)
 
 
-@bets.route(
-    f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/phases/<string:phase_code>", methods=["PUT"]
-)
+@bets.put(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/phases/<string:phase_code>")
 @token_required
 def create_bet(current_user, phase_code):
     phase = Phase.query.filter_by(code=phase_code).first()
@@ -176,7 +174,7 @@ def create_bet(current_user, phase_code):
     )
 
 
-@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets")
+@bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets")
 @token_required
 def groups(current_user):
     binary_bets_query = (
@@ -212,7 +210,7 @@ def groups(current_user):
     )
 
 
-@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/phases/<string:phase_code>")
+@bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/phases/<string:phase_code>")
 @token_required
 def get_bets_by_phase(current_user, phase_code):
     phase, groups, score_bets, binary_bets = bets_from_phase_code(
@@ -234,7 +232,7 @@ def get_bets_by_phase(current_user, phase_code):
     )
 
 
-@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets", methods=["PATCH"])
+@bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets")
 @token_required
 def modify_bets(current_user):
     # Reject if any input bet does not contain id
@@ -342,7 +340,7 @@ def modify_bets(current_user):
     )
 
 
-@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:group_code>")
+@bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:group_code>")
 @token_required
 def group_get(current_user, group_code):
     group, score_bets, binary_bets = bets_from_group_code(current_user, group_code)
@@ -358,7 +356,7 @@ def group_get(current_user, group_code):
     )
 
 
-@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/results/<string:group_code>")
+@bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/results/<string:group_code>")
 @token_required
 def group_result_get(current_user, group_code):
     return success_response(
@@ -445,10 +443,7 @@ def get_result_with_group_code(user_id, group_code):
     }
 
 
-@bets.route(
-    f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:bet_id>",
-    methods=["PATCH"],
-)
+@bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:bet_id>")
 @token_required
 def match_patch(current_user, bet_id):
     body = request.get_json()
@@ -532,7 +527,7 @@ def log_binary_bet(user_name, team1, team2, is_one_won):
     )
 
 
-@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:bet_id>")
+@bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:bet_id>")
 @token_required
 def bet_get(current_user, bet_id):
     bet_type = request.args.get("type")
@@ -560,7 +555,7 @@ def bet_get(current_user, bet_id):
     return success_response(200, response)
 
 
-@bets.route(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/finale_phase", methods=["POST"])
+@bets.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/finale_phase")
 @token_required
 def commit_finale_phase(current_user):
     finale_phase_config = current_app.config["FINALE_PHASE_CONFIG"]
