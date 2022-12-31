@@ -7,7 +7,6 @@ setup(
     packages=["server"],
     install_requires=[
         "Flask-SQLAlchemy >= 2.5",
-        "Flask-Cors >= 3.0",
         "requests >= 2.25",
         "PyJWT >= 2.4.0",
         "PyMySQL >= 1.0.2",

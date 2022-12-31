@@ -1,6 +1,5 @@
 from flask import Flask
 from flask.cli import load_dotenv
-from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
 from .utils.errors import set_error_handler
@@ -36,7 +35,5 @@ def create_app():
     app.register_blueprint(groups_blueprint)
     app.register_blueprint(matches_blueprint)
     app.register_blueprint(teams_blueprint)
-
-    CORS(app, resources={r"/*": {"origins": "*"}})
 
     return app
