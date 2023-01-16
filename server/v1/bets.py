@@ -5,19 +5,19 @@ from uuid import uuid4
 from flask import Blueprint
 from flask import current_app
 from flask import request
+from server import db
+from server.database.models import BinaryBetModel
+from server.database.models import GroupModel
+from server.database.models import is_locked
+from server.database.models import is_phase_locked
+from server.database.models import MatchModel
+from server.database.models import PhaseModel
+from server.database.models import ScoreBetModel
+from server.database.query import bets_from_group_code
+from server.database.query import bets_from_phase_code
 from sqlalchemy import and_
 from sqlalchemy import desc
 
-from . import db
-from .models import BinaryBet
-from .models import Group
-from .models import is_locked
-from .models import is_phase_locked
-from .models import Match
-from .models import Phase
-from .models import ScoreBet
-from .query import bets_from_group_code
-from .query import bets_from_phase_code
 from .utils.auth_utils import token_required
 from .utils.constants import BINARY
 from .utils.constants import GLOBAL_ENDPOINT
@@ -39,33 +39,34 @@ bets = Blueprint("bets", __name__)
 @bets.put(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/phases/<string:phase_code>")
 @token_required
 def create_bet(current_user, phase_code):
-    phase = Phase.query.filter_by(code=phase_code).first()
+    phase = PhaseModel.query.filter_by(code=phase_code).first()
 
     if is_phase_locked(phase.code, current_user.name):
         raise LockedBets()
 
     finale_phase_config = current_app.config["FINALE_PHASE_CONFIG"]
 
-    groups = Group.query.filter(
+    groups = GroupModel.query.filter(
         and_(
-            Group.phase_id == phase.id, Group.code != finale_phase_config["first_group"]
+            GroupModel.phase_id == phase.id,
+            GroupModel.code != finale_phase_config["first_group"],
         )
     )
 
     existing_binary_bets = (
         current_user.binary_bets.filter(
-            Match.group_id.in_(map(attrgetter("id"), groups))
+            MatchModel.group_id.in_(map(attrgetter("id"), groups))
         )
-        .join(BinaryBet.match)
-        .join(Match.group)
-        .order_by(Group.code, Match.index)
+        .join(BinaryBetModel.match)
+        .join(MatchModel.group)
+        .order_by(GroupModel.code, MatchModel.index)
     )
 
     existing_score_bets = (
-        current_user.bets.filter(Match.group_id.in_(map(attrgetter("id"), groups)))
-        .join(ScoreBet.match)
-        .join(Match.group)
-        .order_by(Group.code, Match.index)
+        current_user.bets.filter(MatchModel.group_id.in_(map(attrgetter("id"), groups)))
+        .join(ScoreBetModel.match)
+        .join(MatchModel.group)
+        .order_by(GroupModel.code, MatchModel.index)
     )
 
     body = request.get_json()
@@ -88,12 +89,12 @@ def create_bet(current_user, phase_code):
         team2_id = bet["team2"]["id"]
         index = bet["index"]
 
-        match = Match.query.filter_by(
+        match = MatchModel.query.filter_by(
             group_id=group_id, index=index, team1_id=team1_id, team2_id=team2_id
         ).first()
 
         if not match:
-            match = Match(
+            match = MatchModel(
                 id=str(uuid4()),
                 group_id=group_id,
                 index=index,
@@ -104,12 +105,12 @@ def create_bet(current_user, phase_code):
         new_matches.append(match)
 
         if "is_one_won" in bet:
-            binary_bet = BinaryBet.query.filter_by(
+            binary_bet = BinaryBetModel.query.filter_by(
                 match_id=match.id, user_id=current_user.id
             ).first()
 
             if not binary_bet:
-                binary_bet = BinaryBet(match_id=match.id, user_id=current_user.id)
+                binary_bet = BinaryBetModel(match_id=match.id, user_id=current_user.id)
 
             binary_bet.is_one_won = bet["is_one_won"]
 
@@ -121,12 +122,12 @@ def create_bet(current_user, phase_code):
             and "score" in bet.get("team1", {})
             and "score" in bet.get("team2", {})
         ):
-            score_bet = ScoreBet.query.filter_by(
+            score_bet = ScoreBetModel.query.filter_by(
                 match_id=match.id, user_id=current_user.id
             ).first()
 
             if not score_bet:
-                score_bet = ScoreBet(match_id=match.id, user_id=current_user.id)
+                score_bet = ScoreBetModel(match_id=match.id, user_id=current_user.id)
 
             score_bet.score1 = bet["team1"]["score1"]
             score_bet.score2 = bet["team1"]["score2"]
@@ -178,22 +179,24 @@ def create_bet(current_user, phase_code):
 @token_required
 def groups(current_user):
     binary_bets_query = (
-        current_user.binary_bets.join(BinaryBet.match)
-        .join(Match.group)
-        .join(Group.phase)
-        .order_by(desc(Phase.code), Group.code, Match.index)
+        current_user.binary_bets.join(BinaryBetModel.match)
+        .join(MatchModel.group)
+        .join(GroupModel.phase)
+        .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)
     )
 
     score_bets_query = (
-        current_user.bets.join(ScoreBet.match)
-        .join(Match.group)
-        .join(Group.phase)
-        .order_by(desc(Phase.code), Group.code, Match.index)
+        current_user.bets.join(ScoreBetModel.match)
+        .join(MatchModel.group)
+        .join(GroupModel.phase)
+        .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)
     )
 
-    group_query = Group.query.join(Group.phase).order_by(desc(Phase.code), Group.code)
+    group_query = GroupModel.query.join(GroupModel.phase).order_by(
+        desc(PhaseModel.code), GroupModel.code
+    )
 
-    phase_query = Phase.query.order_by(desc(Phase.code))
+    phase_query = PhaseModel.query.order_by(desc(PhaseModel.code))
 
     return success_response(
         200,
@@ -259,12 +262,12 @@ def modify_bets(current_user):
             and "score" in bet["team2"]
         ):
             bet_type = SCORE
-            original_bet = ScoreBet.query.filter_by(
+            original_bet = ScoreBetModel.query.filter_by(
                 id=bet["id"], user_id=current_user.id
             ).first()
         elif "is_one_won" in bet:
             bet_type = BINARY
-            original_bet = BinaryBet.query.filter_by(
+            original_bet = BinaryBetModel.query.filter_by(
                 id=bet["id"], user_id=current_user.id
             ).first()
         else:
@@ -365,13 +368,13 @@ def group_result_get(current_user, group_code):
 
 
 def get_result_with_group_code(user_id, group_code):
-    group = Group.query.filter_by(code=group_code).first()
+    group = GroupModel.query.filter_by(code=group_code).first()
 
     score_bets = (
-        ScoreBet.query.filter_by(user_id=user_id)
-        .filter(Match.group_id == group.id)
-        .join(ScoreBet.match)
-        .order_by(Match.index)
+        ScoreBetModel.query.filter_by(user_id=user_id)
+        .filter(MatchModel.group_id == group.id)
+        .join(ScoreBetModel.match)
+        .order_by(MatchModel.index)
     )
 
     results = {}
@@ -451,13 +454,13 @@ def match_patch(current_user, bet_id):
     bet_type = request.args.get("type")
 
     if bet_type == SCORE:
-        bet = ScoreBet.query.filter_by(user_id=current_user.id, id=bet_id).first()
+        bet = ScoreBetModel.query.filter_by(user_id=current_user.id, id=bet_id).first()
 
         if "score" not in body["team1"] or "score" not in body["team2"]:
             raise WrongInputs()
 
     elif bet_type == BINARY:
-        bet = BinaryBet.query.filter_by(user_id=current_user.id, id=bet_id).first()
+        bet = BinaryBetModel.query.filter_by(user_id=current_user.id, id=bet_id).first()
 
         if "is_one_won" not in body:
             raise WrongInputs()
@@ -533,9 +536,9 @@ def bet_get(current_user, bet_id):
     bet_type = request.args.get("type")
 
     if bet_type == SCORE:
-        bet = ScoreBet.query.filter_by(user_id=current_user.id, id=bet_id).first()
+        bet = ScoreBetModel.query.filter_by(user_id=current_user.id, id=bet_id).first()
     elif bet_type == BINARY:
-        bet = BinaryBet.query.filter_by(user_id=current_user.id, id=bet_id).first()
+        bet = BinaryBetModel.query.filter_by(user_id=current_user.id, id=bet_id).first()
     else:
         raise InvalidBetType()
 
@@ -562,17 +565,19 @@ def commit_finale_phase(current_user):
 
     groups_result = {
         group.code: get_result_with_group_code(current_user.id, group.code)["results"]
-        for group in Group.query.join(Group.phase).filter(Phase.code == "GROUP")
+        for group in GroupModel.query.join(GroupModel.phase).filter(
+            PhaseModel.code == "GROUP"
+        )
     }
 
-    first_phase_phase_group = Group.query.filter_by(
+    first_phase_phase_group = GroupModel.query.filter_by(
         code=finale_phase_config["first_group"]
     ).first()
 
-    existing_binary_bets = BinaryBet.query.join(BinaryBet.match).filter(
+    existing_binary_bets = BinaryBetModel.query.join(BinaryBetModel.match).filter(
         and_(
-            BinaryBet.user_id == current_user.id,
-            Match.group_id == first_phase_phase_group.id,
+            BinaryBetModel.user_id == current_user.id,
+            MatchModel.group_id == first_phase_phase_group.id,
         )
     )
 
@@ -596,7 +601,7 @@ def commit_finale_phase(current_user):
                 match_config["team2"]["rank"] - 1
             ]
 
-            match = Match.query.filter_by(
+            match = MatchModel.query.filter_by(
                 group_id=first_phase_phase_group.id,
                 team1_id=team1["id"],
                 team2_id=team2["id"],
@@ -604,7 +609,7 @@ def commit_finale_phase(current_user):
             ).first()
 
             if not match:
-                match = Match(
+                match = MatchModel(
                     id=str(uuid4()),
                     group_id=first_phase_phase_group.id,
                     team1_id=team1["id"],
@@ -614,13 +619,13 @@ def commit_finale_phase(current_user):
 
             new_matches.append(match)
 
-            bet = BinaryBet.query.filter_by(
+            bet = BinaryBetModel.query.filter_by(
                 user_id=current_user.id,
                 match_id=match.id,
             ).first()
 
             if not bet:
-                bet = BinaryBet(
+                bet = BinaryBetModel(
                     user_id=current_user.id,
                     match_id=match.id,
                 )
@@ -650,9 +655,12 @@ def commit_finale_phase(current_user):
     db.session.commit()
 
     if is_bet_modified:
-        for bet in BinaryBet.query.filter_by(user_id=current_user.id):
-            if bet.match.group.code in Group.query.join(Group.phase).filter(
-                and_(Phase.code == "FINAL", Group.id == first_phase_phase_group.id)
+        for bet in BinaryBetModel.query.filter_by(user_id=current_user.id):
+            if bet.match.group.code in GroupModel.query.join(GroupModel.phase).filter(
+                and_(
+                    PhaseModel.code == "FINAL",
+                    GroupModel.id == first_phase_phase_group.id,
+                )
             ):
                 db.session.delete(bet)
         db.session.commit()

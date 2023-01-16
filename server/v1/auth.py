@@ -5,11 +5,11 @@ import jwt
 from flask import Blueprint
 from flask import current_app
 from flask import request
+from server import db
+from server.database.models import MatchModel
+from server.database.models import ScoreBetModel
+from server.database.models import UserModel
 
-from . import db
-from .models import Match
-from .models import ScoreBet
-from .models import User
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import VERSION
@@ -27,7 +27,7 @@ auth = Blueprint("auth", __name__)
 @auth.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/login")
 def login_post():
     data = request.get_json()
-    user = User.authenticate(**data)
+    user = UserModel.authenticate(**data)
 
     if not user:
         raise InvalidCredentials()
@@ -50,18 +50,19 @@ def signup_post():
     data = request.get_json()
 
     # Check existing user in db
-    existing_user = User.query.filter_by(name=data["name"]).first()
+    existing_user = UserModel.query.filter_by(name=data["name"]).first()
     if existing_user:
         raise NameAlreadyExists(data["name"])
 
     # Initialize user and integrate in db
-    user = User(**data)
+    user = UserModel(**data)
     db.session.add(user)
     db.session.commit()
 
     # Initialize bets and integrate in db
     db.session.add_all(
-        ScoreBet(user_id=user.id, match_id=match.id) for match in Match.query.all()
+        ScoreBetModel(user_id=user.id, match_id=match.id)
+        for match in MatchModel.query.all()
     )
     db.session.commit()
 
@@ -90,7 +91,7 @@ def patch_user(current_user, user_id):
     if not body.get("password"):
         raise WrongInputs()
 
-    user = User.query.filter_by(id=user_id).first()
+    user = UserModel.query.filter_by(id=user_id).first()
     if not user:
         raise UserNotFound()
 

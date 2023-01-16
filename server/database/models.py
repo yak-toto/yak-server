@@ -2,14 +2,13 @@ import uuid
 from datetime import datetime
 
 from flask import current_app
+from server import db
 from sqlalchemy import CheckConstraint
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 
-from . import db
 
-
-class User(db.Model):
+class UserModel(db.Model):
     __tablename__ = "user"
     id = db.Column(
         db.String(100),
@@ -69,7 +68,7 @@ class User(db.Model):
     )
 
     bets = db.relationship(
-        "ScoreBet",
+        "ScoreBetModel",
         back_populates="user",
         lazy="dynamic",
         cascade="all, delete",
@@ -77,7 +76,7 @@ class User(db.Model):
     )
 
     binary_bets = db.relationship(
-        "BinaryBet",
+        "BinaryBetModel",
         back_populates="user",
         lazy="dynamic",
         cascade="all, delete",
@@ -131,7 +130,7 @@ class User(db.Model):
         }
 
 
-class Match(db.Model):
+class MatchModel(db.Model):
     __tablename__ = "match"
     id = db.Column(
         db.String(100),
@@ -141,18 +140,18 @@ class Match(db.Model):
     )
 
     group_id = db.Column(db.String(100), db.ForeignKey("group.id"), nullable=False)
-    group = db.relationship("Group", foreign_keys=group_id, backref="matches")
+    group = db.relationship("GroupModel", foreign_keys=group_id, backref="matches")
 
     index = db.Column(db.Integer, nullable=False)
 
     team1_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
-    team1 = db.relationship("Team", foreign_keys=team1_id, backref="match1")
+    team1 = db.relationship("TeamModel", foreign_keys=team1_id, backref="match1")
 
     team2_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
-    team2 = db.relationship("Team", foreign_keys=team2_id, backref="match2")
+    team2 = db.relationship("TeamModel", foreign_keys=team2_id, backref="match2")
 
-    bets = db.relationship("ScoreBet", back_populates="match")
-    binary_bets = db.relationship("BinaryBet", back_populates="match")
+    bets = db.relationship("ScoreBetModel", back_populates="match")
+    binary_bets = db.relationship("BinaryBetModel", back_populates="match")
 
     def to_dict(self):
         return {
@@ -206,7 +205,7 @@ def is_phase_locked(phase_code, user_name):
     return False
 
 
-class ScoreBet(db.Model):
+class ScoreBetModel(db.Model):
     __tablename__ = "score_bet"
     id = db.Column(
         db.String(100),
@@ -217,10 +216,10 @@ class ScoreBet(db.Model):
     user_id = db.Column(
         db.String(100), db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
-    user = db.relationship("User", back_populates="bets")
+    user = db.relationship("UserModel", back_populates="bets")
 
     match_id = db.Column(db.String(100), db.ForeignKey("match.id"), nullable=False)
-    match = db.relationship("Match", back_populates="bets")
+    match = db.relationship("MatchModel", back_populates="bets")
 
     score1 = db.Column(db.Integer, CheckConstraint("score1>=0"), default=None)
     score2 = db.Column(db.Integer, CheckConstraint("score2>=0"), default=None)
@@ -288,7 +287,7 @@ class ScoreBet(db.Model):
         }
 
 
-class BinaryBet(db.Model):
+class BinaryBetModel(db.Model):
     __tablename__ = "binary_bet"
     id = db.Column(
         db.String(100),
@@ -299,10 +298,10 @@ class BinaryBet(db.Model):
     user_id = db.Column(
         db.String(100), db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
-    user = db.relationship("User", back_populates="binary_bets")
+    user = db.relationship("UserModel", back_populates="binary_bets")
 
     match_id = db.Column(db.String(100), db.ForeignKey("match.id"), nullable=False)
-    match = db.relationship("Match", back_populates="binary_bets")
+    match = db.relationship("MatchModel", back_populates="binary_bets")
 
     is_one_won = db.Column(db.Boolean, default=None)
 
@@ -351,7 +350,7 @@ class BinaryBet(db.Model):
         }
 
 
-class Team(db.Model):
+class TeamModel(db.Model):
     __tablename__ = "team"
     id = db.Column(
         db.String(100),
@@ -366,7 +365,7 @@ class Team(db.Model):
         return {"id": self.id, "code": self.code, "description": self.description}
 
 
-class Group(db.Model):
+class GroupModel(db.Model):
     __tablename__ = "group"
     id = db.Column(
         db.String(100),
@@ -378,7 +377,7 @@ class Group(db.Model):
     description = db.Column(db.String(100), unique=True, nullable=False)
 
     phase_id = db.Column(db.String(100), db.ForeignKey("phase.id"), nullable=False)
-    phase = db.relationship("Phase", foreign_keys=phase_id)
+    phase = db.relationship("PhaseModel", foreign_keys=phase_id)
 
     def to_dict(self):
         return {
@@ -404,7 +403,7 @@ class Group(db.Model):
         }
 
 
-class Phase(db.Model):
+class PhaseModel(db.Model):
     __tablename__ = "phase"
     id = db.Column(
         db.String(100),

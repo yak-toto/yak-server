@@ -2,16 +2,16 @@ from itertools import chain
 
 from flask import Blueprint
 from flask import current_app
+from server import db
+from server.database.models import BinaryBetModel
+from server.database.models import GroupModel
+from server.database.models import MatchModel
+from server.database.models import PhaseModel
+from server.database.models import ScoreBetModel
+from server.database.models import UserModel
 from sqlalchemy import and_
 
-from . import db
 from .bets import get_result_with_group_code
-from .models import BinaryBet
-from .models import Group
-from .models import Match
-from .models import Phase
-from .models import ScoreBet
-from .models import User
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import VERSION
@@ -29,8 +29,8 @@ def score_board(current_user):
         200,
         [
             user.to_result_dict()
-            for user in User.query.order_by(User.points.desc()).filter(
-                User.name != "admin"
+            for user in UserModel.query.order_by(UserModel.points.desc()).filter(
+                UserModel.name != "admin"
             )
         ],
     )
@@ -42,7 +42,9 @@ def results_get(current_user):
     if current_user.name == "admin":
         raise NoResultsForAdminUser()
 
-    results = User.query.order_by(User.points.desc()).filter(User.name != "admin")
+    results = UserModel.query.order_by(UserModel.points.desc()).filter(
+        UserModel.name != "admin"
+    )
 
     rank = [
         index
@@ -51,7 +53,7 @@ def results_get(current_user):
     ][0]
 
     return success_response(
-        200, User.query.get(current_user.id).to_result_dict() | {"rank": rank}
+        200, UserModel.query.get(current_user.id).to_result_dict() | {"rank": rank}
     )
 
 
@@ -74,8 +76,8 @@ def compute_points_post(current_user):
         200,
         [
             user.to_result_dict()
-            for user in User.query.order_by(User.points.desc()).filter(
-                User.name != "admin"
+            for user in UserModel.query.order_by(UserModel.points.desc()).filter(
+                UserModel.name != "admin"
             )
         ],
     )
@@ -89,7 +91,7 @@ def compute_points(
     team_qualified,
     first_team_qualified,
 ):
-    admin = User.query.filter_by(name="admin").first()
+    admin = UserModel.query.filter_by(name="admin").first()
 
     results = []
 
@@ -99,8 +101,11 @@ def compute_points(
         user_ids_found_correct_result = []
         user_ids_found_correct_score = []
 
-        for user_score in ScoreBet.query.filter(
-            and_(ScoreBet.match_id == real_score.match_id, ScoreBet.user_id != admin.id)
+        for user_score in ScoreBetModel.query.filter(
+            and_(
+                ScoreBetModel.match_id == real_score.match_id,
+                ScoreBetModel.user_id != admin.id,
+            )
         ):
             if user_score.is_same_results(real_score):
                 number_correct_result += 1
@@ -122,9 +127,11 @@ def compute_points(
 
     result_groups = {}
 
-    users = User.query.filter(User.name != "admin")
+    users = UserModel.query.filter(UserModel.name != "admin")
 
-    for group in Group.query.join(Group.phase).filter(Phase.code == "GROUP"):
+    for group in GroupModel.query.join(GroupModel.phase).filter(
+        PhaseModel.code == "GROUP"
+    ):
         group_result_admin = get_result_with_group_code(admin.id, group.code)["results"]
 
         if all(team["played"] == 3 for team in group_result_admin):
@@ -216,9 +223,9 @@ def team_from_group_code(user, group_code):
         chain(
             *(
                 (bet.match.team1.id, bet.match.team2.id)
-                for bet in user.binary_bets.filter(Group.code == group_code)
-                .join(BinaryBet.match)
-                .join(Match.group)
+                for bet in user.binary_bets.filter(GroupModel.code == group_code)
+                .join(BinaryBetModel.match)
+                .join(MatchModel.group)
             )
         )
     )
@@ -227,9 +234,9 @@ def team_from_group_code(user, group_code):
 def winner_from_user(user):
     finale_bet = [
         bet
-        for bet in user.binary_bets.filter(Group.code == "1")
-        .join(BinaryBet.match)
-        .join(Match.group)
+        for bet in user.binary_bets.filter(GroupModel.code == "1")
+        .join(BinaryBetModel.match)
+        .join(MatchModel.group)
     ]
 
     if not finale_bet:

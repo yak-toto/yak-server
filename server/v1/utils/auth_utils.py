@@ -3,8 +3,8 @@ from functools import wraps
 import jwt
 from flask import current_app
 from flask import request
+from server.database.models import UserModel
 
-from ..models import User
 from .errors import UserNotFound
 
 
@@ -19,7 +19,7 @@ def token_required(f):
         token = auth_headers[1]
         data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
 
-        user = User.query.filter_by(id=data["sub"]).first()
+        user = UserModel.query.filter_by(id=data["sub"]).first()
         if not user:
             raise UserNotFound()
 

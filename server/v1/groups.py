@@ -1,8 +1,8 @@
 from flask import Blueprint
+from server.database.models import GroupModel
+from server.database.models import PhaseModel
 from sqlalchemy import desc
 
-from .models import Group
-from .models import Phase
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import VERSION
@@ -14,10 +14,12 @@ groups = Blueprint("group", __name__)
 @groups.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups")
 @token_required
 def get_groups(current_user):
-    group_query = Group.query.join(Group.phase).order_by(desc(Phase.code), Group.code)
+    group_query = GroupModel.query.join(GroupModel.phase).order_by(
+        desc(PhaseModel.code), GroupModel.code
+    )
     groups = [group.to_dict_with_phase_id() for group in group_query]
 
-    phase_query = Phase.query.order_by(desc(Phase.code))
+    phase_query = PhaseModel.query.order_by(desc(PhaseModel.code))
     phases = [phase.to_dict() for phase in phase_query]
 
     return success_response(
@@ -32,7 +34,7 @@ def get_groups(current_user):
 @groups.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_code>")
 @token_required
 def get_group_by_code(current_user, group_code):
-    group = Group.query.filter_by(code=group_code).first()
+    group = GroupModel.query.filter_by(code=group_code).first()
 
     return success_response(
         200,
@@ -46,9 +48,11 @@ def get_group_by_code(current_user, group_code):
 @groups.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/phases/<string:phase_code>")
 @token_required
 def get_groups_by_phase_code(current_user, phase_code):
-    phase = Phase.query.filter_by(code=phase_code).first()
+    phase = PhaseModel.query.filter_by(code=phase_code).first()
 
-    group_query = Group.query.order_by(Group.code).filter_by(phase_id=phase.id)
+    group_query = GroupModel.query.order_by(GroupModel.code).filter_by(
+        phase_id=phase.id
+    )
     groups = [group.to_dict_without_phase() for group in group_query]
 
     return success_response(

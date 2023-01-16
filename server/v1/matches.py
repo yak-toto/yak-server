@@ -1,17 +1,17 @@
 from itertools import chain
 
 from flask import Blueprint
+from server.database.models import BinaryBetModel
+from server.database.models import GroupModel
+from server.database.models import MatchModel
+from server.database.models import PhaseModel
+from server.database.models import ScoreBetModel
+from server.database.models import TeamModel
+from server.database.query import matches_from_group_code
+from server.database.query import matches_from_phase_code
 from sqlalchemy import desc
 from sqlalchemy import or_
 
-from .models import BinaryBet
-from .models import Group
-from .models import Match
-from .models import Phase
-from .models import ScoreBet
-from .models import Team
-from .query import matches_from_group_code
-from .query import matches_from_phase_code
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT
 from .utils.constants import VERSION
@@ -29,22 +29,24 @@ matches = Blueprint("matches", __name__)
 @token_required
 def matches_get_all(current_user):
     binary_bets = (
-        current_user.binary_bets.join(BinaryBet.match)
-        .join(Match.group)
-        .join(Group.phase)
-        .order_by(desc(Phase.code), Group.code, Match.index)
+        current_user.binary_bets.join(BinaryBetModel.match)
+        .join(MatchModel.group)
+        .join(GroupModel.phase)
+        .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)
     )
 
     score_bets = (
-        current_user.bets.join(ScoreBet.match)
-        .join(Match.group)
-        .join(Group.phase)
-        .order_by(desc(Phase.code), Group.code, Match.index)
+        current_user.bets.join(ScoreBetModel.match)
+        .join(MatchModel.group)
+        .join(GroupModel.phase)
+        .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)
     )
 
-    groups = Group.query.join(Group.phase).order_by(desc(Phase.code), Group.code)
+    groups = GroupModel.query.join(GroupModel.phase).order_by(
+        desc(PhaseModel.code), GroupModel.code
+    )
 
-    phases = Phase.query.order_by(desc(Phase.code))
+    phases = PhaseModel.query.order_by(desc(PhaseModel.code))
 
     return success_response(
         200,
@@ -114,9 +116,9 @@ def matches_by_phase_code(current_user, phase_code):
 @token_required
 def matches_teams_get(current_user, team_id):
     if is_uuid4(team_id):
-        team = Team.query.get(team_id)
+        team = TeamModel.query.get(team_id)
     elif is_iso_3166_1_alpha_2_code(team_id):
-        team = Team.query.filter_by(code=team_id).first()
+        team = TeamModel.query.filter_by(code=team_id).first()
     else:
         raise InvalidTeamId(team_id)
 
@@ -124,19 +126,19 @@ def matches_teams_get(current_user, team_id):
         raise TeamNotFound(team_id)
 
     score_bets = (
-        current_user.bets.join(ScoreBet.match)
-        .join(Match.group)
-        .join(Group.phase)
-        .filter(or_(Match.team1_id == team.id, Match.team2_id == team.id))
-        .order_by(desc(Phase.code), Group.code, Match.index)
+        current_user.bets.join(ScoreBetModel.match)
+        .join(MatchModel.group)
+        .join(GroupModel.phase)
+        .filter(or_(MatchModel.team1_id == team.id, MatchModel.team2_id == team.id))
+        .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)
     )
 
     binary_bets = (
-        current_user.binary_bets.join(BinaryBet.match)
-        .join(Match.group)
-        .join(Group.phase)
-        .filter(or_(Match.team1_id == team.id, Match.team2_id == team.id))
-        .order_by(desc(Phase.code), Group.code, Match.index)
+        current_user.binary_bets.join(BinaryBetModel.match)
+        .join(MatchModel.group)
+        .join(GroupModel.phase)
+        .filter(or_(MatchModel.team1_id == team.id, MatchModel.team2_id == team.id))
+        .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)
     )
 
     groups = {bet.match.group for bet in chain(score_bets, binary_bets)}
