@@ -11,5 +11,6 @@ setup(
         "PyJWT >= 2.4.0",
         "PyMySQL >= 1.0.2",
         "python-dotenv >= 0.20.0",
+        "strawberry-graphql[flask] >= 0.154.0",
     ],
 )

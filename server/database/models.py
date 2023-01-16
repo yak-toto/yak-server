@@ -381,7 +381,7 @@ class GroupModel(db.Model):
     description = db.Column(db.String(100), unique=True, nullable=False)
 
     phase_id = db.Column(db.String(100), db.ForeignKey("phase.id"), nullable=False)
-    phase = db.relationship("PhaseModel", foreign_keys=phase_id)
+    phase = db.relationship("PhaseModel", backref="groups")
 
     def to_dict(self):
         return {

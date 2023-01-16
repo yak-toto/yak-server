@@ -1,6 +1,7 @@
 from flask import Flask
 from flask.cli import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
+from strawberry.flask.views import GraphQLView
 
 db = SQLAlchemy()
 
@@ -42,5 +43,17 @@ def create_app():
     app.register_blueprint(groups_blueprint)
     app.register_blueprint(matches_blueprint)
     app.register_blueprint(teams_blueprint)
+
+    # --------------------------------------------- #
+    # Version 2 setup (GraphQL api)
+    # --------------------------------------------- #
+    from .v2 import schema
+    from .v2.utils.constants import GLOBAL_ENDPOINT, VERSION
+
+    # Registrer endpoint
+    app.add_url_rule(
+        f"/{GLOBAL_ENDPOINT}/{VERSION}",
+        view_func=GraphQLView.as_view("graphql_view", schema=schema),
+    )
 
     return app
