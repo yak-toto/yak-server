@@ -17,14 +17,13 @@ build-backend = "poetry.masonry.api"
 
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 
 Flask-SQLAlchemy = "^3.0.3"
 requests = "^2.28.2"
 PyJWT = "^2.6.0"
 PyMySQL = "^1.0.2"
 python-dotenv = "^0.21.1"
-
 strawberry-graphql = {extras = ["flask"], version = "^0.155.3"}
 
 
