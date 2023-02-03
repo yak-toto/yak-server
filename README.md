@@ -51,12 +51,14 @@ login system is using JSON Web Token, a secret key is required. To generate one,
 JWT_SECRET_KEY=9292f79e10ed7ed03ffad66d196217c4
 ```
 
-Also, the backend is able send logs to a Telegram bot. To do so, please add a bot token and chat id to `.flaskenv`.
+Also, the backend is able send logs to a Telegram bot (optional). To do so, please add a bot token and chat id to `.flaskenv`.
 
 ```text
 BOT_TOKEN=my_bot_token
 CHAT_ID=my_chat_id
 ```
+
+If the variables are not set, no telegram will be send.
 
 Finally, flask needs some configuration to start. Please add `FLASK_APP=server` variable to indicate main location. Last thing, for development environment, debug needs to be activated with a addditional environment variable:
 

@@ -8,8 +8,8 @@ SQLALCHEMY_DATABASE_URI = (
 )
 
 # Load Telegram bot configuration from environment variables
-BOT_TOKEN = os.environ["BOT_TOKEN"]
-CHAT_ID = os.environ["CHAT_ID"]
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+CHAT_ID = os.environ.get("CHAT_ID")
 
 # Load jwt secret key from credentials file
 SECRET_KEY = os.environ["JWT_SECRET_KEY"]
