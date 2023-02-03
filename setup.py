@@ -1,16 +1,7 @@
-from setuptools import setup
+#!/usr/bin/env python
+# we use poetry for our build, but this file seems to be required
+# in order to get GitHub dependencies graph to work
+import setuptools
 
-setup(
-    name="Yak Toto",
-    version="1.0",
-    long_description=__doc__,
-    packages=["server"],
-    install_requires=[
-        "Flask-SQLAlchemy >= 2.5",
-        "requests >= 2.25",
-        "PyJWT >= 2.4.0",
-        "PyMySQL >= 1.0.2",
-        "python-dotenv >= 0.20.0",
-        "strawberry-graphql[flask] >= 0.154.0",
-    ],
-)
+if __name__ == "__main__":
+    setuptools.setup(name="yak-server")
