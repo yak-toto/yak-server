@@ -1,5 +1,6 @@
 from flask import Flask
 from flask.cli import load_dotenv
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from strawberry.flask.views import GraphQLView
 
@@ -55,5 +56,7 @@ def create_app():
         f"/{GLOBAL_ENDPOINT}/{VERSION}",
         view_func=GraphQLView.as_view("graphql_view", schema=schema),
     )
+
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     return app
