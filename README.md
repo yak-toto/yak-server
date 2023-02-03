@@ -32,10 +32,10 @@ Then activate it with:
 source <my_env_name>/bin/activate
 ```
 
-Fetch all packages using setuptools with the following command:
+Fetch all packages using poetry with the following command:
 
 ```bash
-python setup.py install
+poetry install
 ```
 
 Before starting the backend, add `JWT_SECRET_KEY` in `.flaskenv` same as the MySQL user name and password. As
@@ -78,4 +78,4 @@ To run local testing, you can use the script `create_database.py` and `initializ
 
 To set up test, please add a MySQL database named `yak_toto_test`. It will contain all the records created during unit tests. This database is cleaned everytime you run test. That's why a different database is created to avoid deleting records you use for your local testing.
 
-Yak-server is using `pytest` to run tests and can run using `pytest` command into root folder.
+Yak-server is using `pytest` to run tests and can run them using `poetry run pytest` command into root folder.
