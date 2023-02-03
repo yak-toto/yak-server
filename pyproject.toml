@@ -27,5 +27,9 @@ python-dotenv = "^0.21.1"
 strawberry-graphql = {extras = ["flask"], version = "^0.155.3"}
 
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.1"
+
+
 [tool.black]
 line-length = 88
