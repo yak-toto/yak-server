@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from unittest.mock import Mock
 
 import initialize_database
@@ -59,10 +60,11 @@ def test_matches_db(app, client, monkeypatch):
     auth_token = response_login.json["result"]["token"]
 
     match_response = client.get(
-        "/api/v1/matches", headers=[("Authorization", f"Bearer {auth_token}")]
+        "/api/v1/matches",
+        headers=[("Authorization", f"Bearer {auth_token}")],
     )
 
-    with open(f"tests/{testcase}/match_result.json") as file:
+    with Path(f"tests/{testcase}/match_result.json").open() as file:
         match_result = json.loads(file.read())
 
     assert match_response.status_code == 200
@@ -73,7 +75,7 @@ def test_matches_db(app, client, monkeypatch):
         headers=[("Authorization", f"Bearer {auth_token}")],
     )
 
-    with open(f"tests/{testcase}/group_result.json") as file:
+    with Path(f"tests/{testcase}/group_result.json").open() as file:
         group_result = json.loads(file.read())
 
     assert group_response.status_code == 200
@@ -81,7 +83,7 @@ def test_matches_db(app, client, monkeypatch):
 
     team_response = client.get("/api/v1/teams")
 
-    with open(f"tests/{testcase}/team_result.json") as file:
+    with Path(f"tests/{testcase}/team_result.json").open() as file:
         team_result = json.loads(file.read())
 
     assert team_response.status_code == 200

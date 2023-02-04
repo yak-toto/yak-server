@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 
 # Setup MySQL credentials
 SQLALCHEMY_DATABASE_URI = (
@@ -35,14 +36,16 @@ LOCK_DATETIME = config.get("locking", "datetime")
 LOCK_DATETIME_FINAL_PHASE = config.get("locking", "datetime_final_phase")
 BASE_CORRECT_RESULT = config.getint("points", "base_correct_result")
 MULTIPLYING_FACTOR_CORRECT_RESULT = config.getint(
-    "points", "multiplying_factor_correct_result"
+    "points",
+    "multiplying_factor_correct_result",
 )
 BASE_CORRECT_SCORE = config.getint("points", "base_correct_score")
 MULTIPLYING_FACTOR_CORRECT_SCORE = config.getint(
-    "points", "multiplying_factor_correct_score"
+    "points",
+    "multiplying_factor_correct_score",
 )
 TEAM_QUALIFIED = config.getint("points", "team_qualified")
 FIRST_TEAM_QUALIFIED = config.getint("points", "first_team_qualified")
 
-with open(f"data/{COMPETITION}/finale_phase_config.json") as file:
+with Path(f"data/{COMPETITION}/finale_phase_config.json").open() as file:
     FINALE_PHASE_CONFIG = json.loads(file.read())

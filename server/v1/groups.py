@@ -1,11 +1,10 @@
 from flask import Blueprint
-from server.database.models import GroupModel
-from server.database.models import PhaseModel
 from sqlalchemy import desc
 
+from server.database.models import GroupModel, PhaseModel
+
 from .utils.auth_utils import token_required
-from .utils.constants import GLOBAL_ENDPOINT
-from .utils.constants import VERSION
+from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.flask_utils import success_response
 
 groups = Blueprint("group", __name__)
@@ -15,7 +14,8 @@ groups = Blueprint("group", __name__)
 @token_required
 def get_groups(current_user):
     group_query = GroupModel.query.join(GroupModel.phase).order_by(
-        desc(PhaseModel.code), GroupModel.code
+        desc(PhaseModel.code),
+        GroupModel.code,
     )
     groups = [group.to_dict_with_phase_id() for group in group_query]
 
@@ -51,7 +51,7 @@ def get_groups_by_phase_code(current_user, phase_code):
     phase = PhaseModel.query.filter_by(code=phase_code).first()
 
     group_query = GroupModel.query.order_by(GroupModel.code).filter_by(
-        phase_id=phase.id
+        phase_id=phase.id,
     )
     groups = [group.to_dict_without_phase() for group in group_query]
 

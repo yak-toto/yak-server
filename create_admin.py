@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 from getpass import getpass
 
-from server import create_app
-from server import db
-from server.database.models import MatchModel
-from server.database.models import ScoreBetModel
-from server.database.models import UserModel
+from server import create_app, db
+from server.database.models import MatchModel, ScoreBetModel, UserModel
 
 
 def script(app):
@@ -28,8 +25,7 @@ def script(app):
         db.session.commit()
 
         db.session.add_all(
-            ScoreBetModel(user_id=user.id, match_id=match.id)
-            for match in MatchModel.query.all()
+            ScoreBetModel(user_id=user.id, match_id=match.id) for match in MatchModel.query.all()
         )
         db.session.commit()
 

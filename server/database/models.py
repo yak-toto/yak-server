@@ -2,10 +2,10 @@ import uuid
 from datetime import datetime
 
 from flask import current_app
-from server import db
 from sqlalchemy import CheckConstraint
-from werkzeug.security import check_password_hash
-from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from server import db
 
 
 class UserModel(db.Model):
@@ -21,10 +21,16 @@ class UserModel(db.Model):
     last_name = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(100), nullable=False)
     number_match_guess = db.Column(
-        db.Integer, CheckConstraint("number_match_guess>=0"), nullable=False, default=0
+        db.Integer,
+        CheckConstraint("number_match_guess>=0"),
+        nullable=False,
+        default=0,
     )
     number_score_guess = db.Column(
-        db.Integer, CheckConstraint("number_score_guess>=0"), nullable=False, default=0
+        db.Integer,
+        CheckConstraint("number_score_guess>=0"),
+        nullable=False,
+        default=0,
     )
     number_qualified_teams_guess = db.Column(
         db.Integer,
@@ -64,7 +70,10 @@ class UserModel(db.Model):
     )
 
     points = db.Column(
-        db.Float, CheckConstraint("points>=0"), nullable=False, default=0
+        db.Float,
+        CheckConstraint("points>=0"),
+        nullable=False,
+        default=0,
     )
 
     bets = db.relationship(
@@ -182,11 +191,13 @@ class MatchModel(db.Model):
 
 def is_locked(score):
     locked_date = datetime.strptime(
-        current_app.config["LOCK_DATETIME"], "%Y-%m-%d %H:%M:%S.%f"
+        current_app.config["LOCK_DATETIME"],
+        "%Y-%m-%d %H:%M:%S.%f",
     )
     if score.match.group.phase.code == "FINAL":
         locked_date_final_phase = datetime.strptime(
-            current_app.config["LOCK_DATETIME_FINAL_PHASE"], "%Y-%m-%d %H:%M:%S.%f"
+            current_app.config["LOCK_DATETIME_FINAL_PHASE"],
+            "%Y-%m-%d %H:%M:%S.%f",
         )
 
         return score.user.name != "admin" and datetime.now() > locked_date_final_phase
@@ -197,7 +208,8 @@ def is_locked(score):
 def is_phase_locked(phase_code, user_name):
     if phase_code == "FINAL":
         locked_date_final_phase = datetime.strptime(
-            current_app.config["LOCK_DATETIME_FINAL_PHASE"], "%Y-%m-%d %H:%M:%S.%f"
+            current_app.config["LOCK_DATETIME_FINAL_PHASE"],
+            "%Y-%m-%d %H:%M:%S.%f",
         )
 
         return user_name != "admin" and datetime.now() > locked_date_final_phase
@@ -214,7 +226,9 @@ class ScoreBetModel(db.Model):
         default=lambda: str(uuid.uuid4()),
     )
     user_id = db.Column(
-        db.String(100), db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+        db.String(100),
+        db.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
     )
     user = db.relationship("UserModel", back_populates="bets")
 
@@ -298,7 +312,9 @@ class BinaryBetModel(db.Model):
         default=lambda: str(uuid.uuid4()),
     )
     user_id = db.Column(
-        db.String(100), db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+        db.String(100),
+        db.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
     )
     user = db.relationship("UserModel", back_populates="binary_bets")
 

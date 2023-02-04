@@ -1,22 +1,22 @@
 from itertools import chain
 
-from flask import Blueprint
-from flask import current_app
-from server import db
-from server.database.models import BinaryBetModel
-from server.database.models import GroupModel
-from server.database.models import MatchModel
-from server.database.models import PhaseModel
-from server.database.models import ScoreBetModel
-from server.database.models import UserModel
+from flask import Blueprint, current_app
 from sqlalchemy import and_
+
+from server import db
+from server.database.models import (
+    BinaryBetModel,
+    GroupModel,
+    MatchModel,
+    PhaseModel,
+    ScoreBetModel,
+    UserModel,
+)
 
 from .bets import get_result_with_group_code
 from .utils.auth_utils import token_required
-from .utils.constants import GLOBAL_ENDPOINT
-from .utils.constants import VERSION
-from .utils.errors import NoResultsForAdminUser
-from .utils.errors import UnauthorizedAccessToAdminAPI
+from .utils.constants import GLOBAL_ENDPOINT, VERSION
+from .utils.errors import NoResultsForAdminUser, UnauthorizedAccessToAdminAPI
 from .utils.flask_utils import success_response
 
 results = Blueprint("results", __name__)
@@ -30,7 +30,7 @@ def score_board(current_user):
         [
             user.to_result_dict()
             for user in UserModel.query.order_by(UserModel.points.desc()).filter(
-                UserModel.name != "admin"
+                UserModel.name != "admin",
             )
         ],
     )
@@ -40,10 +40,10 @@ def score_board(current_user):
 @token_required
 def results_get(current_user):
     if current_user.name == "admin":
-        raise NoResultsForAdminUser()
+        raise NoResultsForAdminUser
 
     results = UserModel.query.order_by(UserModel.points.desc()).filter(
-        UserModel.name != "admin"
+        UserModel.name != "admin",
     )
 
     rank = [
@@ -53,7 +53,8 @@ def results_get(current_user):
     ][0]
 
     return success_response(
-        200, UserModel.query.get(current_user.id).to_result_dict() | {"rank": rank}
+        200,
+        UserModel.query.get(current_user.id).to_result_dict() | {"rank": rank},
     )
 
 
@@ -61,7 +62,7 @@ def results_get(current_user):
 @token_required
 def compute_points_post(current_user):
     if current_user.name != "admin":
-        raise UnauthorizedAccessToAdminAPI()
+        raise UnauthorizedAccessToAdminAPI
 
     compute_points(
         current_app.config["BASE_CORRECT_RESULT"],
@@ -77,7 +78,7 @@ def compute_points_post(current_user):
         [
             user.to_result_dict()
             for user in UserModel.query.order_by(UserModel.points.desc()).filter(
-                UserModel.name != "admin"
+                UserModel.name != "admin",
             )
         ],
     )
@@ -105,7 +106,7 @@ def compute_points(
             and_(
                 ScoreBetModel.match_id == real_score.match_id,
                 ScoreBetModel.user_id != admin.id,
-            )
+            ),
         ):
             if user_score.is_same_results(real_score):
                 number_correct_result += 1
@@ -122,7 +123,7 @@ def compute_points(
                 "user_ids_found_correct_result": user_ids_found_correct_result,
                 "number_correct_score": number_correct_score,
                 "user_ids_found_correct_score": user_ids_found_correct_score,
-            }
+            },
         )
 
     result_groups = {}
@@ -130,7 +131,7 @@ def compute_points(
     users = UserModel.query.filter(UserModel.name != "admin")
 
     for group in GroupModel.query.join(GroupModel.phase).filter(
-        PhaseModel.code == "GROUP"
+        PhaseModel.code == "GROUP",
     ):
         group_result_admin = get_result_with_group_code(admin.id, group.code)["results"]
 
@@ -145,9 +146,7 @@ def compute_points(
                         "number_first_qualified_guess": 0,
                     }
 
-                group_result_user = get_result_with_group_code(user.id, group.code)[
-                    "results"
-                ]
+                group_result_user = get_result_with_group_code(user.id, group.code)["results"]
 
                 if all(team["played"] == 3 for team in group_result_user):
                     user_first_team_id = group_result_user[0]["id"]
@@ -155,7 +154,7 @@ def compute_points(
 
                     result_groups[user.id]["number_qualified_teams_guess"] += len(
                         {user_first_team_id, user_second_team_id}
-                        & {admin_first_team_id, admin_second_team_id}
+                        & {admin_first_team_id, admin_second_team_id},
                     )
 
                     if user_first_team_id == admin_first_team_id:
@@ -176,12 +175,9 @@ def compute_points(
         for result in results:
             if user.id in result["user_ids_found_correct_result"]:
                 user.number_match_guess += 1
-                user.points += (
-                    base_correct_result
-                    + multiplying_factor_correct_result
-                    * (numbers_of_players - result["number_correct_result"])
-                    / (numbers_of_players - 1)
-                )
+                user.points += base_correct_result + multiplying_factor_correct_result * (
+                    numbers_of_players - result["number_correct_result"]
+                ) / (numbers_of_players - 1)
 
             if user.id in result["user_ids_found_correct_score"]:
                 user.number_score_guess += 1
@@ -190,23 +186,25 @@ def compute_points(
                 ) / (numbers_of_players - 1)
 
         user.number_qualified_teams_guess = result_groups.get(user.id, {}).get(
-            "number_qualified_teams_guess", 0
+            "number_qualified_teams_guess",
+            0,
         )
         user.number_first_qualified_guess = result_groups.get(user.id, {}).get(
-            "number_first_qualified_guess", 0
+            "number_first_qualified_guess",
+            0,
         )
 
         user.points += user.number_qualified_teams_guess * team_qualified
         user.points += user.number_first_qualified_guess * first_team_qualified
 
         user.number_quarter_final_guess = len(
-            team_from_group_code(user, "4").intersection(quarter_finals_team)
+            team_from_group_code(user, "4").intersection(quarter_finals_team),
         )
         user.number_semi_final_guess = len(
-            team_from_group_code(user, "2").intersection(semi_finals_team)
+            team_from_group_code(user, "2").intersection(semi_finals_team),
         )
         user.number_final_guess = len(
-            team_from_group_code(user, "1").intersection(final_team)
+            team_from_group_code(user, "1").intersection(final_team),
         )
         user.number_winner_guess = len(winner_from_user(user).intersection(winner))
 
@@ -226,18 +224,17 @@ def team_from_group_code(user, group_code):
                 for bet in user.binary_bets.filter(GroupModel.code == group_code)
                 .join(BinaryBetModel.match)
                 .join(MatchModel.group)
-            )
-        )
+            ),
+        ),
     )
 
 
 def winner_from_user(user):
-    finale_bet = [
-        bet
-        for bet in user.binary_bets.filter(GroupModel.code == "1")
+    finale_bet = list(
+        user.binary_bets.filter(GroupModel.code == "1")
         .join(BinaryBetModel.match)
-        .join(MatchModel.group)
-    ]
+        .join(MatchModel.group),
+    )
 
     if not finale_bet:
         return set()
@@ -248,7 +245,5 @@ def winner_from_user(user):
         return set()
 
     return {
-        finale_bet.match.team1.id
-        if finale_bet.is_one_won
-        else finale_bet.match.team2.id
+        finale_bet.match.team1.id if finale_bet.is_one_won else finale_bet.match.team2.id,
     }

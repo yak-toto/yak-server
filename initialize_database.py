@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 import csv
+from pathlib import Path
 
 from server import db
-from server.database.models import GroupModel
-from server.database.models import MatchModel
-from server.database.models import PhaseModel
-from server.database.models import TeamModel
+from server.database.models import GroupModel, MatchModel, PhaseModel, TeamModel
 
 
 def script(app):
@@ -14,15 +12,13 @@ def script(app):
 
         DATA_FOLDER = "tests" if app.config["TESTING"] else "data"
 
-        with open(f"{DATA_FOLDER}/{COMPETITION}/phases.csv", newline="") as csvfile:
+        with Path(f"{DATA_FOLDER}/{COMPETITION}/phases.csv", newline="").open() as csvfile:
             spamreader = csv.reader(csvfile, delimiter="|")
 
-            db.session.add_all(
-                PhaseModel(code=row[0], description=row[1]) for row in spamreader
-            )
+            db.session.add_all(PhaseModel(code=row[0], description=row[1]) for row in spamreader)
             db.session.commit()
 
-        with open(f"{DATA_FOLDER}/{COMPETITION}/groups.csv", newline="") as csvfile:
+        with Path(f"{DATA_FOLDER}/{COMPETITION}/groups.csv", newline="").open() as csvfile:
             spamreader = csv.reader(csvfile, delimiter="|")
 
             for row in spamreader:
@@ -31,20 +27,18 @@ def script(app):
                 phase = PhaseModel.query.filter_by(code=phase_code).first()
 
                 db.session.add(
-                    GroupModel(code=code, phase_id=phase.id, description=description)
+                    GroupModel(code=code, phase_id=phase.id, description=description),
                 )
 
             db.session.commit()
 
-        with open(f"{DATA_FOLDER}/{COMPETITION}/teams.csv", newline="") as csvfile:
+        with Path(f"{DATA_FOLDER}/{COMPETITION}/teams.csv", newline="").open() as csvfile:
             spamreader = csv.reader(csvfile, delimiter="|")
 
-            db.session.add_all(
-                TeamModel(code=row[0], description=row[1]) for row in spamreader
-            )
+            db.session.add_all(TeamModel(code=row[0], description=row[1]) for row in spamreader)
             db.session.commit()
 
-        with open(f"{DATA_FOLDER}/{COMPETITION}/matches.csv", newline="") as csvfile:
+        with Path(f"{DATA_FOLDER}/{COMPETITION}/matches.csv", newline="").open() as csvfile:
             spamreader = csv.reader(csvfile, delimiter="|")
 
             for row in spamreader:
@@ -61,7 +55,7 @@ def script(app):
                         team1_id=team1.id,
                         team2_id=team2.id,
                         index=index,
-                    )
+                    ),
                 )
 
             db.session.commit()

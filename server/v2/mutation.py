@@ -1,37 +1,39 @@
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 from itertools import chain
 from typing import Union
 
 import jwt
 import strawberry
 from flask import current_app
-from server import db
-from server.database.models import BinaryBetModel
-from server.database.models import MatchModel
-from server.database.models import ScoreBetModel
-from server.database.models import UserModel
 from strawberry.types import Info
 
-from .bearer_authenfication import AdminBearerAuthentification
-from .bearer_authenfication import BearerAuthentification
-from .schema import BetNotFound
-from .schema import BinaryBet
-from .schema import BinaryBetNotFound
-from .schema import LockedBinaryBetError
-from .schema import LockedScoreBetError
-from .schema import LockUserResponse
-from .schema import ModifyBinaryBetResponse
-from .schema import ModifyScoreBetResponse
-from .schema import ScoreBet
-from .schema import UserWithToken
+from server import db
+from server.database.models import BinaryBetModel, MatchModel, ScoreBetModel, UserModel
+
+from .bearer_authenfication import AdminBearerAuthentification, BearerAuthentification
+from .schema import (
+    BetNotFound,
+    BinaryBet,
+    BinaryBetNotFound,
+    LockedBinaryBetError,
+    LockedScoreBetError,
+    LockUserResponse,
+    ModifyBinaryBetResponse,
+    ModifyScoreBetResponse,
+    ScoreBet,
+    UserWithToken,
+)
 
 
 @strawberry.type
 class Mutation:
     @strawberry.mutation
     def signup(
-        self, user_name: str, password: str, first_name: str, last_name: str
+        self,
+        user_name: str,
+        password: str,
+        first_name: str,
+        last_name: str,
     ) -> UserWithToken:
         # Check existing user in db
         existing_user = UserModel.query.filter_by(name=user_name).first()
@@ -50,8 +52,7 @@ class Mutation:
 
         # Initialize bets and integrate in db
         db.session.add_all(
-            ScoreBetModel(user_id=user.id, match_id=match.id)
-            for match in MatchModel.query.all()
+            ScoreBetModel(user_id=user.id, match_id=match.id) for match in MatchModel.query.all()
         )
         db.session.commit()
 
@@ -86,13 +87,17 @@ class Mutation:
 
     @strawberry.mutation(permission_classes=[BearerAuthentification])
     def modify_binary_bet(
-        self, id: strawberry.ID, is_one_won: bool, info: Info
+        self,
+        id: strawberry.ID,
+        is_one_won: bool,
+        info: Info,
     ) -> ModifyBinaryBetResponse:
         bet = BinaryBetModel.query.filter_by(user_id=info.user.id, id=id).first()
 
         if not bet:
             return ModifyBinaryBetResponse(
-                binary_bet=None, binary_bet_errors=[BinaryBetNotFound()]
+                binary_bet=None,
+                binary_bet_errors=[BinaryBetNotFound()],
             )
 
         if bet.locked:
@@ -118,7 +123,8 @@ class Mutation:
 
         if not bet:
             return ModifyScoreBetResponse(
-                score_bet=None, score_bet_errors=[BetNotFound()]
+                score_bet=None,
+                score_bet_errors=[BetNotFound()],
             )
 
         if bet.locked:
@@ -132,7 +138,8 @@ class Mutation:
         db.session.commit()
 
         return ModifyScoreBetResponse(
-            score_bet=ScoreBet.from_instance(instance=bet), score_bet_errors=None
+            score_bet=ScoreBet.from_instance(instance=bet),
+            score_bet_errors=None,
         )
 
     @strawberry.mutation(permission_classes=[AdminBearerAuthentification])

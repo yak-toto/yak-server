@@ -1,24 +1,28 @@
 from typing import Optional
 
 import strawberry
-from server.database.models import BinaryBetModel
-from server.database.models import GroupModel
-from server.database.models import PhaseModel
-from server.database.models import ScoreBetModel
-from server.database.models import TeamModel
-from server.database.models import UserModel
 from strawberry.types import Info
 
-from .bearer_authenfication import bearer_authentification
-from .bearer_authenfication import BearerAuthentification
-from .schema import AllTeamsResponse
-from .schema import BinaryBet
-from .schema import GetUserResponse
-from .schema import Group
-from .schema import Phase
-from .schema import ScoreBet
-from .schema import Team
-from .schema import UserWithoutSensitiveInfo
+from server.database.models import (
+    BinaryBetModel,
+    GroupModel,
+    PhaseModel,
+    ScoreBetModel,
+    TeamModel,
+    UserModel,
+)
+
+from .bearer_authenfication import BearerAuthentification, bearer_authentification
+from .schema import (
+    AllTeamsResponse,
+    BinaryBet,
+    GetUserResponse,
+    Group,
+    Phase,
+    ScoreBet,
+    Team,
+    UserWithoutSensitiveInfo,
+)
 
 
 @strawberry.type
@@ -36,7 +40,8 @@ class Query:
         if not errors:
             teams = TeamModel.query.all()
             return AllTeamsResponse(
-                teams=[Team.from_instance(instance=team) for team in teams], errors=None
+                teams=[Team.from_instance(instance=team) for team in teams],
+                errors=None,
             )
 
         else:
@@ -63,7 +68,8 @@ class Query:
     @strawberry.field(permission_classes=[BearerAuthentification])
     def score_bet(self, id: strawberry.ID, info: Info) -> Optional[ScoreBet]:
         score_bet_record = ScoreBetModel.query.filter_by(
-            id=id, user_id=info.user.id
+            id=id,
+            user_id=info.user.id,
         ).first()
 
         if not score_bet_record:
@@ -74,7 +80,8 @@ class Query:
     @strawberry.field(permission_classes=[BearerAuthentification])
     def binary_bet(self, id: strawberry.ID, info: Info) -> Optional[BinaryBet]:
         binary_bet_record = BinaryBetModel.query.filter_by(
-            id=id, user_id=info.user.id
+            id=id,
+            user_id=info.user.id,
         ).first()
 
         if not binary_bet_record:
@@ -86,10 +93,7 @@ class Query:
     def all_groups(self, info: Info) -> list[Group]:
         groups = GroupModel.query.all()
 
-        return [
-            Group.from_instance(instance=group, user_id=info.user.id)
-            for group in groups
-        ]
+        return [Group.from_instance(instance=group, user_id=info.user.id) for group in groups]
 
     @strawberry.field(permission_classes=[BearerAuthentification])
     def group_by_id(self, id: strawberry.ID, info: Info) -> Optional[Group]:
@@ -113,10 +117,7 @@ class Query:
     def all_phases(self, info: Info) -> list[Phase]:
         phases = PhaseModel.query.all()
 
-        return [
-            Phase.from_instance(instance=phase, user_id=info.user.id)
-            for phase in phases
-        ]
+        return [Phase.from_instance(instance=phase, user_id=info.user.id) for phase in phases]
 
     @strawberry.field(permission_classes=[BearerAuthentification])
     def phase_by_id(self, id: strawberry.ID, info: Info) -> Optional[Phase]:

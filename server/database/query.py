@@ -1,10 +1,6 @@
 from itertools import chain
 
-from .models import BinaryBetModel
-from .models import GroupModel
-from .models import MatchModel
-from .models import PhaseModel
-from .models import ScoreBetModel
+from .models import BinaryBetModel, GroupModel, MatchModel, PhaseModel, ScoreBetModel
 
 
 def bets_from_group_code(user, group_code):

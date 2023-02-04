@@ -4,7 +4,8 @@ from unittest.mock import Mock
 def test_valid_auth(client, monkeypatch):
     # signup test
     monkeypatch.setattr(
-        "uuid.uuid4", Mock(return_value="b31d9d4f-22f5-4122-85dd-48089d42fd0a")
+        "uuid.uuid4",
+        Mock(return_value="b31d9d4f-22f5-4122-85dd-48089d42fd0a"),
     )
 
     response_signup = client.post(
@@ -18,16 +19,15 @@ def test_valid_auth(client, monkeypatch):
     )
     assert response_signup.status_code == 201
     assert response_signup.json["ok"]
-    assert (
-        response_signup.json["result"]["id"] == "b31d9d4f-22f5-4122-85dd-48089d42fd0a"
-    )
+    assert response_signup.json["result"]["id"] == "b31d9d4f-22f5-4122-85dd-48089d42fd0a"
     assert response_signup.json["result"]["name"] == "admin"
 
     monkeypatch.delattr("uuid.uuid4")
 
     # login test
     response_login = client.post(
-        "/api/v1/users/login", json={"name": "admin", "password": "admin"}
+        "/api/v1/users/login",
+        json={"name": "admin", "password": "admin"},
     )
     response_login_body = response_login.json
     auth_token = response_login_body["result"].pop("token")
@@ -39,7 +39,8 @@ def test_valid_auth(client, monkeypatch):
 
     # current user tests
     response_current_user = client.get(
-        "/api/v1/users", headers=[("Authorization", f"Bearer: {auth_token}")]
+        "/api/v1/users",
+        headers=[("Authorization", f"Bearer: {auth_token}")],
     )
     assert response_current_user.status_code == 200
     assert response_current_user.json == {
@@ -51,7 +52,8 @@ def test_valid_auth(client, monkeypatch):
 def test_double_signup(client, monkeypatch):
     # signup test
     monkeypatch.setattr(
-        "uuid.uuid4", Mock(return_value="a9e14635-8983-45ab-8afa-eb920866c60e")
+        "uuid.uuid4",
+        Mock(return_value="a9e14635-8983-45ab-8afa-eb920866c60e"),
     )
 
     response_signup = client.post(
@@ -65,9 +67,7 @@ def test_double_signup(client, monkeypatch):
     )
     assert response_signup.status_code == 201
     assert response_signup.json["ok"]
-    assert (
-        response_signup.json["result"]["id"] == "a9e14635-8983-45ab-8afa-eb920866c60e"
-    )
+    assert response_signup.json["result"]["id"] == "a9e14635-8983-45ab-8afa-eb920866c60e"
     assert response_signup.json["result"]["name"] == "user2"
 
     monkeypatch.delattr("uuid.uuid4")
@@ -102,7 +102,8 @@ def test_login_wrong_password(client):
     )
 
     response_login = client.post(
-        "/api/v1/users/login", json={"name": "glepape", "password": "wrong_password"}
+        "/api/v1/users/login",
+        json={"name": "glepape", "password": "wrong_password"},
     )
 
     assert response_login.status_code == 401

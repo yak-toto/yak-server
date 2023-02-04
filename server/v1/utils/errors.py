@@ -1,11 +1,8 @@
-from flask import json
-from flask import Response
-from jwt import ExpiredSignatureError
-from jwt import InvalidTokenError
+from flask import Response, json
+from jwt import ExpiredSignatureError, InvalidTokenError
 from werkzeug.exceptions import HTTPException
 
-from .constants import BINARY
-from .constants import SCORE
+from .constants import BINARY, SCORE
 
 
 class InvalidCredentials(HTTPException):
@@ -60,7 +57,7 @@ class UnauthorizedAccessToAdminAPI(HTTPException):
 class InvalidTeamId(HTTPException):
     def __init__(self, team_id):
         super().__init__(
-            f"Invalid team id: {team_id}. Retry with a uuid or ISO 3166-1 alpha-2 code"
+            f"Invalid team id: {team_id}. Retry with a uuid or ISO 3166-1 alpha-2 code",
         )
         self.code = 400
 
@@ -99,7 +96,7 @@ def set_error_handler(app):
                 "ok": False,
                 "error_code": e.code,
                 "description": e.description,
-            }
+            },
         )
         response.content_type = "application/json"
 
@@ -118,7 +115,7 @@ def set_error_handler(app):
                 "description": f"{type(e).__name__}: {str(e)}"
                 if app.config.get("DEBUG")
                 else "Unexcepted error",
-            }
+            },
         )
 
         response.status_code = 500
@@ -135,7 +132,7 @@ def set_error_handler(app):
                 "ok": False,
                 "error_code": 401,
                 "description": "Expired token. Reauthentication required.",
-            }
+            },
         )
         response.status_code = 401
         response.content_type = "application/json"
@@ -150,9 +147,8 @@ def set_error_handler(app):
             {
                 "ok": False,
                 "error_code": 401,
-                "description": "Invalid token. "
-                "Registeration and / or authentication required",
-            }
+                "description": "Invalid token. " "Registeration and / or authentication required",
+            },
         )
         response.status_code = 401
         response.content_type = "application/json"

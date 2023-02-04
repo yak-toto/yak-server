@@ -1,8 +1,8 @@
 import os
 
 import pytest
-from server import create_app
-from server import db
+
+from server import create_app, db
 
 
 @pytest.fixture(scope="session")
@@ -15,7 +15,7 @@ def app():
     app.config.update(
         {
             "TESTING": True,
-        }
+        },
     )
 
     # Clean database before running test

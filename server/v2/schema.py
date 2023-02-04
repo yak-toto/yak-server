@@ -1,14 +1,16 @@
-from typing import Optional
-from typing import Union
+from typing import Optional, Union
 
 import strawberry
-from server.database.models import BinaryBetModel
-from server.database.models import GroupModel
-from server.database.models import MatchModel
-from server.database.models import PhaseModel
-from server.database.models import ScoreBetModel
-from server.database.models import TeamModel
-from server.database.models import UserModel
+
+from server.database.models import (
+    BinaryBetModel,
+    GroupModel,
+    MatchModel,
+    PhaseModel,
+    ScoreBetModel,
+    TeamModel,
+    UserModel,
+)
 
 
 @strawberry.type
@@ -81,16 +83,12 @@ class User:
     @strawberry.field
     def binary_bets(self) -> list["BinaryBet"]:
         return [
-            BinaryBet.from_instance(instance=binary_bet)
-            for binary_bet in self.instance.binary_bets
+            BinaryBet.from_instance(instance=binary_bet) for binary_bet in self.instance.binary_bets
         ]
 
     @strawberry.field
     def score_bets(self) -> list["ScoreBet"]:
-        return [
-            ScoreBet.from_instance(instance=score_bet)
-            for score_bet in self.instance.bets
-        ]
+        return [ScoreBet.from_instance(instance=score_bet) for score_bet in self.instance.bets]
 
     @strawberry.field
     def phases(self) -> list["Phase"]:
@@ -296,13 +294,16 @@ class ScoreBet:
             index=instance.match.index,
             locked=instance.locked,
             group=Group.from_instance(
-                instance=instance.match.group, user_id=instance.user_id
+                instance=instance.match.group,
+                user_id=instance.user_id,
             ),
             team1=TeamWithScore.from_instance(
-                instance=instance.match.team1, score=instance.score1
+                instance=instance.match.team1,
+                score=instance.score1,
             ),
             team2=TeamWithScore.from_instance(
-                instance=instance.match.team2, score=instance.score2
+                instance=instance.match.team2,
+                score=instance.score2,
             ),
         )
 
@@ -330,13 +331,16 @@ class BinaryBet:
             index=instance.match.index,
             locked=instance.locked,
             group=Group.from_instance(
-                instance=instance.match.group, user_id=instance.user_id
+                instance=instance.match.group,
+                user_id=instance.user_id,
             ),
             team1=TeamWithVictory.from_instance(
-                instance=instance.match.team1, won=bet_results[0]
+                instance=instance.match.team1,
+                won=bet_results[0],
             ),
             team2=TeamWithVictory.from_instance(
-                instance=instance.match.team2, won=bet_results[1]
+                instance=instance.match.team2,
+                won=bet_results[1],
             ),
         )
 
@@ -370,9 +374,7 @@ class LockedBinaryBetError:
 
 @strawberry.type
 class BinaryBetNotFound:
-    message: str = (
-        "Binary bet not found. Cannot modify a ressource that does not exist."
-    )
+    message: str = "Binary bet not found. Cannot modify a ressource that does not exist."
 
 
 @strawberry.type

@@ -1,23 +1,20 @@
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import jwt
-from flask import Blueprint
-from flask import current_app
-from flask import request
+from flask import Blueprint, current_app, request
+
 from server import db
-from server.database.models import MatchModel
-from server.database.models import ScoreBetModel
-from server.database.models import UserModel
+from server.database.models import MatchModel, ScoreBetModel, UserModel
 
 from .utils.auth_utils import token_required
-from .utils.constants import GLOBAL_ENDPOINT
-from .utils.constants import VERSION
-from .utils.errors import InvalidCredentials
-from .utils.errors import NameAlreadyExists
-from .utils.errors import UnauthorizedAccessToAdminAPI
-from .utils.errors import UserNotFound
-from .utils.errors import WrongInputs
+from .utils.constants import GLOBAL_ENDPOINT, VERSION
+from .utils.errors import (
+    InvalidCredentials,
+    NameAlreadyExists,
+    UnauthorizedAccessToAdminAPI,
+    UserNotFound,
+    WrongInputs,
+)
 from .utils.flask_utils import success_response
 from .utils.telegram_sender import send_message
 
@@ -30,7 +27,7 @@ def login_post():
     user = UserModel.authenticate(**data)
 
     if not user:
-        raise InvalidCredentials()
+        raise InvalidCredentials
 
     send_message(f"User {user.name} login.")
 
@@ -61,8 +58,7 @@ def signup_post():
 
     # Initialize bets and integrate in db
     db.session.add_all(
-        ScoreBetModel(user_id=user.id, match_id=match.id)
-        for match in MatchModel.query.all()
+        ScoreBetModel(user_id=user.id, match_id=match.id) for match in MatchModel.query.all()
     )
     db.session.commit()
 
@@ -84,16 +80,16 @@ def signup_post():
 @token_required
 def patch_user(current_user, user_id):
     if current_user.name != "admin":
-        raise UnauthorizedAccessToAdminAPI()
+        raise UnauthorizedAccessToAdminAPI
 
     body = request.get_json()
 
     if not body.get("password"):
-        raise WrongInputs()
+        raise WrongInputs
 
     user = UserModel.query.filter_by(id=user_id).first()
     if not user:
-        raise UserNotFound()
+        raise UserNotFound
 
     user.change_password(body["password"])
 

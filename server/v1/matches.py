@@ -1,26 +1,22 @@
 from itertools import chain
 
 from flask import Blueprint
-from server.database.models import BinaryBetModel
-from server.database.models import GroupModel
-from server.database.models import MatchModel
-from server.database.models import PhaseModel
-from server.database.models import ScoreBetModel
-from server.database.models import TeamModel
-from server.database.query import matches_from_group_code
-from server.database.query import matches_from_phase_code
-from sqlalchemy import desc
-from sqlalchemy import or_
+from sqlalchemy import desc, or_
+
+from server.database.models import (
+    BinaryBetModel,
+    GroupModel,
+    MatchModel,
+    PhaseModel,
+    ScoreBetModel,
+    TeamModel,
+)
+from server.database.query import matches_from_group_code, matches_from_phase_code
 
 from .utils.auth_utils import token_required
-from .utils.constants import GLOBAL_ENDPOINT
-from .utils.constants import VERSION
-from .utils.errors import InvalidTeamId
-from .utils.errors import MatchNotFound
-from .utils.errors import TeamNotFound
-from .utils.flask_utils import is_iso_3166_1_alpha_2_code
-from .utils.flask_utils import is_uuid4
-from .utils.flask_utils import success_response
+from .utils.constants import GLOBAL_ENDPOINT, VERSION
+from .utils.errors import InvalidTeamId, MatchNotFound, TeamNotFound
+from .utils.flask_utils import is_iso_3166_1_alpha_2_code, is_uuid4, success_response
 
 matches = Blueprint("matches", __name__)
 
@@ -43,7 +39,8 @@ def matches_get_all(current_user):
     )
 
     groups = GroupModel.query.join(GroupModel.phase).order_by(
-        desc(PhaseModel.code), GroupModel.code
+        desc(PhaseModel.code),
+        GroupModel.code,
     )
 
     phases = PhaseModel.query.order_by(desc(PhaseModel.code))
@@ -54,8 +51,7 @@ def matches_get_all(current_user):
             "phases": [phase.to_dict() for phase in phases],
             "groups": [group.to_dict_with_phase_id() for group in groups],
             "matches": [
-                bet.match.to_dict_with_group_id()
-                for bet in chain(score_bets, binary_bets)
+                bet.match.to_dict_with_group_id() for bet in chain(score_bets, binary_bets)
             ],
         },
     )
@@ -151,8 +147,7 @@ def matches_teams_get(current_user, team_id):
             "phases": [phase.to_dict() for phase in phases],
             "groups": [group.to_dict_with_phase_id() for group in groups],
             "matches": [
-                bet.match.to_dict_with_group_id()
-                for bet in chain(score_bets, binary_bets)
+                bet.match.to_dict_with_group_id() for bet in chain(score_bets, binary_bets)
             ],
         },
     )

@@ -5,24 +5,14 @@ repos:
     rev: v3.3.1
     hooks:
       - id: pyupgrade
-        args: ["--py38-plus"]
-  - repo: https://github.com/asottile/reorder_python_imports
-    rev: v3.9.0
-    hooks:
-      - id: reorder-python-imports
-        files: "^(?!examples/)"
-        args: ["--application-directories", "src"]
+        args: ["--py39-plus"]
+
   - repo: https://github.com/psf/black
     rev: 23.1.0
     hooks:
       - id: black
-  - repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
-        additional_dependencies:
-          - flake8-bugbear
-          - flake8-implicit-str-concat
+        args: ["--config", "pyproject.toml"]
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -30,3 +20,8 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-toml
+
+  # - repo: https://github.com/charliermarsh/ruff-pre-commit
+  #   rev: v0.0.241
+  #   hooks:
+  #     - id: ruff

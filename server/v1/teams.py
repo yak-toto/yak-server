@@ -1,15 +1,11 @@
-from flask import Blueprint
-from flask import request
+from flask import Blueprint, request
+
 from server import db
 from server.database.models import TeamModel
 
-from .utils.constants import GLOBAL_ENDPOINT
-from .utils.constants import VERSION
-from .utils.errors import InvalidTeamId
-from .utils.errors import TeamNotFound
-from .utils.flask_utils import is_iso_3166_1_alpha_2_code
-from .utils.flask_utils import is_uuid4
-from .utils.flask_utils import success_response
+from .utils.constants import GLOBAL_ENDPOINT, VERSION
+from .utils.errors import InvalidTeamId, TeamNotFound
+from .utils.flask_utils import is_iso_3166_1_alpha_2_code, is_uuid4, success_response
 
 teams = Blueprint("team", __name__)
 
@@ -37,7 +33,8 @@ def teams_post():
 @teams.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams")
 def teams_get():
     return success_response(
-        200, {"teams": [team.to_dict() for team in TeamModel.query.all()]}
+        200,
+        {"teams": [team.to_dict() for team in TeamModel.query.all()]},
     )
 
 

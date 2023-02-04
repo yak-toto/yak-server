@@ -4,12 +4,12 @@ from flask import jsonify
 
 
 def success_response(status_code, result):
-    return jsonify(dict(ok=True, result=result)), status_code
+    return jsonify({"ok": True, "result": result}), status_code
 
 
 def is_uuid4(uuid):
     regex = re.compile(
-        r"^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}\Z"
+        r"^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}\Z",
     )
     match = regex.match(uuid)
     return bool(match)

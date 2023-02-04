@@ -1,18 +1,15 @@
 import typing
-from typing import Optional
-from typing import Union
+from typing import Optional, Union
 
 import jwt
-from flask import current_app
-from flask import request
+from flask import current_app, request
 from jwt import ExpiredSignatureError
-from server.database.models import UserModel
 from strawberry.permission import BasePermission
 from strawberry.types import Info
 
-from .schema import ExpiredToken
-from .schema import InvalidToken
-from .schema import User
+from server.database.models import UserModel
+
+from .schema import ExpiredToken, InvalidToken, User
 
 
 class BearerAuthentification(BasePermission):
@@ -27,7 +24,9 @@ class BearerAuthentification(BasePermission):
         token = auth_headers[1]
         try:
             data = jwt.decode(
-                token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
+                token,
+                current_app.config["SECRET_KEY"],
+                algorithms=["HS256"],
             )
         except Exception:
             return False
@@ -41,9 +40,12 @@ class BearerAuthentification(BasePermission):
         return True
 
 
-def bearer_authentification() -> tuple[
-    Optional[User], Optional[list[Union[ExpiredToken, InvalidToken]]]
-]:
+def bearer_authentification() -> (
+    tuple[
+        Optional[User],
+        Optional[list[Union[ExpiredToken, InvalidToken]]],
+    ]
+):
     auth_headers = request.headers.get("Authorization", "").split()
 
     if len(auth_headers) != 2:
