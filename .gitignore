@@ -185,3 +185,4 @@ yarn-error.log*
 
 .flaskenv
 *.sql
+.ruff_cache
