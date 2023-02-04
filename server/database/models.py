@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 
+from dateutil import parser
 from flask import current_app
 from sqlalchemy import CheckConstraint
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -190,15 +191,9 @@ class MatchModel(db.Model):
 
 
 def is_locked(score):
-    locked_date = datetime.strptime(
-        current_app.config["LOCK_DATETIME"],
-        "%Y-%m-%d %H:%M:%S.%f",
-    )
+    locked_date = parser.parse(current_app.config["LOCK_DATETIME"])
     if score.match.group.phase.code == "FINAL":
-        locked_date_final_phase = datetime.strptime(
-            current_app.config["LOCK_DATETIME_FINAL_PHASE"],
-            "%Y-%m-%d %H:%M:%S.%f",
-        )
+        locked_date_final_phase = parser.parse(current_app.config["LOCK_DATETIME_FINAL_PHASE"])
 
         return score.user.name != "admin" and datetime.now() > locked_date_final_phase
 
@@ -207,10 +202,7 @@ def is_locked(score):
 
 def is_phase_locked(phase_code, user_name):
     if phase_code == "FINAL":
-        locked_date_final_phase = datetime.strptime(
-            current_app.config["LOCK_DATETIME_FINAL_PHASE"],
-            "%Y-%m-%d %H:%M:%S.%f",
-        )
+        locked_date_final_phase = parser.parse(current_app.config["LOCK_DATETIME_FINAL_PHASE"])
 
         return user_name != "admin" and datetime.now() > locked_date_final_phase
 
