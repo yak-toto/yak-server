@@ -7,13 +7,15 @@ from server.database.models import UserModel
 
 from .errors import UserNotFound
 
+NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
+
 
 def token_required(f):
     @wraps(f)
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get("Authorization", "").split()
 
-        if auth_headers[0] != "Bearer" or len(auth_headers) != 2:
+        if auth_headers[0] != "Bearer" or len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION:
             raise jwt.InvalidTokenError
 
         token = auth_headers[1]

@@ -13,6 +13,8 @@ from server.database.models import UserModel
 
 from .schema import ExpiredToken, InvalidToken, User
 
+NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
+
 
 class BearerAuthentification(BasePermission):
     message = "User is not authenticated"
@@ -20,7 +22,7 @@ class BearerAuthentification(BasePermission):
     def has_permission(self, source: typing.Any, info: "Info", **kwargs) -> bool:
         auth_headers = request.headers.get("Authorization", "").split()
 
-        if len(auth_headers) != 2:
+        if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION:
             return False
 
         token = auth_headers[1]
@@ -50,7 +52,7 @@ def bearer_authentification() -> (
 ):
     auth_headers = request.headers.get("Authorization", "").split()
 
-    if len(auth_headers) != 2:
+    if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION:
         return None, [InvalidToken()]
 
     token = auth_headers[1]
