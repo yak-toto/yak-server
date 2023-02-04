@@ -687,7 +687,6 @@ files = [
 ]
 
 [package.dependencies]
-flask = {version = ">=1.1", optional = true, markers = "extra == \"flask\""}
 graphql-core = ">=3.2.0,<3.3.0"
 python-dateutil = ">=2.7.0,<3.0.0"
 typing_extensions = ">=3.7.4,<5.0.0"
@@ -785,4 +784,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "4aacd36f0e81810258069fcdc583e933842974a80cc126da563f5a8bba84265c"
+content-hash = "64480c3fa27bef3b2646159a467682d3ce98d840e35a9d7da2e7907bd162b925"
