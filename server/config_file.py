@@ -1,13 +1,16 @@
 import json
 import os
 from pathlib import Path
+import pkg_resources
 
 
 def load_business_rules(competition):
     from configparser import ConfigParser
 
+    filename = pkg_resources.resource_filename(__name__, f"data/{competition}/config.ini")
+
     config = ConfigParser()
-    config.read(f"data/{competition}/config.ini")
+    config.read(filename)
     return config
 
 
@@ -15,7 +18,9 @@ COMPETITION = os.environ["COMPETITION"]
 
 config = load_business_rules(COMPETITION)
 
-with Path(f"data/{COMPETITION}/finale_phase_config.json").open() as file:
+with Path(
+    pkg_resources.resource_filename(__name__, f"data/{COMPETITION}/finale_phase_config.json")
+).open() as file:
     FINALE_PHASE_CONFIG = json.loads(file.read())
 
 YAK_CONFIG = {
