@@ -74,7 +74,7 @@ flask run
 
 ### Data initialization
 
-To run local testing, you can use the script `create_database.py` and `initialize_database.py`. To select, set `COMPETITION` environment variable in `.flaskenv`. It will read data from `data/{COMPETITION}/`.
+To run local testing, you can use the script `create_database.py`, `initialize_database.py` and `create_admin.py` located in `util` folder. To select, set `COMPETITION` environment variable in `.flaskenv`. It will read data from `data/{COMPETITION}/`.
 
 ### Testing
 

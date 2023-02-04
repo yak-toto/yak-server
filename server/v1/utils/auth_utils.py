@@ -13,7 +13,7 @@ def token_required(f):
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get("Authorization", "").split()
 
-        if len(auth_headers) != 2:
+        if auth_headers[0] != "Bearer" or len(auth_headers) != 2:
             raise jwt.InvalidTokenError
 
         token = auth_headers[1]

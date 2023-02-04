@@ -147,7 +147,7 @@ def set_error_handler(app):
             {
                 "ok": False,
                 "error_code": 401,
-                "description": "Invalid token. " "Registeration and / or authentication required",
+                "description": "Invalid token. Registeration and / or authentication required",
             },
         )
         response.status_code = 401

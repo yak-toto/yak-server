@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
 from itertools import chain
-from typing import Union
+from typing import TYPE_CHECKING, Optional
 
 import jwt
 import strawberry
 from flask import current_app
-from strawberry.types import Info
+
+if TYPE_CHECKING:
+    from strawberry.types import Info
 
 from server import db
 from server.database.models import BinaryBetModel, MatchModel, ScoreBetModel, UserModel
@@ -90,7 +92,7 @@ class Mutation:
         self,
         id: strawberry.ID,
         is_one_won: bool,
-        info: Info,
+        info: "Info",
     ) -> ModifyBinaryBetResponse:
         bet = BinaryBetModel.query.filter_by(user_id=info.user.id, id=id).first()
 
@@ -115,9 +117,9 @@ class Mutation:
     def modify_score_bet(
         self,
         id: strawberry.ID,
-        score1: Union[int, None],
-        score2: Union[int, None],
-        info: Info,
+        score1: Optional[int],
+        score2: Optional[int],
+        info: "Info",
     ) -> ModifyScoreBetResponse:
         bet = ScoreBetModel.query.filter_by(user_id=info.user.id, id=id).first()
 
@@ -143,7 +145,7 @@ class Mutation:
         )
 
     @strawberry.mutation(permission_classes=[AdminBearerAuthentification])
-    def lock_user_bet(self, user_id: str, info: Info) -> LockUserResponse:
+    def lock_user_bet(self, user_id: str, info: "Info") -> LockUserResponse:
         score_bets = ScoreBetModel.query.filter_by(user_id=user_id)
         binary_bets = BinaryBetModel.query.filter_by(user_id=user_id)
 

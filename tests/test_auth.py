@@ -1,5 +1,7 @@
 from unittest.mock import Mock
 
+from .constants import HttpCode
+
 
 def test_valid_auth(client, monkeypatch):
     # signup test
@@ -17,7 +19,7 @@ def test_valid_auth(client, monkeypatch):
             "password": "admin",
         },
     )
-    assert response_signup.status_code == 201
+    assert response_signup.status_code == HttpCode.CREATED
     assert response_signup.json["ok"]
     assert response_signup.json["result"]["id"] == "b31d9d4f-22f5-4122-85dd-48089d42fd0a"
     assert response_signup.json["result"]["name"] == "admin"
@@ -31,7 +33,7 @@ def test_valid_auth(client, monkeypatch):
     )
     response_login_body = response_login.json
     auth_token = response_login_body["result"].pop("token")
-    assert response_login.status_code == 201
+    assert response_login.status_code == HttpCode.CREATED
     assert response_login_body == {
         "ok": True,
         "result": {"id": "b31d9d4f-22f5-4122-85dd-48089d42fd0a", "name": "admin"},
@@ -40,9 +42,9 @@ def test_valid_auth(client, monkeypatch):
     # current user tests
     response_current_user = client.get(
         "/api/v1/users",
-        headers=[("Authorization", f"Bearer: {auth_token}")],
+        headers=[("Authorization", f"Bearer {auth_token}")],
     )
-    assert response_current_user.status_code == 200
+    assert response_current_user.status_code == HttpCode.OK
     assert response_current_user.json == {
         "ok": True,
         "result": {"id": "b31d9d4f-22f5-4122-85dd-48089d42fd0a", "name": "admin"},
@@ -65,7 +67,7 @@ def test_double_signup(client, monkeypatch):
             "password": "admin",
         },
     )
-    assert response_signup.status_code == 201
+    assert response_signup.status_code == HttpCode.CREATED
     assert response_signup.json["ok"]
     assert response_signup.json["result"]["id"] == "a9e14635-8983-45ab-8afa-eb920866c60e"
     assert response_signup.json["result"]["name"] == "user2"
@@ -82,10 +84,10 @@ def test_double_signup(client, monkeypatch):
             "password": "admin",
         },
     )
-    assert response_second_signup.status_code == 401
+    assert response_second_signup.status_code == HttpCode.UNAUTHORIZED
     assert response_second_signup.json == {
         "ok": False,
-        "error_code": 401,
+        "error_code": HttpCode.UNAUTHORIZED,
         "description": "Name already exists: user2",
     }
 
@@ -106,9 +108,9 @@ def test_login_wrong_password(client):
         json={"name": "glepape", "password": "wrong_password"},
     )
 
-    assert response_login.status_code == 401
+    assert response_login.status_code == HttpCode.UNAUTHORIZED
     assert response_login.json == {
         "ok": False,
-        "error_code": 401,
+        "error_code": HttpCode.UNAUTHORIZED,
         "description": "Invalid credentials",
     }

@@ -144,10 +144,10 @@ class Team:
 
 @strawberry.type
 class TeamWithScore(Team):
-    score: Union[int, None]
+    score: Optional[int]
 
     @classmethod
-    def from_instance(cls, instance: TeamModel, score: Union[int, None]):
+    def from_instance(cls, instance: TeamModel, score: Optional[int]):
         return cls(
             instance=instance,
             id=instance.id,
@@ -159,10 +159,10 @@ class TeamWithScore(Team):
 
 @strawberry.type
 class TeamWithVictory(Team):
-    won: Union[bool, None]
+    won: Optional[bool]
 
     @classmethod
-    def from_instance(cls, instance: TeamModel, won: Union[bool, None]):
+    def from_instance(cls, instance: TeamModel, won: Optional[bool]):
         return cls(
             instance=instance,
             id=instance.id,

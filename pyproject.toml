@@ -117,13 +117,12 @@ exclude = [
     "dist",
     "env",
 ]
-src = ["server", "tests"]
+src = ["server", "tests", "util"]
 
 [tool.ruff.per-file-ignores]
-"create_admin.py" = ["T20"]
-"initialize_database.py" = ["T20"]
-"create_database.py" = ["T20"]
+"util/*" = ["T20"]
 "tests/*" = ["S101"]
+"setup.py" = ["INP001"]
 
 [tool.ruff.isort]
 known-first-party = ["server"]

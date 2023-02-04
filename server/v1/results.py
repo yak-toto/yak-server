@@ -135,7 +135,7 @@ def compute_points(
     ):
         group_result_admin = get_result_with_group_code(admin.id, group.code)["results"]
 
-        if all(team["played"] == 3 for team in group_result_admin):
+        if all_results_filled_in_group(group_result_admin):
             admin_first_team_id = group_result_admin[0]["id"]
             admin_second_team_id = group_result_admin[1]["id"]
 
@@ -148,7 +148,7 @@ def compute_points(
 
                 group_result_user = get_result_with_group_code(user.id, group.code)["results"]
 
-                if all(team["played"] == 3 for team in group_result_user):
+                if all_results_filled_in_group(group_result_user):
                     user_first_team_id = group_result_user[0]["id"]
                     user_second_team_id = group_result_user[1]["id"]
 
@@ -214,6 +214,10 @@ def compute_points(
         user.points += 200 * user.number_winner_guess
 
     db.session.commit()
+
+
+def all_results_filled_in_group(group_result):
+    return all(team["played"] == len(group_result) - 1 for team in group_result)
 
 
 def team_from_group_code(user, group_code):

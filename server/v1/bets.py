@@ -507,7 +507,7 @@ def match_patch(current_user, bet_id):
 
 def log_score_bet(user_name, team1, team2, score1, score2):
     send_message(
-        f"User {user_name} update match {team1} - " f"{team2} with the score {score1} - {score2}.",
+        f"User {user_name} update match {team1} - {team2} with the score {score1} - {score2}.",
     )
 
 
@@ -577,8 +577,12 @@ def commit_finale_phase(current_user):
 
     for index, match_config in enumerate(finale_phase_config["versus"], 1):
         if all(
-            team["played"] == 3 for team in groups_result[match_config["team1"]["group"]]
-        ) and all(team["played"] == 3 for team in groups_result[match_config["team2"]["group"]]):
+            team["played"] == len(groups_result[match_config["team1"]["group"]]) - 1
+            for team in chain(
+                groups_result[match_config["team1"]["group"]],
+                groups_result[match_config["team2"]["group"]],
+            )
+        ):
             team1 = groups_result[match_config["team1"]["group"]][match_config["team1"]["rank"] - 1]
             team2 = groups_result[match_config["team2"]["group"]][match_config["team2"]["rank"] - 1]
 

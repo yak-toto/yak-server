@@ -2,7 +2,9 @@ import json
 from pathlib import Path
 from unittest.mock import Mock
 
-import initialize_database
+from util import initialize_database
+
+from .constants import HttpCode
 
 
 def test_matches_db(app, client, monkeypatch):
@@ -67,7 +69,7 @@ def test_matches_db(app, client, monkeypatch):
     with Path(f"tests/{testcase}/match_result.json").open() as file:
         match_result = json.loads(file.read())
 
-    assert match_response.status_code == 200
+    assert match_response.status_code == HttpCode.OK
     assert match_response.json["result"] == match_result
 
     group_response = client.get(
@@ -78,7 +80,7 @@ def test_matches_db(app, client, monkeypatch):
     with Path(f"tests/{testcase}/group_result.json").open() as file:
         group_result = json.loads(file.read())
 
-    assert group_response.status_code == 200
+    assert group_response.status_code == HttpCode.OK
     assert group_response.json["result"] == group_result
 
     team_response = client.get("/api/v1/teams")
@@ -86,5 +88,5 @@ def test_matches_db(app, client, monkeypatch):
     with Path(f"tests/{testcase}/team_result.json").open() as file:
         team_result = json.loads(file.read())
 
-    assert team_response.status_code == 200
+    assert team_response.status_code == HttpCode.OK
     assert team_response.json["result"] == team_result

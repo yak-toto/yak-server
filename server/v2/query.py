@@ -1,7 +1,9 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import strawberry
-from strawberry.types import Info
+
+if TYPE_CHECKING:
+    from strawberry.types import Info
 
 from server.database.models import (
     BinaryBetModel,
@@ -66,7 +68,7 @@ class Query:
         return Team.from_instance(instance=team_record)
 
     @strawberry.field(permission_classes=[BearerAuthentification])
-    def score_bet(self, id: strawberry.ID, info: Info) -> Optional[ScoreBet]:
+    def score_bet(self, id: strawberry.ID, info: "Info") -> Optional[ScoreBet]:
         score_bet_record = ScoreBetModel.query.filter_by(
             id=id,
             user_id=info.user.id,
@@ -78,7 +80,7 @@ class Query:
         return ScoreBet.from_instance(instance=score_bet_record)
 
     @strawberry.field(permission_classes=[BearerAuthentification])
-    def binary_bet(self, id: strawberry.ID, info: Info) -> Optional[BinaryBet]:
+    def binary_bet(self, id: strawberry.ID, info: "Info") -> Optional[BinaryBet]:
         binary_bet_record = BinaryBetModel.query.filter_by(
             id=id,
             user_id=info.user.id,
@@ -90,13 +92,13 @@ class Query:
         return BinaryBet.from_instance(instance=binary_bet_record)
 
     @strawberry.field(permission_classes=[BearerAuthentification])
-    def all_groups(self, info: Info) -> list[Group]:
+    def all_groups(self, info: "Info") -> list[Group]:
         groups = GroupModel.query.all()
 
         return [Group.from_instance(instance=group, user_id=info.user.id) for group in groups]
 
     @strawberry.field(permission_classes=[BearerAuthentification])
-    def group_by_id(self, id: strawberry.ID, info: Info) -> Optional[Group]:
+    def group_by_id(self, id: strawberry.ID, info: "Info") -> Optional[Group]:
         group_record = GroupModel.query.filter_by(id=id).first()
 
         if not group_record:
@@ -105,7 +107,7 @@ class Query:
         return Group.from_instance(instance=group_record, user_id=info.user.id)
 
     @strawberry.field(permission_classes=[BearerAuthentification])
-    def group_by_code(self, code: strawberry.ID, info: Info) -> Optional[Group]:
+    def group_by_code(self, code: strawberry.ID, info: "Info") -> Optional[Group]:
         group_record = GroupModel.query.filter_by(code=code).first()
 
         if not group_record:
@@ -114,13 +116,13 @@ class Query:
         return Group.from_instance(instance=group_record, user_id=info.user.id)
 
     @strawberry.field(permission_classes=[BearerAuthentification])
-    def all_phases(self, info: Info) -> list[Phase]:
+    def all_phases(self, info: "Info") -> list[Phase]:
         phases = PhaseModel.query.all()
 
         return [Phase.from_instance(instance=phase, user_id=info.user.id) for phase in phases]
 
     @strawberry.field(permission_classes=[BearerAuthentification])
-    def phase_by_id(self, id: strawberry.ID, info: Info) -> Optional[Phase]:
+    def phase_by_id(self, id: strawberry.ID, info: "Info") -> Optional[Phase]:
         phase_record = PhaseModel.query.filter_by(id=id).first()
 
         if not phase_record:
@@ -129,7 +131,7 @@ class Query:
         return Phase.from_instance(instance=phase_record, user_id=info.user.id)
 
     @strawberry.field(permission_classes=[BearerAuthentification])
-    def phase_by_code(self, code: strawberry.ID, info: Info) -> Optional[Phase]:
+    def phase_by_code(self, code: strawberry.ID, info: "Info") -> Optional[Phase]:
         phase_record = PhaseModel.query.filter_by(code=code).first()
 
         if not phase_record:
@@ -138,7 +140,7 @@ class Query:
         return Phase.from_instance(instance=phase_record, user_id=info.user.id)
 
     @strawberry.field(permission_classes=[BearerAuthentification])
-    def score_board(self, info: Info) -> list[UserWithoutSensitiveInfo]:
+    def score_board(self, info: "Info") -> list[UserWithoutSensitiveInfo]:
         users = UserModel.query.filter(UserModel.name != "admin")
 
         return [UserWithoutSensitiveInfo.from_instance(instance=user) for user in users]
