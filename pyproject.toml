@@ -2,7 +2,7 @@
 name = "yak-server"
 packages = [ { include = "server" } ]
 version = "0.1.0"
-description = "football bet rest/graphql server"
+description = "Football bet rest/graphql server"
 authors = ["Guillaume Le Pape <gui.lepape25@gmail.com>"]
 license = "MIT"
 readme = "README.md"

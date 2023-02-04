@@ -13,7 +13,9 @@ def create_app():
     app = Flask(__name__)
 
     # Configuration setup
-    app.config.from_pyfile("config_file.py")
+    from .config_file import YAK_CONFIG
+
+    app.config.from_mapping(YAK_CONFIG)
     app.json.sort_keys = False
 
     # Database setup
