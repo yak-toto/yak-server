@@ -16,7 +16,6 @@ from .utils.errors import (
     WrongInputs,
 )
 from .utils.flask_utils import success_response
-from .utils.telegram_sender import send_message
 
 auth = Blueprint("auth", __name__)
 
@@ -28,8 +27,6 @@ def login_post():
 
     if not user:
         raise InvalidCredentials
-
-    send_message(f"User {user.name} login.")
 
     token = jwt.encode(
         {
@@ -61,8 +58,6 @@ def signup_post():
         ScoreBetModel(user_id=user.id, match_id=match.id) for match in MatchModel.query.all()
     )
     db.session.commit()
-
-    send_message(f"User {user.name} created.")
 
     token = jwt.encode(
         {

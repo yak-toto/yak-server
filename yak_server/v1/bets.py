@@ -28,7 +28,6 @@ from .utils.errors import (
     WrongInputs,
 )
 from .utils.flask_utils import success_response
-from .utils.telegram_sender import send_message
 
 bets = Blueprint("bets", __name__)
 
@@ -244,7 +243,6 @@ def modify_bets(current_user):
 
     binary_bets = []
     score_bets = []
-    telegram_logs = {"score": [], "binary": []}
 
     for bet in request.get_json():
         # Deduce bet type from request
@@ -284,26 +282,8 @@ def modify_bets(current_user):
             original_bet.score1 = bet["team1"]["score"]
             original_bet.score2 = bet["team2"]["score"]
 
-            telegram_logs["score"].append(
-                (
-                    current_user.name,
-                    original_bet.match.team1.description,
-                    original_bet.match.team2.description,
-                    original_bet.score1,
-                    original_bet.score2,
-                ),
-            )
         elif bet_type == BINARY and original_bet.is_one_won != bet["is_one_won"]:
             original_bet.is_one_won = bet["is_one_won"]
-
-            telegram_logs["binary"].append(
-                (
-                    current_user.name,
-                    original_bet.match.team1.description,
-                    original_bet.match.team2.description,
-                    original_bet.is_one_won,
-                ),
-            )
 
         if bet_type == SCORE:
             score_bets.append(original_bet)
@@ -312,12 +292,6 @@ def modify_bets(current_user):
 
     # Commit at the end to make sure all input are correct before pushing to db
     db.session.commit()
-
-    for log in telegram_logs["score"]:
-        log_score_bet(*log)
-
-    for log in telegram_logs["binary"]:
-        log_binary_bet(*log)
 
     return success_response(
         200,
@@ -472,25 +446,10 @@ def match_patch(current_user, bet_id):
             bet.score2 = body["team2"].get("score")
             db.session.commit()
 
-            log_score_bet(
-                current_user.name,
-                bet.match.team1.description,
-                bet.match.team2.description,
-                bet.score1,
-                bet.score2,
-            )
-
     else:
         if bet.is_one_won != body["is_one_won"]:
             bet.is_one_won = body["is_one_won"]
             db.session.commit()
-
-            log_binary_bet(
-                current_user.name,
-                bet.match.team1.description,
-                bet.match.team2.description,
-                bet.is_one_won,
-            )
 
     response = {
         "phase": bet.match.group.phase.to_dict(),
@@ -503,20 +462,6 @@ def match_patch(current_user, bet_id):
         response["binary_bet"] = bet.to_dict_without_group()
 
     return success_response(200, response)
-
-
-def log_score_bet(user_name, team1, team2, score1, score2):
-    send_message(
-        f"User {user_name} update match {team1} - {team2} with the score {score1} - {score2}.",
-    )
-
-
-def log_binary_bet(user_name, team1, team2, is_one_won):
-    send_message(
-        f"User {user_name} update match with victory of "
-        f"{team1 if is_one_won else team2} "
-        f"against {team2 if is_one_won else team1}.",
-    )
 
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:bet_id>")

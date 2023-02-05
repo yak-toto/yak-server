@@ -22,6 +22,6 @@ else
     --header 'Content-Type: application/json' \
     --data-raw '{
         "chat_id": '$CHAT_ID',
-        "text": "Something went wrong when backup at '$current_date' at '$current_time'"
+        "text": "Something went wrong when backup on '$current_date' at '$current_time'"
     }'
 fi

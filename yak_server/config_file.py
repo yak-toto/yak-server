@@ -29,9 +29,6 @@ YAK_CONFIG = {
         f"mysql+pymysql://{os.environ['MYSQL_USER_NAME']}:"
         f"{os.environ['MYSQL_PASSWORD']}@localhost:3306/{os.environ['MYSQL_DB']}"
     ),
-    # Load Telegram bot configuration from environment variables
-    "BOT_TOKEN": os.environ.get("BOT_TOKEN"),
-    "CHAT_ID": os.environ.get("CHAT_ID"),
     # Load jwt secret key from credentials file
     "SECRET_KEY": os.environ["JWT_SECRET_KEY"],
     # SQL Alchemy features
