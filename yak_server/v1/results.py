@@ -3,8 +3,8 @@ from itertools import chain
 from flask import Blueprint, current_app
 from sqlalchemy import and_
 
-from server import db
-from server.database.models import (
+from yak_server import db
+from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
     MatchModel,

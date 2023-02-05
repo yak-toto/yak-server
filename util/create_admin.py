@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 from getpass import getpass
 
-from server import create_app, db
-from server.database.models import MatchModel, ScoreBetModel, UserModel
+from yak_server import create_app, db
+from yak_server.database.models import MatchModel, ScoreBetModel, UserModel
 
 
 def script(app):

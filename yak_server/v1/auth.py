@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 import jwt
 from flask import Blueprint, current_app, request
 
-from server import db
-from server.database.models import MatchModel, ScoreBetModel, UserModel
+from yak_server import db
+from yak_server.database.models import MatchModel, ScoreBetModel, UserModel
 
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT, VERSION

@@ -3,7 +3,7 @@ from functools import wraps
 import jwt
 from flask import current_app, request
 
-from server.database.models import UserModel
+from yak_server.database.models import UserModel
 
 from .errors import UserNotFound
 

@@ -5,7 +5,7 @@ import strawberry
 if TYPE_CHECKING:
     from strawberry.types import Info
 
-from server.database.models import (
+from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
     PhaseModel,

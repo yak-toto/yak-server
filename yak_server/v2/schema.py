@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 import strawberry
 
-from server.database.models import (
+from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
     MatchModel,

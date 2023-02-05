@@ -9,8 +9,8 @@ from flask import current_app
 if TYPE_CHECKING:
     from strawberry.types import Info
 
-from server import db
-from server.database.models import BinaryBetModel, MatchModel, ScoreBetModel, UserModel
+from yak_server import db
+from yak_server.database.models import BinaryBetModel, MatchModel, ScoreBetModel, UserModel
 
 from .bearer_authenfication import AdminBearerAuthentification, BearerAuthentification
 from .schema import (

@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 
-from server import db
-from server.database.models import TeamModel
+from yak_server import db
+from yak_server.database.models import TeamModel
 
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import InvalidTeamId, TeamNotFound

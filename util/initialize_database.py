@@ -2,8 +2,8 @@
 import csv
 from pathlib import Path
 
-from server import db
-from server.database.models import GroupModel, MatchModel, PhaseModel, TeamModel
+from yak_server import db
+from yak_server.database.models import GroupModel, MatchModel, PhaseModel, TeamModel
 
 
 def script(app):
@@ -62,6 +62,6 @@ def script(app):
 
 
 if __name__ == "__main__":
-    from server import create_app
+    from yak_server import create_app
 
     script(create_app())

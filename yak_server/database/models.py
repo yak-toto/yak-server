@@ -6,7 +6,7 @@ from flask import current_app
 from sqlalchemy import CheckConstraint
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from server import db
+from yak_server import db
 
 
 class UserModel(db.Model):

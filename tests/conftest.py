@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from server import create_app, db
+from yak_server import create_app, db
 
 
 @pytest.fixture(scope="session")

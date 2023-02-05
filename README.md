@@ -60,7 +60,7 @@ CHAT_ID=my_chat_id
 
 If the variables are not set, no telegram will be send.
 
-Finally, flask needs some configuration to start. Please add `FLASK_APP=server` variable to indicate main location. Last thing, for development environment, debug needs to be activated with a addditional environment variable:
+Finally, flask needs some configuration to start. Please add `FLASK_APP=yak_server` variable to indicate main location. Last thing, for development environment, debug needs to be activated with a addditional environment variable:
 
 ```text
 FLASK_DEBUG=1

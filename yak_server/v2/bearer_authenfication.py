@@ -9,7 +9,7 @@ from strawberry.permission import BasePermission
 if TYPE_CHECKING:
     from strawberry.types import Info
 
-from server.database.models import UserModel
+from yak_server.database.models import UserModel
 
 from .schema import ExpiredToken, InvalidToken, User
 

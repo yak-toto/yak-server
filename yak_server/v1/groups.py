@@ -1,7 +1,7 @@
 from flask import Blueprint
 from sqlalchemy import desc
 
-from server.database.models import GroupModel, PhaseModel
+from yak_server.database.models import GroupModel, PhaseModel
 
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT, VERSION

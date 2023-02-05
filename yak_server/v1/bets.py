@@ -5,8 +5,8 @@ from uuid import uuid4
 from flask import Blueprint, current_app, request
 from sqlalchemy import and_, desc
 
-from server import db
-from server.database.models import (
+from yak_server import db
+from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
     MatchModel,
@@ -15,7 +15,7 @@ from server.database.models import (
     is_locked,
     is_phase_locked,
 )
-from server.database.query import bets_from_group_code, bets_from_phase_code
+from yak_server.database.query import bets_from_group_code, bets_from_phase_code
 
 from .utils.auth_utils import token_required
 from .utils.constants import BINARY, GLOBAL_ENDPOINT, SCORE, VERSION

@@ -3,7 +3,7 @@ from itertools import chain
 from flask import Blueprint
 from sqlalchemy import desc, or_
 
-from server.database.models import (
+from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
     MatchModel,
@@ -11,7 +11,7 @@ from server.database.models import (
     ScoreBetModel,
     TeamModel,
 )
-from server.database.query import matches_from_group_code, matches_from_phase_code
+from yak_server.database.query import matches_from_group_code, matches_from_phase_code
 
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
