@@ -15,19 +15,22 @@ def script(app):
         with Path(f"{DATA_FOLDER}/{COMPETITION}/phases.csv", newline="").open() as csvfile:
             spamreader = csv.reader(csvfile, delimiter="|")
 
-            db.session.add_all(PhaseModel(code=row[0], description=row[1]) for row in spamreader)
+            for row in spamreader:
+                index, code, description = row
+                db.session.add(PhaseModel(code=code, description=description, index=index))
+
             db.session.commit()
 
         with Path(f"{DATA_FOLDER}/{COMPETITION}/groups.csv", newline="").open() as csvfile:
             spamreader = csv.reader(csvfile, delimiter="|")
 
             for row in spamreader:
-                code, phase_code, description = row
+                index, code, phase_code, description = row
 
                 phase = PhaseModel.query.filter_by(code=phase_code).first()
 
                 db.session.add(
-                    GroupModel(code=code, phase_id=phase.id, description=description),
+                    GroupModel(code=code, phase_id=phase.id, description=description, index=index),
                 )
 
             db.session.commit()

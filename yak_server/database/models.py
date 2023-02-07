@@ -387,6 +387,7 @@ class GroupModel(db.Model):
     )
     code = db.Column(db.String(1), primary_key=True, unique=True, nullable=False)
     description = db.Column(db.String(100), unique=True, nullable=False)
+    index = db.Column(db.Integer, nullable=False)
 
     phase_id = db.Column(db.String(100), db.ForeignKey("phase.id"), nullable=False)
     phase = db.relationship("PhaseModel", backref="groups")
@@ -425,6 +426,7 @@ class PhaseModel(db.Model):
     )
     code = db.Column(db.String(10), primary_key=True, unique=True, nullable=False)
     description = db.Column(db.String(100), nullable=False)
+    index = db.Column(db.Integer, nullable=False)
 
     def to_dict(self):
         return {

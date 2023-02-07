@@ -1,13 +1,13 @@
-A|GROUP|Groupe A
-B|GROUP|Groupe B
-C|GROUP|Groupe C
-D|GROUP|Groupe D
-E|GROUP|Groupe E
-F|GROUP|Groupe F
-G|GROUP|Groupe G
-H|GROUP|Groupe H
-8|FINAL|8ème de finale
-4|FINAL|Quart de finale
-2|FINAL|Demi-finale
-1|FINAL|Finale
-3|FINAL|Finale pour la troisième place
+1|A|GROUP|Groupe A
+2|B|GROUP|Groupe B
+3|C|GROUP|Groupe C
+4|D|GROUP|Groupe D
+5|E|GROUP|Groupe E
+6|F|GROUP|Groupe F
+7|G|GROUP|Groupe G
+8|H|GROUP|Groupe H
+9|8|FINAL|8ème de finale
+10|4|FINAL|Quart de finale
+11|2|FINAL|Demi-finale
+12|1|FINAL|Finale
+13|3|FINAL|Finale pour la troisième place
