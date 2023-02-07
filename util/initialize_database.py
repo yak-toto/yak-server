@@ -10,7 +10,7 @@ def script(app):
     with app.app_context():
         COMPETITION = app.config["COMPETITION"]
 
-        DATA_FOLDER = "tests" if app.config["TESTING"] else "data"
+        DATA_FOLDER = "tests" if app.config["TESTING"] else "yak_server/data"
 
         with Path(f"{DATA_FOLDER}/{COMPETITION}/phases.csv", newline="").open() as csvfile:
             spamreader = csv.reader(csvfile, delimiter="|")
