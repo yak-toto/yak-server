@@ -1,7 +1,7 @@
 from itertools import chain
 
 from flask import Blueprint
-from sqlalchemy import desc, or_
+from sqlalchemy import or_
 
 from yak_server.database.models import (
     BinaryBetModel,
@@ -27,23 +27,18 @@ def matches_get_all(current_user):
     binary_bets = (
         current_user.binary_bets.join(BinaryBetModel.match)
         .join(MatchModel.group)
-        .join(GroupModel.phase)
-        .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)
+        .order_by(GroupModel.index, MatchModel.index)
     )
 
     score_bets = (
         current_user.score_bets.join(ScoreBetModel.match)
         .join(MatchModel.group)
-        .join(GroupModel.phase)
-        .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)
+        .order_by(GroupModel.index, MatchModel.index)
     )
 
-    groups = GroupModel.query.join(GroupModel.phase).order_by(
-        desc(PhaseModel.code),
-        GroupModel.code,
-    )
+    groups = GroupModel.query.order_by(GroupModel.index)
 
-    phases = PhaseModel.query.order_by(desc(PhaseModel.code))
+    phases = PhaseModel.query.order_by(PhaseModel.index)
 
     return success_response(
         200,
@@ -124,17 +119,15 @@ def matches_teams_get(current_user, team_id):
     score_bets = (
         current_user.score_bets.join(ScoreBetModel.match)
         .join(MatchModel.group)
-        .join(GroupModel.phase)
         .filter(or_(MatchModel.team1_id == team.id, MatchModel.team2_id == team.id))
-        .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)
+        .order_by(GroupModel.index, MatchModel.index)
     )
 
     binary_bets = (
         current_user.binary_bets.join(BinaryBetModel.match)
         .join(MatchModel.group)
-        .join(GroupModel.phase)
         .filter(or_(MatchModel.team1_id == team.id, MatchModel.team2_id == team.id))
-        .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)
+        .order_by(GroupModel.index, MatchModel.index)
     )
 
     groups = {bet.match.group for bet in chain(score_bets, binary_bets)}

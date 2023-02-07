@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+
 import pkg_resources
 
 
@@ -19,7 +20,7 @@ COMPETITION = os.environ["COMPETITION"]
 config = load_business_rules(COMPETITION)
 
 with Path(
-    pkg_resources.resource_filename(__name__, f"data/{COMPETITION}/finale_phase_config.json")
+    pkg_resources.resource_filename(__name__, f"data/{COMPETITION}/finale_phase_config.json"),
 ).open() as file:
     FINALE_PHASE_CONFIG = json.loads(file.read())
 

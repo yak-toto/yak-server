@@ -3,7 +3,7 @@ from operator import attrgetter
 from uuid import uuid4
 
 from flask import Blueprint, current_app, request
-from sqlalchemy import and_, desc
+from sqlalchemy import and_
 
 from yak_server import db
 from yak_server.database.models import (
@@ -55,14 +55,14 @@ def create_bet(current_user, phase_code):
         )
         .join(BinaryBetModel.match)
         .join(MatchModel.group)
-        .order_by(GroupModel.code, MatchModel.index)
+        .order_by(GroupModel.index, MatchModel.index)
     )
 
     existing_score_bets = (
         current_user.bets.filter(MatchModel.group_id.in_(map(attrgetter("id"), groups)))
         .join(ScoreBetModel.match)
         .join(MatchModel.group)
-        .order_by(GroupModel.code, MatchModel.index)
+        .order_by(GroupModel.index, MatchModel.index)
     )
 
     body = request.get_json()
@@ -179,23 +179,18 @@ def groups(current_user):
     binary_bets_query = (
         current_user.binary_bets.join(BinaryBetModel.match)
         .join(MatchModel.group)
-        .join(GroupModel.phase)
-        .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)
+        .order_by(GroupModel.index, MatchModel.index)
     )
 
     score_bets_query = (
         current_user.score_bets.join(ScoreBetModel.match)
         .join(MatchModel.group)
-        .join(GroupModel.phase)
-        .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)
+        .order_by(GroupModel.index, MatchModel.index)
     )
 
-    group_query = GroupModel.query.join(GroupModel.phase).order_by(
-        desc(PhaseModel.code),
-        GroupModel.code,
-    )
+    group_query = GroupModel.query.order_by(GroupModel.index)
 
-    phase_query = PhaseModel.query.order_by(desc(PhaseModel.code))
+    phase_query = PhaseModel.query.order_by(PhaseModel.index)
 
     return success_response(
         200,

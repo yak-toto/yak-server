@@ -83,18 +83,35 @@ class User:
     @strawberry.field
     def binary_bets(self) -> list["BinaryBet"]:
         return [
-            BinaryBet.from_instance(instance=binary_bet) for binary_bet in self.instance.binary_bets
+            BinaryBet.from_instance(instance=binary_bet)
+            for binary_bet in BinaryBetModel.query.filter_by(user_id=self.instance.id)
+            .join(BinaryBetModel.match)
+            .join(MatchModel.group)
+            .order_by(GroupModel.index, MatchModel.index)
         ]
 
     @strawberry.field
     def score_bets(self) -> list["ScoreBet"]:
-        return [ScoreBet.from_instance(instance=score_bet) for score_bet in self.instance.score_bets]
+        return [
+            ScoreBet.from_instance(instance=score_bet)
+            for score_bet in ScoreBetModel.query.filter_by(user_id=self.instance.id)
+            .join(ScoreBetModel.match)
+            .join(MatchModel.group)
+            .order_by(GroupModel.index, MatchModel.index)
+        ]
+
+    @strawberry.field
+    def groups(self) -> list["Group"]:
+        return [
+            Group.from_instance(instance=group, user_id=self.instance.id)
+            for group in GroupModel.query.order_by(GroupModel.index)
+        ]
 
     @strawberry.field
     def phases(self) -> list["Phase"]:
         return [
             Phase.from_instance(instance=phase, user_id=self.instance.id)
-            for phase in PhaseModel.query.all()
+            for phase in PhaseModel.query.order_by(PhaseModel.index)
         ]
 
     @classmethod
@@ -192,9 +209,11 @@ class Group:
             for score_bet in (
                 ScoreBetModel.query.filter_by(user_id=self.user_id)
                 .join(ScoreBetModel.match)
+                .join(MatchModel.group)
                 .filter(
                     MatchModel.group_id == self.instance.id,
                 )
+                .order_by(GroupModel.index, MatchModel.index)
             )
         ]
 
@@ -205,9 +224,11 @@ class Group:
             for binary_bet in (
                 BinaryBetModel.query.filter_by(user_id=self.user_id)
                 .join(BinaryBetModel.match)
+                .join(MatchModel.group)
                 .filter(
                     MatchModel.group_id == self.instance.id,
                 )
+                .order_by(GroupModel.index, MatchModel.index)
             )
         ]
 
@@ -235,7 +256,9 @@ class Phase:
     def groups(self) -> list[Group]:
         return [
             Group.from_instance(instance=group, user_id=self.user_id)
-            for group in self.instance.groups
+            for group in GroupModel.query.filter_by(phase_id=self.instance.id).order_by(
+                GroupModel.index,
+            )
         ]
 
     @strawberry.field
@@ -248,6 +271,7 @@ class Phase:
             .filter(
                 GroupModel.phase_id == self.instance.id,
             )
+            .order_by(GroupModel.index, MatchModel.index)
         ]
 
     @strawberry.field
@@ -260,6 +284,7 @@ class Phase:
             .filter(
                 GroupModel.phase_id == self.instance.id,
             )
+            .order_by(GroupModel.index, MatchModel.index)
         ]
 
     @classmethod

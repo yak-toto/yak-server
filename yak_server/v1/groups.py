@@ -1,5 +1,4 @@
 from flask import Blueprint
-from sqlalchemy import desc
 
 from yak_server.database.models import GroupModel, PhaseModel
 
@@ -13,13 +12,10 @@ groups = Blueprint("group", __name__)
 @groups.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups")
 @token_required
 def get_groups(current_user):
-    group_query = GroupModel.query.join(GroupModel.phase).order_by(
-        desc(PhaseModel.code),
-        GroupModel.code,
-    )
+    group_query = GroupModel.query.order_by(GroupModel.index)
     groups = [group.to_dict_with_phase_id() for group in group_query]
 
-    phase_query = PhaseModel.query.order_by(desc(PhaseModel.code))
+    phase_query = PhaseModel.query.order_by(PhaseModel.index)
     phases = [phase.to_dict() for phase in phase_query]
 
     return success_response(
@@ -50,9 +46,7 @@ def get_group_by_code(current_user, group_code):
 def get_groups_by_phase_code(current_user, phase_code):
     phase = PhaseModel.query.filter_by(code=phase_code).first()
 
-    group_query = GroupModel.query.order_by(GroupModel.code).filter_by(
-        phase_id=phase.id,
-    )
+    group_query = GroupModel.query.order_by(GroupModel.index).filter_by(phase_id=phase.id)
     groups = [group.to_dict_without_phase() for group in group_query]
 
     return success_response(

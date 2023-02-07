@@ -40,9 +40,8 @@ class Query:
         _, errors = bearer_authentification()
 
         if not errors:
-            teams = TeamModel.query.all()
             return AllTeamsResponse(
-                teams=[Team.from_instance(instance=team) for team in teams],
+                teams=[Team.from_instance(instance=team) for team in TeamModel.query.all()],
                 errors=None,
             )
 
@@ -93,7 +92,7 @@ class Query:
 
     @strawberry.field(permission_classes=[BearerAuthentification])
     def all_groups(self, info: "Info") -> list[Group]:
-        groups = GroupModel.query.all()
+        groups = GroupModel.query.order_by(GroupModel.index)
 
         return [Group.from_instance(instance=group, user_id=info.user.id) for group in groups]
 
@@ -117,7 +116,7 @@ class Query:
 
     @strawberry.field(permission_classes=[BearerAuthentification])
     def all_phases(self, info: "Info") -> list[Phase]:
-        phases = PhaseModel.query.all()
+        phases = PhaseModel.query.order_by(PhaseModel.index)
 
         return [Phase.from_instance(instance=phase, user_id=info.user.id) for phase in phases]
 
