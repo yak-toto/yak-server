@@ -96,7 +96,7 @@ def compute_points(
 
     results = []
 
-    for real_score in admin.bets:
+    for real_score in admin.score_bets:
         number_correct_result = 0
         number_correct_score = 0
         user_ids_found_correct_result = []

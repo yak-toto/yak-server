@@ -32,7 +32,7 @@ def matches_get_all(current_user):
     )
 
     score_bets = (
-        current_user.bets.join(ScoreBetModel.match)
+        current_user.score_bets.join(ScoreBetModel.match)
         .join(MatchModel.group)
         .join(GroupModel.phase)
         .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)
@@ -63,7 +63,7 @@ def matches_get_by_id(current_user, match_id):
     bet = current_user.binary_bets.filter_by(match_id=match_id).first()
 
     if not bet:
-        bet = current_user.bets.filter_by(match_id=match_id).first()
+        bet = current_user.score_bets.filter_by(match_id=match_id).first()
 
     if not bet:
         raise MatchNotFound(match_id)
@@ -122,7 +122,7 @@ def matches_teams_get(current_user, team_id):
         raise TeamNotFound(team_id)
 
     score_bets = (
-        current_user.bets.join(ScoreBetModel.match)
+        current_user.score_bets.join(ScoreBetModel.match)
         .join(MatchModel.group)
         .join(GroupModel.phase)
         .filter(or_(MatchModel.team1_id == team.id, MatchModel.team2_id == team.id))

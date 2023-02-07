@@ -7,7 +7,7 @@ def bets_from_group_code(user, group_code):
     group = GroupModel.query.filter_by(code=group_code).first()
 
     score_bets = (
-        user.bets.filter(MatchModel.group_id == group.id)
+        user.score_bets.filter(MatchModel.group_id == group.id)
         .join(ScoreBetModel.match)
         .order_by(MatchModel.index)
     )
@@ -40,7 +40,7 @@ def bets_from_phase_code(user, phase_code):
     )
 
     score_bets = (
-        user.bets.filter(GroupModel.phase_id == phase.id)
+        user.score_bets.filter(GroupModel.phase_id == phase.id)
         .join(ScoreBetModel.match)
         .join(MatchModel.group)
         .order_by(GroupModel.code, MatchModel.index)

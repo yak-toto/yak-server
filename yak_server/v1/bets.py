@@ -184,7 +184,7 @@ def groups(current_user):
     )
 
     score_bets_query = (
-        current_user.bets.join(ScoreBetModel.match)
+        current_user.score_bets.join(ScoreBetModel.match)
         .join(MatchModel.group)
         .join(GroupModel.phase)
         .order_by(desc(PhaseModel.code), GroupModel.code, MatchModel.index)

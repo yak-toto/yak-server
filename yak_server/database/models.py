@@ -77,7 +77,7 @@ class UserModel(db.Model):
         default=0,
     )
 
-    bets = db.relationship(
+    score_bets = db.relationship(
         "ScoreBetModel",
         back_populates="user",
         lazy="dynamic",
@@ -160,7 +160,7 @@ class MatchModel(db.Model):
     team2_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
     team2 = db.relationship("TeamModel", foreign_keys=team2_id, backref="match2")
 
-    bets = db.relationship("ScoreBetModel", back_populates="match")
+    score_bets = db.relationship("ScoreBetModel", back_populates="match")
     binary_bets = db.relationship("BinaryBetModel", back_populates="match")
 
     def to_dict(self):
@@ -222,10 +222,10 @@ class ScoreBetModel(db.Model):
         db.ForeignKey("user.id", ondelete="CASCADE"),
         nullable=False,
     )
-    user = db.relationship("UserModel", back_populates="bets")
+    user = db.relationship("UserModel", back_populates="score_bets")
 
     match_id = db.Column(db.String(100), db.ForeignKey("match.id"), nullable=False)
-    match = db.relationship("MatchModel", back_populates="bets")
+    match = db.relationship("MatchModel", back_populates="score_bets")
 
     score1 = db.Column(db.Integer, CheckConstraint("score1>=0"), default=None)
     score2 = db.Column(db.Integer, CheckConstraint("score2>=0"), default=None)

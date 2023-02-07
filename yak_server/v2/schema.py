@@ -88,7 +88,7 @@ class User:
 
     @strawberry.field
     def score_bets(self) -> list["ScoreBet"]:
-        return [ScoreBet.from_instance(instance=score_bet) for score_bet in self.instance.bets]
+        return [ScoreBet.from_instance(instance=score_bet) for score_bet in self.instance.score_bets]
 
     @strawberry.field
     def phases(self) -> list["Phase"]:
