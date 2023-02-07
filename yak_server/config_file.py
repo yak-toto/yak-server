@@ -27,7 +27,8 @@ YAK_CONFIG = {
     # Setup MySQL credentials
     "SQLALCHEMY_DATABASE_URI": (
         f"mysql+pymysql://{os.environ['MYSQL_USER_NAME']}:"
-        f"{os.environ['MYSQL_PASSWORD']}@localhost:3306/{os.environ['MYSQL_DB']}"
+        f"{os.environ['MYSQL_PASSWORD']}@localhost:"
+        f"{os.environ.get('MYSQL_PORT', 3306)}/{os.environ['MYSQL_DB']}"
     ),
     # Load jwt secret key from credentials file
     "SECRET_KEY": os.environ["JWT_SECRET_KEY"],

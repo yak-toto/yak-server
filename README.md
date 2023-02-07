@@ -18,6 +18,8 @@ MYSQL_PASSWORD=my_password
 MYSQL_DB=my_database_name
 ```
 
+You can also set MySQL port by adding `MYSQL_PORT=my_port` to `.flaskenv` file. If not set, it will be 3306 by default.
+
 ### Backend
 
 Run your project in a Python env is highly recommend. You can use `venv` with the following command:
