@@ -47,25 +47,25 @@ class BearerAuthentification(BasePermission):
 def bearer_authentification() -> (
     tuple[
         Optional[User],
-        Optional[list[Union[ExpiredToken, InvalidToken]]],
+        Optional[Union[ExpiredToken, InvalidToken]],
     ]
 ):
     auth_headers = request.headers.get("Authorization", "").split()
 
     if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION:
-        return None, [InvalidToken()]
+        return None, InvalidToken()
 
     token = auth_headers[1]
     try:
         data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
     except ExpiredSignatureError:
-        return None, [ExpiredToken()]
+        return None, ExpiredToken()
     except Exception:
-        return None, [InvalidToken()]
+        return None, InvalidToken()
 
     user = UserModel.query.filter_by(id=data["sub"]).first()
     if not user:
-        return None, [InvalidToken()]
+        return None, InvalidToken()
 
     return User.from_instance(instance=user), None
 

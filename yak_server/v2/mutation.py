@@ -14,9 +14,9 @@ from yak_server.database.models import BinaryBetModel, MatchModel, ScoreBetModel
 
 from .bearer_authenfication import AdminBearerAuthentification, BearerAuthentification
 from .schema import (
-    BetNotFound,
+    ScoreBetNotFoundForUpdate,
     BinaryBet,
-    BinaryBetNotFound,
+    BinaryBetNotFoundForUpdate,
     LockedBinaryBetError,
     LockedScoreBetError,
     LockUserResponse,
@@ -99,7 +99,7 @@ class Mutation:
         if not bet:
             return ModifyBinaryBetResponse(
                 binary_bet=None,
-                binary_bet_errors=[BinaryBetNotFound()],
+                binary_bet_errors=[BinaryBetNotFoundForUpdate()],
             )
 
         if bet.locked:
@@ -126,7 +126,7 @@ class Mutation:
         if not bet:
             return ModifyScoreBetResponse(
                 score_bet=None,
-                score_bet_errors=[BetNotFound()],
+                score_bet_errors=[ScoreBetNotFoundForUpdate()],
             )
 
         if bet.locked:
