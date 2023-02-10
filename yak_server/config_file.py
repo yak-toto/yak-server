@@ -35,6 +35,7 @@ YAK_CONFIG = {
     "SECRET_KEY": os.environ["JWT_SECRET_KEY"],
     # SQL Alchemy features
     "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+    "JSON_SORT_KEYS": False,
     # Name of the competition to load initiliazition data
     "COMPETITION": COMPETITION,
     "LOCK_DATETIME": config.get("locking", "datetime"),

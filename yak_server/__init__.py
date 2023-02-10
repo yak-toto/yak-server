@@ -16,7 +16,6 @@ def create_app():
     from .config_file import YAK_CONFIG
 
     app.config.from_mapping(YAK_CONFIG)
-    app.json.sort_keys = False
 
     # Database setup
     db.init_app(app)
