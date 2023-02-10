@@ -5,6 +5,7 @@ import strawberry
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
+    GroupPositionModel,
     PhaseModel,
     ScoreBetModel,
     TeamModel,
@@ -24,6 +25,9 @@ from .result import (
     GroupByCodeResult,
     GroupByIdNotFound,
     GroupByIdResult,
+    GroupRank,
+    GroupRankByCodeResult,
+    GroupRankByIdResult,
     Groups,
     PhaseByCodeNotFound,
     PhaseByCodeResult,
@@ -45,6 +49,7 @@ from .result import (
 from .schema import (
     BinaryBet,
     Group,
+    GroupPosition,
     Phase,
     ScoreBet,
     Team,
@@ -232,6 +237,72 @@ class Query:
 
         return ScoreBoard(
             users=[UserWithoutSensitiveInfo.from_instance(instance=user) for user in users],
+        )
+
+    @strawberry.field
+    def group_rank_by_code_result(self, code: str) -> GroupRankByCodeResult:
+        user, authentification_error = bearer_authentification()
+
+        if authentification_error:
+            return authentification_error
+
+        group = GroupModel.query.filter_by(code=code).first()
+
+        if not group:
+            return GroupByCodeNotFound(code=code)
+
+        group_rank = GroupPositionModel.query.filter_by(
+            user_id=user.instance.id,
+            group_id=group.id,
+        )
+
+        return GroupRank(
+            group_rank=sorted(
+                [
+                    GroupPosition.from_instance(instance=group_position)
+                    for group_position in group_rank
+                ],
+                key=lambda team: (
+                    team.points(),
+                    team.goals_difference(),
+                    team.goals_for,
+                ),
+                reverse=True,
+            ),
+            group=Group.from_instance(instance=group, user_id=user.instance.id),
+        )
+
+    @strawberry.field
+    def group_rank_by_id_result(self, id: uuid.UUID) -> GroupRankByIdResult:
+        user, authentification_error = bearer_authentification()
+
+        if authentification_error:
+            return authentification_error
+
+        group = GroupModel.query.filter_by(id=str(id)).first()
+
+        if not group:
+            return GroupByIdNotFound(id=id)
+
+        group_rank = GroupPositionModel.query.filter_by(
+            user_id=user.instance.id,
+            group_id=group.id,
+        )
+
+        return GroupRank(
+            group_rank=sorted(
+                [
+                    GroupPosition.from_instance(instance=group_position)
+                    for group_position in group_rank
+                ],
+                key=lambda team: (
+                    team.points(),
+                    team.goals_difference(),
+                    team.goals_for,
+                ),
+                reverse=True,
+            ),
+            group=Group.from_instance(instance=group, user_id=user.instance.id),
         )
 
     @strawberry.field

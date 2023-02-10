@@ -11,6 +11,7 @@ from yak_server import db
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
+    GroupPositionModel,
     MatchModel,
     PhaseModel,
     ScoreBetModel,
@@ -160,6 +161,7 @@ def delete_database(app):
     if not app.config.get("DEBUG"):
         raise RecordDeletionInProduction
 
+    GroupPositionModel.query.delete()
     ScoreBetModel.query.delete()
     BinaryBetModel.query.delete()
     UserModel.query.delete()

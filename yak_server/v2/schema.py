@@ -6,6 +6,7 @@ import strawberry
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
+    GroupPositionModel,
     MatchModel,
     PhaseModel,
     ScoreBetModel,
@@ -200,6 +201,40 @@ class TeamWithVictory(Team):
 
 
 @strawberry.type
+class GroupPosition:
+    instance: strawberry.Private[GroupPositionModel]
+
+    team: Team
+    played: int
+    won: int
+    drawn: int
+    lost: int
+    goals_for: int
+    goals_against: int
+
+    @strawberry.field
+    def goals_difference(self) -> int:
+        return self.goals_for - self.goals_against
+
+    @strawberry.field
+    def points(self) -> int:
+        return self.won * 3 + self.drawn
+
+    @classmethod
+    def from_instance(cls, instance: GroupPositionModel):
+        return cls(
+            instance=instance,
+            team=Team.from_instance(instance=instance.team),
+            played=instance.played,
+            won=instance.won,
+            drawn=instance.drawn,
+            lost=instance.lost,
+            goals_for=instance.goals_for,
+            goals_against=instance.goals_against,
+        )
+
+
+@strawberry.type
 class Group:
     instance: strawberry.Private[GroupModel]
     user_id: strawberry.Private[str]
@@ -207,6 +242,20 @@ class Group:
     id: uuid.UUID
     code: str
     description: str
+
+    @strawberry.field
+    def group_rank(self) -> list[GroupPosition]:
+        group_rank = GroupPositionModel.query.filter_by(user_id=self.user_id, group_id=self.id)
+
+        return sorted(
+            [GroupPosition.from_instance(instance=group_position) for group_position in group_rank],
+            key=lambda team: (
+                team.points(),
+                team.goals_difference(),
+                team.goals_for,
+            ),
+            reverse=True,
+        )
 
     @strawberry.field
     def phase(self) -> "Phase":

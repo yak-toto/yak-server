@@ -11,6 +11,7 @@ from yak_server import db
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
+    GroupPositionModel,
     MatchModel,
     PhaseModel,
     ScoreBetModel,
@@ -18,6 +19,7 @@ from yak_server.database.models import (
     is_phase_locked,
 )
 from yak_server.database.query import bets_from_group_code, bets_from_phase_code
+from yak_server.helpers.group_position import update_group_position
 from yak_server.helpers.logging import modify_binary_bet_successfully, modify_score_bet_successfully
 
 from .utils.auth_utils import token_required
@@ -285,6 +287,24 @@ def modify_bets(current_user):
             ):
                 raise NewScoreNegative
 
+            group_position_team1 = GroupPositionModel.query.filter_by(
+                team_id=original_bet.match.team1_id,
+                user_id=current_user.id,
+            ).first()
+            group_position_team2 = GroupPositionModel.query.filter_by(
+                team_id=original_bet.match.team2_id,
+                user_id=current_user.id,
+            ).first()
+
+            update_group_position(
+                original_bet.score1,
+                original_bet.score2,
+                bet["team1"]["score"],
+                bet["team2"]["score"],
+                group_position_team1,
+                group_position_team2,
+            )
+
             logger.info(
                 modify_score_bet_successfully(
                     current_user.name,
@@ -357,68 +377,13 @@ def group_result_get(current_user, group_code):
 def get_result_with_group_code(user_id, group_code):
     group = GroupModel.query.filter_by(code=group_code).first()
 
-    score_bets = (
-        ScoreBetModel.query.filter_by(user_id=user_id)
-        .filter(MatchModel.group_id == group.id)
-        .join(ScoreBetModel.match)
-        .order_by(MatchModel.index)
-    )
-
-    results = {}
-
-    result_base = {
-        "played": 0,
-        "won": 0,
-        "drawn": 0,
-        "lost": 0,
-        "goals_for": 0,
-        "goals_against": 0,
-        "goals_difference": 0,
-        "points": 0,
-    }
-
-    for score_bet in score_bets:
-        if score_bet.match.team1.id not in results:
-            results[score_bet.match.team1.id] = score_bet.match.team1.to_dict() | result_base
-
-        if score_bet.match.team2.id not in results:
-            results[score_bet.match.team2.id] = score_bet.match.team2.to_dict() | result_base
-
-        if score_bet.score1 is not None and score_bet.score2 is not None:
-            results[score_bet.match.team1.id]["played"] += 1
-            results[score_bet.match.team2.id]["played"] += 1
-
-            results[score_bet.match.team1.id]["goals_for"] += score_bet.score1
-            results[score_bet.match.team1.id]["goals_against"] += score_bet.score2
-            results[score_bet.match.team1.id]["goals_difference"] += (
-                score_bet.score1 - score_bet.score2
-            )
-
-            results[score_bet.match.team2.id]["goals_for"] += score_bet.score2
-            results[score_bet.match.team2.id]["goals_against"] += score_bet.score1
-            results[score_bet.match.team2.id]["goals_difference"] += (
-                score_bet.score2 - score_bet.score1
-            )
-
-            if score_bet.score1 > score_bet.score2:
-                results[score_bet.match.team1.id]["won"] += 1
-                results[score_bet.match.team2.id]["lost"] += 1
-                results[score_bet.match.team1.id]["points"] += 3
-            elif score_bet.score1 < score_bet.score2:
-                results[score_bet.match.team2.id]["won"] += 1
-                results[score_bet.match.team1.id]["lost"] += 1
-                results[score_bet.match.team2.id]["points"] += 3
-            else:
-                results[score_bet.match.team1.id]["drawn"] += 1
-                results[score_bet.match.team2.id]["drawn"] += 1
-                results[score_bet.match.team1.id]["points"] += 1
-                results[score_bet.match.team2.id]["points"] += 1
+    group_rank = GroupPositionModel.query.filter_by(group_id=group.id, user_id=user_id)
 
     return {
         "phase": group.phase.to_dict(),
         "group": group.to_dict_without_phase(),
         "results": sorted(
-            results.values(),
+            [group_position.to_dict() for group_position in group_rank],
             key=lambda team: (
                 team["points"],
                 team["goals_difference"],
@@ -463,6 +428,24 @@ def match_patch(current_user, bet_id):
                 body["team2"]["score"] is not None and body["team2"]["score"] < 0
             ):
                 raise NewScoreNegative
+
+            group_position_team1 = GroupPositionModel.query.filter_by(
+                team_id=bet.match.team1_id,
+                user_id=current_user.id,
+            ).first()
+            group_position_team2 = GroupPositionModel.query.filter_by(
+                team_id=bet.match.team2_id,
+                user_id=current_user.id,
+            ).first()
+
+            update_group_position(
+                bet.score1,
+                bet.score2,
+                body["team1"]["score"],
+                body["team2"]["score"],
+                group_position_team1,
+                group_position_team2,
+            )
 
             logger.info(
                 modify_score_bet_successfully(

@@ -5,6 +5,7 @@ import strawberry
 from .schema import (
     BinaryBet,
     Group,
+    GroupPosition,
     Phase,
     ScoreBet,
     Team,
@@ -289,4 +290,22 @@ LockUserResult = strawberry.union(
 UserResult = strawberry.union(
     "UserResult",
     types=(User, InvalidToken, ExpiredToken, UserNotFound, UnauthorizedAccessToAdminAPI),
+)
+
+
+@strawberry.type
+class GroupRank:
+    group_rank: list[GroupPosition]
+    group: Group
+
+
+GroupRankByCodeResult = strawberry.union(
+    "GroupRankByCodeResult",
+    types=(GroupRank, GroupByCodeNotFound, InvalidToken, ExpiredToken),
+)
+
+
+GroupRankByIdResult = strawberry.union(
+    "GroupRankByIdResult",
+    types=(GroupRank, GroupByIdNotFound, InvalidToken, ExpiredToken),
 )

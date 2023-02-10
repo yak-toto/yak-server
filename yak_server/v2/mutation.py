@@ -8,8 +8,15 @@ import strawberry
 from flask import current_app
 
 from yak_server import db
-from yak_server.database.models import BinaryBetModel, MatchModel, ScoreBetModel, UserModel
+from yak_server.database.models import (
+    BinaryBetModel,
+    GroupPositionModel,
+    MatchModel,
+    ScoreBetModel,
+    UserModel,
+)
 from yak_server.helpers.authentification import encode_bearer_token
+from yak_server.helpers.group_position import create_group_position, update_group_position
 from yak_server.helpers.logging import (
     logged_in_successfully,
     modify_binary_bet_successfully,
@@ -75,6 +82,10 @@ class Mutation:
         db.session.add_all(
             ScoreBetModel(user_id=user.id, match_id=match.id) for match in MatchModel.query.all()
         )
+        db.session.commit()
+
+        # Create group position records
+        db.session.add_all(create_group_position(ScoreBetModel.query.filter_by(user_id=user.id)))
         db.session.commit()
 
         token = encode_bearer_token(
@@ -155,6 +166,24 @@ class Mutation:
 
         if score2 is not None and score2 < 0:
             return NewScoreNegative(variable_name="$score2", score=score2)
+
+        group_position_team1 = GroupPositionModel.query.filter_by(
+            team_id=bet.match.team1_id,
+            user_id=user.instance.id,
+        ).first()
+        group_position_team2 = GroupPositionModel.query.filter_by(
+            team_id=bet.match.team2_id,
+            user_id=user.instance.id,
+        ).first()
+
+        update_group_position(
+            bet.score1,
+            bet.score2,
+            score1,
+            score2,
+            group_position_team1,
+            group_position_team2,
+        )
 
         logger.info(modify_score_bet_successfully(user.pseudo, bet, score1, score2))
 

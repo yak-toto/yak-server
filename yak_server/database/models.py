@@ -439,3 +439,59 @@ class PhaseModel(db.Model):
             "code": self.code,
             "description": self.description,
         }
+
+
+class GroupPositionModel(db.Model):
+    __tablename__ = "group_position"
+    id = db.Column(
+        db.String(100),
+        primary_key=True,
+        nullable=False,
+        default=lambda: str(uuid.uuid4()),
+    )
+    played = db.Column(db.Integer, CheckConstraint("played>=0"), nullable=False, default=0)
+    won = db.Column(db.Integer, CheckConstraint("won>=0"), nullable=False, default=0)
+    drawn = db.Column(db.Integer, CheckConstraint("drawn>=0"), nullable=False, default=0)
+    lost = db.Column(db.Integer, CheckConstraint("lost>=0"), nullable=False, default=0)
+    goals_for = db.Column(db.Integer, CheckConstraint("goals_for>=0"), nullable=False, default=0)
+    goals_against = db.Column(
+        db.Integer,
+        CheckConstraint("goals_against>=0"),
+        nullable=False,
+        default=0,
+    )
+
+    user_id = db.Column(
+        db.String(100),
+        db.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    team_id = db.Column(
+        db.String(100),
+        db.ForeignKey("team.id"),
+        nullable=False,
+    )
+    team = db.relationship("TeamModel")
+
+    group_id = db.Column(
+        db.String(100),
+        db.ForeignKey("group.id"),
+        nullable=False,
+    )
+
+    def to_dict(self):
+        return {
+            "id": self.team.id,
+            "code": self.team.code,
+            "description": self.team.description,
+            "flag": {"url": self.team.flag_url},
+            "played": self.played,
+            "won": self.won,
+            "drawn": self.drawn,
+            "lost": self.lost,
+            "goals_for": self.goals_for,
+            "goals_against": self.goals_against,
+            "goals_difference": self.goals_for - self.goals_against,
+            "points": self.won * 3 + self.drawn,
+        }
