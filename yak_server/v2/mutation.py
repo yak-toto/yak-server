@@ -138,7 +138,7 @@ class Mutation:
         return ScoreBet.from_instance(instance=bet)
 
     @strawberry.mutation
-    def lock_user_bet_result(self, user_id: strawberry.ID) -> LockUserResult:
+    def modify_user_lock_result(self, user_id: strawberry.ID, lock: bool) -> LockUserResult:
         _, authentification_error = admin_bearer_authentification()
 
         if authentification_error:
@@ -149,11 +149,8 @@ class Mutation:
         if not user_to_be_locked:
             return UserNotFound(user_id=user_id)
 
-        score_bets = ScoreBetModel.query.filter_by(user_id=user_id)
-        binary_bets = BinaryBetModel.query.filter_by(user_id=user_id)
-
-        for bet in chain(score_bets, binary_bets):
-            bet.locked = True
+        for bet in chain(user_to_be_locked.score_bets, user_to_be_locked.binary_bets):
+            bet.locked = lock
 
         db.session.commit()
 
