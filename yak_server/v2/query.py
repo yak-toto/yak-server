@@ -1,9 +1,4 @@
-from typing import TYPE_CHECKING
-
 import strawberry
-
-if TYPE_CHECKING:
-    from strawberry.types import Info
 
 from yak_server.database.models import (
     BinaryBetModel,

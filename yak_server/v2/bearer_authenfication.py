@@ -1,47 +1,16 @@
-import typing
-from typing import TYPE_CHECKING, Optional, Union
+from datetime import datetime, timedelta
+from typing import Optional, Union
 
-import jwt
 from flask import current_app, request
 from jwt import ExpiredSignatureError
-from strawberry.permission import BasePermission
-
-if TYPE_CHECKING:
-    from strawberry.types import Info
+from jwt import decode as jwt_decode
+from jwt import encode as jwt_encode
 
 from yak_server.database.models import UserModel
 
-from .schema import ExpiredToken, InvalidToken, User
+from .schema import ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI, User
 
 NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
-
-
-class BearerAuthentification(BasePermission):
-    message = "User is not authenticated"
-
-    def has_permission(self, source: typing.Any, info: "Info", **kwargs) -> bool:
-        auth_headers = request.headers.get("Authorization", "").split()
-
-        if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION:
-            return False
-
-        token = auth_headers[1]
-        try:
-            data = jwt.decode(
-                token,
-                current_app.config["SECRET_KEY"],
-                algorithms=["HS256"],
-            )
-        except Exception:
-            return False
-
-        user = UserModel.query.filter_by(id=data["sub"]).first()
-        if not user:
-            return False
-
-        info.user = user
-
-        return True
 
 
 def bearer_authentification() -> (
@@ -57,7 +26,7 @@ def bearer_authentification() -> (
 
     token = auth_headers[1]
     try:
-        data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+        data = jwt_decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
     except ExpiredSignatureError:
         return None, ExpiredToken()
     except Exception:
@@ -70,10 +39,29 @@ def bearer_authentification() -> (
     return User.from_instance(instance=user), None
 
 
-class AdminBearerAuthentification(BearerAuthentification):
-    message = "Unauthorized access to admin API"
+def admin_bearer_authentification() -> (
+    tuple[
+        Optional[User],
+        Optional[Union[ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI]],
+    ]
+):
+    user, authentification_error = bearer_authentification()
 
-    def has_permission(self, source: typing.Any, info: "Info", **kwargs) -> bool:
-        is_authorized = super().has_permission(source, info, **kwargs)
+    if authentification_error:
+        return None, authentification_error
 
-        return is_authorized and info.user.name == "admin"
+    if user.pseudo != "admin":
+        return None, UnauthorizedAccessToAdminAPI()
+
+    return user, None
+
+
+def encode_bearer_token(sub: str, expiration_time: timedelta, secret_key: str) -> str:
+    return jwt_encode(
+        {
+            "sub": sub,
+            "iat": datetime.utcnow(),
+            "exp": datetime.utcnow() + expiration_time,
+        },
+        secret_key,
+    )

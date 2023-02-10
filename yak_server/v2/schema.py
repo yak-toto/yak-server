@@ -381,9 +381,8 @@ class ExpiredToken:
 
 
 @strawberry.type
-class LockUserResponse:
-    binary_bets: list[BinaryBet]
-    score_bets: list[ScoreBet]
+class UnauthorizedAccessToAdminAPI:
+    message: str = "Unauthorized access to admin API"
 
 
 @strawberry.type
@@ -582,3 +581,15 @@ class InvalidCredentials:
 
 
 LoginResult = Union[UserWithToken, InvalidCredentials]
+
+
+@strawberry.type
+class UserNotFound:
+    user_id: strawberry.Private[str]
+
+    @strawberry.field
+    def message(self) -> str:
+        return f"Cannot find user with id: {self.user_id}"
+
+
+LockUserResult = Union[User, UserNotFound, InvalidToken, ExpiredToken, UnauthorizedAccessToAdminAPI]

@@ -1,32 +1,34 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from itertools import chain
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
-import jwt
 import strawberry
 from flask import current_app
-
-if TYPE_CHECKING:
-    from strawberry.types import Info
 
 from yak_server import db
 from yak_server.database.models import BinaryBetModel, MatchModel, ScoreBetModel, UserModel
 
-from .bearer_authenfication import AdminBearerAuthentification, bearer_authentification
+from .bearer_authenfication import (
+    admin_bearer_authentification,
+    bearer_authentification,
+    encode_bearer_token,
+)
 from .schema import (
     BinaryBet,
     BinaryBetNotFoundForUpdate,
     InvalidCredentials,
     LockedBinaryBetError,
     LockedScoreBetError,
-    LockUserResponse,
+    LockUserResult,
     LoginResult,
     ModifyBinaryBetResult,
     ModifyScoreBetResult,
     ScoreBet,
     ScoreBetNotFoundForUpdate,
     SignupResult,
+    User,
     UserNameAlreadyExists,
+    UserNotFound,
     UserWithToken,
 )
 
@@ -62,13 +64,10 @@ class Mutation:
         )
         db.session.commit()
 
-        token = jwt.encode(
-            {
-                "sub": user.id,
-                "iat": datetime.utcnow(),
-                "exp": datetime.utcnow() + timedelta(minutes=30),
-            },
-            current_app.config["SECRET_KEY"],
+        token = encode_bearer_token(
+            sub=user.id,
+            expiration_time=timedelta(minutes=30),
+            secret_key=current_app.config["SECRET_KEY"],
         )
 
         return UserWithToken.from_instance(instance=user, token=token)
@@ -80,13 +79,10 @@ class Mutation:
         if not user:
             return InvalidCredentials()
 
-        token = jwt.encode(
-            {
-                "sub": user.id,
-                "iat": datetime.utcnow(),
-                "exp": datetime.utcnow() + timedelta(minutes=30),
-            },
-            current_app.config["SECRET_KEY"],
+        token = encode_bearer_token(
+            sub=user.id,
+            expiration_time=timedelta(minutes=30),
+            secret_key=current_app.config["SECRET_KEY"],
         )
 
         return UserWithToken.from_instance(instance=user, token=token)
@@ -141,8 +137,18 @@ class Mutation:
 
         return ScoreBet.from_instance(instance=bet)
 
-    @strawberry.mutation(permission_classes=[AdminBearerAuthentification])
-    def lock_user_bet(self, user_id: str, info: "Info") -> LockUserResponse:
+    @strawberry.mutation
+    def lock_user_bet_result(self, user_id: strawberry.ID) -> LockUserResult:
+        _, authentification_error = admin_bearer_authentification()
+
+        if authentification_error:
+            return authentification_error
+
+        user_to_be_locked = UserModel.query.filter_by(id=user_id).first()
+
+        if not user_to_be_locked:
+            return UserNotFound(user_id=user_id)
+
         score_bets = ScoreBetModel.query.filter_by(user_id=user_id)
         binary_bets = BinaryBetModel.query.filter_by(user_id=user_id)
 
@@ -151,7 +157,4 @@ class Mutation:
 
         db.session.commit()
 
-        return LockUserResponse(
-            score_bets=[ScoreBet.from_instance(instance=bet) for bet in score_bets],
-            binary_bets=[BinaryBet.from_instance(instance=bet) for bet in binary_bets],
-        )
+        return User.from_instance(instance=user_to_be_locked)
