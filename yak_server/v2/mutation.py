@@ -91,7 +91,7 @@ class Mutation:
     def modify_binary_bet_result(
         self,
         id: strawberry.ID,
-        is_one_won: bool,
+        is_one_won: Optional[bool],
     ) -> ModifyBinaryBetResult:
         user, authentification_error = bearer_authentification()
 
