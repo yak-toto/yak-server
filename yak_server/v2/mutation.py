@@ -12,17 +12,21 @@ if TYPE_CHECKING:
 from yak_server import db
 from yak_server.database.models import BinaryBetModel, MatchModel, ScoreBetModel, UserModel
 
-from .bearer_authenfication import AdminBearerAuthentification, BearerAuthentification
+from .bearer_authenfication import AdminBearerAuthentification, bearer_authentification
 from .schema import (
-    ScoreBetNotFoundForUpdate,
     BinaryBet,
     BinaryBetNotFoundForUpdate,
+    InvalidCredentials,
     LockedBinaryBetError,
     LockedScoreBetError,
     LockUserResponse,
-    ModifyBinaryBetResponse,
-    ModifyScoreBetResponse,
+    LoginResult,
+    ModifyBinaryBetResult,
+    ModifyScoreBetResult,
     ScoreBet,
+    ScoreBetNotFoundForUpdate,
+    SignupResult,
+    UserNameAlreadyExists,
     UserWithToken,
 )
 
@@ -30,17 +34,17 @@ from .schema import (
 @strawberry.type
 class Mutation:
     @strawberry.mutation
-    def signup(
+    def signup_result(
         self,
         user_name: str,
         password: str,
         first_name: str,
         last_name: str,
-    ) -> UserWithToken:
+    ) -> SignupResult:
         # Check existing user in db
         existing_user = UserModel.query.filter_by(name=user_name).first()
         if existing_user:
-            raise Exception(f"Name already exists: {user_name}")
+            return UserNameAlreadyExists(user_name=user_name)
 
         # Initialize user and integrate in db
         user = UserModel(
@@ -70,11 +74,11 @@ class Mutation:
         return UserWithToken.from_instance(instance=user, token=token)
 
     @strawberry.mutation
-    def login(self, user_name: str, password: str) -> UserWithToken:
+    def login_result(self, user_name: str, password: str) -> LoginResult:
         user = UserModel.authenticate(name=user_name, password=password)
 
         if not user:
-            raise Exception("Invalid credentials")
+            return InvalidCredentials()
 
         token = jwt.encode(
             {
@@ -87,62 +91,55 @@ class Mutation:
 
         return UserWithToken.from_instance(instance=user, token=token)
 
-    @strawberry.mutation(permission_classes=[BearerAuthentification])
-    def modify_binary_bet(
+    @strawberry.mutation
+    def modify_binary_bet_result(
         self,
         id: strawberry.ID,
         is_one_won: bool,
-        info: "Info",
-    ) -> ModifyBinaryBetResponse:
-        bet = BinaryBetModel.query.filter_by(user_id=info.user.id, id=id).first()
+    ) -> ModifyBinaryBetResult:
+        user, authentification_error = bearer_authentification()
+
+        if authentification_error:
+            return authentification_error
+
+        bet = BinaryBetModel.query.filter_by(user_id=user.instance.id, id=id).first()
 
         if not bet:
-            return ModifyBinaryBetResponse(
-                binary_bet=None,
-                binary_bet_errors=[BinaryBetNotFoundForUpdate()],
-            )
+            return BinaryBetNotFoundForUpdate()
 
         if bet.locked:
-            return ModifyBinaryBetResponse(
-                binary_bet=BinaryBet.from_instance(instance=bet),
-                binary_bet_errors=[LockedBinaryBetError()],
-            )
+            return LockedBinaryBetError()
 
         bet.is_one_won = is_one_won
         db.session.commit()
 
         return BinaryBet.from_instance(instance=bet)
 
-    @strawberry.mutation(permission_classes=[BearerAuthentification])
-    def modify_score_bet(
+    @strawberry.mutation
+    def modify_score_bet_result(
         self,
         id: strawberry.ID,
         score1: Optional[int],
         score2: Optional[int],
-        info: "Info",
-    ) -> ModifyScoreBetResponse:
-        bet = ScoreBetModel.query.filter_by(user_id=info.user.id, id=id).first()
+    ) -> ModifyScoreBetResult:
+        user, authentification_error = bearer_authentification()
+
+        if authentification_error:
+            return authentification_error
+
+        bet = ScoreBetModel.query.filter_by(user_id=user.instance.id, id=id).first()
 
         if not bet:
-            return ModifyScoreBetResponse(
-                score_bet=None,
-                score_bet_errors=[ScoreBetNotFoundForUpdate()],
-            )
+            return ScoreBetNotFoundForUpdate()
 
         if bet.locked:
-            return ModifyScoreBetResponse(
-                score_bet=ScoreBet.from_instance(instance=bet),
-                score_bet_errors=[LockedScoreBetError()],
-            )
+            return LockedScoreBetError()
 
         bet.score1 = score1
         bet.score2 = score2
         db.session.commit()
 
-        return ModifyScoreBetResponse(
-            score_bet=ScoreBet.from_instance(instance=bet),
-            score_bet_errors=None,
-        )
+        return ScoreBet.from_instance(instance=bet)
 
     @strawberry.mutation(permission_classes=[AdminBearerAuthentification])
     def lock_user_bet(self, user_id: str, info: "Info") -> LockUserResponse:

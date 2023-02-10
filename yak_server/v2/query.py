@@ -188,7 +188,7 @@ class Query:
         return Phases(
             phases=[
                 Phase.from_instance(instance=phase, user_id=user.instance.id) for phase in phases
-            ]
+            ],
         )
 
     @strawberry.field
@@ -220,7 +220,7 @@ class Query:
         return Phase.from_instance(instance=phase_record, user_id=user.instance.id)
 
     @strawberry.field
-    def score_board_result(self, info: "Info") -> ScoreBoardResult:
+    def score_board_result(self) -> ScoreBoardResult:
         _, authentification_error = bearer_authentification()
 
         if authentification_error:
@@ -229,5 +229,5 @@ class Query:
         users = UserModel.query.filter(UserModel.name != "admin")
 
         return ScoreBoard(
-            users=[UserWithoutSensitiveInfo.from_instance(instance=user) for user in users]
+            users=[UserWithoutSensitiveInfo.from_instance(instance=user) for user in users],
         )

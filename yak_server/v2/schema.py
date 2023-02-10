@@ -371,6 +371,16 @@ class BinaryBet:
 
 
 @strawberry.type
+class InvalidToken:
+    message: str = "Invalid token. Cannot authentify."
+
+
+@strawberry.type
+class ExpiredToken:
+    message: str = "Token is expired. Please reauthentify."
+
+
+@strawberry.type
 class LockUserResponse:
     binary_bets: list[BinaryBet]
     score_bets: list[ScoreBet]
@@ -386,10 +396,13 @@ class ScoreBetNotFoundForUpdate:
     message: str = "Score bet not found. Cannot modify a ressource that does not exist."
 
 
-@strawberry.type
-class ModifyScoreBetResponse:
-    score_bet: Optional[ScoreBet]
-    score_bet_errors: Optional[list[Union[LockedScoreBetError, ScoreBetNotFoundForUpdate]]]
+ModifyScoreBetResult = Union[
+    ScoreBet,
+    ScoreBetNotFoundForUpdate,
+    LockedScoreBetError,
+    InvalidToken,
+    ExpiredToken,
+]
 
 
 @strawberry.type
@@ -402,20 +415,13 @@ class BinaryBetNotFoundForUpdate:
     message: str = "Binary bet not found. Cannot modify a ressource that does not exist."
 
 
-@strawberry.type
-class ModifyBinaryBetResponse:
-    binary_bet: Optional[BinaryBet]
-    binary_bet_errors: Optional[list[Union[LockedBinaryBetError, BinaryBetNotFoundForUpdate]]]
-
-
-@strawberry.type
-class InvalidToken:
-    message: str = "Invalid token. Cannot authentify."
-
-
-@strawberry.type
-class ExpiredToken:
-    message: str = "Token is expired. Please reauthentify."
+ModifyBinaryBetResult = Union[
+    BinaryBet,
+    BinaryBetNotFoundForUpdate,
+    LockedBinaryBetError,
+    InvalidToken,
+    ExpiredToken,
+]
 
 
 UserResult = Union[User, InvalidToken, ExpiredToken]
@@ -556,3 +562,23 @@ class ScoreBoard:
 
 
 ScoreBoardResult = Union[ScoreBoard, InvalidToken, ExpiredToken]
+
+
+@strawberry.type
+class UserNameAlreadyExists:
+    user_name: strawberry.Private[str]
+
+    @strawberry.field
+    def message(self) -> str:
+        return f"Name already exists: {self.user_name}"
+
+
+SignupResult = Union[UserWithToken, UserNameAlreadyExists]
+
+
+@strawberry.type
+class InvalidCredentials:
+    message: str = "Invalid credentials"
+
+
+LoginResult = Union[UserWithToken, InvalidCredentials]
