@@ -10,37 +10,39 @@ from yak_server.database.models import (
 )
 
 from .bearer_authenfication import bearer_authentification
-from .schema import (
+from .result import (
     AllGroupsResult,
     AllPhasesResult,
     AllTeamsResult,
     AllTeamsSuccessful,
-    BinaryBet,
     BinaryBetNotFound,
     BinaryBetResult,
-    Group,
     GroupByCodeNotFound,
     GroupByCodeResult,
     GroupByIdNotFound,
     GroupByIdResult,
     Groups,
-    Phase,
     PhaseByCodeNotFound,
     PhaseByCodeResult,
     PhaseByIdNotFound,
     PhaseByIdResult,
     Phases,
-    ScoreBet,
     ScoreBetNotFound,
     ScoreBetResult,
     ScoreBoard,
     ScoreBoardResult,
-    Team,
     TeamByCodeNotFound,
     TeamByCodeResult,
     TeamByIdNotFound,
     TeamByIdResult,
     UserResult,
+)
+from .schema import (
+    BinaryBet,
+    Group,
+    Phase,
+    ScoreBet,
+    Team,
     UserWithoutSensitiveInfo,
 )
 

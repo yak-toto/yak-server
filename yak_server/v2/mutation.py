@@ -13,8 +13,7 @@ from .bearer_authenfication import (
     bearer_authentification,
     encode_bearer_token,
 )
-from .schema import (
-    BinaryBet,
+from .result import (
     BinaryBetNotFoundForUpdate,
     InvalidCredentials,
     LockedBinaryBetError,
@@ -23,12 +22,15 @@ from .schema import (
     LoginResult,
     ModifyBinaryBetResult,
     ModifyScoreBetResult,
-    ScoreBet,
     ScoreBetNotFoundForUpdate,
     SignupResult,
-    User,
     UserNameAlreadyExists,
     UserNotFound,
+)
+from .schema import (
+    BinaryBet,
+    ScoreBet,
+    User,
     UserWithToken,
 )
 

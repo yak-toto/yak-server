@@ -8,7 +8,8 @@ from jwt import encode as jwt_encode
 
 from yak_server.database.models import UserModel
 
-from .schema import ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI, User
+from .result import ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI
+from .schema import User
 
 NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
 
