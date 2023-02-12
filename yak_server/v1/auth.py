@@ -93,7 +93,7 @@ def patch_user(current_user, user_id):
     return success_response(200, user.to_user_dict())
 
 
-@auth.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/users")
+@auth.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/current_user")
 @token_required
 def current_user(current_user):
     return success_response(200, current_user.to_user_dict())

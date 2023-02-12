@@ -41,7 +41,7 @@ def test_valid_auth(client, monkeypatch):
 
     # current user tests
     response_current_user = client.get(
-        "/api/v1/users",
+        "/api/v1/current_user",
         headers=[("Authorization", f"Bearer {auth_token}")],
     )
     assert response_current_user.status_code == HttpCode.OK
