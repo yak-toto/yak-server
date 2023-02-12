@@ -126,6 +126,7 @@ class UserModel(db.Model):
         return {
             "first_name": self.first_name,
             "last_name": self.last_name,
+            "full_name": f"{self.first_name} {self.last_name}",
             "number_match_guess": self.number_match_guess,
             "number_score_guess": self.number_score_guess,
             "number_qualified_teams_guess": self.number_qualified_teams_guess,
