@@ -97,3 +97,26 @@ def patch_user(current_user, user_id):
 @token_required
 def current_user(current_user):
     return success_response(200, current_user.to_user_dict())
+
+
+@auth.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/users")
+@token_required
+def get_users(current_user):
+    if current_user.name != "admin":
+        raise UnauthorizedAccessToAdminAPI
+
+    return success_response(200, [user.to_user_dict() for user in UserModel.query.all()])
+
+
+@auth.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/<string:user_id>")
+@token_required
+def get_user(current_user, user_id):
+    if current_user.name != "admin":
+        raise UnauthorizedAccessToAdminAPI
+
+    user = UserModel.query.filter_by(id=user_id).first()
+
+    if not user:
+        return UserNotFound
+
+    return success_response(200, user.to_user_dict())
