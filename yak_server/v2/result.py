@@ -67,7 +67,7 @@ ModifyBinaryBetResult = Union[
 ]
 
 
-UserResult = Union[User, InvalidToken, ExpiredToken]
+CurrentUserResult = Union[User, InvalidToken, ExpiredToken]
 
 
 @strawberry.type

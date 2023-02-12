@@ -17,6 +17,7 @@ from .result import (
     AllTeamsSuccessful,
     BinaryBetNotFound,
     BinaryBetResult,
+    CurrentUserResult,
     GroupByCodeNotFound,
     GroupByCodeResult,
     GroupByIdNotFound,
@@ -35,7 +36,6 @@ from .result import (
     TeamByCodeResult,
     TeamByIdNotFound,
     TeamByIdResult,
-    UserResult,
 )
 from .schema import (
     BinaryBet,
@@ -50,7 +50,7 @@ from .schema import (
 @strawberry.type
 class Query:
     @strawberry.field
-    def user_result(self) -> UserResult:
+    def current_user_result(self) -> CurrentUserResult:
         user, authentification_error = bearer_authentification()
 
         if authentification_error:
