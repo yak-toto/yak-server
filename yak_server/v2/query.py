@@ -9,7 +9,7 @@ from yak_server.database.models import (
     UserModel,
 )
 
-from .bearer_authenfication import bearer_authentification
+from .bearer_authenfication import admin_bearer_authentification, bearer_authentification
 from .result import (
     AllGroupsResult,
     AllPhasesResult,
@@ -36,6 +36,9 @@ from .result import (
     TeamByCodeResult,
     TeamByIdNotFound,
     TeamByIdResult,
+    User,
+    UserNotFound,
+    UserResult,
 )
 from .schema import (
     BinaryBet,
@@ -228,3 +231,17 @@ class Query:
         return ScoreBoard(
             users=[UserWithoutSensitiveInfo.from_instance(instance=user) for user in users],
         )
+
+    @strawberry.field
+    def user_result(self, user_id: str) -> UserResult:
+        _, authentification_error = admin_bearer_authentification()
+
+        if authentification_error:
+            return authentification_error
+
+        user = UserModel.query.filter_by(id=user_id).first()
+
+        if not user:
+            return UserNotFound(user_id=user_id)
+
+        return User.from_instance(instance=user)

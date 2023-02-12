@@ -237,3 +237,6 @@ class UserNotFound:
 
 
 LockUserResult = Union[User, UserNotFound, InvalidToken, ExpiredToken, UnauthorizedAccessToAdminAPI]
+
+
+UserResult = Union[User, InvalidToken, ExpiredToken, UserNotFound, UnauthorizedAccessToAdminAPI]
