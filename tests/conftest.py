@@ -5,7 +5,7 @@ import pytest
 from yak_server import create_app, db
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def app():
     # Override MYSQL_DB environment to push data to a different database
     os.environ["MYSQL_DB"] = "yak_toto_test"
@@ -30,6 +30,6 @@ def app():
         db.drop_all()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def client(app):
     return app.test_client()
