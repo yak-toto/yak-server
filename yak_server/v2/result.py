@@ -1,4 +1,5 @@
 from typing import Optional, Union
+import uuid
 
 import strawberry
 
@@ -91,7 +92,7 @@ AllTeamsResult = Union[AllTeamsSuccessful, InvalidToken, ExpiredToken]
 
 @strawberry.type
 class TeamByIdNotFound:
-    id: strawberry.Private[str]
+    id: strawberry.Private[uuid.UUID]
 
     @strawberry.field
     def message(self) -> str:
@@ -119,7 +120,7 @@ class TeamResponse:
 
 @strawberry.type
 class ScoreBetNotFound:
-    id: strawberry.Private[str]
+    id: strawberry.Private[uuid.UUID]
 
     @strawberry.field
     def message(self) -> str:
@@ -131,7 +132,7 @@ ScoreBetResult = Union[ScoreBet, ScoreBetNotFound, InvalidToken, ExpiredToken]
 
 @strawberry.type
 class BinaryBetNotFound:
-    id: strawberry.Private[str]
+    id: strawberry.Private[uuid.UUID]
 
     @strawberry.field
     def message(self) -> str:
@@ -200,7 +201,7 @@ PhaseByCodeResult = Union[Phase, PhaseByCodeNotFound, InvalidToken, ExpiredToken
 
 @strawberry.type
 class PhaseByIdNotFound:
-    id: strawberry.Private[str]
+    id: strawberry.Private[uuid.UUID]
 
     @strawberry.field
     def message(self) -> str:
@@ -240,7 +241,7 @@ LoginResult = Union[UserWithToken, InvalidCredentials]
 
 @strawberry.type
 class UserNotFound:
-    user_id: strawberry.Private[str]
+    user_id: strawberry.Private[uuid.UUID]
 
     @strawberry.field
     def message(self) -> str:

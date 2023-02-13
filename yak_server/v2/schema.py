@@ -1,4 +1,5 @@
 from typing import Optional
+import uuid
 
 import strawberry
 
@@ -145,7 +146,7 @@ class UserWithToken(User):
 class Team:
     instance: strawberry.Private[TeamModel]
 
-    id: str
+    id: uuid.UUID
     code: str
     description: str
 
@@ -194,7 +195,7 @@ class Group:
     instance: strawberry.Private[GroupModel]
     user_id: strawberry.Private[str]
 
-    id: str
+    id: uuid.UUID
     code: str
     description: str
 
@@ -248,7 +249,7 @@ class Phase:
     instance: strawberry.Private[PhaseModel]
     user_id: strawberry.Private[str]
 
-    id: str
+    id: uuid.UUID
     code: str
     description: str
 
@@ -302,8 +303,8 @@ class Phase:
 class ScoreBet:
     instance: strawberry.Private[ScoreBetModel]
 
-    id: str
-    match_id: str
+    id: uuid.UUID
+    match_id: uuid.UUID
     index: int
     locked: bool
     group: Group
@@ -337,8 +338,8 @@ class ScoreBet:
 class BinaryBet:
     instance: strawberry.Private[BinaryBetModel]
 
-    id: str
-    match_id: str
+    id: uuid.UUID
+    match_id: uuid.UUID
     index: int
     locked: bool
     group: Group

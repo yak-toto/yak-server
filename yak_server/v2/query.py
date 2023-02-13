@@ -1,4 +1,5 @@
 import strawberry
+import uuid
 
 from yak_server.database.models import (
     BinaryBetModel,
@@ -73,13 +74,13 @@ class Query:
         )
 
     @strawberry.field
-    def team_by_id_result(self, id: strawberry.ID) -> TeamByIdResult:
+    def team_by_id_result(self, id: uuid.UUID) -> TeamByIdResult:
         _, authentification_error = bearer_authentification()
 
         if authentification_error:
             return authentification_error
 
-        team_record = TeamModel.query.filter_by(id=id).first()
+        team_record = TeamModel.query.filter_by(id=str(id)).first()
 
         if not team_record:
             return TeamByIdNotFound(id=id)
@@ -87,7 +88,7 @@ class Query:
         return Team.from_instance(instance=team_record)
 
     @strawberry.field
-    def team_by_code_result(self, code: strawberry.ID) -> TeamByCodeResult:
+    def team_by_code_result(self, code: str) -> TeamByCodeResult:
         _, authentification_error = bearer_authentification()
 
         if authentification_error:
@@ -101,14 +102,14 @@ class Query:
         return Team.from_instance(instance=team_record)
 
     @strawberry.field
-    def score_bet_result(self, id: strawberry.ID) -> ScoreBetResult:
+    def score_bet_result(self, id: uuid.UUID) -> ScoreBetResult:
         user, authentification_error = bearer_authentification()
 
         if authentification_error:
             return authentification_error
 
         score_bet_record = ScoreBetModel.query.filter_by(
-            id=id,
+            id=str(id),
             user_id=user.instance.id,
         ).first()
 
@@ -118,14 +119,14 @@ class Query:
         return ScoreBet.from_instance(instance=score_bet_record)
 
     @strawberry.field
-    def binary_bet_result(self, id: strawberry.ID) -> BinaryBetResult:
+    def binary_bet_result(self, id: uuid.UUID) -> BinaryBetResult:
         user, authentification_error = bearer_authentification()
 
         if authentification_error:
             return authentification_error
 
         binary_bet_record = BinaryBetModel.query.filter_by(
-            id=id,
+            id=str(id),
             user_id=user.instance.id,
         ).first()
 
@@ -149,13 +150,13 @@ class Query:
         )
 
     @strawberry.field
-    def group_by_id_result(self, id: strawberry.ID) -> GroupByIdResult:
+    def group_by_id_result(self, id: uuid.UUID) -> GroupByIdResult:
         user, authentification_error = bearer_authentification()
 
         if authentification_error:
             return authentification_error
 
-        group_record = GroupModel.query.filter_by(id=id).first()
+        group_record = GroupModel.query.filter_by(id=str(id)).first()
 
         if not group_record:
             return GroupByIdNotFound(id=id)
@@ -192,13 +193,13 @@ class Query:
         )
 
     @strawberry.field
-    def phase_by_id_result(self, id: strawberry.ID) -> PhaseByIdResult:
+    def phase_by_id_result(self, id: uuid.UUID) -> PhaseByIdResult:
         user, authentification_error = bearer_authentification()
 
         if authentification_error:
             return authentification_error
 
-        phase_record = PhaseModel.query.filter_by(id=id).first()
+        phase_record = PhaseModel.query.filter_by(id=str(id)).first()
 
         if not phase_record:
             return PhaseByIdNotFound(id=id)
@@ -206,7 +207,7 @@ class Query:
         return Phase.from_instance(instance=phase_record, user_id=user.instance.id)
 
     @strawberry.field
-    def phase_by_code_result(self, code: strawberry.ID) -> PhaseByCodeResult:
+    def phase_by_code_result(self, code: str) -> PhaseByCodeResult:
         user, authentification_error = bearer_authentification()
 
         if authentification_error:
@@ -233,13 +234,13 @@ class Query:
         )
 
     @strawberry.field
-    def user_result(self, user_id: str) -> UserResult:
+    def user_result(self, user_id: uuid.UUID) -> UserResult:
         _, authentification_error = admin_bearer_authentification()
 
         if authentification_error:
             return authentification_error
 
-        user = UserModel.query.filter_by(id=user_id).first()
+        user = UserModel.query.filter_by(id=str(user_id)).first()
 
         if not user:
             return UserNotFound(user_id=user_id)

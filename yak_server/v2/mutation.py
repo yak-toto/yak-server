@@ -1,6 +1,7 @@
 from datetime import timedelta
 from itertools import chain
 from typing import Optional
+import uuid
 
 import strawberry
 from flask import current_app
@@ -93,7 +94,7 @@ class Mutation:
     @strawberry.mutation
     def modify_binary_bet_result(
         self,
-        id: strawberry.ID,
+        id: uuid.UUID,
         is_one_won: Optional[bool],
     ) -> ModifyBinaryBetResult:
         user, authentification_error = bearer_authentification()
@@ -101,7 +102,7 @@ class Mutation:
         if authentification_error:
             return authentification_error
 
-        bet = BinaryBetModel.query.filter_by(user_id=user.instance.id, id=id).first()
+        bet = BinaryBetModel.query.filter_by(user_id=user.instance.id, id=str(id)).first()
 
         if not bet:
             return BinaryBetNotFoundForUpdate()
@@ -117,7 +118,7 @@ class Mutation:
     @strawberry.mutation
     def modify_score_bet_result(
         self,
-        id: strawberry.ID,
+        id: uuid.UUID,
         score1: Optional[int],
         score2: Optional[int],
     ) -> ModifyScoreBetResult:
@@ -126,7 +127,7 @@ class Mutation:
         if authentification_error:
             return authentification_error
 
-        bet = ScoreBetModel.query.filter_by(user_id=user.instance.id, id=id).first()
+        bet = ScoreBetModel.query.filter_by(user_id=user.instance.id, id=str(id)).first()
 
         if not bet:
             return ScoreBetNotFoundForUpdate()
@@ -147,13 +148,13 @@ class Mutation:
         return ScoreBet.from_instance(instance=bet)
 
     @strawberry.mutation
-    def modify_user_lock_result(self, user_id: strawberry.ID, lock: bool) -> LockUserResult:
+    def modify_user_lock_result(self, user_id: uuid.UUID, lock: bool) -> LockUserResult:
         _, authentification_error = admin_bearer_authentification()
 
         if authentification_error:
             return authentification_error
 
-        user_to_be_locked = UserModel.query.filter_by(id=user_id).first()
+        user_to_be_locked = UserModel.query.filter_by(id=str(user_id)).first()
 
         if not user_to_be_locked:
             return UserNotFound(user_id=user_id)
