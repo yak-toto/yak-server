@@ -113,3 +113,62 @@ def test_signup_and_invalid_token(client):
         response_current_user.json["data"]["currentUserResult"]["message"]
         == "Invalid token. Cannot authentify."
     )
+
+
+def test_name_already_exists(client):
+    user_name = get_random_string(8)
+
+    query_signup = """
+        mutation Signup(
+            $userName: String!, $firstName: String!,
+            $lastName: String!, $password: String!
+        ) {
+            signupResult(
+                userName: $userName, firstName: $firstName,
+                lastName: $lastName, password: $password
+            ) {
+                __typename
+                ... on UserWithToken {
+                    firstName
+                    lastName
+                    fullName
+                    token
+                }
+                ... on UserNameAlreadyExists {
+                    message
+                }
+            }
+        }
+    """
+
+    response_signup = client.post(
+        "/api/v2",
+        json={
+            "query": query_signup,
+            "variables": {
+                "userName": user_name,
+                "firstName": get_random_string(8),
+                "lastName": f"{get_random_string(4)} {get_random_string(5)}",
+                "password": get_random_string(10),
+            },
+        },
+    )
+    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
+
+    response_signup_2 = client.post(
+        "/api/v2",
+        json={
+            "query": query_signup,
+            "variables": {
+                "userName": user_name,
+                "firstName": get_random_string(7),
+                "lastName": get_random_string(10),
+                "password": get_random_string(5),
+            },
+        },
+    )
+    assert response_signup_2.json["data"]["signupResult"]["__typename"] == "UserNameAlreadyExists"
+    assert (
+        response_signup_2.json["data"]["signupResult"]["message"]
+        == f"Name already exists: {user_name}"
+    )
