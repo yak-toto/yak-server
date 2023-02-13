@@ -22,6 +22,7 @@ from .result import (
     LoginResult,
     ModifyBinaryBetResult,
     ModifyScoreBetResult,
+    NewScoreNegative,
     ScoreBetNotFoundForUpdate,
     SignupResult,
     UserNameAlreadyExists,
@@ -132,6 +133,12 @@ class Mutation:
 
         if bet.locked:
             return LockedScoreBetError()
+
+        if score1 is not None and score1 < 0:
+            return NewScoreNegative(variable_name="$score1", score=score1)
+
+        if score2 is not None and score2 < 0:
+            return NewScoreNegative(variable_name="$score2", score=score2)
 
         bet.score1 = score1
         bet.score2 = score2

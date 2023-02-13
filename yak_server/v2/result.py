@@ -39,10 +39,21 @@ class ScoreBetNotFoundForUpdate:
     message: str = "Score bet not found. Cannot modify a ressource that does not exist."
 
 
+@strawberry.type
+class NewScoreNegative:
+    variable_name: strawberry.Private[str]
+    score: strawberry.Private[int]
+
+    @strawberry.field
+    def message(self) -> str:
+        return f"Variable '{self.variable_name}' got invalid value {self.score}. Score cannot be negative."
+
+
 ModifyScoreBetResult = Union[
     ScoreBet,
     ScoreBetNotFoundForUpdate,
     LockedScoreBetError,
+    NewScoreNegative,
     InvalidToken,
     ExpiredToken,
 ]
