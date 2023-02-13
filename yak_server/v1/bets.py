@@ -25,6 +25,7 @@ from .utils.errors import (
     InvalidBetType,
     LockedBets,
     MissingId,
+    NewScoreNegative,
     WrongInputs,
 )
 from .utils.flask_utils import success_response
@@ -274,6 +275,11 @@ def modify_bets(current_user):
             bet["team1"]["score"],
             bet["team2"]["score"],
         ):
+            if (bet["team1"]["score"] is not None and bet["team1"]["score"] < 0) or (
+                bet["team2"]["score"] is not None and bet["team2"]["score"] < 0
+            ):
+                raise NewScoreNegative
+
             original_bet.score1 = bet["team1"]["score"]
             original_bet.score2 = bet["team2"]["score"]
 
@@ -433,18 +439,20 @@ def match_patch(current_user, bet_id):
     if is_locked(bet):
         raise LockedBets
 
-    if bet_type == "score":
-        if bet.score1 != body["team1"].get("score") or bet.score2 != body["team2"].get(
-            "score",
-        ):
-            bet.score1 = body["team1"].get("score")
-            bet.score2 = body["team2"].get("score")
+    if bet_type == SCORE:
+        if bet.score1 != body["team1"]["score"] or bet.score2 != body["team2"]["score"]:
+            if (bet["team1"]["score"] is not None and bet["team1"]["score"] < 0) or (
+                bet["team2"]["score"] is not None and bet["team2"]["score"] < 0
+            ):
+                raise NewScoreNegative
+
+            bet.score1 = body["team1"]["score"]
+            bet.score2 = body["team2"]["score"]
             db.session.commit()
 
-    else:
-        if bet.is_one_won != body["is_one_won"]:
-            bet.is_one_won = body["is_one_won"]
-            db.session.commit()
+    elif bet_type == BINARY and bet.is_one_won != body["is_one_won"]:
+        bet.is_one_won = body["is_one_won"]
+        db.session.commit()
 
     response = {
         "phase": bet.match.group.phase.to_dict(),
@@ -482,7 +490,7 @@ def bet_get(current_user, bet_id):
     if bet_type == SCORE:
         response["score_bet"] = bet.to_dict_without_group()
     elif bet_type == BINARY:
-        response["score_bet"] = bet.to_dict_without_group()
+        response["binary_bet"] = bet.to_dict_without_group()
 
     return success_response(200, response)
 

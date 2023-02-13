@@ -43,6 +43,11 @@ class UserNotFound(HTTPException):
     description = "User not found"
 
 
+class NewScoreNegative(HTTPException):
+    code = 401
+    description = "Score cannot be negative"
+
+
 class DuplicatedIds(HTTPException):
     def __init__(self, ids) -> None:
         super().__init__(f"Duplicated ids in request: {', '.join(ids)}")
