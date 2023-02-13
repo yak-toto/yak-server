@@ -1,7 +1,5 @@
-from typing import TYPE_CHECKING, Optional
-
-if TYPE_CHECKING:
-    import uuid
+import uuid
+from typing import Optional
 
 import strawberry
 

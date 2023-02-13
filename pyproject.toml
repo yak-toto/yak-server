@@ -109,6 +109,8 @@ ignore = [
 
     "C901",
     "PLR",
+
+    "TCH003"
 ]
 fix = true
 exclude = [

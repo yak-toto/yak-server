@@ -1,9 +1,7 @@
+import uuid
 from datetime import timedelta
 from itertools import chain
-from typing import TYPE_CHECKING, Optional
-
-if TYPE_CHECKING:
-    import uuid
+from typing import Optional
 
 import strawberry
 from flask import current_app
