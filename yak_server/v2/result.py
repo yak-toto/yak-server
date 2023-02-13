@@ -1,5 +1,7 @@
-from typing import Optional, Union
-import uuid
+from typing import TYPE_CHECKING, Optional, Union
+
+if TYPE_CHECKING:
+    import uuid
 
 import strawberry
 
@@ -47,7 +49,10 @@ class NewScoreNegative:
 
     @strawberry.field
     def message(self) -> str:
-        return f"Variable '{self.variable_name}' got invalid value {self.score}. Score cannot be negative."
+        return (
+            f"Variable '{self.variable_name}' got invalid value {self.score}. "
+            "Score cannot be negative."
+        )
 
 
 ModifyScoreBetResult = Union[

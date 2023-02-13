@@ -1,5 +1,9 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import uuid
+
 import strawberry
-import uuid
 
 from yak_server.database.models import (
     BinaryBetModel,

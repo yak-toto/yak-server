@@ -106,6 +106,9 @@ ignore = [
     "EM101",
     "EM102",
     "EM103",
+
+    "C901",
+    "PLR",
 ]
 fix = true
 exclude = [
