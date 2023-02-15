@@ -126,7 +126,7 @@ src = ["yak_server", "tests", "util"]
 
 [tool.ruff.per-file-ignores]
 "util/*" = ["T20"]
-"tests/*" = ["S101"]
+"tests/*" = ["S101", "S105"]
 "setup.py" = ["INP001"]
 
 [tool.ruff.isort]
