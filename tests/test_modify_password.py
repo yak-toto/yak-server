@@ -87,4 +87,5 @@ def test_modify_password(client):
     )
 
     assert response_wrong_input.status_code == HttpCode.NOT_FOUND
+    assert response_wrong_input.json["error_code"] == HttpCode.NOT_FOUND
     assert response_wrong_input.json["description"] == "User not found"

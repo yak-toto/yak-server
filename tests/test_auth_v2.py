@@ -1,3 +1,5 @@
+from unittest.mock import ANY
+
 from .test_utils import get_random_string
 
 
@@ -40,10 +42,13 @@ def test_signup_and_invalid_token(client):
             },
         },
     )
-    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
-    assert response_signup.json["data"]["signupResult"]["firstName"] == first_name
-    assert response_signup.json["data"]["signupResult"]["lastName"] == last_name
-    assert response_signup.json["data"]["signupResult"]["fullName"] == f"{first_name} {last_name}"
+    assert response_signup.json["data"]["signupResult"] == {
+        "__typename": "UserWithToken",
+        "firstName": first_name,
+        "lastName": last_name,
+        "fullName": f"{first_name} {last_name}",
+        "token": ANY,
+    }
 
     authentification_token = response_signup.json["data"]["signupResult"]["token"]
 
@@ -108,11 +113,10 @@ def test_signup_and_invalid_token(client):
         json=query_current_user,
     )
 
-    assert response_current_user.json["data"]["currentUserResult"]["__typename"] == "InvalidToken"
-    assert (
-        response_current_user.json["data"]["currentUserResult"]["message"]
-        == "Invalid token. Cannot authentify."
-    )
+    assert response_current_user.json["data"]["currentUserResult"] == {
+        "__typename": "InvalidToken",
+        "message": "Invalid token. Cannot authentify.",
+    }
 
 
 def test_name_already_exists(client):
@@ -167,8 +171,7 @@ def test_name_already_exists(client):
             },
         },
     )
-    assert response_signup_2.json["data"]["signupResult"]["__typename"] == "UserNameAlreadyExists"
-    assert (
-        response_signup_2.json["data"]["signupResult"]["message"]
-        == f"Name already exists: {user_name}"
-    )
+    assert response_signup_2.json["data"]["signupResult"] == {
+        "__typename": "UserNameAlreadyExists",
+        "message": f"Name already exists: {user_name}",
+    }

@@ -1,15 +1,10 @@
-from unittest.mock import Mock
+from unittest.mock import ANY
 
 from .constants import HttpCode
 
 
-def test_valid_auth(client, monkeypatch):
+def test_valid_auth(client):
     # signup test
-    monkeypatch.setattr(
-        "uuid.uuid4",
-        Mock(return_value="b31d9d4f-22f5-4122-85dd-48089d42fd0a"),
-    )
-
     response_signup = client.post(
         "/api/v1/users/signup",
         json={
@@ -20,24 +15,23 @@ def test_valid_auth(client, monkeypatch):
         },
     )
     assert response_signup.status_code == HttpCode.CREATED
-    assert response_signup.json["ok"]
-    assert response_signup.json["result"]["id"] == "b31d9d4f-22f5-4122-85dd-48089d42fd0a"
-    assert response_signup.json["result"]["name"] == "admin"
-
-    monkeypatch.delattr("uuid.uuid4")
+    assert response_signup.json == {
+        "ok": True,
+        "result": {"id": ANY, "name": "admin", "token": ANY},
+    }
 
     # login test
     response_login = client.post(
         "/api/v1/users/login",
         json={"name": "admin", "password": "admin"},
     )
-    response_login_body = response_login.json
-    auth_token = response_login_body["result"].pop("token")
     assert response_login.status_code == HttpCode.CREATED
-    assert response_login_body == {
+    assert response_login.json == {
         "ok": True,
-        "result": {"id": "b31d9d4f-22f5-4122-85dd-48089d42fd0a", "name": "admin"},
+        "result": {"id": ANY, "name": "admin", "token": ANY},
     }
+
+    auth_token = response_login.json["result"]["token"]
 
     # current user tests
     response_current_user = client.get(
@@ -47,17 +41,12 @@ def test_valid_auth(client, monkeypatch):
     assert response_current_user.status_code == HttpCode.OK
     assert response_current_user.json == {
         "ok": True,
-        "result": {"id": "b31d9d4f-22f5-4122-85dd-48089d42fd0a", "name": "admin"},
+        "result": {"id": ANY, "name": "admin"},
     }
 
 
-def test_double_signup(client, monkeypatch):
+def test_double_signup(client):
     # signup test
-    monkeypatch.setattr(
-        "uuid.uuid4",
-        Mock(return_value="a9e14635-8983-45ab-8afa-eb920866c60e"),
-    )
-
     response_signup = client.post(
         "/api/v1/users/signup",
         json={
@@ -68,11 +57,10 @@ def test_double_signup(client, monkeypatch):
         },
     )
     assert response_signup.status_code == HttpCode.CREATED
-    assert response_signup.json["ok"]
-    assert response_signup.json["result"]["id"] == "a9e14635-8983-45ab-8afa-eb920866c60e"
-    assert response_signup.json["result"]["name"] == "user2"
-
-    monkeypatch.delattr("uuid.uuid4")
+    assert response_signup.json == {
+        "ok": True,
+        "result": {"id": ANY, "name": "user2", "token": ANY},
+    }
 
     # signup with same name test
     response_second_signup = client.post(

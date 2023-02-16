@@ -140,14 +140,10 @@ def test_modify_score_bet(app, client):
         },
     )
 
-    assert (
-        response_modify_bet_new_score_negative.json["data"]["modifyScoreBetResult"]["__typename"]
-        == "NewScoreNegative"
-    )
-    assert (
-        response_modify_bet_new_score_negative.json["data"]["modifyScoreBetResult"]["message"]
-        == f"Variable '$score2' got invalid value {score2}. Score cannot be negative."
-    )
+    assert response_modify_bet_new_score_negative.json["data"]["modifyScoreBetResult"] == {
+        "__typename": "NewScoreNegative",
+        "message": f"Variable '$score2' got invalid value {score2}. Score cannot be negative.",
+    }
 
     # Error case : check ScoreBetNotFoundForUpdate error if score bet does not exist
     score1 = 1
@@ -166,11 +162,7 @@ def test_modify_score_bet(app, client):
         },
     )
 
-    assert (
-        response_modify_bet_invalid_id.json["data"]["modifyScoreBetResult"]["__typename"]
-        == "ScoreBetNotFoundForUpdate"
-    )
-    assert (
-        response_modify_bet_invalid_id.json["data"]["modifyScoreBetResult"]["message"]
-        == "Score bet not found. Cannot modify a ressource that does not exist."
-    )
+    assert response_modify_bet_invalid_id.json["data"]["modifyScoreBetResult"] == {
+        "__typename": "ScoreBetNotFoundForUpdate",
+        "message": "Score bet not found. Cannot modify a ressource that does not exist.",
+    }
