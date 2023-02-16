@@ -41,7 +41,7 @@ def teams_get():
 @teams.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams/<string:team_id>")
 def teams_get_by_id(team_id):
     if is_uuid4(team_id):
-        team = TeamModel.query.get(team_id)
+        team = TeamModel.query.filter_by(id=team_id).first()
     elif is_iso_3166_1_alpha_2_code(team_id):
         team = TeamModel.query.filter_by(code=team_id).first()
     else:
