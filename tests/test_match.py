@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 from unittest.mock import Mock
 
+import pkg_resources
+
 from yak_server.cli import initialize_database
 
 from .constants import HttpCode
@@ -11,7 +13,7 @@ def test_matches_db(app, client, monkeypatch):
     testcase = "test_matches_db"
 
     # location of test data
-    app.config["COMPETITION"] = testcase
+    app.config["DATA_FOLDER"] = pkg_resources.resource_filename(__name__, testcase)
 
     return_data = [
         "8f781aac-b29b-47e7-b6d7-06dd5e4859bb",
@@ -66,7 +68,9 @@ def test_matches_db(app, client, monkeypatch):
         headers=[("Authorization", f"Bearer {auth_token}")],
     )
 
-    with Path(f"tests/{testcase}/match_result.json").open() as file:
+    with Path(
+        pkg_resources.resource_filename(__name__, f"{testcase}/match_result.json"),
+    ).open() as file:
         match_result = json.loads(file.read())
 
     assert match_response.status_code == HttpCode.OK
@@ -77,7 +81,9 @@ def test_matches_db(app, client, monkeypatch):
         headers=[("Authorization", f"Bearer {auth_token}")],
     )
 
-    with Path(f"tests/{testcase}/group_result.json").open() as file:
+    with Path(
+        pkg_resources.resource_filename(__name__, f"{testcase}/group_result.json"),
+    ).open() as file:
         group_result = json.loads(file.read())
 
     assert group_response.status_code == HttpCode.OK
@@ -85,7 +91,9 @@ def test_matches_db(app, client, monkeypatch):
 
     team_response = client.get("/api/v1/teams")
 
-    with Path(f"tests/{testcase}/team_result.json").open() as file:
+    with Path(
+        pkg_resources.resource_filename(__name__, f"{testcase}/team_result.json"),
+    ).open() as file:
         team_result = json.loads(file.read())
 
     assert team_response.status_code == HttpCode.OK

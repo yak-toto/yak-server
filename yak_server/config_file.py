@@ -52,4 +52,5 @@ YAK_CONFIG = {
     "TEAM_QUALIFIED": config.getint("points", "team_qualified"),
     "FIRST_TEAM_QUALIFIED": config.getint("points", "first_team_qualified"),
     "FINALE_PHASE_CONFIG": FINALE_PHASE_CONFIG,
+    "DATA_FOLDER": pkg_resources.resource_filename(__name__, f"data/{COMPETITION}"),
 }

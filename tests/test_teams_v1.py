@@ -2,6 +2,8 @@ from operator import itemgetter
 from unittest.mock import ANY
 from uuid import uuid4
 
+import pkg_resources
+
 from yak_server.cli import initialize_database
 
 from .constants import HttpCode
@@ -9,7 +11,7 @@ from .constants import HttpCode
 
 def test_teams(app, client):
     # location of test data
-    app.config["COMPETITION"] = "test_teams_v1"
+    app.config["DATA_FOLDER"] = pkg_resources.resource_filename(__name__, "test_teams_v1")
 
     # initialize sql database
     initialize_database(app)

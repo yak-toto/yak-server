@@ -1,5 +1,7 @@
 from uuid import uuid4
 
+import pkg_resources
+
 from yak_server.cli import initialize_database
 
 from .test_utils import get_random_string
@@ -9,7 +11,7 @@ def test_modify_score_bet(app, client):
     testcase = "test_modify_bet_v2"
 
     # location of test data
-    app.config["COMPETITION"] = testcase
+    app.config["DATA_FOLDER"] = pkg_resources.resource_filename(__name__, testcase)
 
     initialize_database(app)
 

@@ -8,11 +8,9 @@ from yak_server.database.models import GroupModel, MatchModel, PhaseModel, TeamM
 
 def script(app):
     with app.app_context():
-        COMPETITION = app.config["COMPETITION"]
+        DATA_FOLDER = app.config["DATA_FOLDER"]
 
-        DATA_FOLDER = "tests" if app.config["TESTING"] else "yak_server/data"
-
-        with Path(f"{DATA_FOLDER}/{COMPETITION}/phases.csv", newline="").open() as csvfile:
+        with Path(f"{DATA_FOLDER}/phases.csv", newline="").open() as csvfile:
             spamreader = csv.reader(csvfile, delimiter="|")
 
             for row in spamreader:
@@ -21,7 +19,7 @@ def script(app):
 
             db.session.commit()
 
-        with Path(f"{DATA_FOLDER}/{COMPETITION}/groups.csv", newline="").open() as csvfile:
+        with Path(f"{DATA_FOLDER}/groups.csv", newline="").open() as csvfile:
             spamreader = csv.reader(csvfile, delimiter="|")
 
             for row in spamreader:
@@ -35,13 +33,13 @@ def script(app):
 
             db.session.commit()
 
-        with Path(f"{DATA_FOLDER}/{COMPETITION}/teams.csv", newline="").open() as csvfile:
+        with Path(f"{DATA_FOLDER}/teams.csv", newline="").open() as csvfile:
             spamreader = csv.reader(csvfile, delimiter="|")
 
             db.session.add_all(TeamModel(code=row[0], description=row[1]) for row in spamreader)
             db.session.commit()
 
-        with Path(f"{DATA_FOLDER}/{COMPETITION}/matches.csv", newline="").open() as csvfile:
+        with Path(f"{DATA_FOLDER}/matches.csv", newline="").open() as csvfile:
             spamreader = csv.reader(csvfile, delimiter="|")
 
             for row in spamreader:
