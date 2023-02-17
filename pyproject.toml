@@ -122,10 +122,10 @@ exclude = [
     "dist",
     "env",
 ]
-src = ["yak_server", "tests", "util"]
+src = ["yak_server", "tests"]
 
 [tool.ruff.per-file-ignores]
-"util/*" = ["T20"]
+"yak_server/cli/*" = ["T20"]
 "tests/*" = ["S101", "S105"]
 "setup.py" = ["INP001"]
 

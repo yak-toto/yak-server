@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from util import initialize_database
+from yak_server.cli import initialize_database
 
 from .test_utils import get_random_string
 

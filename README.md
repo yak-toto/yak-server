@@ -53,7 +53,7 @@ login system is using JSON Web Token, a secret key is required. To generate one,
 JWT_SECRET_KEY=9292f79e10ed7ed03ffad66d196217c4
 ```
 
-Also, automatic backup can be done through `util/backup-sh` script and is able to send notification to Telegram bot. To do so, please add a bot token and chat id to `.flaskenv`.
+Also, automatic backup can be done through `yak_server/cli/backup-sh` script and is able to send notification to Telegram bot. To do so, please add a bot token and chat id to `.flaskenv`.
 
 ```text
 BOT_TOKEN=my_bot_token
@@ -76,7 +76,7 @@ flask run
 
 ### Data initialization
 
-To run local testing, you can use the script `create_database.py`, `initialize_database.py` and `create_admin.py` located in `util` folder. To select, set `COMPETITION` environment variable in `.flaskenv`. It will read data from `data/{COMPETITION}/`.
+To run local testing, you can use the script `create_database.py`, `initialize_database.py` and `create_admin.py` located in `yak_server/cli` folder. To select, set `COMPETITION` environment variable in `.flaskenv`. It will read data from `data/{COMPETITION}/`.
 
 ### Testing
 

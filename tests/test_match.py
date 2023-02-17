@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from unittest.mock import Mock
 
-from util import initialize_database
+from yak_server.cli import initialize_database
 
 from .constants import HttpCode
 

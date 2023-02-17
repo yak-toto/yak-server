@@ -4,7 +4,7 @@
 current_date=$(date +"%d-%m-%Y")
 current_time=$(date +"%H:%M")
 current_datetime=${current_date}T${current_time}
-file_name=util/backup_files/yak_toto_backup_$current_datetime.sql
+file_name=yak_server/cli/backup_files/yak_toto_backup_$current_datetime.sql
 
 mysqldump yak_toto -u $MYSQL_USER_NAME --password=$MYSQL_PASSWORD > $file_name
 
