@@ -117,6 +117,6 @@ def get_user(current_user, user_id):
     user = UserModel.query.filter_by(id=user_id).first()
 
     if not user:
-        return UserNotFound
+        raise UserNotFound
 
     return success_response(200, user.to_user_dict())
