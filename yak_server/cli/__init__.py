@@ -1,6 +1,7 @@
 from flask import current_app
 from flask.cli import AppGroup
 
+from .backup_database import script as backup_database
 from .create_admin import script as create_admin
 from .create_database import script as create_database
 from .delete_database import script as delete_database
@@ -27,3 +28,8 @@ def delete():
 @db_cli.command("admin")
 def admin():
     create_admin(current_app)
+
+
+@db_cli.command("backup")
+def backup():
+    backup_database(current_app)

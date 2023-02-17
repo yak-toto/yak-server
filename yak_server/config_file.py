@@ -24,13 +24,22 @@ with Path(
 ).open() as file:
     FINALE_PHASE_CONFIG = json.loads(file.read())
 
+MYSQL_USER_NAME = os.environ["MYSQL_USER_NAME"]
+MYSQL_PASSWORD = os.environ["MYSQL_PASSWORD"]
+MYSQL_PORT = os.environ.get("MYSQL_PORT", 3306)
+MYSQL_DB = os.environ["MYSQL_DB"]
+
 YAK_CONFIG = {
     # Setup MySQL credentials
+    "MYSQL_USER_NAME": MYSQL_USER_NAME,
+    "MYSQL_PASSWORD": MYSQL_PASSWORD,
+    "MYSQL_PORT": MYSQL_PORT,
+    "MYSQL_DB": MYSQL_DB,
     "SQLALCHEMY_DATABASE_URI": (
-        f"mysql+pymysql://{os.environ['MYSQL_USER_NAME']}:"
-        f"{os.environ['MYSQL_PASSWORD']}@localhost:"
-        f"{os.environ.get('MYSQL_PORT', 3306)}/{os.environ['MYSQL_DB']}"
+        f"mysql+pymysql://{MYSQL_USER_NAME}:{MYSQL_PASSWORD}@localhost:{MYSQL_PORT}/{MYSQL_DB}"
     ),
+    "BOT_TOKEN": os.environ["BOT_TOKEN"],
+    "CHAT_ID": os.environ["CHAT_ID"],
     # Load jwt secret key from credentials file
     "SECRET_KEY": os.environ["JWT_SECRET_KEY"],
     # SQL Alchemy features
