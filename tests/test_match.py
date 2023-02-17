@@ -39,7 +39,7 @@ def test_matches_db(app, client, monkeypatch):
     monkeypatch.setattr("uuid.uuid4", test_mock)
 
     # initialize sql database
-    initialize_database.script(app)
+    initialize_database(app)
 
     client.post(
         "/api/v1/users/signup",

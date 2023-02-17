@@ -12,7 +12,7 @@ def test_teams(app, client):
     app.config["COMPETITION"] = "test_teams_v1"
 
     # initialize sql database
-    initialize_database.script(app)
+    initialize_database(app)
 
     # Fetch all the teams
     response_get_all_teams = client.get(

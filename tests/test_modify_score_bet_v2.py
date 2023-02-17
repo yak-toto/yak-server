@@ -11,7 +11,7 @@ def test_modify_score_bet(app, client):
     # location of test data
     app.config["COMPETITION"] = testcase
 
-    initialize_database.script(app)
+    initialize_database(app)
 
     user_name = get_random_string(10)
     first_name = get_random_string(5)
