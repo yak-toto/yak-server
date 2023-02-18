@@ -7,6 +7,7 @@ import pkg_resources
 from yak_server.cli import initialize_database
 
 from .constants import HttpCode
+from .test_utils import get_random_string
 
 
 def test_matches_db(app, client, monkeypatch):
@@ -43,58 +44,98 @@ def test_matches_db(app, client, monkeypatch):
     # initialize sql database
     initialize_database(app)
 
-    client.post(
+    # Signup admin user
+    user_name = get_random_string(6)
+    first_name = get_random_string(10)
+    last_name = get_random_string(8)
+    password = get_random_string(5)
+
+    response_signup = client.post(
         "/api/v1/users/signup",
         json={
-            "name": "clepape",
-            "first_name": "admin",
-            "last_name": "admin",
-            "password": "clacla97",
+            "name": user_name,
+            "first_name": first_name,
+            "last_name": last_name,
+            "password": password,
         },
     )
 
-    response_login = client.post(
-        "/api/v1/users/login",
-        json={
-            "name": "clepape",
-            "password": "clacla97",
-        },
-    )
+    auth_token = response_signup.json["result"]["token"]
 
-    auth_token = response_login.json["result"]["token"]
-
+    # Check all GET matches response
     match_response = client.get(
         "/api/v1/matches",
         headers=[("Authorization", f"Bearer {auth_token}")],
     )
 
-    with Path(
-        pkg_resources.resource_filename(__name__, f"{testcase}/match_result.json"),
-    ).open() as file:
+    with Path(f"{app.config['DATA_FOLDER']}/match_result.json").open() as file:
         match_result = json.loads(file.read())
 
     assert match_response.status_code == HttpCode.OK
     assert match_response.json["result"] == match_result
 
+    # Check groups associated to one phase
     group_response = client.get(
         "/api/v1/groups/phases/GROUP",
         headers=[("Authorization", f"Bearer {auth_token}")],
     )
 
-    with Path(
-        pkg_resources.resource_filename(__name__, f"{testcase}/group_result.json"),
-    ).open() as file:
+    with Path(f"{app.config['DATA_FOLDER']}/group_result.json").open() as file:
         group_result = json.loads(file.read())
 
     assert group_response.status_code == HttpCode.OK
     assert group_response.json["result"] == group_result
 
+    # Check all teams response
     team_response = client.get("/api/v1/teams")
 
-    with Path(
-        pkg_resources.resource_filename(__name__, f"{testcase}/team_result.json"),
-    ).open() as file:
+    with Path(f"{app.config['DATA_FOLDER']}/team_result.json").open() as file:
         team_result = json.loads(file.read())
 
     assert team_response.status_code == HttpCode.OK
     assert team_response.json["result"] == team_result
+
+    # Check GET /groups/{group_code}
+    one_group_response = client.get(
+        "/api/v1/groups/A",
+        headers=[("Authorization", f"Bearer {auth_token}")],
+    )
+
+    assert one_group_response.status_code == 200
+    assert one_group_response.json["result"] == {
+        "group": {
+            "code": "A",
+            "description": "Groupe A",
+            "id": "a963e889-57be-4c38-b65d-e28f196f7921",
+        },
+        "phase": {
+            "code": "GROUP",
+            "description": "Group stage",
+            "id": "8f781aac-b29b-47e7-b6d7-06dd5e4859bb",
+        },
+    }
+
+    # Check GET /groups
+    all_groups_response = client.get(
+        "/api/v1/groups",
+        headers=[("Authorization", f"Bearer {auth_token}")],
+    )
+
+    assert all_groups_response.status_code == 200
+    assert all_groups_response.json["result"] == {
+        "phases": [
+            {
+                "code": "GROUP",
+                "description": "Group stage",
+                "id": "8f781aac-b29b-47e7-b6d7-06dd5e4859bb",
+            },
+        ],
+        "groups": [
+            {
+                "code": "A",
+                "description": "Groupe A",
+                "id": "a963e889-57be-4c38-b65d-e28f196f7921",
+                "phase": {"id": "8f781aac-b29b-47e7-b6d7-06dd5e4859bb"},
+            },
+        ],
+    }
