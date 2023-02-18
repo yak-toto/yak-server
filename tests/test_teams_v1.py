@@ -24,14 +24,19 @@ def test_teams(app, client):
     assert response_get_all_teams.status_code == HttpCode.OK
 
     excepted_teams = [
-        {"id": ANY, "code": "DE", "description": "Germany"},
-        {"id": ANY, "code": "GR", "description": "Greece"},
-        {"id": ANY, "code": "GD", "description": "Grenada"},
-        {"id": ANY, "code": "JM", "description": "Jamaica"},
-        {"id": ANY, "code": "JO", "description": "Jordan"},
-        {"id": ANY, "code": "ML", "description": "Mali"},
-        {"id": ANY, "code": "NO", "description": "Norway"},
-        {"id": ANY, "code": "UA", "description": "Ukraine"},
+        {
+            "id": ANY,
+            "code": "DE",
+            "description": "Germany",
+            "flag": {"url": "/api/v1/teams/DE/flag"},
+        },
+        {"id": ANY, "code": "GR", "description": "Greece", "flag": {"url": ANY}},
+        {"id": ANY, "code": "GD", "description": "Grenada", "flag": {"url": ANY}},
+        {"id": ANY, "code": "JM", "description": "Jamaica", "flag": {"url": ANY}},
+        {"id": ANY, "code": "JO", "description": "Jordan", "flag": {"url": ANY}},
+        {"id": ANY, "code": "ML", "description": "Mali", "flag": {"url": "/api/v1/teams/ML/flag"}},
+        {"id": ANY, "code": "NO", "description": "Norway", "flag": {"url": ANY}},
+        {"id": ANY, "code": "UA", "description": "Ukraine", "flag": {"url": ANY}},
     ]
 
     assert sorted(
@@ -48,6 +53,7 @@ def test_teams(app, client):
         "id": ANY,
         "code": "DE",
         "description": "Germany",
+        "flag": {"url": ANY},
     }
 
     # Fetch one team using id
@@ -61,6 +67,7 @@ def test_teams(app, client):
         "id": team_id,
         "code": "DE",
         "description": "Germany",
+        "flag": {"url": ANY},
     }
 
     # Try to fetch a team using an invalid team id

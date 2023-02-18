@@ -371,9 +371,15 @@ class TeamModel(db.Model):
     )
     code = db.Column(db.String(10), unique=True, nullable=False)
     description = db.Column(db.String(100), unique=True, nullable=False)
+    flag_url = db.Column(db.String(100))
 
     def to_dict(self):
-        return {"id": self.id, "code": self.code, "description": self.description}
+        return {
+            "id": self.id,
+            "code": self.code,
+            "description": self.description,
+            "flag": {"url": self.flag_url},
+        }
 
 
 class GroupModel(db.Model):
