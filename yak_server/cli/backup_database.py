@@ -30,6 +30,10 @@ def script(app):
             raise MissingTelegramIdentifier
 
         backup_location = pkg_resources.resource_filename(__name__, "backup_files")
+
+        if not Path(backup_location).exists():
+            Path(backup_location).mkdir()
+
         backup_date, backup_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S").split()
 
         file_name = f"{backup_location}/yak_toto_backup_{backup_date}T{backup_time}.sql"

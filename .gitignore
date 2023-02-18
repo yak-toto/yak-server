@@ -184,5 +184,5 @@ yarn-error.log*
 *.sw*
 
 .flaskenv
-*.sql
+yak_server/cli/backup_files
 .ruff_cache
