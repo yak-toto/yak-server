@@ -47,6 +47,7 @@ def script(app):
                 f"--password={app.config['MYSQL_PASSWORD']}",
             ],
             capture_output=True,
+            encoding="utf-8",
         )
 
         if result.returncode:
@@ -58,7 +59,7 @@ def script(app):
             return
 
         with Path(file_name).open(mode="w") as file:
-            file.write(str(result.stdout))
+            file.write(result.stdout)
             TelegramSender.send_message(
                 app.config["BOT_TOKEN"],
                 app.config["CHAT_ID"],
