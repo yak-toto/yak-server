@@ -132,7 +132,7 @@ def test_modify_score_bet(app, client):
     assert response_modify_bet.json["data"]["modifyScoreBetResult"]["team2"]["score"] == score2
     assert (
         response_modify_bet.json["data"]["modifyScoreBetResult"]["team1"]["flag"]["url"]
-        == "/api/v1/teams/HR/flag"
+        == "https://fake-team-flag_croatia.com"
     )
     assert response_modify_bet.json["data"]["modifyScoreBetResult"]["team2"]["score"] == score2
 

@@ -2,14 +2,12 @@
 import csv
 from pathlib import Path
 
-from flask import url_for
-
 from yak_server import db
 from yak_server.database.models import GroupModel, MatchModel, PhaseModel, TeamModel
 
 
 def script(app):
-    with app.app_context(), app.test_request_context():
+    with app.app_context():
         DATA_FOLDER = app.config["DATA_FOLDER"]
 
         with Path(f"{DATA_FOLDER}/phases.csv", newline="").open() as csvfile:
@@ -42,7 +40,7 @@ def script(app):
                 TeamModel(
                     code=row[0],
                     description=row[1],
-                    flag_url=url_for("team.team_get_flag", team_id=row[0]),
+                    flag_url=row[2],
                 )
                 for row in spamreader
             )

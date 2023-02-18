@@ -73,12 +73,6 @@ class TeamNotFound(HTTPException):
         self.code = 404
 
 
-class FlagImageNotFound(HTTPException):
-    def __init__(self, team_name) -> None:
-        super().__init__(f"No flag found for team : {team_name}")
-        self.code = 404
-
-
 class LockedBets(HTTPException):
     code = 401
     description = "Cannot modify bets because locked date is exceeded"

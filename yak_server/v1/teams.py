@@ -1,12 +1,10 @@
-from pathlib import Path
-
-from flask import Blueprint, current_app, request, send_file
+from flask import Blueprint, request
 
 from yak_server import db
 from yak_server.database.models import TeamModel
 
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
-from .utils.errors import FlagImageNotFound, InvalidTeamId, TeamNotFound
+from .utils.errors import InvalidTeamId, TeamNotFound
 from .utils.flask_utils import is_iso_3166_1_alpha_2_code, is_uuid4, success_response
 
 teams = Blueprint("team", __name__)
@@ -53,23 +51,3 @@ def teams_get_by_id(team_id):
         raise TeamNotFound(team_id)
 
     return success_response(200, {"team": team.to_dict()})
-
-
-@teams.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams/<string:team_id>/flag")
-def team_get_flag(team_id):
-    if is_uuid4(team_id):
-        team = TeamModel.query.filter_by(id=team_id).first()
-    elif is_iso_3166_1_alpha_2_code(team_id):
-        team = TeamModel.query.filter_by(code=team_id).first()
-    else:
-        raise InvalidTeamId(team_id)
-
-    if not team:
-        raise TeamNotFound(team_id)
-
-    path = Path(f"{current_app.config['DATA_FOLDER']}/flags/{team_id}.png")
-
-    if not path.exists() or not path.is_file():
-        raise FlagImageNotFound(team.description)
-
-    return send_file(path, mimetype="image/png")

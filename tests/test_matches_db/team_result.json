@@ -5,7 +5,7 @@
             "description": "Brazil",
             "id": "7b6b14b8-0f4a-478f-b142-553ebcc0443f",
             "flag": {
-                "url": "/api/v1/teams/BR/flag"
+                "url": "https://fake-team-flag_brazil.com"
             }
         },
         {
@@ -13,7 +13,7 @@
             "description": "Andorra",
             "id": "b3f0f726-f3a5-4d5d-a22b-832d0ec2f36d",
             "flag": {
-                "url": "/api/v1/teams/AD/flag"
+                "url": "https://fake-team-flag_andorra.com"
             }
         },
         {
@@ -21,7 +21,7 @@
             "description": "Burkina Faso",
             "id": "f5836ce2-03ce-42dd-a933-d93d9bb05441",
             "flag": {
-                "url": "/api/v1/teams/BF/flag"
+                "url": "https://fake-team-flag_burkina.com"
             }
         },
         {
@@ -29,7 +29,7 @@
             "description": "The Republic of Guatemala",
             "id": "fdd9f52e-b6b6-4b6a-9737-4ec8165d3e0e",
             "flag": {
-                "url": "/api/v1/teams/GT/flag"
+                "url": "https://fake-team-flag_guatemala.com"
             }
         }
     ]

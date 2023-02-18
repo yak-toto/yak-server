@@ -28,7 +28,7 @@
                 "code": "AD",
                 "description": "Andorra",
                 "flag": {
-                    "url": "/api/v1/teams/AD/flag"
+                    "url": "https://fake-team-flag_andorra.com"
                 }
             },
             "team2": {
@@ -36,7 +36,7 @@
                 "code": "BR",
                 "description": "Brazil",
                 "flag": {
-                    "url": "/api/v1/teams/BR/flag"
+                    "url": "https://fake-team-flag_brazil.com"
                 }
             }
         },
@@ -51,7 +51,7 @@
                 "code": "BF",
                 "description": "Burkina Faso",
                 "flag": {
-                    "url": "/api/v1/teams/BF/flag"
+                    "url": "https://fake-team-flag_burkina.com"
                 }
             },
             "team2": {
@@ -59,7 +59,7 @@
                 "code": "GT",
                 "description": "The Republic of Guatemala",
                 "flag": {
-                    "url": "/api/v1/teams/GT/flag"
+                    "url": "https://fake-team-flag_guatemala.com"
                 }
             }
         },
@@ -74,7 +74,7 @@
                 "code": "AD",
                 "description": "Andorra",
                 "flag": {
-                    "url": "/api/v1/teams/AD/flag"
+                    "url": "https://fake-team-flag_andorra.com"
                 }
             },
             "team2": {
@@ -82,7 +82,7 @@
                 "code": "BF",
                 "description": "Burkina Faso",
                 "flag": {
-                    "url": "/api/v1/teams/BF/flag"
+                    "url": "https://fake-team-flag_burkina.com"
                 }
             }
         },
@@ -97,7 +97,7 @@
                 "code": "BR",
                 "description": "Brazil",
                 "flag": {
-                    "url": "/api/v1/teams/BR/flag"
+                    "url": "https://fake-team-flag_brazil.com"
                 }
             },
             "team2": {
@@ -105,7 +105,7 @@
                 "code": "GT",
                 "description": "The Republic of Guatemala",
                 "flag": {
-                    "url": "/api/v1/teams/GT/flag"
+                    "url": "https://fake-team-flag_guatemala.com"
                 }
             }
         },
@@ -120,7 +120,7 @@
                 "code": "AD",
                 "description": "Andorra",
                 "flag": {
-                    "url": "/api/v1/teams/AD/flag"
+                    "url": "https://fake-team-flag_andorra.com"
                 }
             },
             "team2": {
@@ -128,7 +128,7 @@
                 "code": "GT",
                 "description": "The Republic of Guatemala",
                 "flag": {
-                    "url": "/api/v1/teams/GT/flag"
+                    "url": "https://fake-team-flag_guatemala.com"
                 }
             }
         },
@@ -143,7 +143,7 @@
                 "code": "BR",
                 "description": "Brazil",
                 "flag": {
-                    "url": "/api/v1/teams/BR/flag"
+                    "url": "https://fake-team-flag_brazil.com"
                 }
             },
             "team2": {
@@ -151,7 +151,7 @@
                 "code": "BF",
                 "description": "Burkina Faso",
                 "flag": {
-                    "url": "/api/v1/teams/BF/flag"
+                    "url": "https://fake-team-flag_burkina.com"
                 }
             }
         }
