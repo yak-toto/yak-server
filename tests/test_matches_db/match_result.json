@@ -26,12 +26,18 @@
             "team1": {
                 "id": "b3f0f726-f3a5-4d5d-a22b-832d0ec2f36d",
                 "code": "AD",
-                "description": "Andorra"
+                "description": "Andorra",
+                "flag": {
+                    "url": "/api/v1/teams/AD/flag"
+                }
             },
             "team2": {
                 "id": "7b6b14b8-0f4a-478f-b142-553ebcc0443f",
                 "code": "BR",
-                "description": "Brazil"
+                "description": "Brazil",
+                "flag": {
+                    "url": "/api/v1/teams/BR/flag"
+                }
             }
         },
         {
@@ -43,12 +49,18 @@
             "team1": {
                 "id": "f5836ce2-03ce-42dd-a933-d93d9bb05441",
                 "code": "BF",
-                "description": "Burkina Faso"
+                "description": "Burkina Faso",
+                "flag": {
+                    "url": "/api/v1/teams/BF/flag"
+                }
             },
             "team2": {
                 "id": "fdd9f52e-b6b6-4b6a-9737-4ec8165d3e0e",
                 "code": "GT",
-                "description": "The Republic of Guatemala"
+                "description": "The Republic of Guatemala",
+                "flag": {
+                    "url": "/api/v1/teams/GT/flag"
+                }
             }
         },
         {
@@ -60,12 +72,18 @@
             "team1": {
                 "id": "b3f0f726-f3a5-4d5d-a22b-832d0ec2f36d",
                 "code": "AD",
-                "description": "Andorra"
+                "description": "Andorra",
+                "flag": {
+                    "url": "/api/v1/teams/AD/flag"
+                }
             },
             "team2": {
                 "id": "f5836ce2-03ce-42dd-a933-d93d9bb05441",
                 "code": "BF",
-                "description": "Burkina Faso"
+                "description": "Burkina Faso",
+                "flag": {
+                    "url": "/api/v1/teams/BF/flag"
+                }
             }
         },
         {
@@ -77,12 +95,18 @@
             "team1": {
                 "id": "7b6b14b8-0f4a-478f-b142-553ebcc0443f",
                 "code": "BR",
-                "description": "Brazil"
+                "description": "Brazil",
+                "flag": {
+                    "url": "/api/v1/teams/BR/flag"
+                }
             },
             "team2": {
                 "id": "fdd9f52e-b6b6-4b6a-9737-4ec8165d3e0e",
                 "code": "GT",
-                "description": "The Republic of Guatemala"
+                "description": "The Republic of Guatemala",
+                "flag": {
+                    "url": "/api/v1/teams/GT/flag"
+                }
             }
         },
         {
@@ -94,12 +118,18 @@
             "team1": {
                 "id": "b3f0f726-f3a5-4d5d-a22b-832d0ec2f36d",
                 "code": "AD",
-                "description": "Andorra"
+                "description": "Andorra",
+                "flag": {
+                    "url": "/api/v1/teams/AD/flag"
+                }
             },
             "team2": {
                 "id": "fdd9f52e-b6b6-4b6a-9737-4ec8165d3e0e",
                 "code": "GT",
-                "description": "The Republic of Guatemala"
+                "description": "The Republic of Guatemala",
+                "flag": {
+                    "url": "/api/v1/teams/GT/flag"
+                }
             }
         },
         {
@@ -111,12 +141,18 @@
             "team1": {
                 "id": "7b6b14b8-0f4a-478f-b142-553ebcc0443f",
                 "code": "BR",
-                "description": "Brazil"
+                "description": "Brazil",
+                "flag": {
+                    "url": "/api/v1/teams/BR/flag"
+                }
             },
             "team2": {
                 "id": "f5836ce2-03ce-42dd-a933-d93d9bb05441",
                 "code": "BF",
-                "description": "Burkina Faso"
+                "description": "Burkina Faso",
+                "flag": {
+                    "url": "/api/v1/teams/BF/flag"
+                }
             }
         }
     ]
