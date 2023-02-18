@@ -32,6 +32,7 @@ requests = "^2.28.2"
 pytest = "^7.2.1"
 pytest-cov = "^4.0.0"
 pre-commit = "^3.0.4"
+ruff = "^0.0.247"
 
 
 [tool.black]
