@@ -1,6 +1,5 @@
-import json
-from pathlib import Path
-from unittest.mock import Mock
+from operator import itemgetter
+from unittest.mock import ANY
 
 import pkg_resources
 
@@ -10,36 +9,11 @@ from .constants import HttpCode
 from .test_utils import get_random_string
 
 
-def test_matches_db(app, client, monkeypatch):
+def test_matches_db(app, client):
     testcase = "test_matches_db"
 
     # location of test data
     app.config["DATA_FOLDER"] = pkg_resources.resource_filename(__name__, testcase)
-
-    return_data = [
-        "8f781aac-b29b-47e7-b6d7-06dd5e4859bb",
-        "a963e889-57be-4c38-b65d-e28f196f7921",
-        "b3f0f726-f3a5-4d5d-a22b-832d0ec2f36d",
-        "7b6b14b8-0f4a-478f-b142-553ebcc0443f",
-        "f5836ce2-03ce-42dd-a933-d93d9bb05441",
-        "fdd9f52e-b6b6-4b6a-9737-4ec8165d3e0e",
-        "a7c278ed-44e1-4ff8-9b5f-ba4751ffd39a",
-        "632c2b94-d9d3-4583-9fd3-3d3d3711534e",
-        "7dbf2941-4718-40cb-a8e9-d4baca79eca9",
-        "2aa3e781-c9fe-44ae-ada7-25fd20430985",
-        "d08ee014-36e9-44bc-9f3d-6d9bb0f9a9d1",
-        "a7e02684-e8cc-4069-81c7-2ad44f2de747",
-        "aed5723d-3102-4a63-b9f8-fe89c9685f44",
-        "378c104b-4583-4f25-951e-78877f841132",
-        "b39c3993-2795-41cb-91c1-34086c9b3684",
-        "65c7c636-8907-404e-8341-1328f46e7c22",
-        "16cbe0e8-e276-4f01-a0b6-09e0b352886c",
-        "11ecc5a8-c5df-4dba-8094-f431be35c897",
-        "3613762b-44d6-416f-a7c7-4055358bbcbf",
-    ]
-
-    test_mock = Mock(side_effect=return_data)
-    monkeypatch.setattr("uuid.uuid4", test_mock)
 
     # initialize sql database
     initialize_database(app)
@@ -63,16 +37,134 @@ def test_matches_db(app, client, monkeypatch):
     auth_token = response_signup.json["result"]["token"]
 
     # Check all GET matches response
+    expected_group = {"id": ANY, "code": "A", "phase": {"id": ANY}, "description": "Groupe A"}
+
+    expected_group_without_phase = {
+        key: value for key, value in expected_group.items() if key != "phase"
+    }
+
+    expected_phase = {
+        "code": "GROUP",
+        "description": "Group stage",
+        "id": ANY,
+    }
+
+    expected_matches = [
+        {
+            "id": ANY,
+            "index": 1,
+            "group": {"id": ANY},
+            "team1": {
+                "id": ANY,
+                "code": "AD",
+                "description": "Andorra",
+                "flag": {"url": "https://fake-team-flag_andorra.com"},
+            },
+            "team2": {
+                "id": ANY,
+                "code": "BR",
+                "description": "Brazil",
+                "flag": {"url": "https://fake-team-flag_brazil.com"},
+            },
+        },
+        {
+            "id": ANY,
+            "index": 2,
+            "group": {"id": ANY},
+            "team1": {
+                "id": ANY,
+                "code": "BF",
+                "description": "Burkina Faso",
+                "flag": {"url": "https://fake-team-flag_burkina.com"},
+            },
+            "team2": {
+                "id": ANY,
+                "code": "GT",
+                "description": "The Republic of Guatemala",
+                "flag": {"url": "https://fake-team-flag_guatemala.com"},
+            },
+        },
+        {
+            "id": ANY,
+            "index": 3,
+            "group": {"id": ANY},
+            "team1": {
+                "id": ANY,
+                "code": "AD",
+                "description": "Andorra",
+                "flag": {"url": "https://fake-team-flag_andorra.com"},
+            },
+            "team2": {
+                "id": ANY,
+                "code": "BF",
+                "description": "Burkina Faso",
+                "flag": {"url": "https://fake-team-flag_burkina.com"},
+            },
+        },
+        {
+            "id": ANY,
+            "index": 4,
+            "group": {"id": ANY},
+            "team1": {
+                "id": ANY,
+                "code": "BR",
+                "description": "Brazil",
+                "flag": {"url": "https://fake-team-flag_brazil.com"},
+            },
+            "team2": {
+                "id": ANY,
+                "code": "GT",
+                "description": "The Republic of Guatemala",
+                "flag": {"url": "https://fake-team-flag_guatemala.com"},
+            },
+        },
+        {
+            "id": ANY,
+            "index": 5,
+            "group": {"id": ANY},
+            "team1": {
+                "id": ANY,
+                "code": "AD",
+                "description": "Andorra",
+                "flag": {"url": "https://fake-team-flag_andorra.com"},
+            },
+            "team2": {
+                "id": ANY,
+                "code": "GT",
+                "description": "The Republic of Guatemala",
+                "flag": {"url": "https://fake-team-flag_guatemala.com"},
+            },
+        },
+        {
+            "id": ANY,
+            "index": 6,
+            "group": {"id": ANY},
+            "team1": {
+                "id": ANY,
+                "code": "BR",
+                "description": "Brazil",
+                "flag": {"url": "https://fake-team-flag_brazil.com"},
+            },
+            "team2": {
+                "id": ANY,
+                "code": "BF",
+                "description": "Burkina Faso",
+                "flag": {"url": "https://fake-team-flag_burkina.com"},
+            },
+        },
+    ]
+
     match_response = client.get(
         "/api/v1/matches",
         headers=[("Authorization", f"Bearer {auth_token}")],
     )
 
-    with Path(f"{app.config['DATA_FOLDER']}/match_result.json").open() as file:
-        match_result = json.loads(file.read())
-
     assert match_response.status_code == HttpCode.OK
-    assert match_response.json["result"] == match_result
+    assert match_response.json["result"] == {
+        "phases": [expected_phase],
+        "groups": [expected_group],
+        "matches": expected_matches,
+    }
 
     # Check groups associated to one phase
     group_response = client.get(
@@ -80,20 +172,29 @@ def test_matches_db(app, client, monkeypatch):
         headers=[("Authorization", f"Bearer {auth_token}")],
     )
 
-    with Path(f"{app.config['DATA_FOLDER']}/group_result.json").open() as file:
-        group_result = json.loads(file.read())
-
     assert group_response.status_code == HttpCode.OK
-    assert group_response.json["result"] == group_result
+    assert group_response.json["result"] == {
+        "phase": expected_phase,
+        "groups": [expected_group_without_phase],
+    }
 
     # Check all teams response
     team_response = client.get("/api/v1/teams")
 
-    with Path(f"{app.config['DATA_FOLDER']}/team_result.json").open() as file:
-        team_result = json.loads(file.read())
+    expected_teams = []
+
+    for match in expected_matches:
+        if match["team1"]["code"] not in [team["code"] for team in expected_teams]:
+            expected_teams.append(match["team1"])
+
+        if match["team2"]["code"] not in [team["code"] for team in expected_teams]:
+            expected_teams.append(match["team2"])
 
     assert team_response.status_code == HttpCode.OK
-    assert team_response.json["result"] == team_result
+    assert sorted(team_response.json["result"]["teams"], key=itemgetter("code")) == sorted(
+        expected_teams,
+        key=itemgetter("code"),
+    )
 
     # Check GET /groups/{group_code}
     one_group_response = client.get(
@@ -103,16 +204,8 @@ def test_matches_db(app, client, monkeypatch):
 
     assert one_group_response.status_code == 200
     assert one_group_response.json["result"] == {
-        "group": {
-            "code": "A",
-            "description": "Groupe A",
-            "id": "a963e889-57be-4c38-b65d-e28f196f7921",
-        },
-        "phase": {
-            "code": "GROUP",
-            "description": "Group stage",
-            "id": "8f781aac-b29b-47e7-b6d7-06dd5e4859bb",
-        },
+        "group": expected_group_without_phase,
+        "phase": expected_phase,
     }
 
     # Check GET /groups
@@ -123,19 +216,6 @@ def test_matches_db(app, client, monkeypatch):
 
     assert all_groups_response.status_code == 200
     assert all_groups_response.json["result"] == {
-        "phases": [
-            {
-                "code": "GROUP",
-                "description": "Group stage",
-                "id": "8f781aac-b29b-47e7-b6d7-06dd5e4859bb",
-            },
-        ],
-        "groups": [
-            {
-                "code": "A",
-                "description": "Groupe A",
-                "id": "a963e889-57be-4c38-b65d-e28f196f7921",
-                "phase": {"id": "8f781aac-b29b-47e7-b6d7-06dd5e4859bb"},
-            },
-        ],
+        "phases": [expected_phase],
+        "groups": [expected_group],
     }
