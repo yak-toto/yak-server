@@ -76,10 +76,16 @@ def test_modify_score_bet(app, client):
                     team1 {
                         description
                         score
+                        flag {
+                            url
+                        }
                     }
                     team2 {
                         description
                         score
+                        flag {
+                            url
+                        }
                     }
                     group {
                         id
@@ -123,6 +129,11 @@ def test_modify_score_bet(app, client):
 
     assert response_modify_bet.json["data"]["modifyScoreBetResult"]["__typename"] == "ScoreBet"
     assert response_modify_bet.json["data"]["modifyScoreBetResult"]["team1"]["score"] == score1
+    assert response_modify_bet.json["data"]["modifyScoreBetResult"]["team2"]["score"] == score2
+    assert (
+        response_modify_bet.json["data"]["modifyScoreBetResult"]["team1"]["flag"]["url"]
+        == "/api/v1/teams/HR/flag"
+    )
     assert response_modify_bet.json["data"]["modifyScoreBetResult"]["team2"]["score"] == score2
 
     # Error case : check NewScoreNegative error is send back if one of score is negative

@@ -143,12 +143,18 @@ class UserWithToken(User):
 
 
 @strawberry.type
+class Flag:
+    url: str
+
+
+@strawberry.type
 class Team:
     instance: strawberry.Private[TeamModel]
 
     id: uuid.UUID
     code: str
     description: str
+    flag: Flag
 
     @classmethod
     def from_instance(cls, instance: TeamModel):
@@ -157,6 +163,7 @@ class Team:
             id=instance.id,
             code=instance.code,
             description=instance.description,
+            flag=Flag(url=instance.flag_url),
         )
 
 
@@ -171,6 +178,7 @@ class TeamWithScore(Team):
             id=instance.id,
             code=instance.code,
             description=instance.description,
+            flag=Flag(url=instance.flag_url),
             score=score,
         )
 
@@ -186,6 +194,7 @@ class TeamWithVictory(Team):
             id=instance.id,
             code=instance.code,
             description=instance.description,
+            flag=Flag(url=instance.flag_url),
             won=won,
         )
 
