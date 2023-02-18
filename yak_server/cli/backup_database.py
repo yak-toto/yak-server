@@ -19,8 +19,16 @@ class TelegramSender:
         )
 
 
+class MissingTelegramIdentifier(Exception):
+    def __init__(self) -> None:
+        super().__init__("Bot token or chat id is missing in flask config. Backup is disabled.")
+
+
 def script(app):
     with app.app_context():
+        if not app.config.get("BOT_TOKEN") or not app.config.get("CHAT_ID"):
+            raise MissingTelegramIdentifier
+
         backup_location = pkg_resources.resource_filename(__name__, "backup_files")
         backup_date, backup_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S").split()
 
