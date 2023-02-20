@@ -1,5 +1,6 @@
 from operator import itemgetter
 from unittest.mock import ANY
+from uuid import uuid4
 
 import pkg_resources
 
@@ -154,17 +155,55 @@ def test_matches_db(app, client):
         },
     ]
 
-    match_response = client.get(
+    all_matches_response = client.get(
         "/api/v1/matches",
         headers=[("Authorization", f"Bearer {auth_token}")],
     )
 
-    assert match_response.status_code == HttpCode.OK
-    assert match_response.json["result"] == {
+    assert all_matches_response.status_code == HttpCode.OK
+    assert all_matches_response.json["result"] == {
         "phases": [expected_phase],
         "groups": [expected_group],
         "matches": expected_matches,
     }
+
+    match_id = all_matches_response.json["result"]["matches"][0]["id"]
+
+    # Check GET matches/{matchId} with existing id
+    match_response = client.get(
+        f"/api/v1/matches/{match_id}",
+        headers=[("Authorization", f"Bearer {auth_token}")],
+    )
+
+    assert match_response.status_code == HttpCode.OK
+    assert match_response.json["result"]["match"] == {
+        key: value for key, value in expected_matches[0].items() if key != "group"
+    }
+
+    # Check GET matches/{matchId} with non existing id
+    invalid_match_id = str(uuid4())
+
+    match_response_invalid_id = client.get(
+        f"/api/v1/matches/{invalid_match_id}",
+        headers=[("Authorization", f"Bearer {auth_token}")],
+    )
+
+    assert match_response_invalid_id.status_code == HttpCode.NOT_FOUND
+    assert match_response_invalid_id.json == {
+        "ok": False,
+        "error_code": HttpCode.NOT_FOUND,
+        "description": f"Match not found: {invalid_match_id}",
+    }
+
+    # Check GET matches/groups/{groupCode} with existing code
+    match_response_from_group_code = client.get(
+        "/api/v1/matches/groups/A",
+        headers=[("Authorization", f"Bearer {auth_token}")],
+    )
+
+    assert match_response_from_group_code.json["result"]["matches"] == [
+        {key: value for key, value in match.items() if key != "group"} for match in expected_matches
+    ]
 
     # Check groups associated to one phase
     group_response = client.get(
