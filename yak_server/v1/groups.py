@@ -4,6 +4,7 @@ from yak_server.database.models import GroupModel, PhaseModel
 
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
+from .utils.errors import GroupNotFound
 from .utils.flask_utils import success_response
 
 groups = Blueprint("group", __name__)
@@ -31,6 +32,9 @@ def get_groups(current_user):
 @token_required
 def get_group_by_code(current_user, group_code):
     group = GroupModel.query.filter_by(code=group_code).first()
+
+    if not group:
+        raise GroupNotFound(group_code)
 
     return success_response(
         200,

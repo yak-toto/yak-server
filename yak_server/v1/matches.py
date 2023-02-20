@@ -15,7 +15,7 @@ from yak_server.database.query import matches_from_group_code, matches_from_phas
 
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
-from .utils.errors import InvalidTeamId, MatchNotFound, TeamNotFound
+from .utils.errors import GroupNotFound, InvalidTeamId, MatchNotFound, TeamNotFound
 from .utils.flask_utils import is_iso_3166_1_alpha_2_code, is_uuid4, success_response
 
 matches = Blueprint("matches", __name__)
@@ -77,6 +77,9 @@ def matches_get_by_id(current_user, match_id):
 @token_required
 def matches_by_group_code(current_user, group_code):
     group, matches = matches_from_group_code(current_user, group_code)
+
+    if not group:
+        raise GroupNotFound(group_code)
 
     return success_response(
         200,

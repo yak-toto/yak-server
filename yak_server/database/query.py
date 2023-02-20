@@ -6,6 +6,9 @@ from .models import BinaryBetModel, GroupModel, MatchModel, PhaseModel, ScoreBet
 def bets_from_group_code(user, group_code):
     group = GroupModel.query.filter_by(code=group_code).first()
 
+    if not group:
+        return None, [], []
+
     score_bets = (
         user.score_bets.filter(MatchModel.group_id == group.id)
         .join(ScoreBetModel.match)

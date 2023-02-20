@@ -88,6 +88,12 @@ class NoResultsForAdminUser(HTTPException):
     description = "No results for admin user"
 
 
+class GroupNotFound(HTTPException):
+    def __init__(self, group_id) -> None:
+        super().__init__(f"Group not found: {group_id}")
+        self.code = 404
+
+
 def set_error_handler(app):
     @app.errorhandler(HTTPException)
     def handle_http_exception(e):

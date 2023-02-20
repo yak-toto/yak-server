@@ -205,6 +205,20 @@ def test_matches_db(app, client):
         {key: value for key, value in match.items() if key != "group"} for match in expected_matches
     ]
 
+    # Check GET matches/groups/{groupCode} with non existing code
+    invalid_group_code = "H"
+
+    match_response_with_invalid_group_code = client.get(
+        f"/api/v1/matches/groups/{invalid_group_code}",
+        headers=[("Authorization", f"Bearer {auth_token}")],
+    )
+
+    assert match_response_with_invalid_group_code.json == {
+        "ok": False,
+        "error_code": HttpCode.NOT_FOUND,
+        "description": f"Group not found: {invalid_group_code}",
+    }
+
     # Check groups associated to one phase
     group_response = client.get(
         "/api/v1/groups/phases/GROUP",
