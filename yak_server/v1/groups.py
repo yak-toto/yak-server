@@ -4,7 +4,7 @@ from yak_server.database.models import GroupModel, PhaseModel
 
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
-from .utils.errors import GroupNotFound
+from .utils.errors import GroupNotFound, PhaseNotFound
 from .utils.flask_utils import success_response
 
 groups = Blueprint("group", __name__)
@@ -49,6 +49,9 @@ def get_group_by_code(current_user, group_code):
 @token_required
 def get_groups_by_phase_code(current_user, phase_code):
     phase = PhaseModel.query.filter_by(code=phase_code).first()
+
+    if not phase:
+        raise PhaseNotFound(phase_code)
 
     group_query = GroupModel.query.order_by(GroupModel.index).filter_by(phase_id=phase.id)
     groups = [group.to_dict_without_phase() for group in group_query]

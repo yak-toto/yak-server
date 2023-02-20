@@ -33,6 +33,9 @@ def matches_from_group_code(user, group_code):
 def bets_from_phase_code(user, phase_code):
     phase = PhaseModel.query.filter_by(code=phase_code).first()
 
+    if not phase:
+        return None, [], [], []
+
     groups = GroupModel.query.filter_by(phase_id=phase.id).order_by(GroupModel.index)
 
     binary_bets = (

@@ -231,6 +231,21 @@ def test_matches_db(app, client):
         "groups": [expected_group_without_phase],
     }
 
+    # Check groups by phase with invalid phase identifier
+    invalid_phase_code = get_random_string(5)
+
+    group_response_invalid_phase_code = client.get(
+        f"/api/v1/groups/phases/{invalid_phase_code}",
+        headers=[("Authorization", f"Bearer {auth_token}")],
+    )
+
+    assert group_response_invalid_phase_code.status_code == HttpCode.NOT_FOUND
+    assert group_response_invalid_phase_code.json == {
+        "ok": False,
+        "error_code": HttpCode.NOT_FOUND,
+        "description": f"Phase not found: {invalid_phase_code}",
+    }
+
     # Check all teams response
     team_response = client.get("/api/v1/teams")
 

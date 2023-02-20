@@ -176,7 +176,7 @@ def create_bet(current_user, phase_code):
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets")
 @token_required
-def groups(current_user):
+def get_all_bets(current_user):
     binary_bets_query = (
         current_user.binary_bets.join(BinaryBetModel.match)
         .join(MatchModel.group)

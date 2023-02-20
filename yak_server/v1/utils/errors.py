@@ -94,6 +94,12 @@ class GroupNotFound(HTTPException):
         self.code = 404
 
 
+class PhaseNotFound(HTTPException):
+    def __init__(self, phase_id) -> None:
+        super().__init__(f"Phase not found: {phase_id}")
+        self.code = 404
+
+
 def set_error_handler(app):
     @app.errorhandler(HTTPException)
     def handle_http_exception(e):
