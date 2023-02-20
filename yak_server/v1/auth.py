@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-import jwt
 from flask import Blueprint, current_app, request
 
 from yak_server import db
 from yak_server.database.models import MatchModel, ScoreBetModel, UserModel
+from yak_server.helpers.authentification import encode_bearer_token
 
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
@@ -28,14 +28,8 @@ def login_post():
     if not user:
         raise InvalidCredentials
 
-    token = jwt.encode(
-        {
-            "sub": user.id,
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(minutes=30),
-        },
-        current_app.config["SECRET_KEY"],
-    )
+    token = encode_bearer_token(user.id, timedelta(minutes=30), current_app.config["SECRET_KEY"])
+
     return success_response(201, user.to_user_dict() | {"token": token})
 
 
@@ -59,14 +53,7 @@ def signup_post():
     )
     db.session.commit()
 
-    token = jwt.encode(
-        {
-            "sub": user.id,
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(minutes=30),
-        },
-        current_app.config["SECRET_KEY"],
-    )
+    token = encode_bearer_token(user.id, timedelta(minutes=30), current_app.config["SECRET_KEY"])
 
     return success_response(201, user.to_user_dict() | {"token": token})
 

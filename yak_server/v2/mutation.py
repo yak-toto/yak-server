@@ -8,11 +8,11 @@ from flask import current_app
 
 from yak_server import db
 from yak_server.database.models import BinaryBetModel, MatchModel, ScoreBetModel, UserModel
+from yak_server.helpers.authentification import encode_bearer_token
 
 from .bearer_authenfication import (
     admin_bearer_authentification,
     bearer_authentification,
-    encode_bearer_token,
 )
 from .result import (
     BinaryBetNotFoundForUpdate,

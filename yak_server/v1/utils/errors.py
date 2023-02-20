@@ -102,7 +102,7 @@ class PhaseNotFound(HTTPException):
 
 def set_error_handler(app):
     @app.errorhandler(HTTPException)
-    def handle_http_exception(e):
+    def handle_http_exception(e: HTTPException) -> Response:
         """Return JSON instead of HTML for HTTP errors."""
         # start with the correct headers and status code from the error
         response = e.get_response()
@@ -120,7 +120,7 @@ def set_error_handler(app):
         return response
 
     @app.errorhandler(Exception)
-    def handle_exception(e):
+    def handle_exception(e: Exception) -> Response:
         """Return JSON instead of HTML for generic errors."""
 
         response = Response()
@@ -141,7 +141,7 @@ def set_error_handler(app):
         return response
 
     @app.errorhandler(ExpiredSignatureError)
-    def handler_expired_signature_exception(e):
+    def handler_expired_signature_exception(e: ExpiredSignatureError) -> Response:
         response = Response()
 
         response.data = json.dumps(
@@ -157,14 +157,14 @@ def set_error_handler(app):
         return response
 
     @app.errorhandler(InvalidTokenError)
-    def handler_invalid_token_exception(e):
+    def handler_invalid_token_exception(e: InvalidTokenError) -> Response:
         response = Response()
 
         response.data = json.dumps(
             {
                 "ok": False,
                 "error_code": 401,
-                "description": "Invalid token. Registeration and / or authentication required",
+                "description": "Invalid token. Registration and / or authentication required",
             },
         )
         response.status_code = 401

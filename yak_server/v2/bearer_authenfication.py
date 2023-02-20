@@ -1,10 +1,8 @@
-from datetime import datetime, timedelta
 from typing import Optional, Union
 
 from flask import current_app, request
 from jwt import ExpiredSignatureError
 from jwt import decode as jwt_decode
-from jwt import encode as jwt_encode
 
 from yak_server.database.models import UserModel
 
@@ -55,14 +53,3 @@ def admin_bearer_authentification() -> (
         return None, UnauthorizedAccessToAdminAPI()
 
     return user, None
-
-
-def encode_bearer_token(sub: str, expiration_time: timedelta, secret_key: str) -> str:
-    return jwt_encode(
-        {
-            "sub": sub,
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + expiration_time,
-        },
-        secret_key,
-    )
