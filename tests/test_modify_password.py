@@ -40,7 +40,7 @@ def test_modify_password(client):
 
     response_modify_password = client.patch(
         f"/api/v1/users/{user_id}",
-        headers=[("Authorization", f"Bearer {authentification_token}")],
+        headers={"Authorization": f"Bearer {authentification_token}"},
         json={"password": new_password_other_user},
     )
 
@@ -59,7 +59,7 @@ def test_modify_password(client):
     # Check glepape user cannot update any password
     response_modify_password_with_glepape_user = client.patch(
         f"/api/v1/users/{user_id}",
-        headers=[("Authorization", f"Bearer {authentification_token_glepape}")],
+        headers={"Authorization": f"Bearer {authentification_token_glepape}"},
         json={"password": "new_new_password"},
     )
 
@@ -72,7 +72,7 @@ def test_modify_password(client):
     # Check update is rejected if body does not contain any password
     response_wrong_input = client.patch(
         f"/api/v1/users/{user_id}",
-        headers=[("Authorization", f"Bearer {authentification_token}")],
+        headers={"Authorization": f"Bearer {authentification_token}"},
         json={"name": other_user_name},
     )
 
@@ -82,7 +82,7 @@ def test_modify_password(client):
     # Check call is rejected if user_id is invalid
     response_wrong_input = client.patch(
         f"/api/v1/users/{uuid4()}",
-        headers=[("Authorization", f"Bearer {authentification_token}")],
+        headers={"Authorization": f"Bearer {authentification_token}"},
         json={"password": "new_password_for_unknown_user"},
     )
 

@@ -157,7 +157,7 @@ def test_matches_db(app, client):
 
     all_matches_response = client.get(
         "/api/v1/matches",
-        headers=[("Authorization", f"Bearer {auth_token}")],
+        headers={"Authorization": f"Bearer {auth_token}"},
     )
 
     assert all_matches_response.status_code == HttpCode.OK
@@ -172,7 +172,7 @@ def test_matches_db(app, client):
     # Check GET matches/{matchId} with existing id
     match_response = client.get(
         f"/api/v1/matches/{match_id}",
-        headers=[("Authorization", f"Bearer {auth_token}")],
+        headers={"Authorization": f"Bearer {auth_token}"},
     )
 
     assert match_response.status_code == HttpCode.OK
@@ -185,7 +185,7 @@ def test_matches_db(app, client):
 
     match_response_invalid_id = client.get(
         f"/api/v1/matches/{invalid_match_id}",
-        headers=[("Authorization", f"Bearer {auth_token}")],
+        headers={"Authorization": f"Bearer {auth_token}"},
     )
 
     assert match_response_invalid_id.status_code == HttpCode.NOT_FOUND
@@ -198,7 +198,7 @@ def test_matches_db(app, client):
     # Check GET matches/groups/{groupCode} with existing code
     match_response_from_group_code = client.get(
         "/api/v1/matches/groups/A",
-        headers=[("Authorization", f"Bearer {auth_token}")],
+        headers={"Authorization": f"Bearer {auth_token}"},
     )
 
     assert match_response_from_group_code.json["result"]["matches"] == [
@@ -210,7 +210,7 @@ def test_matches_db(app, client):
 
     match_response_with_invalid_group_code = client.get(
         f"/api/v1/matches/groups/{invalid_group_code}",
-        headers=[("Authorization", f"Bearer {auth_token}")],
+        headers={"Authorization": f"Bearer {auth_token}"},
     )
 
     assert match_response_with_invalid_group_code.json == {
@@ -222,7 +222,7 @@ def test_matches_db(app, client):
     # Check groups associated to one phase
     group_response = client.get(
         "/api/v1/groups/phases/GROUP",
-        headers=[("Authorization", f"Bearer {auth_token}")],
+        headers={"Authorization": f"Bearer {auth_token}"},
     )
 
     assert group_response.status_code == HttpCode.OK
@@ -236,7 +236,7 @@ def test_matches_db(app, client):
 
     group_response_invalid_phase_code = client.get(
         f"/api/v1/groups/phases/{invalid_phase_code}",
-        headers=[("Authorization", f"Bearer {auth_token}")],
+        headers={"Authorization": f"Bearer {auth_token}"},
     )
 
     assert group_response_invalid_phase_code.status_code == HttpCode.NOT_FOUND
@@ -267,7 +267,7 @@ def test_matches_db(app, client):
     # Check GET /groups/{group_code}
     one_group_response = client.get(
         "/api/v1/groups/A",
-        headers=[("Authorization", f"Bearer {auth_token}")],
+        headers={"Authorization": f"Bearer {auth_token}"},
     )
 
     assert one_group_response.status_code == 200
@@ -279,7 +279,7 @@ def test_matches_db(app, client):
     # Check GET /groups
     all_groups_response = client.get(
         "/api/v1/groups",
-        headers=[("Authorization", f"Bearer {auth_token}")],
+        headers={"Authorization": f"Bearer {auth_token}"},
     )
 
     assert all_groups_response.status_code == 200

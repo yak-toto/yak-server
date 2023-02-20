@@ -97,7 +97,7 @@ def test_signup_and_invalid_token(client):
 
     response_current_user = client.post(
         "/api/v2",
-        headers=[("Authorization", f"Bearer {authentification_token}")],
+        headers={"Authorization": f"Bearer {authentification_token}"},
         json=query_current_user,
     )
 
@@ -109,7 +109,7 @@ def test_signup_and_invalid_token(client):
 
     response_current_user = client.post(
         "/api/v2",
-        headers=[("Authorization", f"Bearer {authentification_token}")],
+        headers={"Authorization": f"Bearer {authentification_token}"},
         json=query_current_user,
     )
 

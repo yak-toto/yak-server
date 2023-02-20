@@ -116,7 +116,7 @@ def test_modify_score_bet(app, client):
 
     response_modify_bet = client.post(
         "/api/v2",
-        headers=[("Authorization", f"Bearer {authentification_token}")],
+        headers={"Authorization": f"Bearer {authentification_token}"},
         json={
             "query": query_modify_score_bet,
             "variables": {
@@ -142,7 +142,7 @@ def test_modify_score_bet(app, client):
 
     response_modify_bet_new_score_negative = client.post(
         "/api/v2",
-        headers=[("Authorization", f"Bearer {authentification_token}")],
+        headers={"Authorization": f"Bearer {authentification_token}"},
         json={
             "query": query_modify_score_bet,
             "variables": {
@@ -164,7 +164,7 @@ def test_modify_score_bet(app, client):
 
     response_modify_bet_invalid_id = client.post(
         "/api/v2",
-        headers=[("Authorization", f"Bearer {authentification_token}")],
+        headers={"Authorization": f"Bearer {authentification_token}"},
         json={
             "query": query_modify_score_bet,
             "variables": {

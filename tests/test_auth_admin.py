@@ -40,7 +40,7 @@ def test_admin_api_users(client):
 
     response_get_all_users = client.get(
         "/api/v1/users",
-        headers=[("Authorization", f"Bearer {admin_user['token']}")],
+        headers={"Authorization": f"Bearer {admin_user['token']}"},
     )
 
     assert response_get_all_users.status_code == HttpCode.OK
@@ -51,7 +51,7 @@ def test_admin_api_users(client):
     # Try to GET /users using a non admin account
     response_all_get_users_other_user = client.get(
         "/api/v1/users",
-        headers=[("Authorization", f"Bearer {users[0]['token']}")],
+        headers={"Authorization": f"Bearer {users[0]['token']}"},
     )
 
     assert response_all_get_users_other_user.status_code == HttpCode.UNAUTHORIZED
@@ -62,7 +62,7 @@ def test_admin_api_users(client):
     # Check GET /users/{userId} using admin account
     response_get_one_user_success = client.get(
         f"/api/v1/users/{users[5]['id']}",
-        headers=[("Authorization", f"Bearer {admin_user['token']}")],
+        headers={"Authorization": f"Bearer {admin_user['token']}"},
     )
 
     assert response_get_one_user_success.status_code == HttpCode.OK
@@ -74,7 +74,7 @@ def test_admin_api_users(client):
     # Check GET /users/{userId} error if user id does not exist
     response_get_one_user_invalid_id = client.get(
         f"/api/v1/users/{uuid4()}",
-        headers=[("Authorization", f"Bearer {admin_user['token']}")],
+        headers={"Authorization": f"Bearer {admin_user['token']}"},
     )
 
     assert response_get_one_user_invalid_id.status_code == HttpCode.NOT_FOUND
@@ -87,7 +87,7 @@ def test_admin_api_users(client):
     # Check GET /users/{userId} is unauthorized to others users than admin
     response_get_one_user_unauthorized = client.get(
         f"/api/v1/users/{users[2]['id']}",
-        headers=[("Authorization", f"Bearer {users[3]['token']}")],
+        headers={"Authorization": f"Bearer {users[3]['token']}"},
     )
 
     assert response_get_one_user_unauthorized.status_code == HttpCode.UNAUTHORIZED
