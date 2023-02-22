@@ -1,3 +1,4 @@
+import logging
 from http import HTTPStatus
 from itertools import chain
 from operator import attrgetter
@@ -17,6 +18,7 @@ from yak_server.database.models import (
     is_phase_locked,
 )
 from yak_server.database.query import bets_from_group_code, bets_from_phase_code
+from yak_server.helpers.logging import modify_binary_bet_successfully, modify_score_bet_successfully
 
 from .utils.auth_utils import token_required
 from .utils.constants import BINARY, GLOBAL_ENDPOINT, SCORE, VERSION
@@ -32,6 +34,8 @@ from .utils.errors import (
 from .utils.flask_utils import success_response
 
 bets = Blueprint("bets", __name__)
+
+logger = logging.getLogger(__name__)
 
 
 @bets.put(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/phases/<string:phase_code>")
@@ -281,10 +285,23 @@ def modify_bets(current_user):
             ):
                 raise NewScoreNegative
 
+            logger.info(
+                modify_score_bet_successfully(
+                    current_user.name,
+                    original_bet,
+                    bet["team1"]["score"],
+                    bet["team2"]["score"],
+                ),
+            )
+
             original_bet.score1 = bet["team1"]["score"]
             original_bet.score2 = bet["team2"]["score"]
 
         elif bet_type == BINARY and original_bet.is_one_won != bet["is_one_won"]:
+            logger.info(
+                modify_binary_bet_successfully(current_user.name, original_bet, bet["is_one_won"]),
+            )
+
             original_bet.is_one_won = bet["is_one_won"]
 
         if bet_type == SCORE:
@@ -447,11 +464,22 @@ def match_patch(current_user, bet_id):
             ):
                 raise NewScoreNegative
 
+            logger.info(
+                modify_score_bet_successfully(
+                    current_user.name,
+                    bet,
+                    body["team1"]["score"],
+                    body["team2"]["score"],
+                ),
+            )
+
             bet.score1 = body["team1"]["score"]
             bet.score2 = body["team2"]["score"]
             db.session.commit()
 
     elif bet_type == BINARY and bet.is_one_won != body["is_one_won"]:
+        logger.info(modify_binary_bet_successfully(current_user.name, bet, body["is_one_won"]))
+
         bet.is_one_won = body["is_one_won"]
         db.session.commit()
 

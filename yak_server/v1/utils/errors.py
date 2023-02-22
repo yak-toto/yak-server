@@ -1,3 +1,4 @@
+import logging
 from http import HTTPStatus
 
 from flask import Response, json
@@ -5,6 +6,8 @@ from jwt import ExpiredSignatureError, InvalidTokenError
 from werkzeug.exceptions import HTTPException
 
 from .constants import BINARY, SCORE
+
+logger = logging.getLogger(__name__)
 
 
 class InvalidCredentials(HTTPException):
@@ -119,6 +122,8 @@ def set_error_handler(app):
         )
         response.content_type = "application/json"
 
+        logger.info(f"Server catches an expected exception: {type(e).__name__} {e.description}")
+
         return response
 
     @app.errorhandler(Exception)
@@ -139,6 +144,8 @@ def set_error_handler(app):
 
         response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
         response.content_type = "application/json"
+
+        logger.error(f"An unexcepted expection occurs: {type(e).__name__} {e}")
 
         return response
 

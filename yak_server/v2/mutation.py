@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import timedelta
 from itertools import chain
@@ -9,6 +10,12 @@ from flask import current_app
 from yak_server import db
 from yak_server.database.models import BinaryBetModel, MatchModel, ScoreBetModel, UserModel
 from yak_server.helpers.authentification import encode_bearer_token
+from yak_server.helpers.logging import (
+    logged_in_successfully,
+    modify_binary_bet_successfully,
+    modify_score_bet_successfully,
+    signed_up_successfully,
+)
 
 from .bearer_authenfication import (
     admin_bearer_authentification,
@@ -35,6 +42,8 @@ from .schema import (
     User,
     UserWithToken,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @strawberry.type
@@ -74,6 +83,8 @@ class Mutation:
             secret_key=current_app.config["SECRET_KEY"],
         )
 
+        logger.info(signed_up_successfully(user.name))
+
         return UserWithToken.from_instance(instance=user, token=token)
 
     @strawberry.mutation
@@ -88,6 +99,8 @@ class Mutation:
             expiration_time=timedelta(minutes=30),
             secret_key=current_app.config["SECRET_KEY"],
         )
+
+        logger.info(logged_in_successfully(user.name))
 
         return UserWithToken.from_instance(instance=user, token=token)
 
@@ -109,6 +122,8 @@ class Mutation:
 
         if bet.locked:
             return LockedBinaryBetError()
+
+        logger.info(modify_binary_bet_successfully(user.pseudo, bet, is_one_won))
 
         bet.is_one_won = is_one_won
         db.session.commit()
@@ -140,6 +155,8 @@ class Mutation:
 
         if score2 is not None and score2 < 0:
             return NewScoreNegative(variable_name="$score2", score=score2)
+
+        logger.info(modify_score_bet_successfully(user.pseudo, bet, score1, score2))
 
         bet.score1 = score1
         bet.score2 = score2

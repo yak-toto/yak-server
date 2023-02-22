@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 from http import HTTPStatus
 
@@ -6,6 +7,11 @@ from flask import Blueprint, current_app, request
 from yak_server import db
 from yak_server.database.models import MatchModel, ScoreBetModel, UserModel
 from yak_server.helpers.authentification import encode_bearer_token
+from yak_server.helpers.logging import (
+    logged_in_successfully,
+    modify_password_successfully,
+    signed_up_successfully,
+)
 
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
@@ -20,6 +26,8 @@ from .utils.flask_utils import success_response
 
 auth = Blueprint("auth", __name__)
 
+logger = logging.getLogger(__name__)
+
 
 @auth.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/login")
 def login_post():
@@ -30,6 +38,8 @@ def login_post():
         raise InvalidCredentials
 
     token = encode_bearer_token(user.id, timedelta(minutes=30), current_app.config["SECRET_KEY"])
+
+    logger.info(logged_in_successfully(user.name))
 
     return success_response(HTTPStatus.CREATED, user.to_user_dict() | {"token": token})
 
@@ -56,6 +66,8 @@ def signup_post():
 
     token = encode_bearer_token(user.id, timedelta(minutes=30), current_app.config["SECRET_KEY"])
 
+    logger.info(signed_up_successfully(user.name))
+
     return success_response(HTTPStatus.CREATED, user.to_user_dict() | {"token": token})
 
 
@@ -77,6 +89,8 @@ def patch_user(current_user, user_id):
     user.change_password(body["password"])
 
     db.session.commit()
+
+    logger.info(modify_password_successfully(user.name))
 
     return success_response(HTTPStatus.OK, user.to_user_dict())
 

@@ -1,3 +1,5 @@
+import logging
+
 from flask import Flask
 from flask.cli import load_dotenv
 from flask_cors import CORS
@@ -5,6 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 from strawberry.flask.views import GraphQLView
 
 db = SQLAlchemy()
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -67,5 +71,17 @@ def create_app():
     from .cli import db_cli
 
     app.cli.add_command(db_cli)
+
+    # --------------------------------------------- #
+    # Declare logger configuration for yak server
+    # --------------------------------------------- #
+    logging.basicConfig(
+        filename="yak.log",
+        encoding="utf-8",
+        level=logging.DEBUG if app.config.get("DEBUG") else logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+
+    logger.info("Start yak flask server")
 
     return app
