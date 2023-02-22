@@ -1,27 +1,16 @@
 import json
 import os
+from configparser import ConfigParser
 from pathlib import Path
 
 import pkg_resources
 
+DATA_FOLDER = pkg_resources.resource_filename(__name__, f"data/{os.environ['COMPETITION']}")
 
-def load_business_rules(competition):
-    from configparser import ConfigParser
+config = ConfigParser()
+config.read(f"{DATA_FOLDER}/config.ini")
 
-    filename = pkg_resources.resource_filename(__name__, f"data/{competition}/config.ini")
-
-    config = ConfigParser()
-    config.read(filename)
-    return config
-
-
-COMPETITION = os.environ["COMPETITION"]
-
-config = load_business_rules(COMPETITION)
-
-with Path(
-    pkg_resources.resource_filename(__name__, f"data/{COMPETITION}/finale_phase_config.json"),
-).open() as file:
+with Path(f"{DATA_FOLDER}/finale_phase_config.json").open() as file:
     FINALE_PHASE_CONFIG = json.loads(file.read())
 
 MYSQL_USER_NAME = os.environ["MYSQL_USER_NAME"]
@@ -44,8 +33,6 @@ YAK_CONFIG = {
     "SECRET_KEY": os.environ["JWT_SECRET_KEY"],
     # SQL Alchemy features
     "SQLALCHEMY_TRACK_MODIFICATIONS": False,
-    # Name of the competition to load initiliazition data
-    "COMPETITION": COMPETITION,
     "LOCK_DATETIME": config.get("locking", "datetime"),
     "LOCK_DATETIME_FINAL_PHASE": config.get("locking", "datetime_final_phase"),
     "BASE_CORRECT_RESULT": config.getint("points", "base_correct_result"),
@@ -61,5 +48,5 @@ YAK_CONFIG = {
     "TEAM_QUALIFIED": config.getint("points", "team_qualified"),
     "FIRST_TEAM_QUALIFIED": config.getint("points", "first_team_qualified"),
     "FINALE_PHASE_CONFIG": FINALE_PHASE_CONFIG,
-    "DATA_FOLDER": pkg_resources.resource_filename(__name__, f"data/{COMPETITION}"),
+    "DATA_FOLDER": DATA_FOLDER,
 }
