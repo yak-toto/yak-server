@@ -1,7 +1,14 @@
 from getpass import getpass
 
-from yak_server import db
-from yak_server.database.models import MatchModel, ScoreBetModel, UserModel
+
+class ConfirmPasswordDoesNotMatch(Exception):
+    def __init__(self) -> None:
+        super().__init__("Password and Confirm Password fields does not match.")
+
+
+class SignupError(Exception):
+    def __init__(self, description) -> None:
+        super().__init__(f"Error during signup. {description}")
 
 
 def script(app):
@@ -10,20 +17,19 @@ def script(app):
         confirm_password = getpass(prompt="Confirm admin password: ")
 
         if password != confirm_password:
-            print("ERROR : Password and Confirm Password fields does not match.")
-            return
+            raise ConfirmPasswordDoesNotMatch
 
-        user = UserModel(
-            name="admin",
-            first_name="admin",
-            last_name="admin",
-            password=password,
+        client = app.test_client()
+
+        response_signup = client.post(
+            "/api/v1/users/signup",
+            json={
+                "name": "admin",
+                "first_name": "admin",
+                "last_name": "admin",
+                "password": password,
+            },
         )
 
-        db.session.add(user)
-        db.session.commit()
-
-        db.session.add_all(
-            ScoreBetModel(user_id=user.id, match_id=match.id) for match in MatchModel.query.all()
-        )
-        db.session.commit()
+        if not response_signup.json["ok"]:
+            raise SignupError(response_signup.json["description"])
