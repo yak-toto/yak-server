@@ -60,7 +60,7 @@ def create_bet(current_user, phase_code):
     )
 
     existing_score_bets = (
-        current_user.bets.filter(MatchModel.group_id.in_(map(attrgetter("id"), groups)))
+        current_user.score_bets.filter(MatchModel.group_id.in_(map(attrgetter("id"), groups)))
         .join(ScoreBetModel.match)
         .join(MatchModel.group)
         .order_by(GroupModel.index, MatchModel.index)
