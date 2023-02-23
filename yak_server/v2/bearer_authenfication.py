@@ -2,9 +2,9 @@ from typing import Optional, Union
 
 from flask import current_app, request
 from jwt import ExpiredSignatureError
-from jwt import decode as jwt_decode
 
 from yak_server.database.models import UserModel
+from yak_server.helpers.authentification import decode_bearer_token
 
 from .result import ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI
 from .schema import User
@@ -20,12 +20,12 @@ def bearer_authentification() -> (
 ):
     auth_headers = request.headers.get("Authorization", "").split()
 
-    if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION:
+    if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION or auth_headers[0] != "Bearer":
         return None, InvalidToken()
 
     token = auth_headers[1]
     try:
-        data = jwt_decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+        data = decode_bearer_token(token, current_app.config["SECRET_KEY"])
     except ExpiredSignatureError:
         return None, ExpiredToken()
     except Exception:

@@ -1,9 +1,10 @@
 from functools import wraps
 
-import jwt
 from flask import current_app, request
+from jwt import InvalidTokenError
 
 from yak_server.database.models import UserModel
+from yak_server.helpers.authentification import decode_bearer_token
 
 from .errors import UserNotFound
 
@@ -15,11 +16,11 @@ def token_required(f):
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get("Authorization", "").split()
 
-        if auth_headers[0] != "Bearer" or len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION:
-            raise jwt.InvalidTokenError
+        if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION or auth_headers[0] != "Bearer":
+            raise InvalidTokenError
 
         token = auth_headers[1]
-        data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+        data = decode_bearer_token(token, current_app.config["SECRET_KEY"])
 
         user = UserModel.query.filter_by(id=data["sub"]).first()
         if not user:
