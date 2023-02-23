@@ -195,6 +195,34 @@ def test_matches_db(app, client):
         "description": f"Match not found: {invalid_match_id}",
     }
 
+    # Check GET matches/phases/{phaseCode} with existing phase code
+    matches_by_phase_code = client.get(
+        "/api/v1/matches/phases/GROUP",
+        headers={"Authorization": f"Bearer {auth_token}"},
+    )
+
+    assert matches_by_phase_code.status_code == HttpCode.OK
+    assert matches_by_phase_code.json["result"] == {
+        "phase": expected_phase,
+        "groups": [expected_group_without_phase],
+        "matches": expected_matches,
+    }
+
+    # Check GET matches/phases/{phaseCode} with non existing phase code
+    invalid_phase_code = "GROUP1"
+
+    matches_by_invalid_phase_code = client.get(
+        f"/api/v1/matches/phases/{invalid_phase_code}",
+        headers={"Authorization": f"Bearer {auth_token}"},
+    )
+
+    assert matches_by_invalid_phase_code.status_code == HttpCode.NOT_FOUND
+    assert matches_by_invalid_phase_code.json == {
+        "ok": False,
+        "description": f"Phase not found: {invalid_phase_code}",
+        "error_code": HttpCode.NOT_FOUND,
+    }
+
     # Check GET matches/groups/{groupCode} with existing code
     match_response_from_group_code = client.get(
         "/api/v1/matches/groups/A",

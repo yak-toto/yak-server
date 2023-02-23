@@ -103,7 +103,7 @@ def matches_by_phase_code(current_user, phase_code):
         200,
         {
             "phase": phase.to_dict(),
-            "group": [group.to_dict_without_phase() for group in groups],
+            "groups": [group.to_dict_without_phase() for group in groups],
             "matches": [match.to_dict_with_group_id() for match in matches],
         },
     )
