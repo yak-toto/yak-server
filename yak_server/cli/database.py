@@ -8,7 +8,15 @@ import pkg_resources
 import requests
 
 from yak_server import db
-from yak_server.database.models import GroupModel, MatchModel, PhaseModel, TeamModel
+from yak_server.database.models import (
+    BinaryBetModel,
+    GroupModel,
+    MatchModel,
+    PhaseModel,
+    ScoreBetModel,
+    TeamModel,
+    UserModel,
+)
 
 
 class ConfirmPasswordDoesNotMatch(Exception):
@@ -36,9 +44,14 @@ class MissingTelegramIdentifier(Exception):
         super().__init__("Bot token or chat id is missing in flask config. Backup is disabled.")
 
 
+class RecordDeletionInProduction(Exception):
+    def __init__(self) -> None:
+        super().__init__("Trying to delete records in production using script. DO NOT DO IT.")
+
+
 class TableDropInProduction(Exception):
     def __init__(self) -> None:
-        super().__init__("Trying to drop database tables in production. DO NOT DO IT.")
+        super().__init__("Trying to drop database tables in production using script. DO NOT DO IT.")
 
 
 def create_database(app):
@@ -177,6 +190,21 @@ def backup_database(app):
 
 
 def delete_database(app):
+    if not app.config.get("DEBUG"):
+        raise RecordDeletionInProduction
+
+    with app.app_context():
+        ScoreBetModel.query.delete()
+        BinaryBetModel.query.delete()
+        UserModel.query.delete()
+        MatchModel.query.delete()
+        GroupModel.query.delete()
+        PhaseModel.query.delete()
+        TeamModel.query.delete()
+        db.session.commit()
+
+
+def drop_database(app):
     if not app.config.get("DEBUG"):
         raise TableDropInProduction
 

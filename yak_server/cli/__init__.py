@@ -6,6 +6,7 @@ from .database import (
     create_admin,
     create_database,
     delete_database,
+    drop_database,
     initialize_database,
 )
 
@@ -20,6 +21,11 @@ def create():
 @db_cli.command("init")
 def init():
     initialize_database(current_app)
+
+
+@db_cli.command("drop")
+def drop():
+    drop_database(current_app)
 
 
 @db_cli.command("delete")
