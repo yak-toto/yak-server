@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import pkg_resources
 
-from yak_server.cli import initialize_database
+from yak_server.cli.database import initialize_database
 
 from .constants import HttpCode
 
