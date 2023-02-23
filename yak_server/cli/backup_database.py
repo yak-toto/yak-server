@@ -1,12 +1,9 @@
-#!/usr/bin/env python
 import subprocess
 from datetime import datetime
 from pathlib import Path
 
 import pkg_resources
 import requests
-
-from yak_server import create_app
 
 
 class TelegramSender:
@@ -65,8 +62,3 @@ def script(app):
                 app.config["CHAT_ID"],
                 f"Backup done on {backup_date} at {backup_time}",
             )
-
-
-if __name__ == "__main__":
-    app = create_app()
-    script(app)

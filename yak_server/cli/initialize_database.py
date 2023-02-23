@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import csv
 from pathlib import Path
 
@@ -67,9 +66,3 @@ def script(app):
                 )
 
             db.session.commit()
-
-
-if __name__ == "__main__":
-    from yak_server import create_app
-
-    script(create_app())
