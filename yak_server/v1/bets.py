@@ -441,8 +441,8 @@ def match_patch(current_user, bet_id):
 
     if bet_type == SCORE:
         if bet.score1 != body["team1"]["score"] or bet.score2 != body["team2"]["score"]:
-            if (bet["team1"]["score"] is not None and bet["team1"]["score"] < 0) or (
-                bet["team2"]["score"] is not None and bet["team2"]["score"] < 0
+            if (body["team1"]["score"] is not None and body["team1"]["score"] < 0) or (
+                body["team2"]["score"] is not None and body["team2"]["score"] < 0
             ):
                 raise NewScoreNegative
 
