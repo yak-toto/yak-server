@@ -19,7 +19,7 @@ def test_matches_db(app, client):
     # initialize sql database
     initialize_database(app)
 
-    # Signup admin user
+    # Signup one random user
     user_name = get_random_string(6)
     first_name = get_random_string(10)
     last_name = get_random_string(8)

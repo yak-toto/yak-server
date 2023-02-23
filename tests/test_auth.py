@@ -113,3 +113,29 @@ def test_login_wrong_password(client):
         "error_code": HttpCode.UNAUTHORIZED,
         "description": "Invalid credentials",
     }
+
+
+def test_invalid_token(client):
+    response_signup = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": get_random_string(6),
+            "first_name": get_random_string(2),
+            "last_name": get_random_string(8),
+            "password": get_random_string(8),
+        },
+    )
+
+    auth_token = response_signup.json["result"]["token"]
+
+    response_get_all_bets = client.get(
+        "/api/v1/bets",
+        headers={"Authorization": f"Bear {auth_token}"},
+    )
+
+    assert response_get_all_bets.status_code == HttpCode.UNAUTHORIZED
+    assert response_get_all_bets.json == {
+        "ok": False,
+        "error_code": HttpCode.UNAUTHORIZED,
+        "description": "Invalid token. Registration and / or authentication required",
+    }
