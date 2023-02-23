@@ -55,158 +55,152 @@ class TableDropInProduction(Exception):
 
 
 def create_database(app):
-    with app.app_context():
-        db.create_all()
+    db.create_all()
 
 
 def create_admin(app):
-    with app.app_context():
-        password = getpass(prompt="Admin user password: ")
-        confirm_password = getpass(prompt="Confirm admin password: ")
+    password = getpass(prompt="Admin user password: ")
+    confirm_password = getpass(prompt="Confirm admin password: ")
 
-        if password != confirm_password:
-            raise ConfirmPasswordDoesNotMatch
+    if password != confirm_password:
+        raise ConfirmPasswordDoesNotMatch
 
-        client = app.test_client()
+    client = app.test_client()
 
-        response_signup = client.post(
-            "/api/v1/users/signup",
-            json={
-                "name": "admin",
-                "first_name": "admin",
-                "last_name": "admin",
-                "password": password,
-            },
-        )
+    response_signup = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": "admin",
+            "first_name": "admin",
+            "last_name": "admin",
+            "password": password,
+        },
+    )
 
-        if not response_signup.json["ok"]:
-            raise SignupError(response_signup.json["description"])
+    if not response_signup.json["ok"]:
+        raise SignupError(response_signup.json["description"])
 
 
 def initialize_database(app):
-    with app.app_context():
-        DATA_FOLDER = app.config["DATA_FOLDER"]
+    DATA_FOLDER = app.config["DATA_FOLDER"]
 
-        with Path(f"{DATA_FOLDER}/phases.csv", newline="").open() as csvfile:
-            spamreader = csv.reader(csvfile, delimiter="|")
+    with Path(f"{DATA_FOLDER}/phases.csv", newline="").open() as csvfile:
+        spamreader = csv.reader(csvfile, delimiter="|")
 
-            for row in spamreader:
-                index, code, description = row
-                db.session.add(PhaseModel(code=code, description=description, index=index))
+        for row in spamreader:
+            index, code, description = row
+            db.session.add(PhaseModel(code=code, description=description, index=index))
 
-            db.session.commit()
+        db.session.commit()
 
-        with Path(f"{DATA_FOLDER}/groups.csv", newline="").open() as csvfile:
-            spamreader = csv.reader(csvfile, delimiter="|")
+    with Path(f"{DATA_FOLDER}/groups.csv", newline="").open() as csvfile:
+        spamreader = csv.reader(csvfile, delimiter="|")
 
-            for row in spamreader:
-                index, code, phase_code, description = row
+        for row in spamreader:
+            index, code, phase_code, description = row
 
-                phase = PhaseModel.query.filter_by(code=phase_code).first()
+            phase = PhaseModel.query.filter_by(code=phase_code).first()
 
-                db.session.add(
-                    GroupModel(code=code, phase_id=phase.id, description=description, index=index),
-                )
-
-            db.session.commit()
-
-        with Path(f"{DATA_FOLDER}/teams.csv", newline="").open() as csvfile:
-            spamreader = csv.reader(csvfile, delimiter="|")
-
-            db.session.add_all(
-                TeamModel(
-                    code=row[0],
-                    description=row[1],
-                    flag_url=row[2],
-                )
-                for row in spamreader
+            db.session.add(
+                GroupModel(code=code, phase_id=phase.id, description=description, index=index),
             )
-            db.session.commit()
 
-        with Path(f"{DATA_FOLDER}/matches.csv", newline="").open() as csvfile:
-            spamreader = csv.reader(csvfile, delimiter="|")
+        db.session.commit()
 
-            for row in spamreader:
-                group_code, index, team1_code, team2_code = row
+    with Path(f"{DATA_FOLDER}/teams.csv", newline="").open() as csvfile:
+        spamreader = csv.reader(csvfile, delimiter="|")
 
-                team1 = TeamModel.query.filter_by(code=team1_code).first()
-                team2 = TeamModel.query.filter_by(code=team2_code).first()
+        db.session.add_all(
+            TeamModel(
+                code=row[0],
+                description=row[1],
+                flag_url=row[2],
+            )
+            for row in spamreader
+        )
+        db.session.commit()
 
-                group = GroupModel.query.filter_by(code=group_code).first()
+    with Path(f"{DATA_FOLDER}/matches.csv", newline="").open() as csvfile:
+        spamreader = csv.reader(csvfile, delimiter="|")
 
-                db.session.add(
-                    MatchModel(
-                        group_id=group.id,
-                        team1_id=team1.id,
-                        team2_id=team2.id,
-                        index=index,
-                    ),
-                )
+        for row in spamreader:
+            group_code, index, team1_code, team2_code = row
 
-            db.session.commit()
+            team1 = TeamModel.query.filter_by(code=team1_code).first()
+            team2 = TeamModel.query.filter_by(code=team2_code).first()
+
+            group = GroupModel.query.filter_by(code=group_code).first()
+
+            db.session.add(
+                MatchModel(
+                    group_id=group.id,
+                    team1_id=team1.id,
+                    team2_id=team2.id,
+                    index=index,
+                ),
+            )
+
+        db.session.commit()
 
 
 def backup_database(app):
-    with app.app_context():
-        if not app.config.get("BOT_TOKEN") or not app.config.get("CHAT_ID"):
-            raise MissingTelegramIdentifier
+    if not app.config.get("BOT_TOKEN") or not app.config.get("CHAT_ID"):
+        raise MissingTelegramIdentifier
 
-        backup_location = pkg_resources.resource_filename(__name__, "backup_files")
+    backup_location = pkg_resources.resource_filename(__name__, "backup_files")
 
-        if not Path(backup_location).exists():
-            Path(backup_location).mkdir()
+    if not Path(backup_location).exists():
+        Path(backup_location).mkdir()
 
-        backup_date, backup_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S").split()
+    backup_date, backup_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S").split()
 
-        file_name = f"{backup_location}/yak_toto_backup_{backup_date}T{backup_time}.sql"
+    file_name = f"{backup_location}/yak_toto_backup_{backup_date}T{backup_time}.sql"
 
-        result = subprocess.run(
-            [
-                "mysqldump",
-                app.config["MYSQL_DB"],
-                "-u",
-                app.config["MYSQL_USER_NAME"],
-                f"--password={app.config['MYSQL_PASSWORD']}",
-            ],
-            capture_output=True,
-            encoding="utf-8",
+    result = subprocess.run(
+        [
+            "mysqldump",
+            app.config["MYSQL_DB"],
+            "-u",
+            app.config["MYSQL_USER_NAME"],
+            f"--password={app.config['MYSQL_PASSWORD']}",
+        ],
+        capture_output=True,
+        encoding="utf-8",
+    )
+
+    if result.returncode:
+        TelegramSender.send_message(
+            app.config["BOT_TOKEN"],
+            app.config["CHAT_ID"],
+            f"Something went wrong when backup on {backup_date} at {backup_time}",
         )
+        return
 
-        if result.returncode:
-            TelegramSender.send_message(
-                app.config["BOT_TOKEN"],
-                app.config["CHAT_ID"],
-                f"Something went wrong when backup on {backup_date} at {backup_time}",
-            )
-            return
-
-        with Path(file_name).open(mode="w") as file:
-            file.write(result.stdout)
-            TelegramSender.send_message(
-                app.config["BOT_TOKEN"],
-                app.config["CHAT_ID"],
-                f"Backup done on {backup_date} at {backup_time}",
-            )
+    with Path(file_name).open(mode="w") as file:
+        file.write(result.stdout)
+        TelegramSender.send_message(
+            app.config["BOT_TOKEN"],
+            app.config["CHAT_ID"],
+            f"Backup done on {backup_date} at {backup_time}",
+        )
 
 
 def delete_database(app):
     if not app.config.get("DEBUG"):
         raise RecordDeletionInProduction
 
-    with app.app_context():
-        ScoreBetModel.query.delete()
-        BinaryBetModel.query.delete()
-        UserModel.query.delete()
-        MatchModel.query.delete()
-        GroupModel.query.delete()
-        PhaseModel.query.delete()
-        TeamModel.query.delete()
-        db.session.commit()
+    ScoreBetModel.query.delete()
+    BinaryBetModel.query.delete()
+    UserModel.query.delete()
+    MatchModel.query.delete()
+    GroupModel.query.delete()
+    PhaseModel.query.delete()
+    TeamModel.query.delete()
+    db.session.commit()
 
 
 def drop_database(app):
     if not app.config.get("DEBUG"):
         raise TableDropInProduction
 
-    with app.app_context():
-        db.drop_all()
+    db.drop_all()

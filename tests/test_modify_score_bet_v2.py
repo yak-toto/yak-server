@@ -13,7 +13,8 @@ def test_modify_score_bet(app, client):
     # location of test data
     app.config["DATA_FOLDER"] = pkg_resources.resource_filename(__name__, testcase)
 
-    initialize_database(app)
+    with app.app_context():
+        initialize_database(app)
 
     user_name = get_random_string(10)
     first_name = get_random_string(5)

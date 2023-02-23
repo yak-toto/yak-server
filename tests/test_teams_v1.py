@@ -14,7 +14,8 @@ def test_teams(app, client):
     app.config["DATA_FOLDER"] = pkg_resources.resource_filename(__name__, "test_teams_v1")
 
     # initialize sql database
-    initialize_database(app)
+    with app.app_context():
+        initialize_database(app)
 
     # Fetch all the teams
     response_get_all_teams = client.get(
