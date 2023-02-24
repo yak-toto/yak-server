@@ -1,7 +1,7 @@
+from http import HTTPStatus
 from random import randint
 from uuid import uuid4
 
-from .constants import HttpCode
 from .test_utils import get_random_string
 
 
@@ -43,7 +43,7 @@ def test_admin_api_users(client):
         headers={"Authorization": f"Bearer {admin_user['token']}"},
     )
 
-    assert response_get_all_users.status_code == HttpCode.OK
+    assert response_get_all_users.status_code == HTTPStatus.OK
     assert sorted([user["name"] for user in response_get_all_users.json["result"]]) == sorted(
         [user["name"] for user in [*users, admin_user]],
     )
@@ -54,7 +54,7 @@ def test_admin_api_users(client):
         headers={"Authorization": f"Bearer {users[0]['token']}"},
     )
 
-    assert response_all_get_users_other_user.status_code == HttpCode.UNAUTHORIZED
+    assert response_all_get_users_other_user.status_code == HTTPStatus.UNAUTHORIZED
     assert (
         response_all_get_users_other_user.json["description"] == "Unauthorized access to admin API"
     )
@@ -65,7 +65,7 @@ def test_admin_api_users(client):
         headers={"Authorization": f"Bearer {admin_user['token']}"},
     )
 
-    assert response_get_one_user_success.status_code == HttpCode.OK
+    assert response_get_one_user_success.status_code == HTTPStatus.OK
     assert response_get_one_user_success.json["result"] == {
         "id": users[5]["id"],
         "name": users[5]["name"],
@@ -77,10 +77,10 @@ def test_admin_api_users(client):
         headers={"Authorization": f"Bearer {admin_user['token']}"},
     )
 
-    assert response_get_one_user_invalid_id.status_code == HttpCode.NOT_FOUND
+    assert response_get_one_user_invalid_id.status_code == HTTPStatus.NOT_FOUND
     assert response_get_one_user_invalid_id.json == {
         "ok": False,
-        "error_code": HttpCode.NOT_FOUND,
+        "error_code": HTTPStatus.NOT_FOUND,
         "description": "User not found",
     }
 
@@ -90,9 +90,9 @@ def test_admin_api_users(client):
         headers={"Authorization": f"Bearer {users[3]['token']}"},
     )
 
-    assert response_get_one_user_unauthorized.status_code == HttpCode.UNAUTHORIZED
+    assert response_get_one_user_unauthorized.status_code == HTTPStatus.UNAUTHORIZED
     assert response_get_one_user_unauthorized.json == {
         "ok": False,
-        "error_code": HttpCode.UNAUTHORIZED,
+        "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Unauthorized access to admin API",
     }

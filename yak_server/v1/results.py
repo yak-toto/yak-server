@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from itertools import chain
 
 from flask import Blueprint, current_app
@@ -26,7 +27,7 @@ results = Blueprint("results", __name__)
 @token_required
 def score_board(current_user):
     return success_response(
-        200,
+        HTTPStatus.OK,
         [
             user.to_result_dict()
             for user in UserModel.query.order_by(UserModel.points.desc()).filter(
@@ -53,7 +54,7 @@ def results_get(current_user):
     ][0]
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         UserModel.query.get(current_user.id).to_result_dict() | {"rank": rank},
     )
 
@@ -74,7 +75,7 @@ def compute_points_post(current_user):
     )
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         [
             user.to_result_dict()
             for user in UserModel.query.order_by(UserModel.points.desc()).filter(

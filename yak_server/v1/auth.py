@@ -1,4 +1,5 @@
 from datetime import timedelta
+from http import HTTPStatus
 
 from flask import Blueprint, current_app, request
 
@@ -30,7 +31,7 @@ def login_post():
 
     token = encode_bearer_token(user.id, timedelta(minutes=30), current_app.config["SECRET_KEY"])
 
-    return success_response(201, user.to_user_dict() | {"token": token})
+    return success_response(HTTPStatus.CREATED, user.to_user_dict() | {"token": token})
 
 
 @auth.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/signup")
@@ -55,7 +56,7 @@ def signup_post():
 
     token = encode_bearer_token(user.id, timedelta(minutes=30), current_app.config["SECRET_KEY"])
 
-    return success_response(201, user.to_user_dict() | {"token": token})
+    return success_response(HTTPStatus.CREATED, user.to_user_dict() | {"token": token})
 
 
 @auth.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/<string:user_id>")
@@ -77,13 +78,13 @@ def patch_user(current_user, user_id):
 
     db.session.commit()
 
-    return success_response(200, user.to_user_dict())
+    return success_response(HTTPStatus.OK, user.to_user_dict())
 
 
 @auth.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/current_user")
 @token_required
 def current_user(current_user):
-    return success_response(200, current_user.to_user_dict())
+    return success_response(HTTPStatus.OK, current_user.to_user_dict())
 
 
 @auth.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/users")
@@ -92,7 +93,7 @@ def get_users(current_user):
     if current_user.name != "admin":
         raise UnauthorizedAccessToAdminAPI
 
-    return success_response(200, [user.to_user_dict() for user in UserModel.query.all()])
+    return success_response(HTTPStatus.OK, [user.to_user_dict() for user in UserModel.query.all()])
 
 
 @auth.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/<string:user_id>")
@@ -106,4 +107,4 @@ def get_user(current_user, user_id):
     if not user:
         raise UserNotFound
 
-    return success_response(200, user.to_user_dict())
+    return success_response(HTTPStatus.OK, user.to_user_dict())

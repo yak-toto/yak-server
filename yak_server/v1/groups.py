@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from flask import Blueprint
 
 from yak_server.database.models import GroupModel, PhaseModel
@@ -20,7 +22,7 @@ def get_groups(current_user):
     phases = [phase.to_dict() for phase in phase_query]
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phases": phases,
             "groups": groups,
@@ -37,7 +39,7 @@ def get_group_by_code(current_user, group_code):
         raise GroupNotFound(group_code)
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phase": group.phase.to_dict(),
             "group": group.to_dict_without_phase(),
@@ -57,7 +59,7 @@ def get_groups_by_phase_code(current_user, phase_code):
     groups = [group.to_dict_without_phase() for group in group_query]
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phase": phase.to_dict(),
             "groups": groups,

@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from itertools import chain
 from operator import attrgetter
 from uuid import uuid4
@@ -164,7 +165,7 @@ def create_bet(current_user, phase_code):
     )
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phase": phase.to_dict(),
             "groups": [group.to_dict_without_phase() for group in groups],
@@ -194,7 +195,7 @@ def get_all_bets(current_user):
     phase_query = PhaseModel.query.order_by(PhaseModel.index)
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phases": [phase.to_dict() for phase in phase_query],
             "groups": [group.to_dict_with_phase_id() for group in group_query],
@@ -213,7 +214,7 @@ def get_bets_by_phase(current_user, phase_code):
     )
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phase": phase.to_dict(),
             "groups": [group.to_dict_without_phase() for group in groups],
@@ -295,7 +296,7 @@ def modify_bets(current_user):
     db.session.commit()
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phases": [
                 phase.to_dict()
@@ -317,7 +318,7 @@ def group_get(current_user, group_code):
     group, score_bets, binary_bets = bets_from_group_code(current_user, group_code)
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phase": group.phase.to_dict(),
             "group": group.to_dict_without_phase(),
@@ -331,7 +332,7 @@ def group_get(current_user, group_code):
 @token_required
 def group_result_get(current_user, group_code):
     return success_response(
-        200,
+        HTTPStatus.OK,
         get_result_with_group_code(current_user.id, group_code),
     )
 
@@ -464,7 +465,7 @@ def match_patch(current_user, bet_id):
     elif bet_type == BINARY:
         response["binary_bet"] = bet.to_dict_without_group()
 
-    return success_response(200, response)
+    return success_response(HTTPStatus.OK, response)
 
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:bet_id>")
@@ -492,7 +493,7 @@ def bet_get(current_user, bet_id):
     elif bet_type == BINARY:
         response["binary_bet"] = bet.to_dict_without_group()
 
-    return success_response(200, response)
+    return success_response(HTTPStatus.OK, response)
 
 
 @bets.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/finale_phase")
@@ -601,7 +602,7 @@ def commit_finale_phase(current_user):
     phase, groups, score_bets, binary_bets = bets_from_phase_code(current_user, "FINAL")
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phase": phase.to_dict(),
             "groups": [group.to_dict_without_phase() for group in groups],

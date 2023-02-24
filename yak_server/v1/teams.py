@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from flask import Blueprint
 
 from yak_server.database.models import TeamModel
@@ -12,7 +14,7 @@ teams = Blueprint("team", __name__)
 @teams.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams")
 def teams_get():
     return success_response(
-        200,
+        HTTPStatus.OK,
         {"teams": [team.to_dict() for team in TeamModel.query.all()]},
     )
 
@@ -29,4 +31,4 @@ def teams_get_by_id(team_id):
     if not team:
         raise TeamNotFound(team_id)
 
-    return success_response(200, {"team": team.to_dict()})
+    return success_response(HTTPStatus.OK, {"team": team.to_dict()})

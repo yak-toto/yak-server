@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from itertools import chain
 
 from flask import Blueprint
@@ -41,7 +42,7 @@ def matches_get_all(current_user):
     phases = PhaseModel.query.order_by(PhaseModel.index)
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phases": [phase.to_dict() for phase in phases],
             "groups": [group.to_dict_with_phase_id() for group in groups],
@@ -64,7 +65,7 @@ def matches_get_by_id(current_user, match_id):
         raise MatchNotFound(match_id)
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phase": bet.match.group.phase.to_dict(),
             "group": bet.match.group.to_dict_without_phase(),
@@ -82,7 +83,7 @@ def matches_by_group_code(current_user, group_code):
         raise GroupNotFound(group_code)
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phase": group.phase.to_dict(),
             "group": group.to_dict_without_phase(),
@@ -100,7 +101,7 @@ def matches_by_phase_code(current_user, phase_code):
         raise PhaseNotFound(phase_code)
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phase": phase.to_dict(),
             "groups": [group.to_dict_without_phase() for group in groups],
@@ -141,7 +142,7 @@ def matches_teams_get(current_user, team_id):
     phases = {group.phase for group in groups}
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "phases": [phase.to_dict() for phase in phases],
             "groups": [group.to_dict_with_phase_id() for group in groups],

@@ -1,6 +1,6 @@
+from http import HTTPStatus
 from uuid import uuid4
 
-from .constants import HttpCode
 from .test_utils import get_random_string
 
 
@@ -44,7 +44,7 @@ def test_modify_password(client):
         json={"password": new_password_other_user},
     )
 
-    assert response_modify_password.status_code == HttpCode.OK
+    assert response_modify_password.status_code == HTTPStatus.OK
     assert response_modify_password.json["result"]["name"] == other_user_name
 
     # Check login succesful with the new password
@@ -53,7 +53,7 @@ def test_modify_password(client):
         json={"name": other_user_name, "password": new_password_other_user},
     )
 
-    assert response_login_glepape.status_code == HttpCode.CREATED
+    assert response_login_glepape.status_code == HTTPStatus.CREATED
     assert response_login_glepape.json["result"]["name"] == other_user_name
 
     # Check glepape user cannot update any password
@@ -63,7 +63,7 @@ def test_modify_password(client):
         json={"password": "new_new_password"},
     )
 
-    assert response_modify_password_with_glepape_user.status_code == HttpCode.UNAUTHORIZED
+    assert response_modify_password_with_glepape_user.status_code == HTTPStatus.UNAUTHORIZED
     assert (
         response_modify_password_with_glepape_user.json["description"]
         == "Unauthorized access to admin API"
@@ -76,7 +76,7 @@ def test_modify_password(client):
         json={"name": other_user_name},
     )
 
-    assert response_wrong_input.status_code == HttpCode.UNAUTHORIZED
+    assert response_wrong_input.status_code == HTTPStatus.UNAUTHORIZED
     assert response_wrong_input.json["description"] == "Wrong inputs"
 
     # Check call is rejected if user_id is invalid
@@ -86,6 +86,6 @@ def test_modify_password(client):
         json={"password": "new_password_for_unknown_user"},
     )
 
-    assert response_wrong_input.status_code == HttpCode.NOT_FOUND
-    assert response_wrong_input.json["error_code"] == HttpCode.NOT_FOUND
+    assert response_wrong_input.status_code == HTTPStatus.NOT_FOUND
+    assert response_wrong_input.json["error_code"] == HTTPStatus.NOT_FOUND
     assert response_wrong_input.json["description"] == "User not found"

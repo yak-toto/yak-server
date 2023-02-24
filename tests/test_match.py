@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from operator import itemgetter
 from unittest.mock import ANY
 from uuid import uuid4
@@ -6,7 +7,6 @@ import pkg_resources
 
 from yak_server.cli.database import initialize_database
 
-from .constants import HttpCode
 from .test_utils import get_random_string
 
 
@@ -161,7 +161,7 @@ def test_matches_db(app, client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert all_matches_response.status_code == HttpCode.OK
+    assert all_matches_response.status_code == HTTPStatus.OK
     assert all_matches_response.json["result"] == {
         "phases": [expected_phase],
         "groups": [expected_group],
@@ -176,7 +176,7 @@ def test_matches_db(app, client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert match_response.status_code == HttpCode.OK
+    assert match_response.status_code == HTTPStatus.OK
     assert match_response.json["result"]["match"] == {
         key: value for key, value in expected_matches[0].items() if key != "group"
     }
@@ -189,10 +189,10 @@ def test_matches_db(app, client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert match_response_invalid_id.status_code == HttpCode.NOT_FOUND
+    assert match_response_invalid_id.status_code == HTTPStatus.NOT_FOUND
     assert match_response_invalid_id.json == {
         "ok": False,
-        "error_code": HttpCode.NOT_FOUND,
+        "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Match not found: {invalid_match_id}",
     }
 
@@ -202,7 +202,7 @@ def test_matches_db(app, client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert matches_by_phase_code.status_code == HttpCode.OK
+    assert matches_by_phase_code.status_code == HTTPStatus.OK
     assert matches_by_phase_code.json["result"] == {
         "phase": expected_phase,
         "groups": [expected_group_without_phase],
@@ -217,11 +217,11 @@ def test_matches_db(app, client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert matches_by_invalid_phase_code.status_code == HttpCode.NOT_FOUND
+    assert matches_by_invalid_phase_code.status_code == HTTPStatus.NOT_FOUND
     assert matches_by_invalid_phase_code.json == {
         "ok": False,
         "description": f"Phase not found: {invalid_phase_code}",
-        "error_code": HttpCode.NOT_FOUND,
+        "error_code": HTTPStatus.NOT_FOUND,
     }
 
     # Check GET matches/groups/{groupCode} with existing code
@@ -244,7 +244,7 @@ def test_matches_db(app, client):
 
     assert match_response_with_invalid_group_code.json == {
         "ok": False,
-        "error_code": HttpCode.NOT_FOUND,
+        "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Group not found: {invalid_group_code}",
     }
 
@@ -254,7 +254,7 @@ def test_matches_db(app, client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert group_response.status_code == HttpCode.OK
+    assert group_response.status_code == HTTPStatus.OK
     assert group_response.json["result"] == {
         "phase": expected_phase,
         "groups": [expected_group_without_phase],
@@ -268,10 +268,10 @@ def test_matches_db(app, client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert group_response_invalid_phase_code.status_code == HttpCode.NOT_FOUND
+    assert group_response_invalid_phase_code.status_code == HTTPStatus.NOT_FOUND
     assert group_response_invalid_phase_code.json == {
         "ok": False,
-        "error_code": HttpCode.NOT_FOUND,
+        "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Phase not found: {invalid_phase_code}",
     }
 
@@ -287,7 +287,7 @@ def test_matches_db(app, client):
         if match["team2"]["code"] not in [team["code"] for team in expected_teams]:
             expected_teams.append(match["team2"])
 
-    assert team_response.status_code == HttpCode.OK
+    assert team_response.status_code == HTTPStatus.OK
     assert sorted(team_response.json["result"]["teams"], key=itemgetter("code")) == sorted(
         expected_teams,
         key=itemgetter("code"),
@@ -299,7 +299,7 @@ def test_matches_db(app, client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert one_group_response.status_code == 200
+    assert one_group_response.status_code == HTTPStatus.OK
     assert one_group_response.json["result"] == {
         "group": expected_group_without_phase,
         "phase": expected_phase,
@@ -311,7 +311,7 @@ def test_matches_db(app, client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert all_groups_response.status_code == 200
+    assert all_groups_response.status_code == HTTPStatus.OK
     assert all_groups_response.json["result"] == {
         "phases": [expected_phase],
         "groups": [expected_group],

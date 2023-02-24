@@ -1,6 +1,6 @@
+from http import HTTPStatus
 from unittest.mock import ANY
 
-from .constants import HttpCode
 from .test_utils import get_random_string
 
 
@@ -20,7 +20,7 @@ def test_valid_auth(client):
             "password": password,
         },
     )
-    assert response_signup.status_code == HttpCode.CREATED
+    assert response_signup.status_code == HTTPStatus.CREATED
     assert response_signup.json == {
         "ok": True,
         "result": {"id": ANY, "name": user_name, "token": ANY},
@@ -31,7 +31,7 @@ def test_valid_auth(client):
         "/api/v1/users/login",
         json={"name": user_name, "password": password},
     )
-    assert response_login.status_code == HttpCode.CREATED
+    assert response_login.status_code == HTTPStatus.CREATED
     assert response_login.json == {
         "ok": True,
         "result": {"id": ANY, "name": user_name, "token": ANY},
@@ -44,7 +44,7 @@ def test_valid_auth(client):
         "/api/v1/current_user",
         headers={"Authorization": f"Bearer {auth_token}"},
     )
-    assert response_current_user.status_code == HttpCode.OK
+    assert response_current_user.status_code == HTTPStatus.OK
     assert response_current_user.json == {
         "ok": True,
         "result": {"id": ANY, "name": user_name},
@@ -67,7 +67,7 @@ def test_double_signup(client):
             "password": password,
         },
     )
-    assert response_signup.status_code == HttpCode.CREATED
+    assert response_signup.status_code == HTTPStatus.CREATED
     assert response_signup.json == {
         "ok": True,
         "result": {"id": ANY, "name": user_name, "token": ANY},
@@ -83,10 +83,10 @@ def test_double_signup(client):
             "password": get_random_string(6),
         },
     )
-    assert response_second_signup.status_code == HttpCode.UNAUTHORIZED
+    assert response_second_signup.status_code == HTTPStatus.UNAUTHORIZED
     assert response_second_signup.json == {
         "ok": False,
-        "error_code": HttpCode.UNAUTHORIZED,
+        "error_code": HTTPStatus.UNAUTHORIZED,
         "description": f"Name already exists: {user_name}",
     }
 
@@ -107,10 +107,10 @@ def test_login_wrong_password(client):
         json={"name": "glepape", "password": "wrong_password"},
     )
 
-    assert response_login.status_code == HttpCode.UNAUTHORIZED
+    assert response_login.status_code == HTTPStatus.UNAUTHORIZED
     assert response_login.json == {
         "ok": False,
-        "error_code": HttpCode.UNAUTHORIZED,
+        "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Invalid credentials",
     }
 
@@ -133,9 +133,9 @@ def test_invalid_token(client):
         headers={"Authorization": f"Bear {auth_token}"},
     )
 
-    assert response_get_all_bets.status_code == HttpCode.UNAUTHORIZED
+    assert response_get_all_bets.status_code == HTTPStatus.UNAUTHORIZED
     assert response_get_all_bets.json == {
         "ok": False,
-        "error_code": HttpCode.UNAUTHORIZED,
+        "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Invalid token. Registration and / or authentication required",
     }

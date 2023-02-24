@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from flask import Blueprint, current_app
 
 from .utils.auth_utils import token_required
@@ -15,7 +17,7 @@ def config_get(current_user):
         raise UnauthorizedAccessToAdminAPI
 
     return success_response(
-        200,
+        HTTPStatus.OK,
         {
             "locked_datetime": current_app.config["LOCK_DATETIME"],
             "base_correct_result": current_app.config["BASE_CORRECT_RESULT"],

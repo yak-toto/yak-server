@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from operator import itemgetter
 from unittest.mock import ANY
 from uuid import uuid4
@@ -5,8 +6,6 @@ from uuid import uuid4
 import pkg_resources
 
 from yak_server.cli.database import initialize_database
-
-from .constants import HttpCode
 
 
 def test_teams(app, client):
@@ -22,7 +21,7 @@ def test_teams(app, client):
         "api/v1/teams",
     )
 
-    assert response_get_all_teams.status_code == HttpCode.OK
+    assert response_get_all_teams.status_code == HTTPStatus.OK
 
     excepted_teams = [
         {
@@ -85,7 +84,7 @@ def test_teams(app, client):
 
     assert response_one_team_with_invalid_id.json == {
         "ok": False,
-        "error_code": HttpCode.BAD_REQUEST,
+        "error_code": HTTPStatus.BAD_REQUEST,
         "description": f"Invalid team id: {invalid_team_id}. "
         "Retry with a uuid or ISO 3166-1 alpha-2 code",
     }
@@ -99,6 +98,6 @@ def test_teams(app, client):
 
     assert response_non_existing_team_id.json == {
         "ok": False,
-        "error_code": HttpCode.NOT_FOUND,
+        "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Team not found: {non_existing_team_id}",
     }
