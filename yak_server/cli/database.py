@@ -1,4 +1,4 @@
-import csv
+import json
 import subprocess
 from datetime import datetime
 from getpass import getpass
@@ -84,62 +84,46 @@ def create_admin(app):
 def initialize_database(app):
     DATA_FOLDER = app.config["DATA_FOLDER"]
 
-    with Path(f"{DATA_FOLDER}/phases.csv", newline="").open() as csvfile:
-        spamreader = csv.reader(csvfile, delimiter="|")
+    with Path(f"{DATA_FOLDER}/phases.json").open() as file:
+        phases = json.loads(file.read())
 
-        for row in spamreader:
-            index, code, description = row
-            db.session.add(PhaseModel(code=code, description=description, index=index))
-
+        db.session.add_all(PhaseModel(**phase) for phase in phases)
         db.session.commit()
 
-    with Path(f"{DATA_FOLDER}/groups.csv", newline="").open() as csvfile:
-        spamreader = csv.reader(csvfile, delimiter="|")
+    with Path(f"{DATA_FOLDER}/groups.json").open() as file:
+        groups = json.loads(file.read())
 
-        for row in spamreader:
-            index, code, phase_code, description = row
+        for group in groups:
+            phase = PhaseModel.query.filter_by(code=group["phase_code"]).first()
+            group.pop("phase_code")
+            group["phase_id"] = phase.id
 
-            phase = PhaseModel.query.filter_by(code=phase_code).first()
-
-            db.session.add(
-                GroupModel(code=code, phase_id=phase.id, description=description, index=index),
-            )
-
+        db.session.add_all(GroupModel(**group) for group in groups)
         db.session.commit()
 
-    with Path(f"{DATA_FOLDER}/teams.csv", newline="").open() as csvfile:
-        spamreader = csv.reader(csvfile, delimiter="|")
+    with Path(f"{DATA_FOLDER}/teams.json").open() as file:
+        teams = json.loads(file.read())
 
-        db.session.add_all(
-            TeamModel(
-                code=row[0],
-                description=row[1],
-                flag_url=row[2],
-            )
-            for row in spamreader
-        )
+        db.session.add_all(TeamModel(**team) for team in teams)
         db.session.commit()
 
-    with Path(f"{DATA_FOLDER}/matches.csv", newline="").open() as csvfile:
-        spamreader = csv.reader(csvfile, delimiter="|")
+    with Path(f"{DATA_FOLDER}/matches.json").open() as file:
+        matches = json.loads(file.read())
 
-        for row in spamreader:
-            group_code, index, team1_code, team2_code = row
+        for match in matches:
+            team1 = TeamModel.query.filter_by(code=match["team1_code"]).first()
+            match.pop("team1_code")
+            match["team1_id"] = team1.id
 
-            team1 = TeamModel.query.filter_by(code=team1_code).first()
-            team2 = TeamModel.query.filter_by(code=team2_code).first()
+            team2 = TeamModel.query.filter_by(code=match["team2_code"]).first()
+            match.pop("team2_code")
+            match["team2_id"] = team2.id
 
-            group = GroupModel.query.filter_by(code=group_code).first()
+            group = GroupModel.query.filter_by(code=match["group_code"]).first()
+            match.pop("group_code")
+            match["group_id"] = group.id
 
-            db.session.add(
-                MatchModel(
-                    group_id=group.id,
-                    team1_id=team1.id,
-                    team2_id=team2.id,
-                    index=index,
-                ),
-            )
-
+        db.session.add_all(MatchModel(**match) for match in matches)
         db.session.commit()
 
 

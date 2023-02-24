@@ -1,0 +1,38 @@
+[
+    {
+        "group_code": "A",
+        "index": 1,
+        "team1_code": "HR",
+        "team2_code": "FI"
+    },
+    {
+        "group_code": "A",
+        "index": 2,
+        "team1_code": "NA",
+        "team2_code": "IQ"
+    },
+    {
+        "group_code": "A",
+        "index": 3,
+        "team1_code": "HR",
+        "team2_code": "NA"
+    },
+    {
+        "group_code": "A",
+        "index": 4,
+        "team1_code": "FI",
+        "team2_code": "IQ"
+    },
+    {
+        "group_code": "A",
+        "index": 5,
+        "team1_code": "HR",
+        "team2_code": "IQ"
+    },
+    {
+        "group_code": "A",
+        "index": 6,
+        "team1_code": "FI",
+        "team2_code": "NA"
+    }
+]

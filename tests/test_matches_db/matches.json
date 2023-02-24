@@ -1,0 +1,38 @@
+[
+    {
+        "group_code": "A",
+        "index": 1,
+        "team1_code": "AD",
+        "team2_code": "BR"
+    },
+    {
+        "group_code": "A",
+        "index": 2,
+        "team1_code": "BF",
+        "team2_code": "GT"
+    },
+    {
+        "group_code": "A",
+        "index": 3,
+        "team1_code": "AD",
+        "team2_code": "BF"
+    },
+    {
+        "group_code": "A",
+        "index": 4,
+        "team1_code": "BR",
+        "team2_code": "GT"
+    },
+    {
+        "group_code": "A",
+        "index": 5,
+        "team1_code": "AD",
+        "team2_code": "GT"
+    },
+    {
+        "group_code": "A",
+        "index": 6,
+        "team1_code": "BR",
+        "team2_code": "BF"
+    }
+]

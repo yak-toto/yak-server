@@ -1,0 +1,42 @@
+[
+    {
+        "code": "DE",
+        "description": "Germany",
+        "flag_url": "https://fake-team-flag_germany.com"
+    },
+    {
+        "code": "GR",
+        "description": "Greece",
+        "flag_url": "https://fake-team-flag_greece.com"
+    },
+    {
+        "code": "GD",
+        "description": "Grenada",
+        "flag_url": "https://fake-team-flag_grenada.com"
+    },
+    {
+        "code": "JM",
+        "description": "Jamaica",
+        "flag_url": "https://fake-team-flag_jamaica.com"
+    },
+    {
+        "code": "JO",
+        "description": "Jordan",
+        "flag_url": "https://fake-team-flag_jordan.com"
+    },
+    {
+        "code": "ML",
+        "description": "Mali",
+        "flag_url": "https://fake-team-flag_mali.com"
+    },
+    {
+        "code": "NO",
+        "description": "Norway",
+        "flag_url": "https://fake-team-flag_norway.com"
+    },
+    {
+        "code": "UA",
+        "description": "Ukraine",
+        "flag_url": "https://fake-team-flag_ukraine.com"
+    }
+]

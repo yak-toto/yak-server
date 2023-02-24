@@ -1,0 +1,12 @@
+[
+    {
+        "index": 1,
+        "code": "GROUP",
+        "description": "Phase de groupes"
+    },
+    {
+        "index": 2,
+        "code": "FINAL",
+        "description": "Phase finale"
+    }
+]

@@ -1,0 +1,22 @@
+[
+    {
+        "code": "HR",
+        "description": "Crotia",
+        "flag_url": "https://fake-team-flag_croatia.com"
+    },
+    {
+        "code": "FI",
+        "description": "Finland",
+        "flag_url": "https://fake-team-flag_finland.com"
+    },
+    {
+        "code": "IQ",
+        "description": "Iraq",
+        "flag_url": "https://fake-team-flag_iraq.com"
+    },
+    {
+        "code": "NA",
+        "description": "Namibia",
+        "flag_url": "https://fake-team-flag_namibia.com"
+    }
+]
