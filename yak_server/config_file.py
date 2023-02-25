@@ -27,8 +27,6 @@ YAK_CONFIG = {
     "SQLALCHEMY_DATABASE_URI": (
         f"mysql+pymysql://{MYSQL_USER_NAME}:{MYSQL_PASSWORD}@localhost:{MYSQL_PORT}/{MYSQL_DB}"
     ),
-    "BOT_TOKEN": os.environ.get("BOT_TOKEN"),
-    "CHAT_ID": os.environ.get("CHAT_ID"),
     # Load jwt secret key from credentials file
     "SECRET_KEY": os.environ["JWT_SECRET_KEY"],
     # SQL Alchemy features

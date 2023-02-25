@@ -1,11 +1,11 @@
 import json
+import logging
 import subprocess
 from datetime import datetime
 from getpass import getpass
 from pathlib import Path
 
 import pkg_resources
-import requests
 
 from yak_server import db
 from yak_server.database.models import (
@@ -18,6 +18,8 @@ from yak_server.database.models import (
     UserModel,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class ConfirmPasswordDoesNotMatch(Exception):
     def __init__(self) -> None:
@@ -29,21 +31,6 @@ class SignupError(Exception):
         super().__init__(f"Error during signup. {description}")
 
 
-class TelegramSender:
-    @staticmethod
-    def send_message(bot_token, chat_id, text):
-        requests.get(
-            f"https://api.telegram.org/bot{bot_token}/sendMessage",
-            params={"chat_id": chat_id, "text": text},
-            timeout=10,
-        )
-
-
-class MissingTelegramIdentifier(Exception):
-    def __init__(self) -> None:
-        super().__init__("Bot token or chat id is missing in flask config. Backup is disabled.")
-
-
 class RecordDeletionInProduction(Exception):
     def __init__(self) -> None:
         super().__init__("Trying to delete records in production using script. DO NOT DO IT.")
@@ -52,6 +39,11 @@ class RecordDeletionInProduction(Exception):
 class TableDropInProduction(Exception):
     def __init__(self) -> None:
         super().__init__("Trying to drop database tables in production using script. DO NOT DO IT.")
+
+
+class BackupError(Exception):
+    def __init__(self, description) -> None:
+        super().__init__(f"Error during backup. {description}")
 
 
 def create_database(app):
@@ -128,9 +120,6 @@ def initialize_database(app):
 
 
 def backup_database(app):
-    if not app.config.get("BOT_TOKEN") or not app.config.get("CHAT_ID"):
-        raise MissingTelegramIdentifier
-
     backup_location = pkg_resources.resource_filename(__name__, "backup_files")
 
     if not Path(backup_location).exists():
@@ -153,20 +142,18 @@ def backup_database(app):
     )
 
     if result.returncode:
-        TelegramSender.send_message(
-            app.config["BOT_TOKEN"],
-            app.config["CHAT_ID"],
-            f"Something went wrong when backup on {backup_date} at {backup_time}",
+        error_message = (
+            f"Something went wrong when backup on {backup_date} at {backup_time}: "
+            f"{result.stderr.replace(app.config['MYSQL_PASSWORD'], '********')}"
         )
-        return
+
+        logger.error(error_message)
+
+        raise BackupError(error_message)
 
     with Path(file_name).open(mode="w") as file:
         file.write(result.stdout)
-        TelegramSender.send_message(
-            app.config["BOT_TOKEN"],
-            app.config["CHAT_ID"],
-            f"Backup done on {backup_date} at {backup_time}",
-        )
+        logger.info(f"Backup done on {backup_date} at {backup_time}")
 
 
 def delete_database(app):

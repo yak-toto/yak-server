@@ -53,14 +53,7 @@ login system is using JSON Web Token, a secret key is required. To generate one,
 JWT_SECRET_KEY=9292f79e10ed7ed03ffad66d196217c4
 ```
 
-Also, automatic backup can be done through `yak_server/cli/backup_database` script and is able to send notification to Telegram bot. It can be run using `flask db backup`. To do so, please add a Telegram bot token and chat id to `.flaskenv`.
-
-```text
-BOT_TOKEN=my_bot_token
-CHAT_ID=my_chat_id
-```
-
-If the variables are not set, no telegram will be send.
+Also, automatic backup can be done through `yak_server/cli/backup_database` script. It can be run using `flask db backup`.
 
 Finally, flask needs some configuration to start. Please add `FLASK_APP=yak_server` variable to indicate main location. Last thing, for development environment, debug needs to be activated with a addditional environment variable:
 
