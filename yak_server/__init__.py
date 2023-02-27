@@ -66,13 +66,6 @@ def create_app():
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     # --------------------------------------------- #
-    # CLI setup (flask db create|init|delete|admin)
-    # --------------------------------------------- #
-    from .cli import db_cli
-
-    app.cli.add_command(db_cli)
-
-    # --------------------------------------------- #
     # Declare logger configuration for yak server
     # --------------------------------------------- #
     logging.basicConfig(

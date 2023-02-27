@@ -1,5 +1,6 @@
-from flask import current_app
-from flask.cli import AppGroup
+import click
+
+from yak_server import create_app
 
 from .database import (
     backup_database,
@@ -10,34 +11,71 @@ from .database import (
     initialize_database,
 )
 
-db_cli = AppGroup("db")
 
-
-@db_cli.command("create")
+@click.command()
 def create():
-    create_database(current_app)
+    """Create all database tables"""
+    app = create_app()
+    with app.app_context():
+        create_database(app)
 
 
-@db_cli.command("init")
+@click.command()
 def init():
-    initialize_database(current_app)
+    """Initialize database"""
+    app = create_app()
+    with app.app_context():
+        initialize_database(app)
 
 
-@db_cli.command("drop")
+@click.command()
 def drop():
-    drop_database(current_app)
+    """Drop all tables"""
+    app = create_app()
+    with app.app_context():
+        drop_database(app)
 
 
-@db_cli.command("delete")
+@click.command()
 def delete():
-    delete_database(current_app)
+    """Delete all records"""
+    app = create_app()
+    with app.app_context():
+        delete_database(app)
 
 
-@db_cli.command("admin")
+@click.command()
 def admin():
-    create_admin(current_app)
+    """Create admin account in database"""
+    app = create_app()
+    with app.app_context():
+        create_admin(app)
 
 
-@db_cli.command("backup")
+@click.command()
 def backup():
-    backup_database(current_app)
+    """Backup database in a sql file"""
+    app = create_app()
+    with app.app_context():
+        backup_database(app)
+
+
+@click.group()
+def db():
+    pass
+
+
+db.add_command(create)
+db.add_command(init)
+db.add_command(drop)
+db.add_command(delete)
+db.add_command(admin)
+db.add_command(backup)
+
+
+@click.group()
+def main():
+    pass
+
+
+main.add_command(db)
