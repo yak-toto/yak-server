@@ -41,7 +41,7 @@
     },
     {
         "code": "US",
-        "description": "États-Unis",
+        "description": "\u00c9tats-Unis",
         "flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_United_States-64x34.png"
     },
     {
@@ -81,7 +81,7 @@
     },
     {
         "code": "KR",
-        "description": "Corée du Sud",
+        "description": "Cor\u00e9e du Sud",
         "flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_South_Korea-64x43.png"
     },
     {
@@ -91,7 +91,7 @@
     },
     {
         "code": "EC",
-        "description": "Équateur",
+        "description": "\u00c9quateur",
         "flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Ecuador-64x43.png"
     },
     {
@@ -116,7 +116,7 @@
     },
     {
         "code": "SN",
-        "description": "Sénégal",
+        "description": "S\u00e9n\u00e9gal",
         "flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Senegal-64x43.png"
     },
     {
@@ -126,7 +126,7 @@
     },
     {
         "code": "BR",
-        "description": "Brésil",
+        "description": "Br\u00e9sil",
         "flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Brazil-64x45.png"
     },
     {

@@ -51,7 +51,7 @@
         "index": 9,
         "code": "8",
         "phase_code": "FINAL",
-        "description": "8ème de finale"
+        "description": "8\u00e8me de finale"
     },
     {
         "index": 10,
@@ -75,6 +75,6 @@
         "index": 13,
         "code": "3",
         "phase_code": "FINAL",
-        "description": "Finale pour la troisième place"
+        "description": "Finale pour la troisi\u00e8me place"
     }
 ]
