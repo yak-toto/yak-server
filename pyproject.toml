@@ -21,7 +21,7 @@ python = "^3.9"
 
 Flask-SQLAlchemy = "^3.0.3"
 PyJWT = "^2.6.0"
-PyMySQL = "^1.0.2"
+PyMySQL = {version = "^1.0.2", extras=["rsa"]}
 python-dotenv = "^0.21.1"
 strawberry-graphql = "^0.155.3"
 flask-cors = "^3.0.10"
