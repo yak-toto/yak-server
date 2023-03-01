@@ -1,0 +1,61 @@
+name: 🔂 Unit tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+    paths:
+      - "yak_server/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "poetry.lock"
+      - ".github/workflows/test.yml"
+
+jobs:
+  unit-tests:
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Shutdown Ubuntu MySQL
+        run: sudo service mysql stop # Shutdown the Default MySQL
+
+      - name: Set up MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql version: '8.0'
+          mysql database: 'yak_toto_test'
+          mysql user: ${{ secrets.MYSQL_USER_NAME }}
+          mysql root password: ${{ secrets.MYSQL_PASSWORD }}
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        id: setup-python
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+
+      - name: Using python environment
+        run: poetry env use ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Create .flaskenv file
+        run: echo -e "MYSQL_USER_NAME=${{ secrets.MYSQL_USER_NAME }}\nMYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}\nMYSQL_DB=yak_toto_test\nJWT_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(16))')\nFLASK_DEBUG=1\nCOMPETITION=world_cup_2022" > .flaskenv
+
+      - name: Run test
+        run:
+          poetry run pytest --cov=strawberry --cov-append --cov-report=xml -vv
+
+        if: ${{ always() }}
