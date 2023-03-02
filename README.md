@@ -1,5 +1,7 @@
 # Yak-toto
 
+[![PyPI](https://img.shields.io/pypi/v/yak-server?logo=pypi&logoColor=white&style=for-the-badge)](https://pypi.org/project/yak-server/)
+
 ## Requisites
 
 - Ubuntu 22.04
