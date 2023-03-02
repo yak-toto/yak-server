@@ -1,6 +1,6 @@
 import strawberry
 from flask import current_app
-from strawberry.extensions import MaskErrors
+from strawberry.extensions import MaskErrors, QueryDepthLimiter
 
 from .mutation import Mutation
 from .query import Query
@@ -13,5 +13,5 @@ def mask_errors(_) -> bool:
 schema = strawberry.Schema(
     query=Query,
     mutation=Mutation,
-    extensions=[MaskErrors(should_mask_error=mask_errors)],
+    extensions=[MaskErrors(should_mask_error=mask_errors), QueryDepthLimiter(max_depth=6)],
 )
