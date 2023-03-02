@@ -1,0 +1,20 @@
+[
+    {
+        "group_code": "A",
+        "index": 1,
+        "team1_code": "FR",
+        "team2_code": "IE"
+    },
+    {
+        "group_code": "A",
+        "index": 2,
+        "team1_code": "FR",
+        "team2_code": "IM"
+    },
+    {
+        "group_code": "A",
+        "index": 3,
+        "team1_code": "IE",
+        "team2_code": "IM"
+    }
+]
