@@ -28,9 +28,12 @@ flask-cors = "^3.0.10"
 flask-migrate = "^4.0.4"
 
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.group.test.dependencies]
 pytest = "^7.2.1"
 pytest-cov = "^4.0.0"
+
+
+[tool.poetry.group.pre_commit.dependencies]
 pre-commit = "^3.0.4"
 ruff = "^0.0.247"
 
