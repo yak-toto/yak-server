@@ -49,7 +49,7 @@ jobs:
         run: poetry env use ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --without pre_commit
 
       - name: Create .flaskenv file
         run: echo -e "MYSQL_USER_NAME=${{ secrets.MYSQL_USER_NAME }}\nMYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}\nMYSQL_DB=yak_toto_test\nJWT_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(16))')\nFLASK_DEBUG=1\nCOMPETITION=world_cup_2022" > .flaskenv
