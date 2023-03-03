@@ -1,5 +1,4 @@
 import uuid
-from typing import Optional, Union
 
 import strawberry
 
@@ -53,14 +52,17 @@ class NewScoreNegative:
         )
 
 
-ModifyScoreBetResult = Union[
-    ScoreBet,
-    ScoreBetNotFoundForUpdate,
-    LockedScoreBetError,
-    NewScoreNegative,
-    InvalidToken,
-    ExpiredToken,
-]
+ModifyScoreBetResult = strawberry.union(
+    "ModifyScoreBetResult",
+    types=(
+        ScoreBet,
+        ScoreBetNotFoundForUpdate,
+        LockedScoreBetError,
+        NewScoreNegative,
+        InvalidToken,
+        ExpiredToken,
+    ),
+)
 
 
 @strawberry.type
@@ -73,16 +75,19 @@ class BinaryBetNotFoundForUpdate:
     message: str = "Binary bet not found. Cannot modify a ressource that does not exist."
 
 
-ModifyBinaryBetResult = Union[
-    BinaryBet,
-    BinaryBetNotFoundForUpdate,
-    LockedBinaryBetError,
-    InvalidToken,
-    ExpiredToken,
-]
+ModifyBinaryBetResult = strawberry.union(
+    "ModifyBinaryBetResult",
+    types=(
+        BinaryBet,
+        BinaryBetNotFoundForUpdate,
+        LockedBinaryBetError,
+        InvalidToken,
+        ExpiredToken,
+    ),
+)
 
 
-CurrentUserResult = Union[User, InvalidToken, ExpiredToken]
+CurrentUserResult = strawberry.union("CurrentUserResult", types=(User, InvalidToken, ExpiredToken))
 
 
 @strawberry.type
@@ -90,7 +95,10 @@ class AllTeamsSuccessful:
     teams: list[Team]
 
 
-AllTeamsResult = Union[AllTeamsSuccessful, InvalidToken, ExpiredToken]
+AllTeamsResult = strawberry.union(
+    "AllTeamsResult",
+    types=(AllTeamsSuccessful, InvalidToken, ExpiredToken),
+)
 
 
 @strawberry.type
@@ -111,14 +119,14 @@ class TeamByCodeNotFound:
         return f"Cannot find team with code: {self.code}"
 
 
-TeamByIdResult = Union[Team, TeamByIdNotFound, InvalidToken, ExpiredToken]
-TeamByCodeResult = Union[Team, TeamByCodeNotFound, InvalidToken, ExpiredToken]
-
-
-@strawberry.type
-class TeamResponse:
-    team: Optional[Team]
-    errors: Optional[list[Union[InvalidToken, ExpiredToken]]]
+TeamByIdResult = strawberry.union(
+    "TeamByIdResult",
+    types=(Team, TeamByIdNotFound, InvalidToken, ExpiredToken),
+)
+TeamByCodeResult = strawberry.union(
+    "TeamByCodeResult",
+    types=(Team, TeamByCodeNotFound, InvalidToken, ExpiredToken),
+)
 
 
 @strawberry.type
@@ -130,7 +138,10 @@ class ScoreBetNotFound:
         return f"Cannot find score bet with id: {self.id}"
 
 
-ScoreBetResult = Union[ScoreBet, ScoreBetNotFound, InvalidToken, ExpiredToken]
+ScoreBetResult = strawberry.union(
+    "ScoreBetResult",
+    types=(ScoreBet, ScoreBetNotFound, InvalidToken, ExpiredToken),
+)
 
 
 @strawberry.type
@@ -142,12 +153,15 @@ class BinaryBetNotFound:
         return f"Cannot find binary bet with id: {self.id}"
 
 
-BinaryBetResult = Union[
-    BinaryBet,
-    BinaryBetNotFound,
-    InvalidToken,
-    ExpiredToken,
-]
+BinaryBetResult = strawberry.union(
+    "BinaryBetResult",
+    types=(
+        BinaryBet,
+        BinaryBetNotFound,
+        InvalidToken,
+        ExpiredToken,
+    ),
+)
 
 
 @strawberry.type
@@ -155,7 +169,7 @@ class Groups:
     groups: list[Group]
 
 
-AllGroupsResult = Union[Groups, InvalidToken, ExpiredToken]
+AllGroupsResult = strawberry.union("AllGroupsResult", types=(Groups, InvalidToken, ExpiredToken))
 
 
 @strawberry.type
@@ -167,7 +181,10 @@ class GroupByCodeNotFound:
         return f"Cannot find group with code: {self.code}"
 
 
-GroupByCodeResult = Union[Group, GroupByCodeNotFound, InvalidToken, ExpiredToken]
+GroupByCodeResult = strawberry.union(
+    "GroupByCodeResult",
+    types=(Group, GroupByCodeNotFound, InvalidToken, ExpiredToken),
+)
 
 
 @strawberry.type
@@ -179,7 +196,10 @@ class GroupByIdNotFound:
         return f"Cannot find group with id: {self.id}"
 
 
-GroupByIdResult = Union[Group, GroupByIdNotFound, InvalidToken, ExpiredToken]
+GroupByIdResult = strawberry.union(
+    "GroupByIdResult",
+    types=(Group, GroupByIdNotFound, InvalidToken, ExpiredToken),
+)
 
 
 @strawberry.type
@@ -187,7 +207,7 @@ class Phases:
     phases: list[Phase]
 
 
-AllPhasesResult = Union[Phases, InvalidToken, ExpiredToken]
+AllPhasesResult = strawberry.union("AllPhasesResult", types=(Phases, InvalidToken, ExpiredToken))
 
 
 @strawberry.type
@@ -199,7 +219,10 @@ class PhaseByCodeNotFound:
         return f"Cannot find phase with code: {self.code}"
 
 
-PhaseByCodeResult = Union[Phase, PhaseByCodeNotFound, InvalidToken, ExpiredToken]
+PhaseByCodeResult = strawberry.union(
+    "PhaseByCodeResult",
+    types=(Phase, PhaseByCodeNotFound, InvalidToken, ExpiredToken),
+)
 
 
 @strawberry.type
@@ -211,7 +234,10 @@ class PhaseByIdNotFound:
         return f"Cannot find phase with id: {self.id}"
 
 
-PhaseByIdResult = Union[Phase, PhaseByIdNotFound, InvalidToken, ExpiredToken]
+PhaseByIdResult = strawberry.union(
+    "PhaseByIdResult",
+    types=(Phase, PhaseByIdNotFound, InvalidToken, ExpiredToken),
+)
 
 
 @strawberry.type
@@ -219,7 +245,10 @@ class ScoreBoard:
     users: list[UserWithoutSensitiveInfo]
 
 
-ScoreBoardResult = Union[ScoreBoard, InvalidToken, ExpiredToken]
+ScoreBoardResult = strawberry.union(
+    "ScoreBoardResult",
+    types=(ScoreBoard, InvalidToken, ExpiredToken),
+)
 
 
 @strawberry.type
@@ -231,7 +260,7 @@ class UserNameAlreadyExists:
         return f"Name already exists: {self.user_name}"
 
 
-SignupResult = Union[UserWithToken, UserNameAlreadyExists]
+SignupResult = strawberry.union("SignupResult", types=(UserWithToken, UserNameAlreadyExists))
 
 
 @strawberry.type
@@ -239,7 +268,7 @@ class InvalidCredentials:
     message: str = "Invalid credentials"
 
 
-LoginResult = Union[UserWithToken, InvalidCredentials]
+LoginResult = strawberry.union("LoginResult", types=(UserWithToken, InvalidCredentials))
 
 
 @strawberry.type
@@ -251,7 +280,13 @@ class UserNotFound:
         return f"Cannot find user with id: {self.user_id}"
 
 
-LockUserResult = Union[User, UserNotFound, InvalidToken, ExpiredToken, UnauthorizedAccessToAdminAPI]
+LockUserResult = strawberry.union(
+    "LockUserResult",
+    types=(User, UserNotFound, InvalidToken, ExpiredToken, UnauthorizedAccessToAdminAPI),
+)
 
 
-UserResult = Union[User, InvalidToken, ExpiredToken, UserNotFound, UnauthorizedAccessToAdminAPI]
+UserResult = strawberry.union(
+    "UserResult",
+    types=(User, InvalidToken, ExpiredToken, UserNotFound, UnauthorizedAccessToAdminAPI),
+)
