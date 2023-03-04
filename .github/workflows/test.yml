@@ -56,6 +56,6 @@ jobs:
 
       - name: Run test
         run:
-          poetry run pytest --cov=yak_server --cov-append --cov-report=xml -vv
+          poetry run pytest --cov-append --cov-report=xml -vv
 
         if: ${{ always() }}
