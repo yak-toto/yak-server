@@ -1,7 +1,6 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
-include = yak_server
 
 [report]
 omit = ./yak_server/database/migrations/*
