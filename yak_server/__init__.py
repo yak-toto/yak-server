@@ -63,7 +63,7 @@ def create_app():
     # Registrer endpoint
     app.add_url_rule(
         f"/{GLOBAL_ENDPOINT}/{VERSION}",
-        view_func=GraphQLView.as_view("graphql_view", schema=schema),
+        view_func=GraphQLView.as_view("graphql_view", schema=schema, graphiql=app.config["DEBUG"]),
     )
 
     CORS(app, resources={r"/api/*": {"origins": "*"}})
