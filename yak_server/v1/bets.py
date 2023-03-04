@@ -365,16 +365,16 @@ def group_get(current_user, group_code):
     )
 
 
-@bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/results/<string:group_code>")
+@bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/rank/<string:group_code>")
 @token_required
 def group_result_get(current_user, group_code):
     return success_response(
         HTTPStatus.OK,
-        get_result_with_group_code(current_user.id, group_code),
+        get_group_rank_with_code(current_user.id, group_code),
     )
 
 
-def get_result_with_group_code(user_id, group_code):
+def get_group_rank_with_code(user_id, group_code):
     group = GroupModel.query.filter_by(code=group_code).first()
 
     group_rank = GroupPositionModel.query.filter_by(group_id=group.id, user_id=user_id)
@@ -382,7 +382,7 @@ def get_result_with_group_code(user_id, group_code):
     return {
         "phase": group.phase.to_dict(),
         "group": group.to_dict_without_phase(),
-        "results": sorted(
+        "group_rank": sorted(
             [group_position.to_dict() for group_position in group_rank],
             key=lambda team: (
                 team["points"],
@@ -513,7 +513,7 @@ def commit_finale_phase(current_user):
     finale_phase_config = current_app.config["FINALE_PHASE_CONFIG"]
 
     groups_result = {
-        group.code: get_result_with_group_code(current_user.id, group.code)["results"]
+        group.code: get_group_rank_with_code(current_user.id, group.code)["group_rank"]
         for group in GroupModel.query.join(GroupModel.phase).filter(
             PhaseModel.code == "GROUP",
         )
@@ -543,8 +543,12 @@ def commit_finale_phase(current_user):
                 groups_result[match_config["team2"]["group"]],
             )
         ):
-            team1 = groups_result[match_config["team1"]["group"]][match_config["team1"]["rank"] - 1]
-            team2 = groups_result[match_config["team2"]["group"]][match_config["team2"]["rank"] - 1]
+            team1 = groups_result[match_config["team1"]["group"]][
+                match_config["team1"]["rank"] - 1
+            ]["team"]
+            team2 = groups_result[match_config["team2"]["group"]][
+                match_config["team2"]["rank"] - 1
+            ]["team"]
 
             match = MatchModel.query.filter_by(
                 group_id=first_phase_phase_group.id,

@@ -81,9 +81,6 @@ def put_finale_phase(client, token, is_one_won):
 
     assert response_put_finale_phase.status_code == HTTPStatus.OK
 
-    if response_put_finale_phase.status_code == HTTPStatus.UNAUTHORIZED:
-        assert response_put_finale_phase.json["description"] == ""
-
 
 def test_compute_points(app, client):
     # location of test data

@@ -56,49 +56,55 @@ def test_group_rank(app, client):
     assert response_patch_bets.status_code == HTTPStatus.OK
 
     response_group_result_response = client.get(
-        "/api/v1/bets/groups/results/A",
+        "/api/v1/bets/groups/rank/A",
         headers={"Authorization": f"Bearer {token}"},
     )
 
     assert response_group_result_response.status_code == HTTPStatus.OK
-    assert response_group_result_response.json["result"]["results"] == [
+    assert response_group_result_response.json["result"]["group_rank"] == [
         {
-            "code": "FR",
-            "description": "France",
+            "team": {
+                "id": ANY,
+                "code": "FR",
+                "description": "France",
+                "flag": {"url": "https://fake-team-flag_france.com"},
+            },
             "drawn": 1,
-            "flag": {"url": "https://fake-team-flag_france.com"},
             "goals_against": 1,
             "goals_difference": 4,
             "goals_for": 5,
-            "id": ANY,
             "lost": 0,
             "played": 2,
             "points": 4,
             "won": 1,
         },
         {
-            "code": "IM",
-            "description": "Isle of Man",
+            "team": {
+                "id": ANY,
+                "code": "IM",
+                "description": "Isle of Man",
+                "flag": {"url": "https://fake-team-flag_isle_of_man.com"},
+            },
             "drawn": 1,
-            "flag": {"url": "https://fake-team-flag_isle_of_man.com"},
             "goals_against": 1,
             "goals_difference": 1,
             "goals_for": 2,
-            "id": ANY,
             "lost": 0,
             "played": 2,
             "points": 4,
             "won": 1,
         },
         {
-            "code": "IE",
-            "description": "Ireland",
+            "team": {
+                "code": "IE",
+                "description": "Ireland",
+                "id": ANY,
+                "flag": {"url": "https://fake-team-flag_brazil.com"},
+            },
             "drawn": 0,
-            "flag": {"url": "https://fake-team-flag_brazil.com"},
             "goals_against": 7,
             "goals_difference": -5,
             "goals_for": 2,
-            "id": ANY,
             "lost": 2,
             "played": 2,
             "points": 0,

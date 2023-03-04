@@ -14,7 +14,7 @@ from yak_server.database.models import (
     UserModel,
 )
 
-from .bets import get_result_with_group_code
+from .bets import get_group_rank_with_code
 from .utils.auth_utils import token_required
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import NoResultsForAdminUser, UnauthorizedAccessToAdminAPI
@@ -134,11 +134,11 @@ def compute_points(
     for group in GroupModel.query.join(GroupModel.phase).filter(
         PhaseModel.code == "GROUP",
     ):
-        group_result_admin = get_result_with_group_code(admin.id, group.code)["results"]
+        group_result_admin = get_group_rank_with_code(admin.id, group.code)["group_rank"]
 
         if all_results_filled_in_group(group_result_admin):
-            admin_first_team_id = group_result_admin[0]["id"]
-            admin_second_team_id = group_result_admin[1]["id"]
+            admin_first_team_id = group_result_admin[0]["team"]["id"]
+            admin_second_team_id = group_result_admin[1]["team"]["id"]
 
             for user in users:
                 if user.id not in result_groups:
@@ -147,11 +147,11 @@ def compute_points(
                         "number_first_qualified_guess": 0,
                     }
 
-                group_result_user = get_result_with_group_code(user.id, group.code)["results"]
+                group_result_user = get_group_rank_with_code(user.id, group.code)["group_rank"]
 
                 if all_results_filled_in_group(group_result_user):
-                    user_first_team_id = group_result_user[0]["id"]
-                    user_second_team_id = group_result_user[1]["id"]
+                    user_first_team_id = group_result_user[0]["team"]["id"]
+                    user_second_team_id = group_result_user[1]["team"]["id"]
 
                     result_groups[user.id]["number_qualified_teams_guess"] += len(
                         {user_first_team_id, user_second_team_id}

@@ -482,10 +482,7 @@ class GroupPositionModel(db.Model):
 
     def to_dict(self):
         return {
-            "id": self.team.id,
-            "code": self.team.code,
-            "description": self.team.description,
-            "flag": {"url": self.team.flag_url},
+            "team": self.team.to_dict(),
             "played": self.played,
             "won": self.won,
             "drawn": self.drawn,
