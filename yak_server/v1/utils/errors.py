@@ -1,7 +1,7 @@
 import logging
 from http import HTTPStatus
 
-from flask import Response, json
+from flask import Response, jsonify
 from jwt import ExpiredSignatureError, InvalidTokenError
 from werkzeug.exceptions import HTTPException
 
@@ -108,75 +108,51 @@ class PhaseNotFound(HTTPException):
 def set_error_handler(app):
     @app.errorhandler(HTTPException)
     def handle_http_exception(e: HTTPException) -> Response:
-        """Return JSON instead of HTML for HTTP errors."""
-        # start with the correct headers and status code from the error
-        response = e.get_response()
-
-        # replace the body with JSON
-        response.data = json.dumps(
-            {
-                "ok": False,
-                "error_code": e.code,
-                "description": e.description,
-            },
-        )
-        response.content_type = "application/json"
-
+        # Return JSON instead of HTML for HTTP errors.
         logger.info(f"Server catches an expected exception: {type(e).__name__} {e.description}")
 
-        return response
+        return jsonify(ok=False, error_code=e.code, description=e.description), e.code
 
     @app.errorhandler(Exception)
     def handle_exception(e: Exception) -> Response:
-        """Return JSON instead of HTML for generic errors."""
-
-        response = Response()
-
-        response.data = json.dumps(
-            {
-                "ok": False,
-                "error_code": HTTPStatus.INTERNAL_SERVER_ERROR,
-                "description": f"{type(e).__name__}: {str(e)}"
-                if app.config.get("DEBUG")
-                else "Unexcepted error",
-            },
-        )
-
-        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-        response.content_type = "application/json"
-
+        # Return JSON instead of HTML for generic errors.
         logger.error(f"An unexcepted expection occurs: {type(e).__name__} {e}")
 
-        return response
+        return (
+            jsonify(
+                {
+                    "ok": False,
+                    "error_code": HTTPStatus.INTERNAL_SERVER_ERROR,
+                    "description": f"{type(e).__name__}: {str(e)}"
+                    if app.config.get("DEBUG")
+                    else "Unexcepted error",
+                },
+            ),
+            HTTPStatus.INTERNAL_SERVER_ERROR,
+        )
 
     @app.errorhandler(ExpiredSignatureError)
     def handler_expired_signature_exception(e: ExpiredSignatureError) -> Response:
-        response = Response()
-
-        response.data = json.dumps(
-            {
-                "ok": False,
-                "error_code": HTTPStatus.UNAUTHORIZED,
-                "description": "Expired token. Reauthentication required.",
-            },
+        return (
+            jsonify(
+                {
+                    "ok": False,
+                    "error_code": HTTPStatus.UNAUTHORIZED,
+                    "description": "Expired token. Reauthentication required.",
+                },
+            ),
+            HTTPStatus.UNAUTHORIZED,
         )
-        response.status_code = HTTPStatus.UNAUTHORIZED
-        response.content_type = "application/json"
-
-        return response
 
     @app.errorhandler(InvalidTokenError)
     def handler_invalid_token_exception(e: InvalidTokenError) -> Response:
-        response = Response()
-
-        response.data = json.dumps(
-            {
-                "ok": False,
-                "error_code": HTTPStatus.UNAUTHORIZED,
-                "description": "Invalid token. Registration and / or authentication required",
-            },
+        return (
+            jsonify(
+                {
+                    "ok": False,
+                    "error_code": HTTPStatus.UNAUTHORIZED,
+                    "description": "Invalid token. Registration and / or authentication required",
+                },
+            ),
+            HTTPStatus.UNAUTHORIZED,
         )
-        response.status_code = HTTPStatus.UNAUTHORIZED
-        response.content_type = "application/json"
-
-        return response
