@@ -62,6 +62,14 @@ exclude = '''
 '''
 
 
+[tool.coverage.run]
+branch = "true"
+
+
+[tool.coverage.report]
+omit = ["./yak_server/database/migrations/*"]
+
+
 [tool.ruff]
 line-length = 100
 select = ["ALL"]
