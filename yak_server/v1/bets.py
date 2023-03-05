@@ -27,6 +27,7 @@ from .utils.constants import BINARY, GLOBAL_ENDPOINT, SCORE, VERSION
 from .utils.errors import (
     BetNotFound,
     DuplicatedIds,
+    GroupNotFound,
     InvalidBetType,
     LockedBets,
     MissingId,
@@ -353,6 +354,9 @@ def modify_bets(current_user):
 @token_required
 def group_get(current_user, group_code):
     group, score_bets, binary_bets = bets_from_group_code(current_user, group_code)
+
+    if not group:
+        raise GroupNotFound(group_code)
 
     return success_response(
         HTTPStatus.OK,
