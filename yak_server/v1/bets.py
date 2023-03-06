@@ -16,8 +16,6 @@ from yak_server.database.models import (
     MatchModel,
     PhaseModel,
     ScoreBetModel,
-    is_locked,
-    is_phase_locked,
 )
 from yak_server.database.query import bets_from_group_code, bets_from_phase_code
 from yak_server.helpers.group_position import update_group_position
@@ -49,7 +47,7 @@ logger = logging.getLogger(__name__)
 def create_bet(current_user, phase_code):
     phase = PhaseModel.query.filter_by(code=phase_code).first()
 
-    if is_phase_locked(phase.code, current_user.name):
+    if current_user.locked:
         raise LockedBets
 
     finale_phase_config = current_app.config["FINALE_PHASE_CONFIG"]
@@ -298,7 +296,7 @@ def modify_score_bet(user, bet_id):
     if not score_bet:
         raise BetNotFound(bet_id)
 
-    if is_locked(score_bet):
+    if user.locked:
         raise LockedBets
 
     if score_bet.score1 != body["team1"]["score"] or score_bet.score2 != body["team2"]["score"]:

@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from http import HTTPStatus
 from importlib import resources
 from unittest.mock import ANY
@@ -82,8 +81,6 @@ def test_compute_points(app, client):
     # location of test data
     with resources.as_file(resources.files("tests") / "test_compute_points_v1") as path:
         app.config["DATA_FOLDER"] = path
-    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
-    app.config["LOCK_DATETIME_FINAL_PHASE"] = str(datetime.now() + timedelta(minutes=10))
     app.config["FINALE_PHASE_CONFIG"] = {
         "first_group": "1",
         "versus": [{"team1": {"rank": 1, "group": "A"}, "team2": {"rank": 2, "group": "A"}}],

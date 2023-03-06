@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from http import HTTPStatus
 from importlib import resources
 from random import randint
@@ -15,7 +14,6 @@ def test_modify_score_bet(app, client):
     # location of test data
     with resources.as_file(resources.files("tests") / testcase) as path:
         app.config["DATA_FOLDER"] = path
-    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
 
     with app.app_context():
         initialize_database(app)
@@ -37,6 +35,7 @@ def test_modify_score_bet(app, client):
 
     assert response_signup.status_code == HTTPStatus.CREATED
     authentification_token = response_signup.json["result"]["token"]
+    user_id = response_signup.json["result"]["id"]
 
     response_get_all_bets = client.get(
         "/api/v1/bets",
@@ -77,7 +76,27 @@ def test_modify_score_bet(app, client):
     }
 
     # Error case : check locked bet
-    app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(minutes=10))
+    response_signup_admin = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": "admin",
+            "first_name": get_random_string(10),
+            "last_name": get_random_string(8),
+            "password": get_random_string(5),
+        },
+    )
+
+    assert response_signup_admin.status_code == HTTPStatus.CREATED
+
+    admin_token = response_signup_admin.json["result"]["token"]
+
+    response_lock_user = client.patch(
+        f"/api/v1/users/{user_id}",
+        json={"lock": True},
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+
+    assert response_lock_user.status_code == HTTPStatus.OK
 
     response_locked_bet = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[0]}",
@@ -91,7 +110,13 @@ def test_modify_score_bet(app, client):
         "description": "Cannot modify bets because locked date is exceeded",
     }
 
-    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
+    response_unlock_user = client.patch(
+        f"/api/v1/users/{user_id}",
+        json={"lock": False},
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+
+    assert response_unlock_user.status_code == HTTPStatus.OK
 
     # Error case : check bet not found
     non_existing_bet_id = str(uuid4())

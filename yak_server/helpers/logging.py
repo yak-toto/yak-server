@@ -36,3 +36,10 @@ def group_position_lock_retry(team1, team2, retry_time, number_of_retry):
         f"error due to group position locking {team1}-{team2} after {number_of_retry} tries. "
         f"Retry in {retry_time} seconds."
     )
+
+
+def modify_locking_rights(user_name, lock):
+    if lock:
+        return f"admin locks {user_name} bets"
+    else:
+        return f"admin unlocks {user_name} bets"

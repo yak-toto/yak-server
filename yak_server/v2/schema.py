@@ -376,7 +376,7 @@ class ScoreBet:
             id=instance.id,
             match_id=instance.match_id,
             index=instance.match.index,
-            locked=instance.locked,
+            locked=instance.user.locked,
             group=Group.from_instance(
                 instance=instance.match.group,
                 user_id=instance.user_id,
@@ -413,7 +413,7 @@ class BinaryBet:
             id=instance.id,
             match_id=instance.match_id,
             index=instance.match.index,
-            locked=instance.locked,
+            locked=instance.user.locked,
             group=Group.from_instance(
                 instance=instance.match.group,
                 user_id=instance.user_id,

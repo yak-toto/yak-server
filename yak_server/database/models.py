@@ -1,8 +1,5 @@
-from datetime import datetime
 from uuid import uuid4
 
-from dateutil import parser
-from flask import current_app
 from sqlalchemy import CheckConstraint
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -76,6 +73,8 @@ class UserModel(db.Model):
         nullable=False,
         default=0,
     )
+
+    locked = db.Column(db.Boolean, default=False)
 
     score_bets = db.relationship(
         "ScoreBetModel",
@@ -189,25 +188,6 @@ class MatchModel(db.Model):
         }
 
 
-def is_locked(score):
-    locked_date = parser.parse(current_app.config["LOCK_DATETIME"])
-    if score.match.group.phase.code == "FINAL":
-        locked_date_final_phase = parser.parse(current_app.config["LOCK_DATETIME_FINAL_PHASE"])
-
-        return score.user.name != "admin" and datetime.now() > locked_date_final_phase
-
-    return score.user.name != "admin" and datetime.now() > locked_date
-
-
-def is_phase_locked(phase_code, user_name):
-    if phase_code == "FINAL":
-        locked_date_final_phase = parser.parse(current_app.config["LOCK_DATETIME_FINAL_PHASE"])
-
-        return user_name != "admin" and datetime.now() > locked_date_final_phase
-
-    return False
-
-
 class ScoreBetModel(db.Model):
     __tablename__ = "score_bet"
     id = db.Column(
@@ -228,8 +208,6 @@ class ScoreBetModel(db.Model):
 
     score1 = db.Column(db.Integer, CheckConstraint("score1>=0"), default=None)
     score2 = db.Column(db.Integer, CheckConstraint("score2>=0"), default=None)
-
-    locked = db.Column(db.Boolean, default=False)
 
     def is_invalid(self) -> bool:
         return None in (self.score1, self.score2)
@@ -266,7 +244,7 @@ class ScoreBetModel(db.Model):
             "id": self.id,
             "match_id": self.match_id,
             "index": self.match.index,
-            "locked": is_locked(self),
+            "locked": self.user.locked,
             "group": self.match.group.to_dict(),
             "team1": self.match.team1.to_dict() | {"score": self.score1},
             "team2": self.match.team2.to_dict() | {"score": self.score2},
@@ -277,7 +255,7 @@ class ScoreBetModel(db.Model):
             "id": self.id,
             "match_id": self.match_id,
             "index": self.match.index,
-            "locked": is_locked(self),
+            "locked": self.user.locked,
             "group": {"id": self.match.group_id},
             "team1": self.match.team1.to_dict() | {"score": self.score1},
             "team2": self.match.team2.to_dict() | {"score": self.score2},
@@ -288,7 +266,7 @@ class ScoreBetModel(db.Model):
             "id": self.id,
             "match_id": self.match_id,
             "index": self.match.index,
-            "locked": is_locked(self),
+            "locked": self.user.locked,
             "team1": self.match.team1.to_dict() | {"score": self.score1},
             "team2": self.match.team2.to_dict() | {"score": self.score2},
         }
@@ -312,8 +290,6 @@ class BinaryBetModel(db.Model):
     match_id = db.Column(db.String(100), db.ForeignKey("match.id"), nullable=False)
     match = db.relationship("MatchModel", back_populates="binary_bets")
 
-    locked = db.Column(db.Boolean, default=False)
-
     is_one_won = db.Column(db.Boolean, default=None)
 
     def bet_from_is_one_won(self):
@@ -329,7 +305,7 @@ class BinaryBetModel(db.Model):
             "id": self.id,
             "match_id": self.match_id,
             "index": self.match.index,
-            "locked": is_locked(self),
+            "locked": self.user.locked,
             "group": self.match.group.to_dict(),
             "team1": self.match.team1.to_dict() | {"won": bet_results[0]},
             "team2": self.match.team2.to_dict() | {"won": bet_results[1]},
@@ -342,7 +318,7 @@ class BinaryBetModel(db.Model):
             "id": self.id,
             "match_id": self.match_id,
             "index": self.match.index,
-            "locked": is_locked(self),
+            "locked": self.user.locked,
             "group": {"id": self.match.group_id},
             "team1": self.match.team1.to_dict() | {"won": bet_results[0]},
             "team2": self.match.team2.to_dict() | {"won": bet_results[1]},
@@ -355,7 +331,7 @@ class BinaryBetModel(db.Model):
             "id": self.id,
             "match_id": self.match_id,
             "index": self.match.index,
-            "locked": is_locked(self),
+            "locked": self.user.locked,
             "team1": self.match.team1.to_dict() | {"won": bet_results[0]},
             "team2": self.match.team2.to_dict() | {"won": bet_results[1]},
         }

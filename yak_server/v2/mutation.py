@@ -1,6 +1,5 @@
 import logging
 from datetime import timedelta
-from itertools import chain
 from typing import Optional
 from uuid import UUID
 
@@ -129,7 +128,7 @@ class Mutation:
         if not bet:
             return BinaryBetNotFoundForUpdate()
 
-        if bet.locked:
+        if user.instance.locked:
             return LockedBinaryBetError()
 
         logger.info(modify_binary_bet_successfully(info.user.pseudo, bet, is_one_won))
@@ -153,7 +152,7 @@ class Mutation:
         if not bet:
             return ScoreBetNotFoundForUpdate()
 
-        if bet.locked:
+        if user.instance.locked:
             return LockedScoreBetError()
 
         if score1 is not None and score1 < 0:
@@ -197,8 +196,7 @@ class Mutation:
         if not user_to_be_locked:
             return UserNotFound(user_id=user_id)
 
-        for bet in chain(user_to_be_locked.score_bets, user_to_be_locked.binary_bets):
-            bet.locked = lock
+        user_to_be_locked.locked = lock
 
         db.session.commit()
 

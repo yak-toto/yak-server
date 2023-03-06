@@ -10,6 +10,7 @@ from yak_server.helpers.authentification import encode_bearer_token
 from yak_server.helpers.group_position import create_group_position
 from yak_server.helpers.logging import (
     logged_in_successfully,
+    modify_locking_rights,
     modify_password_successfully,
     signed_up_successfully,
 )
@@ -95,18 +96,25 @@ def patch_user(current_user, user_id):
 
     body = request.get_json()
 
-    if not body.get("password"):
+    if "password" not in body and "lock" not in body:
         raise WrongInputs
 
     user = UserModel.query.filter_by(id=user_id).first()
     if not user:
         raise UserNotFound
 
-    user.change_password(body["password"])
+    if "password" in body:
+        user.change_password(body["password"])
 
-    db.session.commit()
+        db.session.commit()
 
-    logger.info(modify_password_successfully(user.name))
+        logger.info(modify_password_successfully(user.name))
+
+    if "lock" in body:
+        user.locked = body["lock"]
+        db.session.commit()
+
+        logger.info(modify_locking_rights(user.name, body["lock"]))
 
     return success_response(HTTPStatus.OK, user.to_user_dict())
 

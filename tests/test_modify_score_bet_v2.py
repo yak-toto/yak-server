@@ -1,7 +1,9 @@
 from importlib import resources
 from uuid import uuid4
 
+from yak_server import db
 from yak_server.cli.database import initialize_database
+from yak_server.database.models import UserModel
 
 from .test_utils import get_random_string
 
@@ -180,3 +182,59 @@ def test_modify_score_bet(app, client):
         "__typename": "ScoreBetNotFoundForUpdate",
         "message": "Score bet not found. Cannot modify a ressource that does not exist.",
     }
+
+    # Error case : check LockedScoreBetError
+    response_signup_admin = client.post(
+        "/api/v2",
+        json={
+            "query": """
+                mutation Signup(
+                    $userName: String!, $firstName: String!,
+                    $lastName: String!, $password: String!
+                ) {
+                    signupResult(
+                        userName: $userName, firstName: $firstName,
+                        lastName: $lastName, password: $password
+                    ) {
+                        __typename
+                        ... on UserWithToken {
+                            token
+                        }
+                    }
+                }
+            """,
+            "variables": {
+                "userName": "admin",
+                "firstName": get_random_string(10),
+                "lastName": get_random_string(5),
+                "password": get_random_string(6),
+            },
+        },
+    )
+
+    assert response_signup_admin.json["data"]["signupResult"]["__typename"] == "UserWithToken"
+
+    response_signup_admin.json["data"]["signupResult"]["token"]
+
+    with app.app_context():
+        user_instance = UserModel.query.filter_by(name=user_name).first()
+        user_instance.locked = True
+        db.session.commit()
+
+    response_modify_locked_bet = client.post(
+        "/api/v2",
+        headers={"Authorization": f"Bearer {authentification_token}"},
+        json={
+            "query": query_modify_score_bet,
+            "variables": {
+                "id": score_bet_ids[0],
+                "score1": score1,
+                "score2": score2,
+            },
+        },
+    )
+
+    assert (
+        response_modify_locked_bet.json["data"]["modifyScoreBetResult"]["__typename"]
+        == "LockedScoreBetError"
+    )

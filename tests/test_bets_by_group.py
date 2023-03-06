@@ -50,7 +50,7 @@ def test_bets_by_groups(client, app):
             {
                 "id": ANY,
                 "index": 1,
-                "locked": True,
+                "locked": False,
                 "match_id": ANY,
                 "team1": {
                     "code": "FR",
@@ -70,7 +70,7 @@ def test_bets_by_groups(client, app):
             {
                 "id": ANY,
                 "index": 2,
-                "locked": True,
+                "locked": False,
                 "match_id": ANY,
                 "team1": {
                     "code": "FR",
@@ -90,7 +90,7 @@ def test_bets_by_groups(client, app):
             {
                 "id": ANY,
                 "index": 3,
-                "locked": True,
+                "locked": False,
                 "match_id": ANY,
                 "team1": {
                     "code": "IE",
