@@ -1,8 +1,8 @@
 import logging
-import uuid
 from datetime import timedelta
 from itertools import chain
 from typing import Optional
+from uuid import UUID
 
 import strawberry
 from flask import current_app
@@ -118,7 +118,7 @@ class Mutation:
     @strawberry.mutation
     def modify_binary_bet_result(
         self,
-        id: uuid.UUID,
+        id: UUID,
         is_one_won: Optional[bool],
     ) -> ModifyBinaryBetResult:
         user, authentification_error = bearer_authentification()
@@ -144,7 +144,7 @@ class Mutation:
     @strawberry.mutation
     def modify_score_bet_result(
         self,
-        id: uuid.UUID,
+        id: UUID,
         score1: Optional[int],
         score2: Optional[int],
     ) -> ModifyScoreBetResult:
@@ -194,7 +194,7 @@ class Mutation:
         return ScoreBet.from_instance(instance=bet)
 
     @strawberry.mutation
-    def modify_user_lock_result(self, user_id: uuid.UUID, lock: bool) -> LockUserResult:
+    def modify_user_lock_result(self, user_id: UUID, lock: bool) -> LockUserResult:
         _, authentification_error = admin_bearer_authentification()
 
         if authentification_error:

@@ -1,4 +1,4 @@
-import uuid
+from uuid import UUID
 
 import strawberry
 
@@ -80,7 +80,7 @@ class Query:
         )
 
     @strawberry.field
-    def team_by_id_result(self, id: uuid.UUID) -> TeamByIdResult:
+    def team_by_id_result(self, id: UUID) -> TeamByIdResult:
         _, authentification_error = bearer_authentification()
 
         if authentification_error:
@@ -108,7 +108,7 @@ class Query:
         return Team.from_instance(instance=team_record)
 
     @strawberry.field
-    def score_bet_result(self, id: uuid.UUID) -> ScoreBetResult:
+    def score_bet_result(self, id: UUID) -> ScoreBetResult:
         user, authentification_error = bearer_authentification()
 
         if authentification_error:
@@ -125,7 +125,7 @@ class Query:
         return ScoreBet.from_instance(instance=score_bet_record)
 
     @strawberry.field
-    def binary_bet_result(self, id: uuid.UUID) -> BinaryBetResult:
+    def binary_bet_result(self, id: UUID) -> BinaryBetResult:
         user, authentification_error = bearer_authentification()
 
         if authentification_error:
@@ -156,7 +156,7 @@ class Query:
         )
 
     @strawberry.field
-    def group_by_id_result(self, id: uuid.UUID) -> GroupByIdResult:
+    def group_by_id_result(self, id: UUID) -> GroupByIdResult:
         user, authentification_error = bearer_authentification()
 
         if authentification_error:
@@ -199,7 +199,7 @@ class Query:
         )
 
     @strawberry.field
-    def phase_by_id_result(self, id: uuid.UUID) -> PhaseByIdResult:
+    def phase_by_id_result(self, id: UUID) -> PhaseByIdResult:
         user, authentification_error = bearer_authentification()
 
         if authentification_error:
@@ -273,7 +273,7 @@ class Query:
         )
 
     @strawberry.field
-    def group_rank_by_id_result(self, id: uuid.UUID) -> GroupRankByIdResult:
+    def group_rank_by_id_result(self, id: UUID) -> GroupRankByIdResult:
         user, authentification_error = bearer_authentification()
 
         if authentification_error:
@@ -306,7 +306,7 @@ class Query:
         )
 
     @strawberry.field
-    def user_result(self, user_id: uuid.UUID) -> UserResult:
+    def user_result(self, user_id: UUID) -> UserResult:
         _, authentification_error = admin_bearer_authentification()
 
         if authentification_error:

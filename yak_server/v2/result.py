@@ -1,4 +1,4 @@
-import uuid
+from uuid import UUID
 
 import strawberry
 
@@ -104,7 +104,7 @@ AllTeamsResult = strawberry.union(
 
 @strawberry.type
 class TeamByIdNotFound:
-    id: strawberry.Private[uuid.UUID]
+    id: strawberry.Private[UUID]
 
     @strawberry.field
     def message(self) -> str:
@@ -132,7 +132,7 @@ TeamByCodeResult = strawberry.union(
 
 @strawberry.type
 class ScoreBetNotFound:
-    id: strawberry.Private[uuid.UUID]
+    id: strawberry.Private[UUID]
 
     @strawberry.field
     def message(self) -> str:
@@ -147,7 +147,7 @@ ScoreBetResult = strawberry.union(
 
 @strawberry.type
 class BinaryBetNotFound:
-    id: strawberry.Private[uuid.UUID]
+    id: strawberry.Private[UUID]
 
     @strawberry.field
     def message(self) -> str:
@@ -228,7 +228,7 @@ PhaseByCodeResult = strawberry.union(
 
 @strawberry.type
 class PhaseByIdNotFound:
-    id: strawberry.Private[uuid.UUID]
+    id: strawberry.Private[UUID]
 
     @strawberry.field
     def message(self) -> str:
@@ -274,7 +274,7 @@ LoginResult = strawberry.union("LoginResult", types=(UserWithToken, InvalidCrede
 
 @strawberry.type
 class UserNotFound:
-    user_id: strawberry.Private[uuid.UUID]
+    user_id: strawberry.Private[UUID]
 
     @strawberry.field
     def message(self) -> str:

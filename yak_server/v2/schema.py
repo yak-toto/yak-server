@@ -1,5 +1,5 @@
-import uuid
 from typing import Optional
+from uuid import UUID
 
 import strawberry
 
@@ -152,7 +152,7 @@ class Flag:
 class Team:
     instance: strawberry.Private[TeamModel]
 
-    id: uuid.UUID
+    id: UUID
     code: str
     description: str
     flag: Flag
@@ -239,7 +239,7 @@ class Group:
     instance: strawberry.Private[GroupModel]
     user_id: strawberry.Private[str]
 
-    id: uuid.UUID
+    id: UUID
     code: str
     description: str
 
@@ -307,7 +307,7 @@ class Phase:
     instance: strawberry.Private[PhaseModel]
     user_id: strawberry.Private[str]
 
-    id: uuid.UUID
+    id: UUID
     code: str
     description: str
 
@@ -361,8 +361,8 @@ class Phase:
 class ScoreBet:
     instance: strawberry.Private[ScoreBetModel]
 
-    id: uuid.UUID
-    match_id: uuid.UUID
+    id: UUID
+    match_id: UUID
     index: int
     locked: bool
     group: Group
@@ -396,8 +396,8 @@ class ScoreBet:
 class BinaryBet:
     instance: strawberry.Private[BinaryBetModel]
 
-    id: uuid.UUID
-    match_id: uuid.UUID
+    id: UUID
+    match_id: UUID
     index: int
     locked: bool
     group: Group

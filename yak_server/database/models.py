@@ -1,5 +1,5 @@
-import uuid
 from datetime import datetime
+from uuid import uuid4
 
 from dateutil import parser
 from flask import current_app
@@ -15,7 +15,7 @@ class UserModel(db.Model):
         db.String(100),
         primary_key=True,
         nullable=False,
-        default=lambda: str(uuid.uuid4()),
+        default=lambda: str(uuid4()),
     )
     name = db.Column(db.String(100), unique=True, nullable=False)
     first_name = db.Column(db.String(100), nullable=False)
@@ -145,7 +145,7 @@ class MatchModel(db.Model):
         db.String(100),
         primary_key=True,
         nullable=False,
-        default=lambda: str(uuid.uuid4()),
+        default=lambda: str(uuid4()),
     )
 
     group_id = db.Column(db.String(100), db.ForeignKey("group.id"), nullable=False)
@@ -214,7 +214,7 @@ class ScoreBetModel(db.Model):
         db.String(100),
         primary_key=True,
         nullable=False,
-        default=lambda: str(uuid.uuid4()),
+        default=lambda: str(uuid4()),
     )
     user_id = db.Column(
         db.String(100),
@@ -300,7 +300,7 @@ class BinaryBetModel(db.Model):
         db.String(100),
         primary_key=True,
         nullable=False,
-        default=lambda: str(uuid.uuid4()),
+        default=lambda: str(uuid4()),
     )
     user_id = db.Column(
         db.String(100),
@@ -367,7 +367,7 @@ class TeamModel(db.Model):
         db.String(100),
         primary_key=True,
         nullable=False,
-        default=lambda: str(uuid.uuid4()),
+        default=lambda: str(uuid4()),
     )
     code = db.Column(db.String(10), unique=True, nullable=False)
     description = db.Column(db.String(100), unique=True, nullable=False)
@@ -388,7 +388,7 @@ class GroupModel(db.Model):
         db.String(100),
         primary_key=True,
         nullable=False,
-        default=lambda: str(uuid.uuid4()),
+        default=lambda: str(uuid4()),
     )
     code = db.Column(db.String(1), primary_key=True, unique=True, nullable=False)
     description = db.Column(db.String(100), unique=True, nullable=False)
@@ -427,7 +427,7 @@ class PhaseModel(db.Model):
         db.String(100),
         primary_key=True,
         nullable=False,
-        default=lambda: str(uuid.uuid4()),
+        default=lambda: str(uuid4()),
     )
     code = db.Column(db.String(10), primary_key=True, unique=True, nullable=False)
     description = db.Column(db.String(100), nullable=False)
@@ -447,7 +447,7 @@ class GroupPositionModel(db.Model):
         db.String(100),
         primary_key=True,
         nullable=False,
-        default=lambda: str(uuid.uuid4()),
+        default=lambda: str(uuid4()),
     )
     played = db.Column(db.Integer, CheckConstraint("played>=0"), nullable=False, default=0)
     won = db.Column(db.Integer, CheckConstraint("won>=0"), nullable=False, default=0)
