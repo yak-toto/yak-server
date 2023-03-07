@@ -55,7 +55,7 @@ def results_get(current_user):
 
     return success_response(
         HTTPStatus.OK,
-        UserModel.query.get(current_user.id).to_result_dict() | {"rank": rank},
+        UserModel.query.filter_by(id=current_user.id).first().to_result_dict() | {"rank": rank},
     )
 
 

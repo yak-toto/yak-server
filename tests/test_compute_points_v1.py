@@ -95,14 +95,13 @@ def test_compute_points(app, client):
     with app.app_context():
         initialize_database(app)
 
+    # Create 4 accounts and patch bets
     admin_token = patch_score_bets(client, "admin", [(1, 2), (5, 1), (5, 5)])
-
     user_token = patch_score_bets(client, "user", [(2, 2), (5, 1), (5, 5)])
-
     user2_token = patch_score_bets(client, "user2", [(2, 0), (2, 0), (1, 4)])
-
     user3_token = patch_score_bets(client, "user3", [(0, 2), (2, 0), (1, 1)])
 
+    # Success case : compute_points call
     response_compute_points = client.post(
         "/api/v1/compute_points",
         headers={"Authorization": f"Bearer {admin_token}"},
@@ -110,6 +109,20 @@ def test_compute_points(app, client):
 
     assert response_compute_points.status_code == HTTPStatus.OK
 
+    # Error case : check unauthorized admin access to compute_points
+    response_compute_points_unauthorized = client.post(
+        "/api/v1/compute_points",
+        headers={"Authorization": f"Bearer {user_token}"},
+    )
+
+    assert response_compute_points_unauthorized.status_code == HTTPStatus.UNAUTHORIZED
+    assert response_compute_points_unauthorized.json == {
+        "ok": False,
+        "error_code": HTTPStatus.UNAUTHORIZED,
+        "description": "Unauthorized access to admin API",
+    }
+
+    # Success case : Check score board call
     score_board_response = client.get(
         "/api/v1/score_board",
         headers={"Authorization": f"Bearer {user_token}"},
@@ -160,11 +173,13 @@ def test_compute_points(app, client):
         },
     ]
 
+    # Push finale phase bets
     put_finale_phase(client, admin_token, True)
     put_finale_phase(client, user_token, False)
     put_finale_phase(client, user2_token, True)
     put_finale_phase(client, user3_token, False)
 
+    # Compute points again
     response_compute_points = client.post(
         "/api/v1/compute_points",
         headers={"Authorization": f"Bearer {admin_token}"},
@@ -172,6 +187,7 @@ def test_compute_points(app, client):
 
     assert response_compute_points.status_code == HTTPStatus.OK
 
+    # Check score board after finale phase bets patch
     score_board_response_after_finale_phase = client.get(
         "/api/v1/score_board",
         headers={"Authorization": f"Bearer {user_token}"},
@@ -221,3 +237,37 @@ def test_compute_points(app, client):
             "points": 131.0,
         },
     ]
+
+    # Success case : check user GET /results call
+    get_results_response = client.get(
+        "/api/v1/results",
+        headers={"Authorization": f"Bearer {user_token}"},
+    )
+
+    assert get_results_response.json["result"] == {
+        "first_name": ANY,
+        "full_name": ANY,
+        "last_name": ANY,
+        "number_final_guess": 2,
+        "number_first_qualified_guess": 0,
+        "number_match_guess": 2,
+        "number_qualified_teams_guess": 2,
+        "number_quarter_final_guess": 0,
+        "number_score_guess": 2,
+        "number_semi_final_guess": 0,
+        "number_winner_guess": 1,
+        "points": 483.0,
+        "rank": 1,
+    }
+
+    # Error case : check not result for admin user
+    get_results_response_admin = client.get(
+        "/api/v1/results",
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+
+    assert get_results_response_admin.json == {
+        "ok": False,
+        "error_code": HTTPStatus.UNAUTHORIZED,
+        "description": "No results for admin user",
+    }
