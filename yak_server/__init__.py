@@ -1,11 +1,11 @@
 import logging
 
-import pkg_resources
 from flask import Flask
 from flask.cli import load_dotenv
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from pkg_resources import resource_filename
 from strawberry.flask.views import GraphQLView
 
 db = SQLAlchemy()
@@ -17,7 +17,7 @@ load_dotenv()
 
 def create_app():
     app = Flask(__name__)
-    Migrate(app, db, directory=pkg_resources.resource_filename(__name__, "database/migrations"))
+    Migrate(app, db, directory=resource_filename(__name__, "database/migrations"))
 
     # Configuration setup
     from .config_file import YAK_CONFIG

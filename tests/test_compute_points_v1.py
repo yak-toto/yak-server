@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from http import HTTPStatus
 from unittest.mock import ANY
 
-import pkg_resources
+from pkg_resources import resource_filename
 
 from yak_server.cli.database import initialize_database
 
@@ -84,7 +84,7 @@ def put_finale_phase(client, token, is_one_won):
 
 def test_compute_points(app, client):
     # location of test data
-    app.config["DATA_FOLDER"] = pkg_resources.resource_filename(__name__, "test_compute_points_v1")
+    app.config["DATA_FOLDER"] = resource_filename(__name__, "test_compute_points_v1")
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
     app.config["LOCK_DATETIME_FINAL_PHASE"] = str(datetime.now() + timedelta(minutes=10))
     app.config["FINALE_PHASE_CONFIG"] = {

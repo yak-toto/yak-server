@@ -3,7 +3,7 @@ from http import HTTPStatus
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pkg_resources
+from pkg_resources import resource_filename
 
 from yak_server.cli.database import initialize_database
 
@@ -11,7 +11,7 @@ from .test_utils import get_random_string
 
 
 def test_group_rank(app, client):
-    app.config["DATA_FOLDER"] = pkg_resources.resource_filename(__name__, "test_compute_points_v1")
+    app.config["DATA_FOLDER"] = resource_filename(__name__, "test_compute_points_v1")
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
 
     with app.app_context():

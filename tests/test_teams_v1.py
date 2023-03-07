@@ -3,14 +3,14 @@ from operator import itemgetter
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pkg_resources
+from pkg_resources import resource_filename
 
 from yak_server.cli.database import initialize_database
 
 
 def test_teams(app, client):
     # location of test data
-    app.config["DATA_FOLDER"] = pkg_resources.resource_filename(__name__, "test_teams_v1")
+    app.config["DATA_FOLDER"] = resource_filename(__name__, "test_teams_v1")
 
     # initialize sql database
     with app.app_context():

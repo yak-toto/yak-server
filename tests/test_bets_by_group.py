@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from unittest.mock import ANY
 
-import pkg_resources
+from pkg_resources import resource_filename
 
 from yak_server.cli.database import initialize_database
 
@@ -9,7 +9,7 @@ from .test_utils import get_random_string
 
 
 def test_bets_by_groups(client, app):
-    app.config["DATA_FOLDER"] = pkg_resources.resource_filename(__name__, "test_compute_points_v1")
+    app.config["DATA_FOLDER"] = resource_filename(__name__, "test_compute_points_v1")
 
     with app.app_context():
         initialize_database(app)

@@ -3,7 +3,7 @@ from operator import itemgetter
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pkg_resources
+from pkg_resources import resource_filename
 
 from yak_server.cli.database import initialize_database
 
@@ -14,7 +14,7 @@ def test_matches_db(app, client):
     testcase = "test_matches_db"
 
     # location of test data
-    app.config["DATA_FOLDER"] = pkg_resources.resource_filename(__name__, testcase)
+    app.config["DATA_FOLDER"] = resource_filename(__name__, testcase)
 
     # initialize sql database
     with app.app_context():

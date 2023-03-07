@@ -5,7 +5,7 @@ from datetime import datetime
 from getpass import getpass
 from pathlib import Path
 
-import pkg_resources
+from pkg_resources import resource_filename
 
 from yak_server import db
 from yak_server.database.models import (
@@ -121,7 +121,7 @@ def initialize_database(app):
 
 
 def backup_database(app):
-    backup_location = pkg_resources.resource_filename(__name__, "backup_files")
+    backup_location = resource_filename(__name__, "backup_files")
 
     if not Path(backup_location).exists():
         Path(backup_location).mkdir()

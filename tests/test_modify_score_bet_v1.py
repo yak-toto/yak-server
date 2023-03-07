@@ -3,7 +3,7 @@ from http import HTTPStatus
 from random import randint
 from uuid import uuid4
 
-import pkg_resources
+from pkg_resources import resource_filename
 
 from yak_server.cli.database import initialize_database
 
@@ -14,7 +14,7 @@ def test_modify_score_bet(app, client):
     testcase = "test_modify_bet_v2"
 
     # location of test data
-    app.config["DATA_FOLDER"] = pkg_resources.resource_filename(__name__, testcase)
+    app.config["DATA_FOLDER"] = resource_filename(__name__, testcase)
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
 
     with app.app_context():
