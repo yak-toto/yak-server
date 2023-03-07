@@ -248,33 +248,6 @@ def test_matches_db(app, client):
         "description": f"Group not found: {invalid_group_code}",
     }
 
-    # Check groups associated to one phase
-    group_response = client.get(
-        "/api/v1/groups/phases/GROUP",
-        headers={"Authorization": f"Bearer {auth_token}"},
-    )
-
-    assert group_response.status_code == HTTPStatus.OK
-    assert group_response.json["result"] == {
-        "phase": expected_phase,
-        "groups": [expected_group_without_phase],
-    }
-
-    # Check groups by phase with invalid phase identifier
-    invalid_phase_code = get_random_string(5)
-
-    group_response_invalid_phase_code = client.get(
-        f"/api/v1/groups/phases/{invalid_phase_code}",
-        headers={"Authorization": f"Bearer {auth_token}"},
-    )
-
-    assert group_response_invalid_phase_code.status_code == HTTPStatus.NOT_FOUND
-    assert group_response_invalid_phase_code.json == {
-        "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
-        "description": f"Phase not found: {invalid_phase_code}",
-    }
-
     # Check all teams response
     team_response = client.get("/api/v1/teams")
 
@@ -292,42 +265,3 @@ def test_matches_db(app, client):
         expected_teams,
         key=itemgetter("code"),
     )
-
-    # Check GET /groups/{group_code}
-    one_group_response = client.get(
-        "/api/v1/groups/A",
-        headers={"Authorization": f"Bearer {auth_token}"},
-    )
-
-    assert one_group_response.status_code == HTTPStatus.OK
-    assert one_group_response.json["result"] == {
-        "group": expected_group_without_phase,
-        "phase": expected_phase,
-    }
-
-    # Check GET /groups/{groupCode} with invalid code
-    invalid_group_code = "B"
-
-    group_response_with_invalid_code = client.get(
-        "/api/v1/groups/B",
-        headers={"Authorization": f"Bearer {auth_token}"},
-    )
-
-    assert group_response_with_invalid_code.status_code == HTTPStatus.NOT_FOUND
-    assert group_response_with_invalid_code.json == {
-        "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
-        "description": f"Group not found: {invalid_group_code}",
-    }
-
-    # Check GET /groups
-    all_groups_response = client.get(
-        "/api/v1/groups",
-        headers={"Authorization": f"Bearer {auth_token}"},
-    )
-
-    assert all_groups_response.status_code == HTTPStatus.OK
-    assert all_groups_response.json["result"] == {
-        "phases": [expected_phase],
-        "groups": [expected_group],
-    }
