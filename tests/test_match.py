@@ -305,6 +305,21 @@ def test_matches_db(app, client):
         "phase": expected_phase,
     }
 
+    # Check GET /groups/{groupCode} with invalid code
+    invalid_group_code = "B"
+
+    group_response_with_invalid_code = client.get(
+        "/api/v1/groups/B",
+        headers={"Authorization": f"Bearer {auth_token}"},
+    )
+
+    assert group_response_with_invalid_code.status_code == HTTPStatus.NOT_FOUND
+    assert group_response_with_invalid_code.json == {
+        "ok": False,
+        "error_code": HTTPStatus.NOT_FOUND,
+        "description": f"Group not found: {invalid_group_code}",
+    }
+
     # Check GET /groups
     all_groups_response = client.get(
         "/api/v1/groups",
