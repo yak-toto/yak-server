@@ -1,9 +1,8 @@
 from http import HTTPStatus
+from importlib import resources
 from operator import itemgetter
 from unittest.mock import ANY
 from uuid import uuid4
-
-from pkg_resources import resource_filename
 
 from yak_server.cli.database import initialize_database
 
@@ -14,7 +13,8 @@ def test_matches_db(app, client):
     testcase = "test_matches_db"
 
     # location of test data
-    app.config["DATA_FOLDER"] = resource_filename(__name__, testcase)
+    with resources.as_file(resources.files("tests") / testcase) as path:
+        app.config["DATA_FOLDER"] = path
 
     # initialize sql database
     with app.app_context():
