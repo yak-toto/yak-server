@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
 from http import HTTPStatus
+from importlib import resources
 from unittest.mock import ANY
 from uuid import uuid4
-
-from pkg_resources import resource_filename
 
 from yak_server.cli.database import initialize_database
 
@@ -11,7 +10,8 @@ from .test_utils import get_random_string
 
 
 def test_group_rank(app, client):
-    app.config["DATA_FOLDER"] = resource_filename(__name__, "test_compute_points_v1")
+    with resources.as_file(resources.files("tests") / "test_compute_points_v1") as path:
+        app.config["DATA_FOLDER"] = path
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
 
     with app.app_context():

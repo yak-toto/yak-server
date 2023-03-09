@@ -3,9 +3,8 @@ import logging
 import subprocess
 from datetime import datetime
 from getpass import getpass
+from importlib import resources
 from pathlib import Path
-
-from pkg_resources import resource_filename
 
 from yak_server import db
 from yak_server.database.models import (
@@ -121,7 +120,8 @@ def initialize_database(app):
 
 
 def backup_database(app):
-    backup_location = resource_filename(__name__, "backup_files")
+    with resources.as_file(resources.files("yak_server") / "backup_files") as path:
+        backup_location = path
 
     if not Path(backup_location).exists():
         Path(backup_location).mkdir()

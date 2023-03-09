@@ -1,11 +1,11 @@
 import json
 import os
 from configparser import ConfigParser
+from importlib import resources
 from pathlib import Path
 
-import pkg_resources
-
-DATA_FOLDER = pkg_resources.resource_filename(__name__, f"data/{os.environ['COMPETITION']}")
+with resources.as_file(resources.files("yak_server") / "data" / os.environ["COMPETITION"]) as path:
+    DATA_FOLDER = path
 
 config = ConfigParser()
 config.read(f"{DATA_FOLDER}/config.ini")
