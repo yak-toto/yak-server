@@ -2,6 +2,7 @@ import logging
 from http import HTTPStatus
 from itertools import chain
 from operator import attrgetter
+from time import sleep
 from uuid import uuid4
 
 from flask import Blueprint, current_app, request
@@ -20,7 +21,11 @@ from yak_server.database.models import (
 )
 from yak_server.database.query import bets_from_group_code, bets_from_phase_code
 from yak_server.helpers.group_position import update_group_position
-from yak_server.helpers.logging import modify_binary_bet_successfully, modify_score_bet_successfully
+from yak_server.helpers.logging import (
+    group_position_lock_retry,
+    modify_binary_bet_successfully,
+    modify_score_bet_successfully,
+)
 
 from .utils.auth_utils import token_required
 from .utils.constants import BINARY, GLOBAL_ENDPOINT, SCORE, VERSION
@@ -437,14 +442,52 @@ def match_patch(current_user, bet_id):
             ):
                 raise NewScoreNegative
 
-            group_position_team1 = GroupPositionModel.query.filter_by(
-                team_id=bet.match.team1_id,
-                user_id=current_user.id,
-            ).first()
-            group_position_team2 = GroupPositionModel.query.filter_by(
-                team_id=bet.match.team2_id,
-                user_id=current_user.id,
-            ).first()
+            retry_time = 0.1
+            number_of_retries = 5
+
+            for i in range(number_of_retries):
+                try:
+                    group_position_team1 = (
+                        GroupPositionModel.query.filter_by(
+                            team_id=bet.match.team1_id,
+                            user_id=current_user.id,
+                        )
+                        .with_for_update()
+                        .first()
+                    )
+                    break
+                except Exception:
+                    logger.info(
+                        group_position_lock_retry(
+                            bet.match.team1.description,
+                            bet.match.team2.description,
+                            retry_time,
+                            i + 1,
+                        ),
+                    )
+                    sleep(retry_time)
+
+            for i in range(number_of_retries):
+                try:
+                    group_position_team2 = (
+                        GroupPositionModel.query.filter_by(
+                            team_id=bet.match.team2_id,
+                            user_id=current_user.id,
+                        )
+                        .with_for_update()
+                        .first()
+                    )
+                    break
+                except Exception:
+                    logger.info(
+                        group_position_lock_retry(
+                            bet.match.team1.description,
+                            bet.match.team2.description,
+                            retry_time,
+                            i + 1,
+                        ),
+                    )
+                    sleep(retry_time)
 
             update_group_position(
                 bet.score1,
