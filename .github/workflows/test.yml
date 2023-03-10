@@ -52,7 +52,7 @@ jobs:
         run: poetry install --without pre_commit
 
       - name: Create .flaskenv file
-        run: echo -e "MYSQL_USER_NAME=${{ secrets.MYSQL_USER_NAME }}\nMYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}\nMYSQL_DB=yak_toto_test\nJWT_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(16))')\nFLASK_DEBUG=1\nCOMPETITION=world_cup_2022" > .flaskenv
+        run: echo -e "MYSQL_USER_NAME=${{ secrets.MYSQL_USER_NAME }}\nMYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}\nMYSQL_DB=yak_toto_test\nJWT_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(16))')\nJWT_EXPIRATION_TIME=1800\nFLASK_DEBUG=1\nCOMPETITION=world_cup_2022" > .flaskenv
 
       - name: Run test
         run:

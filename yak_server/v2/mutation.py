@@ -91,7 +91,7 @@ class Mutation:
 
         token = encode_bearer_token(
             sub=user.id,
-            expiration_time=timedelta(minutes=30),
+            expiration_time=timedelta(seconds=current_app.config["JWT_EXPIRATION_TIME"]),
             secret_key=current_app.config["SECRET_KEY"],
         )
 
@@ -108,7 +108,7 @@ class Mutation:
 
         token = encode_bearer_token(
             sub=user.id,
-            expiration_time=timedelta(minutes=30),
+            expiration_time=timedelta(seconds=current_app.config["JWT_EXPIRATION_TIME"]),
             secret_key=current_app.config["SECRET_KEY"],
         )
 
