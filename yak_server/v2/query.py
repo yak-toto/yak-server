@@ -1,6 +1,7 @@
 from uuid import UUID
 
 import strawberry
+from strawberry.types import Info
 
 from yak_server.database.models import (
     BinaryBetModel,
@@ -12,7 +13,7 @@ from yak_server.database.models import (
     UserModel,
 )
 
-from .bearer_authenfication import admin_bearer_authentification, bearer_authentification
+from .bearer_authenfication import is_admin_authentificated, is_authentificated
 from .result import (
     AllGroupsResult,
     AllPhasesResult,
@@ -60,32 +61,20 @@ from .schema import (
 @strawberry.type
 class Query:
     @strawberry.field
-    def current_user_result(self) -> CurrentUserResult:
-        user, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
-        return user
+    @is_authentificated
+    def current_user_result(self, info: Info) -> CurrentUserResult:
+        return info.user
 
     @strawberry.field
-    def all_teams_result(self) -> AllTeamsResult:
-        _, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def all_teams_result(self, info: Info) -> AllTeamsResult:
         return AllTeamsSuccessful(
             teams=[Team.from_instance(instance=team) for team in TeamModel.query.all()],
         )
 
     @strawberry.field
-    def team_by_id_result(self, id: UUID) -> TeamByIdResult:
-        _, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def team_by_id_result(self, id: UUID, info: Info) -> TeamByIdResult:
         team_record = TeamModel.query.filter_by(id=str(id)).first()
 
         if not team_record:
@@ -94,12 +83,8 @@ class Query:
         return Team.from_instance(instance=team_record)
 
     @strawberry.field
-    def team_by_code_result(self, code: str) -> TeamByCodeResult:
-        _, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def team_by_code_result(self, code: str, info: Info) -> TeamByCodeResult:
         team_record = TeamModel.query.filter_by(code=code).first()
 
         if not team_record:
@@ -108,15 +93,11 @@ class Query:
         return Team.from_instance(instance=team_record)
 
     @strawberry.field
-    def score_bet_result(self, id: UUID) -> ScoreBetResult:
-        user, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def score_bet_result(self, id: UUID, info: Info) -> ScoreBetResult:
         score_bet_record = ScoreBetModel.query.filter_by(
             id=str(id),
-            user_id=user.instance.id,
+            user_id=info.user.instance.id,
         ).first()
 
         if not score_bet_record:
@@ -125,15 +106,11 @@ class Query:
         return ScoreBet.from_instance(instance=score_bet_record)
 
     @strawberry.field
-    def binary_bet_result(self, id: UUID) -> BinaryBetResult:
-        user, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def binary_bet_result(self, id: UUID, info: Info) -> BinaryBetResult:
         binary_bet_record = BinaryBetModel.query.filter_by(
             id=str(id),
-            user_id=user.instance.id,
+            user_id=info.user.instance.id,
         ).first()
 
         if not binary_bet_record:
@@ -142,97 +119,70 @@ class Query:
         return BinaryBet.from_instance(instance=binary_bet_record)
 
     @strawberry.field
-    def all_groups_result(self) -> AllGroupsResult:
-        user, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def all_groups_result(self, info: Info) -> AllGroupsResult:
         return Groups(
             groups=[
-                Group.from_instance(instance=group, user_id=user.instance.id)
+                Group.from_instance(instance=group, user_id=info.user.instance.id)
                 for group in GroupModel.query.order_by(GroupModel.index)
             ],
         )
 
     @strawberry.field
-    def group_by_id_result(self, id: UUID) -> GroupByIdResult:
-        user, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def group_by_id_result(self, id: UUID, info: Info) -> GroupByIdResult:
         group_record = GroupModel.query.filter_by(id=str(id)).first()
 
         if not group_record:
             return GroupByIdNotFound(id=id)
 
-        return Group.from_instance(instance=group_record, user_id=user.instance.id)
+        return Group.from_instance(instance=group_record, user_id=info.user.instance.id)
 
     @strawberry.field
-    def group_by_code_result(self, code: strawberry.ID) -> GroupByCodeResult:
-        user, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def group_by_code_result(self, code: strawberry.ID, info: Info) -> GroupByCodeResult:
         group_record = GroupModel.query.filter_by(code=code).first()
 
         if not group_record:
             return GroupByCodeNotFound(code=code)
 
-        return Group.from_instance(instance=group_record, user_id=user.instance.id)
+        return Group.from_instance(instance=group_record, user_id=info.user.instance.id)
 
     @strawberry.field
-    def all_phases_result(self) -> AllPhasesResult:
-        user, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def all_phases_result(self, info: Info) -> AllPhasesResult:
         phases = PhaseModel.query.order_by(PhaseModel.index)
 
         return Phases(
             phases=[
-                Phase.from_instance(instance=phase, user_id=user.instance.id) for phase in phases
+                Phase.from_instance(instance=phase, user_id=info.user.instance.id)
+                for phase in phases
             ],
         )
 
     @strawberry.field
-    def phase_by_id_result(self, id: UUID) -> PhaseByIdResult:
-        user, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def phase_by_id_result(self, id: UUID, info: Info) -> PhaseByIdResult:
         phase_record = PhaseModel.query.filter_by(id=str(id)).first()
 
         if not phase_record:
             return PhaseByIdNotFound(id=id)
 
-        return Phase.from_instance(instance=phase_record, user_id=user.instance.id)
+        return Phase.from_instance(instance=phase_record, user_id=info.user.instance.id)
 
     @strawberry.field
-    def phase_by_code_result(self, code: str) -> PhaseByCodeResult:
-        user, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def phase_by_code_result(self, code: str, info: Info) -> PhaseByCodeResult:
         phase_record = PhaseModel.query.filter_by(code=code).first()
 
         if not phase_record:
             return PhaseByCodeNotFound(code=code)
 
-        return Phase.from_instance(instance=phase_record, user_id=user.instance.id)
+        return Phase.from_instance(instance=phase_record, user_id=info.user.instance.id)
 
     @strawberry.field
-    def score_board_result(self) -> ScoreBoardResult:
-        _, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def score_board_result(self, info: Info) -> ScoreBoardResult:
         users = UserModel.query.filter(UserModel.name != "admin")
 
         return ScoreBoard(
@@ -240,19 +190,15 @@ class Query:
         )
 
     @strawberry.field
-    def group_rank_by_code_result(self, code: str) -> GroupRankByCodeResult:
-        user, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def group_rank_by_code_result(self, code: str, info: Info) -> GroupRankByCodeResult:
         group = GroupModel.query.filter_by(code=code).first()
 
         if not group:
             return GroupByCodeNotFound(code=code)
 
         group_rank = GroupPositionModel.query.filter_by(
-            user_id=user.instance.id,
+            user_id=info.user.instance.id,
             group_id=group.id,
         )
 
@@ -269,23 +215,19 @@ class Query:
                 ),
                 reverse=True,
             ),
-            group=Group.from_instance(instance=group, user_id=user.instance.id),
+            group=Group.from_instance(instance=group, user_id=info.user.instance.id),
         )
 
     @strawberry.field
-    def group_rank_by_id_result(self, id: UUID) -> GroupRankByIdResult:
-        user, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    def group_rank_by_id_result(self, id: UUID, info: Info) -> GroupRankByIdResult:
         group = GroupModel.query.filter_by(id=str(id)).first()
 
         if not group:
             return GroupByIdNotFound(id=id)
 
         group_rank = GroupPositionModel.query.filter_by(
-            user_id=user.instance.id,
+            user_id=info.user.instance.id,
             group_id=group.id,
         )
 
@@ -302,16 +244,13 @@ class Query:
                 ),
                 reverse=True,
             ),
-            group=Group.from_instance(instance=group, user_id=user.instance.id),
+            group=Group.from_instance(instance=group, user_id=info.user.instance.id),
         )
 
     @strawberry.field
-    def user_result(self, user_id: UUID) -> UserResult:
-        _, authentification_error = admin_bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    @is_admin_authentificated
+    def user_result(self, user_id: UUID, info: Info) -> UserResult:
         user = UserModel.query.filter_by(id=str(user_id)).first()
 
         if not user:

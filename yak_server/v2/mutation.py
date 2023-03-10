@@ -6,6 +6,7 @@ from uuid import UUID
 
 import strawberry
 from flask import current_app
+from strawberry.types import Info
 
 from yak_server import db
 from yak_server.database.models import (
@@ -25,8 +26,8 @@ from yak_server.helpers.logging import (
 )
 
 from .bearer_authenfication import (
-    admin_bearer_authentification,
-    bearer_authentification,
+    is_admin_authentificated,
+    is_authentificated,
 )
 from .result import (
     BinaryBetNotFoundForUpdate,
@@ -116,17 +117,14 @@ class Mutation:
         return UserWithToken.from_instance(instance=user, token=token)
 
     @strawberry.mutation
+    @is_authentificated
     def modify_binary_bet_result(
         self,
         id: UUID,
         is_one_won: Optional[bool],
+        info: Info,
     ) -> ModifyBinaryBetResult:
-        user, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
-        bet = BinaryBetModel.query.filter_by(user_id=user.instance.id, id=str(id)).first()
+        bet = BinaryBetModel.query.filter_by(user_id=info.user.instance.id, id=str(id)).first()
 
         if not bet:
             return BinaryBetNotFoundForUpdate()
@@ -134,7 +132,7 @@ class Mutation:
         if bet.locked:
             return LockedBinaryBetError()
 
-        logger.info(modify_binary_bet_successfully(user.pseudo, bet, is_one_won))
+        logger.info(modify_binary_bet_successfully(info.user.pseudo, bet, is_one_won))
 
         bet.is_one_won = is_one_won
         db.session.commit()
@@ -142,18 +140,15 @@ class Mutation:
         return BinaryBet.from_instance(instance=bet)
 
     @strawberry.mutation
+    @is_authentificated
     def modify_score_bet_result(
         self,
         id: UUID,
         score1: Optional[int],
         score2: Optional[int],
+        info: Info,
     ) -> ModifyScoreBetResult:
-        user, authentification_error = bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
-        bet = ScoreBetModel.query.filter_by(user_id=user.instance.id, id=str(id)).first()
+        bet = ScoreBetModel.query.filter_by(user_id=info.user.instance.id, id=str(id)).first()
 
         if not bet:
             return ScoreBetNotFoundForUpdate()
@@ -169,11 +164,11 @@ class Mutation:
 
         group_position_team1 = GroupPositionModel.query.filter_by(
             team_id=bet.match.team1_id,
-            user_id=user.instance.id,
+            user_id=info.user.instance.id,
         ).first()
         group_position_team2 = GroupPositionModel.query.filter_by(
             team_id=bet.match.team2_id,
-            user_id=user.instance.id,
+            user_id=info.user.instance.id,
         ).first()
 
         update_group_position(
@@ -185,7 +180,7 @@ class Mutation:
             group_position_team2,
         )
 
-        logger.info(modify_score_bet_successfully(user.pseudo, bet, score1, score2))
+        logger.info(modify_score_bet_successfully(info.user.pseudo, bet, score1, score2))
 
         bet.score1 = score1
         bet.score2 = score2
@@ -194,12 +189,9 @@ class Mutation:
         return ScoreBet.from_instance(instance=bet)
 
     @strawberry.mutation
-    def modify_user_lock_result(self, user_id: UUID, lock: bool) -> LockUserResult:
-        _, authentification_error = admin_bearer_authentification()
-
-        if authentification_error:
-            return authentification_error
-
+    @is_authentificated
+    @is_admin_authentificated
+    def modify_user_lock_result(self, user_id: UUID, lock: bool, info: Info) -> LockUserResult:
         user_to_be_locked = UserModel.query.filter_by(id=str(user_id)).first()
 
         if not user_to_be_locked:
