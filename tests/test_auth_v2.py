@@ -1,3 +1,4 @@
+from time import sleep
 from unittest.mock import ANY
 
 from .test_utils import get_random_string
@@ -305,3 +306,86 @@ def test_name_already_exists(client):
         "__typename": "UserNameAlreadyExists",
         "message": f"Name already exists: {user_name}",
     }
+
+
+def test_expired_token(client, app):
+    old_jwt_expiration_time = app.config["JWT_EXPIRATION_TIME"]
+    app.config["JWT_EXPIRATION_TIME"] = 1
+
+    user_name = get_random_string(6)
+    password = get_random_string(15)
+
+    query_signup = """
+        mutation Signup(
+            $userName: String!, $firstName: String!,
+            $lastName: String!, $password: String!
+        ) {
+            signupResult(
+                userName: $userName, firstName: $firstName,
+                lastName: $lastName, password: $password
+            ) {
+                __typename
+                ... on UserWithToken {
+                    token
+                }
+                ... on UserNameAlreadyExists {
+                    message
+                }
+            }
+        }
+    """
+
+    response_signup = client.post(
+        "/api/v2",
+        json={
+            "query": query_signup,
+            "variables": {
+                "userName": user_name,
+                "firstName": get_random_string(2),
+                "lastName": get_random_string(8),
+                "password": password,
+            },
+        },
+    )
+
+    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
+
+    auth_token = response_signup.json["data"]["signupResult"]["token"]
+
+    query_current_user = """
+        query {
+            currentUserResult {
+                __typename
+                ... on User {
+                    fullName
+                }
+                ... on InvalidToken {
+                    message
+                }
+                ... on ExpiredToken {
+                    message
+                }
+            }
+        }
+    """
+
+    sleep(1)
+
+    response_expired_token = client.post(
+        "/api/v2",
+        headers={"Authorization": f"Bearer {auth_token}"},
+        json={
+            "query": query_current_user,
+        },
+    )
+
+    assert response_expired_token.json == {
+        "data": {
+            "currentUserResult": {
+                "__typename": "ExpiredToken",
+                "message": "Token is expired. Please reauthentify.",
+            },
+        },
+    }
+
+    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time

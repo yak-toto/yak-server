@@ -29,6 +29,7 @@ YAK_CONFIG = {
     ),
     # Load jwt secret key from credentials file
     "SECRET_KEY": os.environ["JWT_SECRET_KEY"],
+    "JWT_EXPIRATION_TIME": int(os.environ["JWT_EXPIRATION_TIME"]),
     # SQL Alchemy features
     "SQLALCHEMY_TRACK_MODIFICATIONS": False,
     "LOCK_DATETIME": config.get("locking", "datetime"),

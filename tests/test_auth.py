@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from time import sleep
 from unittest.mock import ANY
 
 from .test_utils import get_random_string
@@ -151,3 +152,41 @@ def test_invalid_token(client):
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Invalid token. Registration and / or authentication required",
     }
+
+
+def test_expired_token(client, app):
+    old_jwt_expiration_time = app.config["JWT_EXPIRATION_TIME"]
+    app.config["JWT_EXPIRATION_TIME"] = 1
+
+    user_name = get_random_string(6)
+    password = get_random_string(15)
+
+    response_signup = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": user_name,
+            "first_name": get_random_string(2),
+            "last_name": get_random_string(8),
+            "password": password,
+        },
+    )
+
+    assert response_signup.status_code == HTTPStatus.CREATED
+
+    auth_token = response_signup.json["result"]["token"]
+
+    sleep(1)
+
+    response_current_user = client.get(
+        "/api/v1/current_user",
+        headers={"Authorization": f"Bearer {auth_token}"},
+    )
+
+    assert response_current_user.status_code == HTTPStatus.UNAUTHORIZED
+    assert response_current_user.json == {
+        "ok": False,
+        "error_code": HTTPStatus.UNAUTHORIZED,
+        "description": "Expired token. Reauthentication required.",
+    }
+
+    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time

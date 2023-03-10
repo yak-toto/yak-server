@@ -38,7 +38,11 @@ def login_post():
     if not user:
         raise InvalidCredentials
 
-    token = encode_bearer_token(user.id, timedelta(minutes=30), current_app.config["SECRET_KEY"])
+    token = encode_bearer_token(
+        sub=user.id,
+        expiration_time=timedelta(seconds=current_app.config["JWT_EXPIRATION_TIME"]),
+        secret_key=current_app.config["SECRET_KEY"],
+    )
 
     logger.info(logged_in_successfully(user.name))
 
@@ -69,7 +73,11 @@ def signup_post():
     db.session.add_all(create_group_position(ScoreBetModel.query.filter_by(user_id=user.id)))
     db.session.commit()
 
-    token = encode_bearer_token(user.id, timedelta(minutes=30), current_app.config["SECRET_KEY"])
+    token = encode_bearer_token(
+        sub=user.id,
+        expiration_time=timedelta(seconds=current_app.config["JWT_EXPIRATION_TIME"]),
+        secret_key=current_app.config["SECRET_KEY"],
+    )
 
     logger.info(signed_up_successfully(user.name))
 

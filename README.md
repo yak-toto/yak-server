@@ -42,8 +42,8 @@ Fetch all packages using poetry with the following command:
 poetry install
 ```
 
-Before starting the backend, add `JWT_SECRET_KEY` in `.flaskenv` same as the MySQL user name and password. As
-login system is using JSON Web Token, a secret key is required. To generate one, you can use the python built-in `secrets` module.
+Before starting the backend, add `JWT_SECRET_KEY` and `JWT_EXPIRATION_TIME` in `.flaskenv` same as the MySQL user name and password. As
+login system is using JSON Web Token, a secret key is required and an expiration time (in seconds). To generate one, you can use the python built-in `secrets` module.
 
 ```py
 >>> import secrets
