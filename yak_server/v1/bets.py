@@ -32,6 +32,7 @@ from .utils.errors import (
     LockedBets,
     MissingId,
     NewScoreNegative,
+    PhaseNotFound,
     WrongInputs,
 )
 from .utils.flask_utils import success_response
@@ -219,6 +220,9 @@ def get_bets_by_phase(current_user, phase_code):
         current_user,
         phase_code,
     )
+
+    if not phase:
+        raise PhaseNotFound(phase_code)
 
     return success_response(
         HTTPStatus.OK,
