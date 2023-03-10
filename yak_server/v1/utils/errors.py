@@ -2,7 +2,6 @@ import logging
 from http import HTTPStatus
 
 from flask import Response, jsonify
-from jwt import ExpiredSignatureError, InvalidTokenError
 from werkzeug.exceptions import HTTPException
 
 from .constants import BINARY, SCORE
@@ -105,6 +104,16 @@ class PhaseNotFound(HTTPException):
         self.code = HTTPStatus.NOT_FOUND
 
 
+class InvalidToken(HTTPException):
+    code = HTTPStatus.UNAUTHORIZED
+    description = "Invalid token. Registration and / or authentication required"
+
+
+class ExpiredToken(HTTPException):
+    code = HTTPStatus.UNAUTHORIZED
+    description = "Expired token. Reauthentication required."
+
+
 def set_error_handler(app):
     @app.errorhandler(HTTPException)
     def handle_http_exception(e: HTTPException) -> Response:
@@ -129,30 +138,4 @@ def set_error_handler(app):
                 },
             ),
             HTTPStatus.INTERNAL_SERVER_ERROR,
-        )
-
-    @app.errorhandler(ExpiredSignatureError)
-    def handler_expired_signature_exception(e: ExpiredSignatureError) -> Response:
-        return (
-            jsonify(
-                {
-                    "ok": False,
-                    "error_code": HTTPStatus.UNAUTHORIZED,
-                    "description": "Expired token. Reauthentication required.",
-                },
-            ),
-            HTTPStatus.UNAUTHORIZED,
-        )
-
-    @app.errorhandler(InvalidTokenError)
-    def handler_invalid_token_exception(e: InvalidTokenError) -> Response:
-        return (
-            jsonify(
-                {
-                    "ok": False,
-                    "error_code": HTTPStatus.UNAUTHORIZED,
-                    "description": "Invalid token. Registration and / or authentication required",
-                },
-            ),
-            HTTPStatus.UNAUTHORIZED,
         )

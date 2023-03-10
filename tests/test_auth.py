@@ -139,3 +139,15 @@ def test_invalid_token(client):
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Invalid token. Registration and / or authentication required",
     }
+
+    response_get_all_bets_with_cropped_token = client.get(
+        "/api/v1/bets",
+        headers={"Authorization": f"Bearer {auth_token[:17]}{auth_token[12:]}"},
+    )
+
+    assert response_get_all_bets_with_cropped_token.status_code == HTTPStatus.UNAUTHORIZED
+    assert response_get_all_bets_with_cropped_token.json == {
+        "ok": False,
+        "error_code": HTTPStatus.UNAUTHORIZED,
+        "description": "Invalid token. Registration and / or authentication required",
+    }
