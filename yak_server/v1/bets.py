@@ -17,7 +17,6 @@ from yak_server.database.models import (
     PhaseModel,
     ScoreBetModel,
     is_locked,
-    is_phase_locked,
 )
 from yak_server.database.query import bets_from_group_code, bets_from_phase_code
 from yak_server.helpers.group_position import update_group_position
@@ -47,10 +46,10 @@ logger = logging.getLogger(__name__)
 @bets.put(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/phases/<string:phase_code>")
 @token_required
 def create_bet(current_user, phase_code):
-    phase = PhaseModel.query.filter_by(code=phase_code).first()
-
-    if is_phase_locked(phase.code, current_user.name):
+    if is_locked(current_user.name):
         raise LockedBets
+
+    phase = PhaseModel.query.filter_by(code=phase_code).first()
 
     finale_phase_config = current_app.config["FINALE_PHASE_CONFIG"]
 
@@ -288,6 +287,9 @@ def get_group_rank_with_code(user_id, group_code):
 @bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
 @token_required
 def modify_score_bet(user, bet_id):
+    if is_locked(user.name):
+        raise LockedBets
+
     body = request.get_json()
 
     if "score" not in body["team1"] or "score" not in body["team2"]:
@@ -297,9 +299,6 @@ def modify_score_bet(user, bet_id):
 
     if not score_bet:
         raise BetNotFound(bet_id)
-
-    if is_locked(score_bet):
-        raise LockedBets
 
     if score_bet.score1 != body["team1"]["score"] or score_bet.score2 != body["team2"]["score"]:
         if (body["team1"]["score"] is not None and body["team1"]["score"] < 0) or (
@@ -377,6 +376,9 @@ def modify_score_bet(user, bet_id):
 @bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
 @token_required
 def modify_binary_bet(user, bet_id):
+    if is_locked(user.name):
+        raise LockedBets
+
     body = request.get_json()
 
     if "is_one_won" not in body:
@@ -386,9 +388,6 @@ def modify_binary_bet(user, bet_id):
 
     if not binary_bet:
         raise BetNotFound(bet_id)
-
-    if is_locked(binary_bet):
-        raise LockedBets
 
     logger.info(modify_binary_bet_successfully(user.name, binary_bet, body["is_one_won"]))
 
