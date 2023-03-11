@@ -120,7 +120,7 @@ def initialize_database(app):
 
 
 def backup_database(app):
-    with resources.as_file(resources.files("yak_server") / "backup_files") as path:
+    with resources.as_file(resources.files("yak_server") / "cli/backup_files") as path:
         backup_location = path
 
     if not Path(backup_location).exists():
