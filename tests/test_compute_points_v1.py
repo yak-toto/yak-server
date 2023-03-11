@@ -28,20 +28,17 @@ def patch_score_bets(client, user_name, new_scores):
 
     assert response_get_all_bets.status_code == HTTPStatus.OK
 
-    response_patch_score_bet = client.patch(
-        "/api/v1/bets",
-        json=[
-            {
-                "id": bet["id"],
-                "team1": {"score": new_scores[index][0]},
-                "team2": {"score": new_scores[index][1]},
-            }
-            for index, bet in enumerate(response_get_all_bets.json["result"]["score_bets"])
-        ],
-        headers={"Authorization": f"Bearer {token}"},
-    )
+    for bet, new_score in zip(response_get_all_bets.json["result"]["score_bets"], new_scores):
+        response_patch_score_bet = client.patch(
+            f"/api/v1/score_bets/{bet['id']}",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "team1": {"score": new_score[0]},
+                "team2": {"score": new_score[1]},
+            },
+        )
 
-    assert response_patch_score_bet.status_code == HTTPStatus.OK
+        assert response_patch_score_bet.status_code == HTTPStatus.OK
 
     return token
 
