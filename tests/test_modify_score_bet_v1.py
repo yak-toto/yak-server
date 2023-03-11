@@ -63,6 +63,17 @@ def test_modify_score_bet(app, client):
     assert response_patch_one_bet.json["result"]["score_bet"]["team1"]["score"] == score1
     assert response_patch_one_bet.json["result"]["score_bet"]["team2"]["score"] == score2
 
+    # Success case : check no updates
+    response_patch_no_updates = client.patch(
+        f"/api/v1/score_bets/{score_bet_ids[0]}",
+        json={"team1": {"score": score1}, "team2": {"score": score2}},
+        headers={"Authorization": f"Bearer {authentification_token}"},
+    )
+
+    assert response_patch_no_updates.status_code == HTTPStatus.OK
+    assert response_patch_no_updates.json["result"]["score_bet"]["team1"]["score"] == score1
+    assert response_patch_no_updates.json["result"]["score_bet"]["team2"]["score"] == score2
+
     # Error case : check wrong inputs
     response_patch_wrong_inputs = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[0]}",
