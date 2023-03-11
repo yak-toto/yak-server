@@ -300,77 +300,82 @@ def modify_score_bet(user, bet_id):
     if not score_bet:
         raise BetNotFound(bet_id)
 
-    if score_bet.score1 != body["team1"]["score"] or score_bet.score2 != body["team2"]["score"]:
-        if (body["team1"]["score"] is not None and body["team1"]["score"] < 0) or (
-            body["team2"]["score"] is not None and body["team2"]["score"] < 0
-        ):
-            raise NewScoreNegative
+    if (body["team1"]["score"] is not None and body["team1"]["score"] < 0) or (
+        body["team2"]["score"] is not None and body["team2"]["score"] < 0
+    ):
+        raise NewScoreNegative
 
-        retry_time = 0.1
-        number_of_retries = 5
+    def send_response(score_bet):
+        return success_response(
+            HTTPStatus.OK,
+            {
+                "phase": score_bet.match.group.phase.to_dict(),
+                "group": score_bet.match.group.to_dict_without_phase(),
+                "score_bet": score_bet.to_dict_without_group(),
+            },
+        )
 
-        for i in range(number_of_retries):
-            try:
-                group_position_team1 = (
-                    GroupPositionModel.query.filter_by(
-                        team_id=score_bet.match.team1_id,
-                        user_id=user.id,
-                    )
-                    .populate_existing()
-                    .with_for_update()
-                    .first()
-                )
-                group_position_team2 = (
-                    GroupPositionModel.query.filter_by(
-                        team_id=score_bet.match.team2_id,
-                        user_id=user.id,
-                    )
-                    .populate_existing()
-                    .with_for_update()
-                    .first()
-                )
-                break
-            except Exception:
-                logger.info(
-                    group_position_lock_retry(
-                        score_bet.match.team1.description,
-                        score_bet.match.team2.description,
-                        retry_time,
-                        i + 1,
-                    ),
-                )
-                sleep(retry_time)
+    if score_bet.score1 == body["team1"]["score"] and score_bet.score2 == body["team2"]["score"]:
+        return send_response(score_bet)
 
-        update_group_position(
-            score_bet.score1,
-            score_bet.score2,
+    retry_time = 0.1
+    number_of_retries = 5
+
+    for i in range(number_of_retries):
+        try:
+            group_position_team1 = (
+                GroupPositionModel.query.filter_by(
+                    team_id=score_bet.match.team1_id,
+                    user_id=user.id,
+                )
+                .populate_existing()
+                .with_for_update()
+                .first()
+            )
+            group_position_team2 = (
+                GroupPositionModel.query.filter_by(
+                    team_id=score_bet.match.team2_id,
+                    user_id=user.id,
+                )
+                .populate_existing()
+                .with_for_update()
+                .first()
+            )
+            break
+        except Exception:
+            logger.info(
+                group_position_lock_retry(
+                    score_bet.match.team1.description,
+                    score_bet.match.team2.description,
+                    retry_time,
+                    i + 1,
+                ),
+            )
+            sleep(retry_time)
+
+    update_group_position(
+        score_bet.score1,
+        score_bet.score2,
+        body["team1"]["score"],
+        body["team2"]["score"],
+        group_position_team1,
+        group_position_team2,
+    )
+
+    logger.info(
+        modify_score_bet_successfully(
+            user.name,
+            score_bet,
             body["team1"]["score"],
             body["team2"]["score"],
-            group_position_team1,
-            group_position_team2,
-        )
-
-        logger.info(
-            modify_score_bet_successfully(
-                user.name,
-                score_bet,
-                body["team1"]["score"],
-                body["team2"]["score"],
-            ),
-        )
-
-        score_bet.score1 = body["team1"]["score"]
-        score_bet.score2 = body["team2"]["score"]
-        db.session.commit()
-
-    return success_response(
-        HTTPStatus.OK,
-        {
-            "phase": score_bet.match.group.phase.to_dict(),
-            "group": score_bet.match.group.to_dict_without_phase(),
-            "score_bet": score_bet.to_dict_without_group(),
-        },
+        ),
     )
+
+    score_bet.score1 = body["team1"]["score"]
+    score_bet.score2 = body["team2"]["score"]
+    db.session.commit()
+
+    return send_response(score_bet)
 
 
 @bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
