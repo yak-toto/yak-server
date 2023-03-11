@@ -317,28 +317,16 @@ def modify_score_bet(user, bet_id):
                         team_id=score_bet.match.team1_id,
                         user_id=user.id,
                     )
+                    .populate_existing()
                     .with_for_update()
                     .first()
                 )
-                break
-            except Exception:
-                logger.info(
-                    group_position_lock_retry(
-                        score_bet.match.team1.description,
-                        score_bet.match.team2.description,
-                        retry_time,
-                        i + 1,
-                    ),
-                )
-                sleep(retry_time)
-
-        for i in range(number_of_retries):
-            try:
                 group_position_team2 = (
                     GroupPositionModel.query.filter_by(
                         team_id=score_bet.match.team2_id,
                         user_id=user.id,
                     )
+                    .populate_existing()
                     .with_for_update()
                     .first()
                 )
