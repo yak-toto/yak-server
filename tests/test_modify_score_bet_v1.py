@@ -54,7 +54,7 @@ def test_modify_score_bet(app, client):
     score2 = 4
 
     response_patch_one_bet = client.patch(
-        f"/api/v1/bets/{score_bet_ids[0]}?type=score",
+        f"/api/v1/score_bets/{score_bet_ids[0]}",
         json={"team1": {"score": score1}, "team2": {"score": score2}},
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
@@ -65,7 +65,7 @@ def test_modify_score_bet(app, client):
 
     # Error case : check wrong inputs
     response_patch_wrong_inputs = client.patch(
-        f"/api/v1/bets/{score_bet_ids[0]}?type=score",
+        f"/api/v1/score_bets/{score_bet_ids[0]}",
         json={"team1": {}, "team2": {"score": score2}},
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
@@ -80,7 +80,7 @@ def test_modify_score_bet(app, client):
     app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(minutes=10))
 
     response_locked_bet = client.patch(
-        f"/api/v1/bets/{score_bet_ids[0]}?type=score",
+        f"/api/v1/score_bets/{score_bet_ids[0]}",
         json={"team1": {"score": score1}, "team2": {"score": score2}},
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
@@ -93,24 +93,11 @@ def test_modify_score_bet(app, client):
 
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
 
-    # Error case : check invalid bet type
-    response_invalid_bet_type = client.patch(
-        f"/api/v1/bets/{score_bet_ids[0]}?type=scored",
-        json={"team1": {"score": score1}, "team2": {"score": score2}},
-        headers={"Authorization": f"Bearer {authentification_token}"},
-    )
-
-    assert response_invalid_bet_type.json == {
-        "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Invalid bet type. The available bet types are : ('score', 'binary')",
-    }
-
     # Error case : check bet not found
     non_existing_bet_id = str(uuid4())
 
     response_bet_not_found = client.patch(
-        f"/api/v1/bets/{non_existing_bet_id}?type=score",
+        f"/api/v1/score_bets/{non_existing_bet_id}",
         json={"team1": {"score": score1}, "team2": {"score": score2}},
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
@@ -123,7 +110,7 @@ def test_modify_score_bet(app, client):
 
     # Error case : check new score negative error
     response_new_score_negative = client.patch(
-        f"/api/v1/bets/{score_bet_ids[0]}?type=score",
+        f"/api/v1/score_bets/{score_bet_ids[0]}",
         json={"team1": {"score": -1}, "team2": {"score": score2}},
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
@@ -136,7 +123,7 @@ def test_modify_score_bet(app, client):
 
     # Patch second bet
     response_patch_second_bet = client.patch(
-        f"/api/v1/bets/{score_bet_ids[1]}?type=score",
+        f"/api/v1/score_bets/{score_bet_ids[1]}",
         json={"team1": {"score": randint(0, 5)}, "team2": {"score": randint(1, 3)}},
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
@@ -145,7 +132,7 @@ def test_modify_score_bet(app, client):
 
     # Patch third bet
     response_patch_third_bet = client.patch(
-        f"/api/v1/bets/{score_bet_ids[2]}?type=score",
+        f"/api/v1/score_bets/{score_bet_ids[2]}",
         json={"team1": {"score": randint(0, 3)}, "team2": {"score": randint(2, 3)}},
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
