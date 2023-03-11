@@ -7,6 +7,7 @@ from sqlalchemy import CheckConstraint
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from yak_server import db
+from yak_server.v1.utils.errors import WrongInputs
 
 
 class UserModel(db.Model):
@@ -93,7 +94,15 @@ class UserModel(db.Model):
         passive_deletes=True,
     )
 
-    def __init__(self, name, first_name, last_name, password) -> None:
+    def __init__(self, **kwargs) -> None:
+        name = kwargs.get("name")
+        first_name = kwargs.get("first_name")
+        last_name = kwargs.get("last_name")
+        password = kwargs.get("password")
+
+        if not name or not first_name or not last_name or not password:
+            raise WrongInputs
+
         self.name = name
         self.first_name = first_name
         self.last_name = last_name
@@ -105,7 +114,7 @@ class UserModel(db.Model):
         password = kwargs.get("password")
 
         if not name or not password:
-            return None
+            raise WrongInputs
 
         user = cls.query.filter_by(name=name).first()
         if not user or not check_password_hash(user.password, password):

@@ -190,3 +190,51 @@ def test_expired_token(client, app):
     }
 
     app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
+
+
+def test_invalid_signup_body(client, app):
+    # Try to signup with invalid body
+    response_signup = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": get_random_string(10),
+            "first_name": get_random_string(12),
+            "last_name": get_random_string(6),
+            "passwor": get_random_string(5),
+        },
+    )
+
+    assert response_signup.status_code == HTTPStatus.UNAUTHORIZED
+    assert response_signup.json == {
+        "ok": False,
+        "error_code": HTTPStatus.UNAUTHORIZED,
+        "description": "Wrong inputs",
+    }
+
+
+def test_invalid_login_body(client, app):
+    user_name = get_random_string(6)
+    password = get_random_string(10)
+
+    response_signup = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": get_random_string(10),
+            "first_name": get_random_string(12),
+            "last_name": get_random_string(6),
+            "passwor": get_random_string(5),
+        },
+    )
+
+    assert response_signup.status_code == HTTPStatus.UNAUTHORIZED
+
+    response_login = client.post(
+        "/api/v1/users/login",
+        json={
+            "nme": user_name,
+            "password": password,
+        },
+    )
+
+    assert response_login.status_code == HTTPStatus.UNAUTHORIZED
+    assert response_login.json == {"description": "Wrong inputs", "error_code": 401, "ok": False}
