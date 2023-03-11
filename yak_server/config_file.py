@@ -33,7 +33,6 @@ YAK_CONFIG = {
     # SQL Alchemy features
     "SQLALCHEMY_TRACK_MODIFICATIONS": False,
     "LOCK_DATETIME": config.get("locking", "datetime"),
-    "LOCK_DATETIME_FINAL_PHASE": config.get("locking", "datetime_final_phase"),
     "BASE_CORRECT_RESULT": config.getint("points", "base_correct_result"),
     "MULTIPLYING_FACTOR_CORRECT_RESULT": config.getint(
         "points",
