@@ -33,7 +33,6 @@ from .utils.errors import (
     BetNotFound,
     DuplicatedIds,
     GroupNotFound,
-    InvalidBetType,
     LockedBets,
     MissingId,
     NewScoreNegative,
@@ -407,155 +406,172 @@ def get_group_rank_with_code(user_id, group_code):
     }
 
 
-@bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:bet_id>")
+@bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
 @token_required
-def match_patch(current_user, bet_id):
+def modify_score_bet(user, bet_id):
     body = request.get_json()
 
-    bet_type = request.args.get("type")
+    if "score" not in body["team1"] or "score" not in body["team2"]:
+        raise WrongInputs
 
-    if bet_type == SCORE:
-        bet = ScoreBetModel.query.filter_by(user_id=current_user.id, id=bet_id).first()
+    score_bet = ScoreBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
 
-        if "score" not in body["team1"] or "score" not in body["team2"]:
-            raise WrongInputs
-
-    elif bet_type == BINARY:
-        bet = BinaryBetModel.query.filter_by(user_id=current_user.id, id=bet_id).first()
-
-        if "is_one_won" not in body:
-            raise WrongInputs
-
-    else:
-        raise InvalidBetType
-
-    if not bet:
+    if not score_bet:
         raise BetNotFound(bet_id)
 
-    if is_locked(bet):
+    if is_locked(score_bet):
         raise LockedBets
 
-    if bet_type == SCORE:
-        if bet.score1 != body["team1"]["score"] or bet.score2 != body["team2"]["score"]:
-            if (body["team1"]["score"] is not None and body["team1"]["score"] < 0) or (
-                body["team2"]["score"] is not None and body["team2"]["score"] < 0
-            ):
-                raise NewScoreNegative
+    if score_bet.score1 != body["team1"]["score"] or score_bet.score2 != body["team2"]["score"]:
+        if (body["team1"]["score"] is not None and body["team1"]["score"] < 0) or (
+            body["team2"]["score"] is not None and body["team2"]["score"] < 0
+        ):
+            raise NewScoreNegative
 
-            retry_time = 0.1
-            number_of_retries = 5
+        retry_time = 0.1
+        number_of_retries = 5
 
-            for i in range(number_of_retries):
-                try:
-                    group_position_team1 = (
-                        GroupPositionModel.query.filter_by(
-                            team_id=bet.match.team1_id,
-                            user_id=current_user.id,
-                        )
-                        .with_for_update()
-                        .first()
+        for i in range(number_of_retries):
+            try:
+                group_position_team1 = (
+                    GroupPositionModel.query.filter_by(
+                        team_id=score_bet.match.team1_id,
+                        user_id=user.id,
                     )
-                    break
-                except Exception:
-                    logger.info(
-                        group_position_lock_retry(
-                            bet.match.team1.description,
-                            bet.match.team2.description,
-                            retry_time,
-                            i + 1,
-                        ),
-                    )
-                    sleep(retry_time)
+                    .with_for_update()
+                    .first()
+                )
+                break
+            except Exception:
+                logger.info(
+                    group_position_lock_retry(
+                        score_bet.match.team1.description,
+                        score_bet.match.team2.description,
+                        retry_time,
+                        i + 1,
+                    ),
+                )
+                sleep(retry_time)
 
-            for i in range(number_of_retries):
-                try:
-                    group_position_team2 = (
-                        GroupPositionModel.query.filter_by(
-                            team_id=bet.match.team2_id,
-                            user_id=current_user.id,
-                        )
-                        .with_for_update()
-                        .first()
+        for i in range(number_of_retries):
+            try:
+                group_position_team2 = (
+                    GroupPositionModel.query.filter_by(
+                        team_id=score_bet.match.team2_id,
+                        user_id=user.id,
                     )
-                    break
-                except Exception:
-                    logger.info(
-                        group_position_lock_retry(
-                            bet.match.team1.description,
-                            bet.match.team2.description,
-                            retry_time,
-                            i + 1,
-                        ),
-                    )
-                    sleep(retry_time)
+                    .with_for_update()
+                    .first()
+                )
+                break
+            except Exception:
+                logger.info(
+                    group_position_lock_retry(
+                        score_bet.match.team1.description,
+                        score_bet.match.team2.description,
+                        retry_time,
+                        i + 1,
+                    ),
+                )
+                sleep(retry_time)
 
-            update_group_position(
-                bet.score1,
-                bet.score2,
+        update_group_position(
+            score_bet.score1,
+            score_bet.score2,
+            body["team1"]["score"],
+            body["team2"]["score"],
+            group_position_team1,
+            group_position_team2,
+        )
+
+        logger.info(
+            modify_score_bet_successfully(
+                user.name,
+                score_bet,
                 body["team1"]["score"],
                 body["team2"]["score"],
-                group_position_team1,
-                group_position_team2,
-            )
+            ),
+        )
 
-            logger.info(
-                modify_score_bet_successfully(
-                    current_user.name,
-                    bet,
-                    body["team1"]["score"],
-                    body["team2"]["score"],
-                ),
-            )
-
-            bet.score1 = body["team1"]["score"]
-            bet.score2 = body["team2"]["score"]
-            db.session.commit()
-
-    elif bet_type == BINARY and bet.is_one_won != body["is_one_won"]:
-        logger.info(modify_binary_bet_successfully(current_user.name, bet, body["is_one_won"]))
-
-        bet.is_one_won = body["is_one_won"]
+        score_bet.score1 = body["team1"]["score"]
+        score_bet.score2 = body["team2"]["score"]
         db.session.commit()
 
-    response = {
-        "phase": bet.match.group.phase.to_dict(),
-        "group": bet.match.group.to_dict_without_phase(),
-    }
-
-    if bet_type == SCORE:
-        response["score_bet"] = bet.to_dict_without_group()
-    elif bet_type == BINARY:
-        response["binary_bet"] = bet.to_dict_without_group()
-
-    return success_response(HTTPStatus.OK, response)
+    return success_response(
+        HTTPStatus.OK,
+        {
+            "phase": score_bet.match.group.phase.to_dict(),
+            "group": score_bet.match.group.to_dict_without_phase(),
+            "score_bet": score_bet.to_dict_without_group(),
+        },
+    )
 
 
-@bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/<string:bet_id>")
+@bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
 @token_required
-def bet_get(current_user, bet_id):
-    bet_type = request.args.get("type")
+def modify_binary_bet(user, bet_id):
+    body = request.get_json()
 
-    if bet_type == SCORE:
-        bet = ScoreBetModel.query.filter_by(user_id=current_user.id, id=bet_id).first()
-    elif bet_type == BINARY:
-        bet = BinaryBetModel.query.filter_by(user_id=current_user.id, id=bet_id).first()
-    else:
-        raise InvalidBetType
+    if "is_one_won" not in body:
+        raise WrongInputs
 
-    if not bet:
+    binary_bet = BinaryBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
+
+    if not binary_bet:
         raise BetNotFound(bet_id)
 
-    response = {
-        "phase": bet.match.group.phase.to_dict(),
-        "group": bet.match.group.to_dict_without_phase(),
-    }
+    if is_locked(binary_bet):
+        raise LockedBets
 
-    if bet_type == SCORE:
-        response["score_bet"] = bet.to_dict_without_group()
-    elif bet_type == BINARY:
-        response["binary_bet"] = bet.to_dict_without_group()
+    logger.info(modify_binary_bet_successfully(user.name, binary_bet, body["is_one_won"]))
 
-    return success_response(HTTPStatus.OK, response)
+    binary_bet.is_one_won = body["is_one_won"]
+    db.session.commit()
+
+    return success_response(
+        HTTPStatus.OK,
+        {
+            "phase": binary_bet.match.group.phase.to_dict(),
+            "group": binary_bet.match.group.to_dict_without_phase(),
+            "binary_bet": binary_bet.to_dict_without_group(),
+        },
+    )
+
+
+@bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
+@token_required
+def retrieve_score_bet_by_id(user, bet_id):
+    score_bet = ScoreBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
+
+    if not score_bet:
+        raise BetNotFound(bet_id)
+
+    return success_response(
+        HTTPStatus.OK,
+        {
+            "phase": score_bet.match.group.phase.to_dict(),
+            "group": score_bet.match.group.to_dict_without_phase(),
+            "score_bet": score_bet.to_dict_without_group(),
+        },
+    )
+
+
+@bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
+@token_required
+def retrieve_binary_bet_by_id(user, bet_id):
+    binary_bet = BinaryBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
+
+    if not binary_bet:
+        raise BetNotFound(bet_id)
+
+    return success_response(
+        HTTPStatus.OK,
+        {
+            "phase": binary_bet.match.group.phase.to_dict(),
+            "group": binary_bet.match.group.to_dict_without_phase(),
+            "binary_bet": binary_bet.to_dict_without_group(),
+        },
+    )
 
 
 @bets.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/finale_phase")

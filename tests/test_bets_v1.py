@@ -49,7 +49,7 @@ def test_bets(client, app):
 
     # Success case : check get one bet
     response_bet_by_id = client.get(
-        f"/api/v1/bets/{score_bet_ids[0]}?type=score",
+        f"/api/v1/score_bets/{score_bet_ids[0]}",
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
 
@@ -94,7 +94,7 @@ def test_bets(client, app):
     invalid_bet_id = str(uuid4())
 
     response_bet_with_invalid_id = client.get(
-        f"/api/v1/bets/{invalid_bet_id}?type=score",
+        f"/api/v1/score_bets/{invalid_bet_id}",
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
 
