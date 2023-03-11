@@ -5,7 +5,7 @@ from http import HTTPStatus
 from flask import Blueprint, current_app, request
 
 from yak_server import db
-from yak_server.database.models import MatchModel, ScoreBetModel, UserModel
+from yak_server.database.models import GroupModel, MatchModel, PhaseModel, ScoreBetModel, UserModel
 from yak_server.helpers.authentification import encode_bearer_token
 from yak_server.helpers.group_position import create_group_position
 from yak_server.helpers.logging import (
@@ -65,7 +65,10 @@ def signup_post():
 
     # Initialize bets and integrate in db
     db.session.add_all(
-        ScoreBetModel(user_id=user.id, match_id=match.id) for match in MatchModel.query.all()
+        ScoreBetModel(user_id=user.id, match_id=match.id)
+        for match in MatchModel.query.join(MatchModel.group)
+        .join(GroupModel.phase)
+        .filter(PhaseModel.code == "GROUP")
     )
     db.session.commit()
 
