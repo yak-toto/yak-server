@@ -28,13 +28,11 @@ from yak_server.helpers.logging import (
 )
 
 from .utils.auth_utils import token_required
-from .utils.constants import BINARY, GLOBAL_ENDPOINT, SCORE, VERSION
+from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import (
     BetNotFound,
-    DuplicatedIds,
     GroupNotFound,
     LockedBets,
-    MissingId,
     NewScoreNegative,
     PhaseNotFound,
     WrongInputs,
@@ -235,125 +233,6 @@ def get_bets_by_phase(current_user, phase_code):
             "groups": [group.to_dict_without_phase() for group in groups],
             "score_bets": [score_bet.to_dict_with_group_id() for score_bet in score_bets],
             "binary_bets": [binary_bet.to_dict_with_group_id() for binary_bet in binary_bets],
-        },
-    )
-
-
-@bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets")
-@token_required
-def modify_bets(current_user):
-    # Reject if any input bet does not contain id
-    if not all(bet.get("id") for bet in request.get_json()):
-        raise MissingId
-
-    bet_ids = [bet["id"] for bet in request.get_json()]
-
-    # Reject if there are duplicated ids in input bets
-    duplicated_ids = {bet_id for bet_id in bet_ids if bet_ids.count(bet_id) > 1}
-    if duplicated_ids:
-        raise DuplicatedIds(duplicated_ids)
-
-    binary_bets = []
-    score_bets = []
-
-    for bet in request.get_json():
-        # Deduce bet type from request
-        if (
-            "team1" in bet
-            and "team2" in bet
-            and "score" in bet["team1"]
-            and "score" in bet["team2"]
-        ):
-            bet_type = SCORE
-            original_bet = ScoreBetModel.query.filter_by(
-                id=bet["id"],
-                user_id=current_user.id,
-            ).first()
-        elif "is_one_won" in bet:
-            bet_type = BINARY
-            original_bet = BinaryBetModel.query.filter_by(
-                id=bet["id"],
-                user_id=current_user.id,
-            ).first()
-        else:
-            raise WrongInputs
-
-        # No bet has been found
-        if not original_bet:
-            raise BetNotFound(bet["id"])
-
-        # Return error if bet is locked
-        if is_locked(original_bet):
-            raise LockedBets
-
-        # Modify bet depending on their type if the bet has been changed
-        if bet_type == SCORE and (original_bet.score1, original_bet.score2) != (
-            bet["team1"]["score"],
-            bet["team2"]["score"],
-        ):
-            if (bet["team1"]["score"] is not None and bet["team1"]["score"] < 0) or (
-                bet["team2"]["score"] is not None and bet["team2"]["score"] < 0
-            ):
-                raise NewScoreNegative
-
-            group_position_team1 = GroupPositionModel.query.filter_by(
-                team_id=original_bet.match.team1_id,
-                user_id=current_user.id,
-            ).first()
-            group_position_team2 = GroupPositionModel.query.filter_by(
-                team_id=original_bet.match.team2_id,
-                user_id=current_user.id,
-            ).first()
-
-            update_group_position(
-                original_bet.score1,
-                original_bet.score2,
-                bet["team1"]["score"],
-                bet["team2"]["score"],
-                group_position_team1,
-                group_position_team2,
-            )
-
-            logger.info(
-                modify_score_bet_successfully(
-                    current_user.name,
-                    original_bet,
-                    bet["team1"]["score"],
-                    bet["team2"]["score"],
-                ),
-            )
-
-            original_bet.score1 = bet["team1"]["score"]
-            original_bet.score2 = bet["team2"]["score"]
-
-        elif bet_type == BINARY and original_bet.is_one_won != bet["is_one_won"]:
-            logger.info(
-                modify_binary_bet_successfully(current_user.name, original_bet, bet["is_one_won"]),
-            )
-
-            original_bet.is_one_won = bet["is_one_won"]
-
-        if bet_type == SCORE:
-            score_bets.append(original_bet)
-        elif bet_type == BINARY:
-            binary_bets.append(original_bet)
-
-    # Commit at the end to make sure all input are correct before pushing to db
-    db.session.commit()
-
-    return success_response(
-        HTTPStatus.OK,
-        {
-            "phases": [
-                phase.to_dict()
-                for phase in {bet.match.group.phase for bet in chain(score_bets, binary_bets)}
-            ],
-            "groups": [
-                group.to_dict_with_phase_id()
-                for group in {bet.match.group for bet in chain(score_bets, binary_bets)}
-            ],
-            "score_bets": [bet.to_dict_with_group_id() for bet in score_bets],
-            "binary_bets": [bet.to_dict_with_group_id() for bet in binary_bets],
         },
     )
 
