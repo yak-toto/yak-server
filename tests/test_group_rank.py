@@ -12,6 +12,7 @@ from .test_utils import get_random_string
 def test_group_rank(app, client):
     with resources.as_file(resources.files("tests") / "test_compute_points_v1") as path:
         app.config["DATA_FOLDER"] = path
+    old_lock_datetime = app.config["LOCK_DATETIME"]
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
 
     with app.app_context():
@@ -319,3 +320,5 @@ def test_group_rank(app, client):
             "message": f"Cannot find group with id: {invalid_id}",
         },
     }
+
+    app.config["LOCK_DATETIME"] = old_lock_datetime

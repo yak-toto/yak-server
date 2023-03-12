@@ -82,6 +82,7 @@ def test_compute_points(app, client):
     # location of test data
     with resources.as_file(resources.files("tests") / "test_compute_points_v1") as path:
         app.config["DATA_FOLDER"] = path
+    old_lock_datetime = app.config["LOCK_DATETIME"]
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
     app.config["FINALE_PHASE_CONFIG"] = {
         "first_group": "1",
@@ -267,3 +268,5 @@ def test_compute_points(app, client):
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "No results for admin user",
     }
+
+    app.config["LOCK_DATETIME"] = old_lock_datetime
