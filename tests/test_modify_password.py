@@ -76,8 +76,18 @@ def test_modify_password(client):
         json={"name": other_user_name},
     )
 
-    assert response_wrong_input.status_code == HTTPStatus.UNAUTHORIZED
-    assert response_wrong_input.json["description"] == "Wrong inputs"
+    assert response_wrong_input.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+    assert response_wrong_input.json == {
+        "ok": False,
+        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
+        "description": "'password' is a required property",
+        "schema": {
+            "type": "object",
+            "properties": {"password": {"type": "string"}},
+            "required": ["password"],
+        },
+        "path": [],
+    }
 
     # Check call is rejected if user_id is invalid
     response_wrong_input = client.patch(

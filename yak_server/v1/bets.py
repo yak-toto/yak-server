@@ -32,11 +32,12 @@ from .utils.errors import (
     BetNotFound,
     GroupNotFound,
     LockedBets,
-    NewScoreNegative,
     PhaseNotFound,
     WrongInputs,
 )
 from .utils.flask_utils import success_response
+from .utils.schemas import SCHEMA_PATCH_BINARY_BET, SCHEMA_PATCH_SCORE_BET
+from .utils.validation import validate_body
 
 bets = Blueprint("bets", __name__)
 
@@ -285,25 +286,16 @@ def get_group_rank_with_code(user_id, group_code):
 
 
 @bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
+@validate_body(schema=SCHEMA_PATCH_SCORE_BET)
 @token_required
 def modify_score_bet(user, bet_id):
     if is_locked(user.name):
         raise LockedBets
 
-    body = request.get_json()
-
-    if "score" not in body["team1"] or "score" not in body["team2"]:
-        raise WrongInputs
-
     score_bet = ScoreBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
 
     if not score_bet:
         raise BetNotFound(bet_id)
-
-    if (body["team1"]["score"] is not None and body["team1"]["score"] < 0) or (
-        body["team2"]["score"] is not None and body["team2"]["score"] < 0
-    ):
-        raise NewScoreNegative
 
     def send_response(score_bet):
         return success_response(
@@ -314,6 +306,8 @@ def modify_score_bet(user, bet_id):
                 "score_bet": score_bet.to_dict_without_group(),
             },
         )
+
+    body = request.get_json()
 
     if score_bet.score1 == body["team1"]["score"] and score_bet.score2 == body["team2"]["score"]:
         return send_response(score_bet)
@@ -379,20 +373,18 @@ def modify_score_bet(user, bet_id):
 
 
 @bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
+@validate_body(schema=SCHEMA_PATCH_BINARY_BET)
 @token_required
 def modify_binary_bet(user, bet_id):
     if is_locked(user.name):
         raise LockedBets
 
-    body = request.get_json()
-
-    if "is_one_won" not in body:
-        raise WrongInputs
-
     binary_bet = BinaryBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
 
     if not binary_bet:
         raise BetNotFound(bet_id)
+
+    body = request.get_json()
 
     logger.info(modify_binary_bet_successfully(user.name, binary_bet, body["is_one_won"]))
 

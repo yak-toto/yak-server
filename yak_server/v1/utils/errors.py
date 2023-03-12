@@ -4,8 +4,6 @@ from http import HTTPStatus
 from flask import Response, jsonify
 from werkzeug.exceptions import HTTPException
 
-from .constants import BINARY, SCORE
-
 logger = logging.getLogger(__name__)
 
 
@@ -37,25 +35,9 @@ class WrongInputs(HTTPException):
     description = "Wrong inputs"
 
 
-class MissingId(HTTPException):
-    code = HTTPStatus.UNAUTHORIZED
-    description = "Missing id(s) in request"
-
-
 class UserNotFound(HTTPException):
     code = HTTPStatus.NOT_FOUND
     description = "User not found"
-
-
-class NewScoreNegative(HTTPException):
-    code = HTTPStatus.UNAUTHORIZED
-    description = "Score cannot be negative"
-
-
-class DuplicatedIds(HTTPException):
-    def __init__(self, ids) -> None:
-        super().__init__(f"Duplicated ids in request: {', '.join(ids)}")
-        self.code = HTTPStatus.UNAUTHORIZED
 
 
 class UnauthorizedAccessToAdminAPI(HTTPException):
@@ -80,11 +62,6 @@ class TeamNotFound(HTTPException):
 class LockedBets(HTTPException):
     code = HTTPStatus.UNAUTHORIZED
     description = "Cannot modify bets because locked date is exceeded"
-
-
-class InvalidBetType(HTTPException):
-    code = HTTPStatus.UNAUTHORIZED
-    description = f"Invalid bet type. The available bet types are : {SCORE, BINARY}"
 
 
 class NoResultsForAdminUser(HTTPException):
@@ -114,6 +91,14 @@ class ExpiredToken(HTTPException):
     description = "Expired token. Reauthentication required."
 
 
+class RequestValidationError(HTTPException):
+    def __init__(self, schema, path, description):
+        super().__init__(description)
+        self.schema = schema
+        self.path = path
+        self.code = HTTPStatus.UNPROCESSABLE_ENTITY
+
+
 def set_error_handler(app):
     @app.errorhandler(HTTPException)
     def handle_http_exception(e: HTTPException) -> Response:
@@ -138,4 +123,19 @@ def set_error_handler(app):
                 },
             ),
             HTTPStatus.INTERNAL_SERVER_ERROR,
+        )
+
+    @app.errorhandler(RequestValidationError)
+    def handle_request_validation_error(e: RequestValidationError) -> Response:
+        return (
+            jsonify(
+                {
+                    "ok": False,
+                    "error_code": e.code,
+                    "description": e.description,
+                    "schema": e.schema,
+                    "path": list(e.path),
+                },
+            ),
+            e.code,
         )

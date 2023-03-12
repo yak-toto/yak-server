@@ -204,29 +204,28 @@ def test_invalid_signup_body(client, app):
         },
     )
 
-    assert response_signup.status_code == HTTPStatus.UNAUTHORIZED
+    assert response_signup.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     assert response_signup.json == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Wrong inputs",
+        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
+        "description": "'password' is a required property",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "first_name": {"type": "string"},
+                "last_name": {"type": "string"},
+                "password": {"type": "string"},
+            },
+            "required": ["name", "first_name", "last_name", "password"],
+        },
+        "path": [],
     }
 
 
 def test_invalid_login_body(client, app):
     user_name = get_random_string(6)
     password = get_random_string(10)
-
-    response_signup = client.post(
-        "/api/v1/users/signup",
-        json={
-            "name": get_random_string(10),
-            "first_name": get_random_string(12),
-            "last_name": get_random_string(6),
-            "passwor": get_random_string(5),
-        },
-    )
-
-    assert response_signup.status_code == HTTPStatus.UNAUTHORIZED
 
     response_login = client.post(
         "/api/v1/users/login",
@@ -236,5 +235,15 @@ def test_invalid_login_body(client, app):
         },
     )
 
-    assert response_login.status_code == HTTPStatus.UNAUTHORIZED
-    assert response_login.json == {"description": "Wrong inputs", "error_code": 401, "ok": False}
+    assert response_login.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+    assert response_login.json == {
+        "ok": False,
+        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
+        "description": "'name' is a required property",
+        "schema": {
+            "type": "object",
+            "properties": {"name": {"type": "string"}, "password": {"type": "string"}},
+            "required": ["name", "password"],
+        },
+        "path": [],
+    }
