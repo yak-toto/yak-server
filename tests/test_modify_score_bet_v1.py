@@ -15,6 +15,7 @@ def test_modify_score_bet(app, client):
     # location of test data
     with resources.as_file(resources.files("tests") / testcase) as path:
         app.config["DATA_FOLDER"] = path
+    old_lock_datetime = app.config["LOCK_DATETIME"]
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
 
     with app.app_context():
@@ -167,3 +168,5 @@ def test_modify_score_bet(app, client):
     )
 
     assert response_patch_third_bet.status_code == HTTPStatus.OK
+
+    app.config["LOCK_DATETIME"] = old_lock_datetime
