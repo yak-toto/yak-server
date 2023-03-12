@@ -14,12 +14,11 @@ from yak_server.helpers.logging import (
     signed_up_successfully,
 )
 
-from .utils.auth_utils import token_required
+from .utils.auth_utils import is_admin_authentificated, is_authentificated
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import (
     InvalidCredentials,
     NameAlreadyExists,
-    UnauthorizedAccessToAdminAPI,
     UserNotFound,
 )
 from .utils.flask_utils import success_response
@@ -92,11 +91,8 @@ def signup_post():
 
 @auth.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/<string:user_id>")
 @validate_body(schema=SCHEMA_PATCH_USER)
-@token_required
-def patch_user(current_user, user_id):
-    if current_user.name != "admin":
-        raise UnauthorizedAccessToAdminAPI
-
+@is_admin_authentificated
+def patch_user(_, user_id):
     body = request.get_json()
 
     user = UserModel.query.filter_by(id=user_id).first()
@@ -113,6 +109,6 @@ def patch_user(current_user, user_id):
 
 
 @auth.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/current_user")
-@token_required
+@is_authentificated
 def current_user(current_user):
     return success_response(HTTPStatus.OK, current_user.to_user_dict())

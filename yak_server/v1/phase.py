@@ -4,7 +4,7 @@ from flask import Blueprint
 
 from yak_server.database.models import PhaseModel
 
-from .utils.auth_utils import token_required
+from .utils.auth_utils import is_authentificated
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import PhaseNotFound
 from .utils.flask_utils import success_response
@@ -13,7 +13,7 @@ phase = Blueprint("phase", __name__)
 
 
 @phase.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/phases")
-@token_required
+@is_authentificated
 def retrieve_all_phases(user):
     return success_response(
         HTTPStatus.OK,
@@ -22,7 +22,7 @@ def retrieve_all_phases(user):
 
 
 @phase.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/phases/<string:phase_id>")
-@token_required
+@is_authentificated
 def retrieve_by_phase_id(user, phase_id):
     phase = PhaseModel.query.filter_by(id=phase_id).first()
 

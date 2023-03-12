@@ -4,7 +4,7 @@ from flask import Blueprint
 
 from yak_server.database.models import GroupModel, PhaseModel
 
-from .utils.auth_utils import token_required
+from .utils.auth_utils import is_authentificated
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import GroupNotFound, PhaseNotFound
 from .utils.flask_utils import success_response
@@ -13,7 +13,7 @@ groups = Blueprint("group", __name__)
 
 
 @groups.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups")
-@token_required
+@is_authentificated
 def get_groups(current_user):
     group_query = GroupModel.query.order_by(GroupModel.index)
     groups = [group.to_dict_with_phase_id() for group in group_query]
@@ -31,7 +31,7 @@ def get_groups(current_user):
 
 
 @groups.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_code>")
-@token_required
+@is_authentificated
 def get_group_by_code(current_user, group_code):
     group = GroupModel.query.filter_by(code=group_code).first()
 
@@ -48,7 +48,7 @@ def get_group_by_code(current_user, group_code):
 
 
 @groups.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/phases/<string:phase_code>")
-@token_required
+@is_authentificated
 def get_groups_by_phase_code(current_user, phase_code):
     phase = PhaseModel.query.filter_by(code=phase_code).first()
 

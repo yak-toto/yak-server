@@ -30,7 +30,7 @@ from yak_server.helpers.logging import (
     modify_score_bet_successfully,
 )
 
-from .utils.auth_utils import token_required
+from .utils.auth_utils import is_authentificated
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import (
     BetNotFound,
@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 @bets.put(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/phases/<string:phase_code>")
 @validate_body(schema=SCHEMA_PUT_BINARY_BETS_BY_PHASE)
-@token_required
+@is_authentificated
 def create_bet(current_user, phase_code):
     if is_locked(current_user.name):
         raise LockedBets
@@ -147,7 +147,7 @@ def create_bet(current_user, phase_code):
 
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets")
-@token_required
+@is_authentificated
 def get_all_bets(current_user):
     binary_bets_query = (
         current_user.binary_bets.join(BinaryBetModel.match)
@@ -177,7 +177,7 @@ def get_all_bets(current_user):
 
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/phases/<string:phase_code>")
-@token_required
+@is_authentificated
 def get_bets_by_phase(current_user, phase_code):
     phase, groups, score_bets, binary_bets = bets_from_phase_code(
         current_user,
@@ -199,7 +199,7 @@ def get_bets_by_phase(current_user, phase_code):
 
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:group_code>")
-@token_required
+@is_authentificated
 def group_get(current_user, group_code):
     group, score_bets, binary_bets = bets_from_group_code(current_user, group_code)
 
@@ -218,7 +218,7 @@ def group_get(current_user, group_code):
 
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/rank/<string:group_code>")
-@token_required
+@is_authentificated
 def group_result_get(current_user, group_code):
     return success_response(
         HTTPStatus.OK,
@@ -251,7 +251,7 @@ def get_group_rank_with_code(user_id, group_code):
 
 @bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
 @validate_body(schema=SCHEMA_PATCH_SCORE_BET)
-@token_required
+@is_authentificated
 def modify_score_bet(user, bet_id):
     if is_locked(user.name):
         raise LockedBets
@@ -338,7 +338,7 @@ def modify_score_bet(user, bet_id):
 
 @bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
 @validate_body(schema=SCHEMA_PATCH_BINARY_BET)
-@token_required
+@is_authentificated
 def modify_binary_bet(user, bet_id):
     if is_locked(user.name):
         raise LockedBets
@@ -366,7 +366,7 @@ def modify_binary_bet(user, bet_id):
 
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
-@token_required
+@is_authentificated
 def retrieve_score_bet_by_id(user, bet_id):
     score_bet = ScoreBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
 
@@ -384,7 +384,7 @@ def retrieve_score_bet_by_id(user, bet_id):
 
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
-@token_required
+@is_authentificated
 def retrieve_binary_bet_by_id(user, bet_id):
     binary_bet = BinaryBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
 
@@ -402,7 +402,7 @@ def retrieve_binary_bet_by_id(user, bet_id):
 
 
 @bets.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/finale_phase")
-@token_required
+@is_authentificated
 def commit_finale_phase(current_user):
     finale_phase_config = current_app.config["FINALE_PHASE_CONFIG"]
 

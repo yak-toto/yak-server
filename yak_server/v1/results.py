@@ -15,16 +15,16 @@ from yak_server.database.models import (
 )
 
 from .bets import get_group_rank_with_code
-from .utils.auth_utils import token_required
+from .utils.auth_utils import is_admin_authentificated, is_authentificated
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
-from .utils.errors import NoResultsForAdminUser, UnauthorizedAccessToAdminAPI
+from .utils.errors import NoResultsForAdminUser
 from .utils.flask_utils import success_response
 
 results = Blueprint("results", __name__)
 
 
 @results.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_board")
-@token_required
+@is_authentificated
 def score_board(current_user):
     return success_response(
         HTTPStatus.OK,
@@ -38,7 +38,7 @@ def score_board(current_user):
 
 
 @results.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/results")
-@token_required
+@is_authentificated
 def results_get(current_user):
     if current_user.name == "admin":
         raise NoResultsForAdminUser
@@ -60,11 +60,8 @@ def results_get(current_user):
 
 
 @results.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/compute_points")
-@token_required
-def compute_points_post(current_user):
-    if current_user.name != "admin":
-        raise UnauthorizedAccessToAdminAPI
-
+@is_admin_authentificated
+def compute_points_post(_):
     compute_points(
         current_app.config["BASE_CORRECT_RESULT"],
         current_app.config["MULTIPLYING_FACTOR_CORRECT_RESULT"],
