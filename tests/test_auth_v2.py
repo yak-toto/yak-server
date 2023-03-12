@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from time import sleep
 from unittest.mock import ANY
 
@@ -388,4 +389,85 @@ def test_expired_token(client, app):
         },
     }
 
+    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
+
+
+def test_unexcepted_error(client, app):
+    old_jwt_expiration_time = app.config["JWT_EXPIRATION_TIME"]
+    del app.config["JWT_EXPIRATION_TIME"]
+
+    query_signup = """
+        mutation Root(
+            $userName: String!, $firstName: String!,
+            $lastName: String!, $password: String!
+        ) {
+            signupResult(
+                userName: $userName, firstName: $firstName,
+                lastName: $lastName, password: $password
+            ) {
+                __typename
+                ... on UserWithToken {
+                    fullName
+                }
+                ... on UserNameAlreadyExists {
+                    message
+                }
+            }
+        }
+    """
+
+    # Check unexpected error in debug mode, error should not obfuscated
+    response_signup_debug_unexpected_error = client.post(
+        "/api/v2",
+        json={
+            "query": query_signup,
+            "variables": {
+                "userName": get_random_string(6),
+                "firstName": get_random_string(6),
+                "lastName": get_random_string(6),
+                "password": get_random_string(6),
+            },
+        },
+    )
+
+    assert response_signup_debug_unexpected_error.status_code == HTTPStatus.OK
+    assert response_signup_debug_unexpected_error.json == {
+        "data": None,
+        "errors": [
+            {
+                "locations": [{"column": 13, "line": 6}],
+                "message": "'JWT_EXPIRATION_TIME'",
+                "path": ["signupResult"],
+            },
+        ],
+    }
+
+    # Check unexpected error in production mode, error should be obfuscated
+    app.config["DEBUG"] = False
+
+    response_signup_production_unexpected_error = client.post(
+        "/api/v2",
+        json={
+            "query": query_signup,
+            "variables": {
+                "name": get_random_string(6),
+                "first_name": get_random_string(6),
+                "last_name": get_random_string(6),
+                "password": get_random_string(6),
+            },
+        },
+    )
+
+    assert response_signup_production_unexpected_error.status_code == HTTPStatus.OK
+    assert response_signup_production_unexpected_error.json == {
+        "data": None,
+        "errors": [
+            {"locations": [{"column": 13, "line": 3}], "message": "Unexpected error."},
+            {"locations": [{"column": 33, "line": 3}], "message": "Unexpected error."},
+            {"locations": [{"column": 13, "line": 4}], "message": "Unexpected error."},
+        ],
+    }
+
+    # Fallback modified configuration
+    app.config["DEBUG"] = True
     app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
