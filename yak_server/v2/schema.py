@@ -225,7 +225,7 @@ class GroupPosition:
         return cls(
             instance=instance,
             team=Team.from_instance(instance=instance.team),
-            played=instance.played,
+            played=instance.won + instance.drawn + instance.lost,
             won=instance.won,
             drawn=instance.drawn,
             lost=instance.lost,
