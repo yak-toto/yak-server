@@ -121,11 +121,17 @@ def test_binary_bet(client, app):
         json={"is_won": True},
     )
 
-    assert response_invalid_inputs.status_code == HTTPStatus.UNAUTHORIZED
+    assert response_invalid_inputs.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     assert response_invalid_inputs.json == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Wrong inputs",
+        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
+        "description": "'is_one_won' is a required property",
+        "schema": {
+            "type": "object",
+            "properties": {"is_one_won": {"oneOf": [{"type": "boolean"}, {"type": "null"}]}},
+            "required": ["is_one_won"],
+        },
+        "path": [],
     }
 
     # Error case : invalid bet id

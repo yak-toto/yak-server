@@ -83,8 +83,24 @@ def test_modify_score_bet(app, client):
 
     assert response_patch_wrong_inputs.json == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Wrong inputs",
+        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
+        "description": "'score' is a required property",
+        "schema": {
+            "properties": {
+                "score": {
+                    "oneOf": [
+                        {
+                            "type": "integer",
+                            "minimum": 0,
+                        },
+                        {"type": "null"},
+                    ],
+                },
+            },
+            "required": ["score"],
+            "type": "object",
+        },
+        "path": ["team1"],
     }
 
     # Error case : check locked bet
@@ -128,8 +144,10 @@ def test_modify_score_bet(app, client):
 
     assert response_new_score_negative.json == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Score cannot be negative",
+        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
+        "description": "-1 is less than the minimum of 0",
+        "schema": {"type": "integer", "minimum": 0},
+        "path": ["team1", "score"],
     }
 
     # Patch second bet

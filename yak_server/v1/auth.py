@@ -21,9 +21,10 @@ from .utils.errors import (
     NameAlreadyExists,
     UnauthorizedAccessToAdminAPI,
     UserNotFound,
-    WrongInputs,
 )
 from .utils.flask_utils import success_response
+from .utils.schemas import SCHEMA_LOGIN, SCHEMA_PATCH_USER, SCHEMA_SIGNUP
+from .utils.validation import validate_body
 
 auth = Blueprint("auth", __name__)
 
@@ -31,9 +32,10 @@ logger = logging.getLogger(__name__)
 
 
 @auth.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/login")
+@validate_body(schema=SCHEMA_LOGIN)
 def login_post():
-    data = request.get_json()
-    user = UserModel.authenticate(**data)
+    body = request.get_json()
+    user = UserModel.authenticate(body["name"], body["password"])
 
     if not user:
         raise InvalidCredentials
@@ -50,6 +52,7 @@ def login_post():
 
 
 @auth.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/signup")
+@validate_body(schema=SCHEMA_SIGNUP)
 def signup_post():
     data = request.get_json()
 
@@ -59,7 +62,7 @@ def signup_post():
         raise NameAlreadyExists(data["name"])
 
     # Initialize user and integrate in db
-    user = UserModel(**data)
+    user = UserModel(data["name"], data["first_name"], data["last_name"], data["password"])
     db.session.add(user)
     db.session.commit()
 
@@ -88,15 +91,13 @@ def signup_post():
 
 
 @auth.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/<string:user_id>")
+@validate_body(schema=SCHEMA_PATCH_USER)
 @token_required
 def patch_user(current_user, user_id):
     if current_user.name != "admin":
         raise UnauthorizedAccessToAdminAPI
 
     body = request.get_json()
-
-    if not body.get("password"):
-        raise WrongInputs
 
     user = UserModel.query.filter_by(id=user_id).first()
     if not user:
