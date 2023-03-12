@@ -209,8 +209,6 @@ class ScoreBetModel(db.Model):
     score1 = db.Column(db.Integer, CheckConstraint("score1>=0"), default=None)
     score2 = db.Column(db.Integer, CheckConstraint("score2>=0"), default=None)
 
-    locked = db.Column(db.Boolean, default=False)
-
     def is_invalid(self) -> bool:
         return None in (self.score1, self.score2)
 
@@ -291,8 +289,6 @@ class BinaryBetModel(db.Model):
 
     match_id = db.Column(db.String(100), db.ForeignKey("match.id"), nullable=False)
     match = db.relationship("MatchModel", back_populates="binary_bets")
-
-    locked = db.Column(db.Boolean, default=False)
 
     is_one_won = db.Column(db.Boolean, default=None)
 

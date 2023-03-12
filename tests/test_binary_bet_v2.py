@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from random import choice
 from uuid import uuid4
 
@@ -15,6 +16,9 @@ from .test_utils import get_random_string
 
 
 def test_binary_bet(client, app):
+    old_lock_datetime = app.config["LOCK_DATETIME"]
+    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=10))
+
     user_name = get_random_string(10)
     password = get_random_string(30)
 
@@ -200,10 +204,7 @@ def test_binary_bet(client, app):
     }
 
     # Error case : locked binary bet
-    with app.app_context():
-        binary_bet = BinaryBetModel.query.filter_by(id=bet_id).first()
-        binary_bet.locked = True
-        db.session.commit()
+    app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(seconds=10))
 
     response_modify_locked_binary_bet = client.post(
         "/api/v2",
@@ -223,10 +224,7 @@ def test_binary_bet(client, app):
         },
     }
 
-    with app.app_context():
-        binary_bet = BinaryBetModel.query.filter_by(id=bet_id).first()
-        binary_bet.locked = False
-        db.session.commit()
+    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
 
     # Success case : Retrive one binary bet
     query_binary_bet = """
@@ -304,3 +302,6 @@ def test_binary_bet(client, app):
             },
         },
     }
+
+    # Fallback lock datetime
+    app.config["LOCK_DATETIME"] = old_lock_datetime

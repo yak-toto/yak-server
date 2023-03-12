@@ -1,6 +1,5 @@
 import logging
 from datetime import timedelta
-from itertools import chain
 from typing import Optional
 from uuid import UUID
 
@@ -15,6 +14,7 @@ from yak_server.database.models import (
     MatchModel,
     ScoreBetModel,
     UserModel,
+    is_locked,
 )
 from yak_server.helpers.authentification import encode_bearer_token
 from yak_server.helpers.group_position import create_group_position, update_group_position
@@ -26,7 +26,6 @@ from yak_server.helpers.logging import (
 )
 
 from .bearer_authenfication import (
-    is_admin_authentificated,
     is_authentificated,
 )
 from .result import (
@@ -34,7 +33,6 @@ from .result import (
     InvalidCredentials,
     LockedBinaryBetError,
     LockedScoreBetError,
-    LockUserResult,
     LoginResult,
     ModifyBinaryBetResult,
     ModifyScoreBetResult,
@@ -42,12 +40,10 @@ from .result import (
     ScoreBetNotFoundForUpdate,
     SignupResult,
     UserNameAlreadyExists,
-    UserNotFound,
 )
 from .schema import (
     BinaryBet,
     ScoreBet,
-    User,
     UserWithToken,
 )
 
@@ -126,11 +122,11 @@ class Mutation:
     ) -> ModifyBinaryBetResult:
         bet = BinaryBetModel.query.filter_by(user_id=info.user.instance.id, id=str(id)).first()
 
+        if is_locked(info.user.pseudo):
+            return LockedBinaryBetError()
+
         if not bet:
             return BinaryBetNotFoundForUpdate()
-
-        if bet.locked:
-            return LockedBinaryBetError()
 
         logger.info(modify_binary_bet_successfully(info.user.pseudo, bet, is_one_won))
 
@@ -150,11 +146,11 @@ class Mutation:
     ) -> ModifyScoreBetResult:
         bet = ScoreBetModel.query.filter_by(user_id=info.user.instance.id, id=str(id)).first()
 
+        if is_locked(info.user.pseudo):
+            return LockedScoreBetError()
+
         if not bet:
             return ScoreBetNotFoundForUpdate()
-
-        if bet.locked:
-            return LockedScoreBetError()
 
         if score1 is not None and score1 < 0:
             return NewScoreNegative(variable_name="$score1", score=score1)
@@ -187,19 +183,3 @@ class Mutation:
         db.session.commit()
 
         return ScoreBet.from_instance(instance=bet)
-
-    @strawberry.mutation
-    @is_authentificated
-    @is_admin_authentificated
-    def modify_user_lock_result(self, user_id: UUID, lock: bool, info: Info) -> LockUserResult:
-        user_to_be_locked = UserModel.query.filter_by(id=str(user_id)).first()
-
-        if not user_to_be_locked:
-            return UserNotFound(user_id=user_id)
-
-        for bet in chain(user_to_be_locked.score_bets, user_to_be_locked.binary_bets):
-            bet.locked = lock
-
-        db.session.commit()
-
-        return User.from_instance(instance=user_to_be_locked)

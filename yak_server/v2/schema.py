@@ -12,6 +12,7 @@ from yak_server.database.models import (
     ScoreBetModel,
     TeamModel,
     UserModel,
+    is_locked,
 )
 
 
@@ -376,7 +377,7 @@ class ScoreBet:
             id=instance.id,
             match_id=instance.match_id,
             index=instance.match.index,
-            locked=instance.locked,
+            locked=is_locked(instance.user.name),
             group=Group.from_instance(
                 instance=instance.match.group,
                 user_id=instance.user_id,
@@ -413,7 +414,7 @@ class BinaryBet:
             id=instance.id,
             match_id=instance.match_id,
             index=instance.match.index,
-            locked=instance.locked,
+            locked=is_locked(instance.user.name),
             group=Group.from_instance(
                 instance=instance.match.group,
                 user_id=instance.user_id,
