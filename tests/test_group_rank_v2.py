@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from http import HTTPStatus
 from importlib import resources
 from unittest.mock import ANY
 from uuid import uuid4
@@ -19,113 +18,89 @@ def test_group_rank(app, client):
         initialize_database(app)
 
     response_signup = client.post(
-        "/api/v1/users/signup",
+        "/api/v2",
         json={
-            "name": get_random_string(6),
-            "first_name": get_random_string(10),
-            "last_name": get_random_string(10),
-            "password": get_random_string(10),
+            "query": """
+                mutation Root(
+                    $userName: String!, $firstName: String!,
+                    $lastName: String!, $password: String!
+                ) {
+                    signupResult(
+                        userName: $userName, firstName: $firstName,
+                        lastName: $lastName, password: $password
+                    ) {
+                        __typename
+                        ... on UserWithToken {
+                            token
+                            scoreBets {
+                                id
+                            }
+                        }
+                        ... on UserNameAlreadyExists {
+                            message
+                        }
+                    }
+                }
+            """,
+            "variables": {
+                "userName": get_random_string(6),
+                "firstName": get_random_string(10),
+                "lastName": get_random_string(10),
+                "password": get_random_string(10),
+            },
         },
     )
 
-    assert response_signup.status_code == HTTPStatus.CREATED
+    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
 
-    token = response_signup.json["result"]["token"]
+    token = response_signup.json["data"]["signupResult"]["token"]
 
-    response_all_bets = client.get(
-        "/api/v1/bets",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    assert response_all_bets.status_code == HTTPStatus.OK
+    query_modify_score_bet = """
+        mutation Root($id: UUID!, $score1: Int!, $score2: Int!) {
+            modifyScoreBetResult(id: $id, score1: $score1, score2: $score2) {
+                __typename
+                ... on ScoreBet {
+                    id
+                }
+                ... on ScoreBetNotFoundForUpdate {
+                    message
+                }
+                ... on LockedScoreBetError {
+                    message
+                }
+                ... on ExpiredToken {
+                    message
+                }
+                ... on InvalidToken {
+                    message
+                }
+            }
+        }
+    """
 
     new_scores = [(5, 1), (0, 0), (1, 2)]
 
-    for bet, new_score in zip(response_all_bets.json["result"]["score_bets"], new_scores):
-        response_patch_bet = client.patch(
-            f"/api/v1/score_bets/{bet['id']}",
+    for bet, new_score in zip(
+        response_signup.json["data"]["signupResult"]["scoreBets"],
+        new_scores,
+    ):
+        response_patch_bet = client.post(
+            "/api/v2",
             headers={"Authorization": f"Bearer {token}"},
             json={
-                "team1": {"score": new_score[0]},
-                "team2": {"score": new_score[1]},
+                "query": query_modify_score_bet,
+                "variables": {
+                    "id": bet["id"],
+                    "score1": new_score[0],
+                    "score2": new_score[1],
+                },
             },
         )
 
-        assert response_patch_bet.status_code == HTTPStatus.OK
-
-    response_group_result_response = client.get(
-        "/api/v1/bets/groups/rank/A",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    assert response_group_result_response.status_code == HTTPStatus.OK
-    assert response_group_result_response.json["result"]["group_rank"] == [
-        {
-            "team": {
-                "id": ANY,
-                "code": "FR",
-                "description": "France",
-                "flag": {"url": ANY},
-            },
-            "drawn": 1,
-            "goals_against": 1,
-            "goals_difference": 4,
-            "goals_for": 5,
-            "lost": 0,
-            "played": 2,
-            "points": 4,
-            "won": 1,
-        },
-        {
-            "team": {
-                "id": ANY,
-                "code": "IM",
-                "description": "Isle of Man",
-                "flag": {"url": ANY},
-            },
-            "drawn": 1,
-            "goals_against": 1,
-            "goals_difference": 1,
-            "goals_for": 2,
-            "lost": 0,
-            "played": 2,
-            "points": 4,
-            "won": 1,
-        },
-        {
-            "team": {
-                "code": "IE",
-                "description": "Ireland",
-                "id": ANY,
-                "flag": {"url": ANY},
-            },
-            "drawn": 0,
-            "goals_against": 7,
-            "goals_difference": -5,
-            "goals_for": 2,
-            "lost": 2,
-            "played": 2,
-            "points": 0,
-            "won": 0,
-        },
-    ]
-
-    # Error case : retrieve group rank with invalid code
-    invalid_group_code = get_random_string(2)
-
-    response_group_rank_with_invalid_code = client.get(
-        f"/api/v1/bets/groups/rank/{invalid_group_code}",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    assert response_group_rank_with_invalid_code.json == {
-        "description": f"Group not found: {invalid_group_code}",
-        "error_code": HTTPStatus.NOT_FOUND,
-        "ok": False,
-    }
+        assert response_patch_bet.json["data"]["modifyScoreBetResult"]["__typename"] == "ScoreBet"
 
     query_group_rank = """
-        query ModifyScoreBet($code: String!) {
+        query Root($code: String!) {
             groupRankByCodeResult(code: $code) {
                 __typename
                 ... on GroupRank {
@@ -259,7 +234,7 @@ def test_group_rank(app, client):
     }
 
     query_group_rank_by_id = """
-        query ModifyScoreBet($id: UUID!) {
+        query Root($id: UUID!) {
             groupRankByIdResult(id: $id) {
                 __typename
                 ... on GroupRank {
