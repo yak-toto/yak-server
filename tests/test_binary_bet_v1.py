@@ -3,16 +3,25 @@ from http import HTTPStatus
 from unittest.mock import ANY
 from uuid import uuid4
 
+import pytest
+
 from yak_server import db
 from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, PhaseModel, TeamModel
 
 from .test_utils import get_random_string
 
 
-def test_binary_bet(client, app):
+@pytest.fixture()
+def setup_app(app):
     old_lock_datetime = app.config["LOCK_DATETIME"]
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
 
+    yield app
+
+    app.config["LOCK_DATETIME"] = old_lock_datetime
+
+
+def test_binary_bet(client, setup_app):
     response_signup = client.post(
         "/api/v1/users/signup",
         json={
@@ -28,7 +37,7 @@ def test_binary_bet(client, app):
     user_id = response_signup.json["result"]["id"]
     token = response_signup.json["result"]["token"]
 
-    with app.app_context():
+    with setup_app.app_context():
         phase = PhaseModel(index=1, code="GROUP", description="Group stage")
         db.session.add(phase)
         db.session.commit()
@@ -97,7 +106,7 @@ def test_binary_bet(client, app):
     }
 
     # Error case : locked bet
-    app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(seconds=10))
+    setup_app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(seconds=10))
 
     response_lock_bet = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
@@ -112,7 +121,7 @@ def test_binary_bet(client, app):
         "description": "Cannot modify bets because locked date is exceeded",
     }
 
-    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
+    setup_app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
 
     # Error case : Invalid input
     response_invalid_inputs = client.patch(
@@ -199,6 +208,3 @@ def test_binary_bet(client, app):
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Bet not found: {invalid_bet_id}",
     }
-
-    # Fallback lock datetime
-    app.config["LOCK_DATETIME"] = old_lock_datetime

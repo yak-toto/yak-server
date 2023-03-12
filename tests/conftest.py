@@ -46,3 +46,13 @@ def app(app_session):
 @pytest.fixture(scope="module")
 def client(app):
     return app.test_client()
+
+
+@pytest.fixture()
+def production_app(app):
+    debug = app.config["DEBUG"]
+    app.config["DEBUG"] = False
+
+    yield app
+
+    app.config["DEBUG"] = debug

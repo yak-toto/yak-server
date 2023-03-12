@@ -4,12 +4,15 @@ from importlib import resources
 from random import randint
 from uuid import uuid4
 
+import pytest
+
 from yak_server.cli.database import initialize_database
 
 from .test_utils import get_random_string
 
 
-def test_modify_score_bet(app, client):
+@pytest.fixture()
+def setup_app(app):
     testcase = "test_modify_bet_v2"
 
     # location of test data
@@ -21,6 +24,12 @@ def test_modify_score_bet(app, client):
     with app.app_context():
         initialize_database(app)
 
+    yield app
+
+    app.config["LOCK_DATETIME"] = old_lock_datetime
+
+
+def test_modify_score_bet(setup_app, client):
     user_name = get_random_string(10)
     first_name = get_random_string(5)
     last_name = get_random_string(8)
@@ -105,7 +114,7 @@ def test_modify_score_bet(app, client):
     }
 
     # Error case : check locked bet
-    app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(minutes=10))
+    setup_app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(minutes=10))
 
     response_locked_bet = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[0]}",
@@ -119,7 +128,7 @@ def test_modify_score_bet(app, client):
         "description": "Cannot modify bets because locked date is exceeded",
     }
 
-    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
+    setup_app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
 
     # Error case : check bet not found
     non_existing_bet_id = str(uuid4())
@@ -168,5 +177,3 @@ def test_modify_score_bet(app, client):
     )
 
     assert response_patch_third_bet.status_code == HTTPStatus.OK
-
-    app.config["LOCK_DATETIME"] = old_lock_datetime

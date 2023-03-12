@@ -1,6 +1,7 @@
 from http import HTTPStatus
-from time import sleep
 from unittest.mock import ANY
+
+import pytest
 
 from .test_utils import get_random_string
 
@@ -309,10 +310,17 @@ def test_name_already_exists(client):
     }
 
 
-def test_expired_token(client, app):
+@pytest.fixture()
+def setup_app_for_expired_token(app):
     old_jwt_expiration_time = app.config["JWT_EXPIRATION_TIME"]
-    app.config["JWT_EXPIRATION_TIME"] = 1
+    app.config["JWT_EXPIRATION_TIME"] = 0
 
+    yield app
+
+    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
+
+
+def test_expired_token(client, setup_app_for_expired_token):
     user_name = get_random_string(6)
     password = get_random_string(15)
 
@@ -370,8 +378,6 @@ def test_expired_token(client, app):
         }
     """
 
-    sleep(1)
-
     response_expired_token = client.post(
         "/api/v2",
         headers={"Authorization": f"Bearer {auth_token}"},
@@ -389,38 +395,45 @@ def test_expired_token(client, app):
         },
     }
 
-    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
 
-
-def test_unexcepted_error(client, app):
+@pytest.fixture()
+def debug_app_for_unexcepted_error_check(app):
+    # Unset expiration time configuration. Server will raise an exception.
     old_jwt_expiration_time = app.config["JWT_EXPIRATION_TIME"]
     del app.config["JWT_EXPIRATION_TIME"]
 
-    query_signup = """
-        mutation Root(
-            $userName: String!, $firstName: String!,
-            $lastName: String!, $password: String!
+    yield app
+
+    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
+
+
+QUERY_SIGNUP = """
+    mutation Root(
+        $userName: String!, $firstName: String!,
+        $lastName: String!, $password: String!
+    ) {
+        signupResult(
+            userName: $userName, firstName: $firstName,
+            lastName: $lastName, password: $password
         ) {
-            signupResult(
-                userName: $userName, firstName: $firstName,
-                lastName: $lastName, password: $password
-            ) {
-                __typename
-                ... on UserWithToken {
-                    fullName
-                }
-                ... on UserNameAlreadyExists {
-                    message
-                }
+            __typename
+            ... on UserWithToken {
+                fullName
+            }
+            ... on UserNameAlreadyExists {
+                message
             }
         }
-    """
+    }
+"""
 
+
+def test_unexcepted_error_debug(client, debug_app_for_unexcepted_error_check):
     # Check unexpected error in debug mode, error should not obfuscated
     response_signup_debug_unexpected_error = client.post(
         "/api/v2",
         json={
-            "query": query_signup,
+            "query": QUERY_SIGNUP,
             "variables": {
                 "userName": get_random_string(6),
                 "firstName": get_random_string(6),
@@ -435,24 +448,32 @@ def test_unexcepted_error(client, app):
         "data": None,
         "errors": [
             {
-                "locations": [{"column": 13, "line": 6}],
+                "locations": [{"column": 9, "line": 6}],
                 "message": "'JWT_EXPIRATION_TIME'",
                 "path": ["signupResult"],
             },
         ],
     }
 
-    # Check unexpected error in production mode, error should be obfuscated
-    app.config["DEBUG"] = False
 
+@pytest.fixture()
+def production_app_unexcepted_error_check(debug_app_for_unexcepted_error_check):
+    debug_app_for_unexcepted_error_check.config["DEBUG"] = False
+
+    yield debug_app_for_unexcepted_error_check
+
+    debug_app_for_unexcepted_error_check.config["DEBUG"] = True
+
+
+def test_unexcepted_error_production(client, production_app_unexcepted_error_check):
     response_signup_production_unexpected_error = client.post(
         "/api/v2",
         json={
-            "query": query_signup,
+            "query": QUERY_SIGNUP,
             "variables": {
-                "name": get_random_string(6),
-                "first_name": get_random_string(6),
-                "last_name": get_random_string(6),
+                "userName": get_random_string(6),
+                "firstName": get_random_string(6),
+                "lastName": get_random_string(6),
                 "password": get_random_string(6),
             },
         },
@@ -462,12 +483,10 @@ def test_unexcepted_error(client, app):
     assert response_signup_production_unexpected_error.json == {
         "data": None,
         "errors": [
-            {"locations": [{"column": 13, "line": 3}], "message": "Unexpected error."},
-            {"locations": [{"column": 33, "line": 3}], "message": "Unexpected error."},
-            {"locations": [{"column": 13, "line": 4}], "message": "Unexpected error."},
+            {
+                "locations": [{"column": 9, "line": 6}],
+                "message": "Unexpected error.",
+                "path": ["signupResult"],
+            },
         ],
     }
-
-    # Fallback modified configuration
-    app.config["DEBUG"] = True
-    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time

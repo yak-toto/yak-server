@@ -4,12 +4,15 @@ from operator import itemgetter
 from unittest.mock import ANY
 from uuid import uuid4
 
+import pytest
+
 from yak_server.cli.database import initialize_database
 
 from .test_utils import get_random_string
 
 
-def test_matches_db(app, client):
+@pytest.fixture(autouse=True)
+def setup_app(app):
     testcase = "test_matches_db"
 
     # location of test data
@@ -20,6 +23,10 @@ def test_matches_db(app, client):
     with app.app_context():
         initialize_database(app)
 
+    return app
+
+
+def test_matches_db(client):
     # Signup one random user
     user_name = get_random_string(6)
     first_name = get_random_string(10)

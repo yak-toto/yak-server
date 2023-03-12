@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 from random import choice
 from uuid import uuid4
 
+import pytest
+
 from yak_server import db
 from yak_server.database.models import (
     BinaryBetModel,
@@ -15,10 +17,17 @@ from yak_server.database.models import (
 from .test_utils import get_random_string
 
 
-def test_binary_bet(client, app):
+@pytest.fixture()
+def setup_app(app):
     old_lock_datetime = app.config["LOCK_DATETIME"]
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=10))
 
+    yield app
+
+    app.config["LOCK_DATETIME"] = old_lock_datetime
+
+
+def test_binary_bet(client, setup_app):
     user_name = get_random_string(10)
     password = get_random_string(30)
 
@@ -56,7 +65,7 @@ def test_binary_bet(client, app):
     assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
 
     # set one binary bet in database
-    with app.app_context():
+    with setup_app.app_context():
         phase = PhaseModel(index=1, code="GROUP", description="Group stage")
         db.session.add(phase)
         db.session.commit()
@@ -204,7 +213,7 @@ def test_binary_bet(client, app):
     }
 
     # Error case : locked binary bet
-    app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(seconds=10))
+    setup_app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(seconds=10))
 
     response_modify_locked_binary_bet = client.post(
         "/api/v2",
@@ -224,7 +233,7 @@ def test_binary_bet(client, app):
         },
     }
 
-    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
+    setup_app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
 
     # Success case : Retrive one binary bet
     query_binary_bet = """
@@ -302,6 +311,3 @@ def test_binary_bet(client, app):
             },
         },
     }
-
-    # Fallback lock datetime
-    app.config["LOCK_DATETIME"] = old_lock_datetime

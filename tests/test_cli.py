@@ -62,22 +62,14 @@ def test_create_admin(client, app, monkeypatch):
         create_admin(app)
 
 
-def test_delete_all_records(app):
-    app.config["DEBUG"] = False
-
+def test_delete_all_records(production_app):
     with pytest.raises(RecordDeletionInProduction):
-        delete_database(app)
-
-    app.config["DEBUG"] = True
+        delete_database(production_app)
 
 
-def test_drop_all_tables(app):
-    app.config["DEBUG"] = False
-
+def test_drop_all_tables(production_app):
     with pytest.raises(TableDropInProduction):
-        drop_database(app)
-
-    app.config["DEBUG"] = True
+        drop_database(production_app)
 
 
 def test_backup(app):

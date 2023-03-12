@@ -3,12 +3,15 @@ from importlib import resources
 from unittest.mock import ANY
 from uuid import uuid4
 
+import pytest
+
 from yak_server.cli.database import initialize_database
 
 from .test_utils import get_random_string
 
 
-def test_bets(client, app):
+@pytest.fixture(autouse=True)
+def setup_app(app):
     testcase = "test_modify_bet_v2"
 
     with resources.as_file(resources.files("tests") / testcase) as path:
@@ -17,6 +20,10 @@ def test_bets(client, app):
     with app.app_context():
         initialize_database(app)
 
+    return app
+
+
+def test_bets(client):
     user_name = get_random_string(10)
     first_name = get_random_string(5)
     last_name = get_random_string(8)
