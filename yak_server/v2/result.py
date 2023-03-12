@@ -273,27 +273,6 @@ LoginResult = strawberry.union("LoginResult", types=(UserWithToken, InvalidCrede
 
 
 @strawberry.type
-class UserNotFound:
-    user_id: strawberry.Private[UUID]
-
-    @strawberry.field
-    def message(self) -> str:
-        return f"Cannot find user with id: {self.user_id}"
-
-
-LockUserResult = strawberry.union(
-    "LockUserResult",
-    types=(User, UserNotFound, InvalidToken, ExpiredToken, UnauthorizedAccessToAdminAPI),
-)
-
-
-UserResult = strawberry.union(
-    "UserResult",
-    types=(User, InvalidToken, ExpiredToken, UserNotFound, UnauthorizedAccessToAdminAPI),
-)
-
-
-@strawberry.type
 class GroupRank:
     group_rank: list[GroupPosition]
     group: Group

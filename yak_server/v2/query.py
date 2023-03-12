@@ -13,7 +13,7 @@ from yak_server.database.models import (
     UserModel,
 )
 
-from .bearer_authenfication import is_admin_authentificated, is_authentificated
+from .bearer_authenfication import is_authentificated
 from .result import (
     AllGroupsResult,
     AllPhasesResult,
@@ -43,9 +43,6 @@ from .result import (
     TeamByCodeResult,
     TeamByIdNotFound,
     TeamByIdResult,
-    User,
-    UserNotFound,
-    UserResult,
 )
 from .schema import (
     BinaryBet,
@@ -246,14 +243,3 @@ class Query:
             ),
             group=Group.from_instance(instance=group, user_id=info.user.instance.id),
         )
-
-    @strawberry.field
-    @is_authentificated
-    @is_admin_authentificated
-    def user_result(self, user_id: UUID, info: Info) -> UserResult:
-        user = UserModel.query.filter_by(id=str(user_id)).first()
-
-        if not user:
-            return UserNotFound(user_id=user_id)
-
-        return User.from_instance(instance=user)
