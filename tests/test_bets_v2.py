@@ -109,7 +109,7 @@ def test_bets(client, app):
                 "__typename": "ScoreBet",
                 "id": ANY,
                 "index": 1,
-                "locked": False,
+                "locked": True,
                 "group": {"description": "Groupe A", "id": ANY},
                 "team1": {"description": "Crotia", "score": None},
                 "team2": {"description": "Finland", "score": None},
