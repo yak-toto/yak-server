@@ -18,7 +18,7 @@ load_dotenv()
 def create_app():
     app = Flask(__name__)
 
-    with resources.as_file(resources.files("yak_server") / "data" / "migrations") as path:
+    with resources.as_file(resources.files("yak_server") / "database/migrations") as path:
         Migrate(app, db, directory=path)
 
     # Configuration setup
