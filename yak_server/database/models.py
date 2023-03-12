@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from dateutil import parser
-from flask import current_app
+from flask import current_app, url_for
 from sqlalchemy import CheckConstraint
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -358,7 +358,7 @@ class TeamModel(db.Model):
             "id": self.id,
             "code": self.code,
             "description": self.description,
-            "flag": {"url": self.flag_url},
+            "flag": {"url": url_for("team.retrieve_team_flag", team_id=self.id)},
         }
 
 
