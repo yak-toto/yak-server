@@ -247,3 +247,53 @@ def test_invalid_login_body(client, app):
         },
         "path": [],
     }
+
+
+def test_unexpected_error(client, app):
+    # Unset expiration time configuration. Server will raise an exception.
+    old_jwt_expiration_time = app.config["JWT_EXPIRATION_TIME"]
+    del app.config["JWT_EXPIRATION_TIME"]
+
+    # Check unexpected error in debug mode, error should not be obfuscated
+    response_signup_debug_unexpected_error = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": get_random_string(6),
+            "first_name": get_random_string(6),
+            "last_name": get_random_string(6),
+            "password": get_random_string(6),
+        },
+    )
+
+    assert response_signup_debug_unexpected_error.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+    assert response_signup_debug_unexpected_error.json == {
+        "ok": False,
+        "error_code": HTTPStatus.INTERNAL_SERVER_ERROR,
+        "description": "KeyError: 'JWT_EXPIRATION_TIME'",
+    }
+
+    # Check unexpected error in production mode, error should be obfuscated
+    app.config["DEBUG"] = False
+
+    response_signup_production_unexpected_error = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": get_random_string(6),
+            "first_name": get_random_string(6),
+            "last_name": get_random_string(6),
+            "password": get_random_string(6),
+        },
+    )
+
+    assert (
+        response_signup_production_unexpected_error.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+    )
+    assert response_signup_production_unexpected_error.json == {
+        "ok": False,
+        "error_code": HTTPStatus.INTERNAL_SERVER_ERROR,
+        "description": "Unexcepted error",
+    }
+
+    # Fallback modified configuration
+    app.config["DEBUG"] = True
+    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
