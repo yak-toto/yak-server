@@ -18,7 +18,11 @@ from yak_server.database.models import (
     ScoreBetModel,
     is_locked,
 )
-from yak_server.database.query import bets_from_group_code, bets_from_phase_code
+from yak_server.database.query import (
+    bets_from_group_code,
+    bets_from_phase_code,
+    binary_bets_from_phase_code,
+)
 from yak_server.helpers.group_position import update_group_position
 from yak_server.helpers.logging import (
     group_position_lock_retry,
@@ -33,10 +37,13 @@ from .utils.errors import (
     GroupNotFound,
     LockedBets,
     PhaseNotFound,
-    WrongInputs,
 )
 from .utils.flask_utils import success_response
-from .utils.schemas import SCHEMA_PATCH_BINARY_BET, SCHEMA_PATCH_SCORE_BET
+from .utils.schemas import (
+    SCHEMA_PATCH_BINARY_BET,
+    SCHEMA_PATCH_SCORE_BET,
+    SCHEMA_PUT_BINARY_BETS_BY_PHASE,
+)
 from .utils.validation import validate_body
 
 bets = Blueprint("bets", __name__)
@@ -44,7 +51,8 @@ bets = Blueprint("bets", __name__)
 logger = logging.getLogger(__name__)
 
 
-@bets.put(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/phases/<string:phase_code>")
+@bets.put(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/phases/<string:phase_code>")
+@validate_body(schema=SCHEMA_PUT_BINARY_BETS_BY_PHASE)
 @token_required
 def create_bet(current_user, phase_code):
     if is_locked(current_user.name):
@@ -70,28 +78,12 @@ def create_bet(current_user, phase_code):
         .order_by(GroupModel.index, MatchModel.index)
     )
 
-    existing_score_bets = (
-        current_user.score_bets.filter(MatchModel.group_id.in_(map(attrgetter("id"), groups)))
-        .join(ScoreBetModel.match)
-        .join(MatchModel.group)
-        .order_by(GroupModel.index, MatchModel.index)
-    )
-
     body = request.get_json()
 
     new_matches = []
     new_binary_bets = []
-    new_score_bets = []
 
     for bet in body:
-        if (
-            not bet.get("group", {}).get("id")
-            or not bet.get("team1", {}).get("id")
-            or not bet.get("team2", {}).get("id")
-            or not bet.get("index")
-        ):
-            raise WrongInputs
-
         group_id = bet["group"]["id"]
         team1_id = bet["team1"]["id"]
         team2_id = bet["team2"]["id"]
@@ -115,50 +107,20 @@ def create_bet(current_user, phase_code):
 
         new_matches.append(match)
 
-        if "is_one_won" in bet:
-            binary_bet = BinaryBetModel.query.filter_by(
-                match_id=match.id,
-                user_id=current_user.id,
-            ).first()
+        binary_bet = BinaryBetModel.query.filter_by(
+            match_id=match.id,
+            user_id=current_user.id,
+        ).first()
 
-            if not binary_bet:
-                binary_bet = BinaryBetModel(match_id=match.id, user_id=current_user.id)
+        if not binary_bet:
+            binary_bet = BinaryBetModel(match_id=match.id, user_id=current_user.id)
 
-            binary_bet.is_one_won = bet["is_one_won"]
+        binary_bet.is_one_won = bet["is_one_won"]
 
-            new_binary_bets.append(binary_bet)
-
-        elif (
-            "team1" in bet
-            and "team2" in bet
-            and "score" in bet.get("team1", {})
-            and "score" in bet.get("team2", {})
-        ):
-            score_bet = ScoreBetModel.query.filter_by(
-                match_id=match.id,
-                user_id=current_user.id,
-            ).first()
-
-            if not score_bet:
-                score_bet = ScoreBetModel(match_id=match.id, user_id=current_user.id)
-
-            score_bet.score1 = bet["team1"]["score1"]
-            score_bet.score2 = bet["team1"]["score2"]
-
-            new_score_bets.append(score_bet)
-
-        else:
-            raise WrongInputs
+        new_binary_bets.append(binary_bet)
 
     db.session.add_all(new_matches)
     db.session.commit()
-
-    db.session.add_all(new_score_bets)
-    db.session.commit()
-
-    for bet in existing_score_bets:
-        if bet.id not in map(attrgetter("id"), new_score_bets):
-            db.session.delete(bet)
 
     db.session.add_all(new_binary_bets)
     db.session.commit()
@@ -169,7 +131,7 @@ def create_bet(current_user, phase_code):
 
     db.session.commit()
 
-    phase, groups, score_bets, binary_bets = bets_from_phase_code(
+    phase, groups, binary_bets = binary_bets_from_phase_code(
         current_user,
         phase_code,
     )
@@ -179,7 +141,6 @@ def create_bet(current_user, phase_code):
         {
             "phase": phase.to_dict(),
             "groups": [group.to_dict_without_phase() for group in groups],
-            "score_bets": [score_bet.to_dict_with_group_id() for score_bet in score_bets],
             "binary_bets": [binary_bet.to_dict_with_group_id() for binary_bet in binary_bets],
         },
     )
