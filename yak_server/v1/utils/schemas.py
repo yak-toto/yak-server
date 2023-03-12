@@ -69,3 +69,40 @@ SCHEMA_PATCH_USER = {
     "properties": {"password": {"type": "string"}},
     "required": ["password"],
 }
+
+
+SCHEMA_PUT_BINARY_BETS_BY_PHASE = {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "is_one_won": {
+                "oneOf": [
+                    {
+                        "type": "boolean",
+                    },
+                    {
+                        "type": "null",
+                    },
+                ],
+            },
+            "index": {"type": "integer"},
+            "group": {
+                "type": "object",
+                "properties": {"id": {"format": "uuid"}},
+                "required": ["id"],
+            },
+            "team1": {
+                "type": "object",
+                "properties": {"id": {"format": "uuid"}},
+                "required": ["id"],
+            },
+            "team2": {
+                "type": "object",
+                "properties": {"id": {"format": "uuid"}},
+                "required": ["id"],
+            },
+        },
+        "required": ["is_one_won", "index", "group", "team1", "team2"],
+    },
+}

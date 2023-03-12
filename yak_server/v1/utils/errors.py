@@ -30,11 +30,6 @@ class BetNotFound(HTTPException):
         self.code = HTTPStatus.NOT_FOUND
 
 
-class WrongInputs(HTTPException):
-    code = HTTPStatus.UNAUTHORIZED
-    description = "Wrong inputs"
-
-
 class UserNotFound(HTTPException):
     code = HTTPStatus.NOT_FOUND
     description = "User not found"

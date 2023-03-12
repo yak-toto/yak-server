@@ -1,7 +1,7 @@
 from functools import wraps
 
 from flask import request
-from jsonschema import ValidationError, validate
+from jsonschema import Draft202012Validator, ValidationError, validate
 
 from .errors import RequestValidationError
 
@@ -11,7 +11,11 @@ def validate_body(schema):
         @wraps(f)
         def _verify(*args, **kwargs):
             try:
-                validate(instance=request.get_json(), schema=schema)
+                validate(
+                    instance=request.get_json(),
+                    schema=schema,
+                    format_checker=Draft202012Validator.FORMAT_CHECKER,
+                )
             except ValidationError as validation_error:
                 raise RequestValidationError(
                     schema=validation_error.schema,

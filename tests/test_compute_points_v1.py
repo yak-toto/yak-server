@@ -54,7 +54,7 @@ def put_finale_phase(client, token, is_one_won):
     assert response_post_finale_phase_bets_admin.status_code == HTTPStatus.OK
 
     response_put_finale_phase = client.put(
-        "/api/v1/bets/phases/FINAL",
+        "/api/v1/binary_bets/phases/FINAL",
         json=[
             {
                 "is_one_won": is_one_won,
