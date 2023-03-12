@@ -1,6 +1,7 @@
 from http import HTTPStatus
-from time import sleep
 from unittest.mock import ANY
+
+import pytest
 
 from .test_utils import get_random_string
 
@@ -93,19 +94,23 @@ def test_double_signup(client):
 
 
 def test_login_wrong_password(client):
-    client.post(
+    user_name = get_random_string(6)
+
+    response_signup = client.post(
         "/api/v1/users/signup",
         json={
-            "name": "glepape",
-            "first_name": "Guillaume",
-            "last_name": "Le Pape",
-            "password": "admin",
+            "name": user_name,
+            "first_name": get_random_string(10),
+            "last_name": get_random_string(11),
+            "password": get_random_string(12),
         },
     )
 
+    assert response_signup.status_code == HTTPStatus.CREATED
+
     response_login = client.post(
         "/api/v1/users/login",
-        json={"name": "glepape", "password": "wrong_password"},
+        json={"name": user_name, "password": get_random_string(12)},
     )
 
     assert response_login.status_code == HTTPStatus.UNAUTHORIZED
@@ -154,10 +159,17 @@ def test_invalid_token(client):
     }
 
 
-def test_expired_token(client, app):
+@pytest.fixture()
+def setup_app_for_expired_token(app):
     old_jwt_expiration_time = app.config["JWT_EXPIRATION_TIME"]
-    app.config["JWT_EXPIRATION_TIME"] = 1
+    app.config["JWT_EXPIRATION_TIME"] = 0
 
+    yield app
+
+    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
+
+
+def test_expired_token(client, setup_app_for_expired_token):
     user_name = get_random_string(6)
     password = get_random_string(15)
 
@@ -175,8 +187,6 @@ def test_expired_token(client, app):
 
     auth_token = response_signup.json["result"]["token"]
 
-    sleep(1)
-
     response_current_user = client.get(
         "/api/v1/current_user",
         headers={"Authorization": f"Bearer {auth_token}"},
@@ -189,10 +199,8 @@ def test_expired_token(client, app):
         "description": "Expired token. Reauthentication required.",
     }
 
-    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
 
-
-def test_invalid_signup_body(client, app):
+def test_invalid_signup_body(client):
     # Try to signup with invalid body
     response_signup = client.post(
         "/api/v1/users/signup",
@@ -223,7 +231,7 @@ def test_invalid_signup_body(client, app):
     }
 
 
-def test_invalid_login_body(client, app):
+def test_invalid_login_body(client):
     user_name = get_random_string(6)
     password = get_random_string(10)
 
@@ -249,11 +257,18 @@ def test_invalid_login_body(client, app):
     }
 
 
-def test_unexpected_error(client, app):
+@pytest.fixture()
+def debug_app_for_unexcepted_error_check(app):
     # Unset expiration time configuration. Server will raise an exception.
     old_jwt_expiration_time = app.config["JWT_EXPIRATION_TIME"]
     del app.config["JWT_EXPIRATION_TIME"]
 
+    yield app
+
+    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
+
+
+def test_unexpected_error(client, debug_app_for_unexcepted_error_check):
     # Check unexpected error in debug mode, error should not be obfuscated
     response_signup_debug_unexpected_error = client.post(
         "/api/v1/users/signup",
@@ -272,9 +287,17 @@ def test_unexpected_error(client, app):
         "description": "KeyError: 'JWT_EXPIRATION_TIME'",
     }
 
-    # Check unexpected error in production mode, error should be obfuscated
-    app.config["DEBUG"] = False
 
+@pytest.fixture()
+def production_app_unexcepted_error_check(debug_app_for_unexcepted_error_check):
+    debug_app_for_unexcepted_error_check.config["DEBUG"] = False
+
+    yield debug_app_for_unexcepted_error_check
+
+    debug_app_for_unexcepted_error_check.config["DEBUG"] = True
+
+
+def test_unexcepted_error(client, production_app_unexcepted_error_check):
     response_signup_production_unexpected_error = client.post(
         "/api/v1/users/signup",
         json={
@@ -293,7 +316,3 @@ def test_unexpected_error(client, app):
         "error_code": HTTPStatus.INTERNAL_SERVER_ERROR,
         "description": "Unexcepted error",
     }
-
-    # Fallback modified configuration
-    app.config["DEBUG"] = True
-    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time

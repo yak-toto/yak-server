@@ -4,10 +4,13 @@ from operator import itemgetter
 from unittest.mock import ANY
 from uuid import uuid4
 
+import pytest
+
 from yak_server.cli.database import initialize_database
 
 
-def test_teams(app, client):
+@pytest.fixture(autouse=True)
+def setup_up(app):
     # location of test data
     with resources.as_file(resources.files("tests") / "test_teams_v1") as path:
         app.config["DATA_FOLDER"] = path
@@ -16,6 +19,10 @@ def test_teams(app, client):
     with app.app_context():
         initialize_database(app)
 
+    return app
+
+
+def test_teams(client):
     # Fetch all the teams
     response_get_all_teams = client.get(
         "api/v1/teams",

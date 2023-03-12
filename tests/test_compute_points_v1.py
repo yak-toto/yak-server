@@ -3,6 +3,8 @@ from http import HTTPStatus
 from importlib import resources
 from unittest.mock import ANY
 
+import pytest
+
 from yak_server.cli.database import initialize_database
 
 from .test_utils import get_random_string
@@ -78,8 +80,8 @@ def put_finale_phase(client, token, is_one_won):
     assert response_put_finale_phase.status_code == HTTPStatus.OK
 
 
-def test_compute_points(app, client):
-    # location of test data
+@pytest.fixture(autouse=True)
+def setup_app(app):
     with resources.as_file(resources.files("tests") / "test_compute_points_v1") as path:
         app.config["DATA_FOLDER"] = path
     old_lock_datetime = app.config["LOCK_DATETIME"]
@@ -92,6 +94,12 @@ def test_compute_points(app, client):
     with app.app_context():
         initialize_database(app)
 
+    yield app
+
+    app.config["LOCK_DATETIME"] = old_lock_datetime
+
+
+def test_compute_points(client):
     # Create 4 accounts and patch bets
     admin_token = patch_score_bets(client, "admin", [(1, 2), (5, 1), (5, 5)])
     user_token = patch_score_bets(client, "user", [(2, 2), (5, 1), (5, 5)])
@@ -268,5 +276,3 @@ def test_compute_points(app, client):
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "No results for admin user",
     }
-
-    app.config["LOCK_DATETIME"] = old_lock_datetime

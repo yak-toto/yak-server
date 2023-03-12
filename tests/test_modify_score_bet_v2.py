@@ -3,12 +3,15 @@ from importlib import resources
 from random import randint
 from uuid import uuid4
 
+import pytest
+
 from yak_server.cli.database import initialize_database
 
 from .test_utils import get_random_string
 
 
-def test_modify_score_bet(app, client):
+@pytest.fixture()
+def setup_app(app):
     old_lock_datetime = app.config["LOCK_DATETIME"]
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
 
@@ -21,6 +24,12 @@ def test_modify_score_bet(app, client):
     with app.app_context():
         initialize_database(app)
 
+    yield app
+
+    app.config["LOCK_DATETIME"] = old_lock_datetime
+
+
+def test_modify_score_bet(setup_app, client):
     user_name = get_random_string(10)
     first_name = get_random_string(5)
     last_name = get_random_string(8)
@@ -187,7 +196,7 @@ def test_modify_score_bet(app, client):
     }
 
     # Error case : check locked score bet
-    app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(seconds=30))
+    setup_app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(seconds=30))
 
     response_modify_locked_score_bet = client.post(
         "/api/v2",
@@ -211,7 +220,7 @@ def test_modify_score_bet(app, client):
         },
     }
 
-    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
+    setup_app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
 
     # Error case : check ScoreBetNotFoundForUpdate error if score bet does not exist
     score1 = 1
@@ -234,6 +243,3 @@ def test_modify_score_bet(app, client):
         "__typename": "ScoreBetNotFoundForUpdate",
         "message": "Score bet not found. Cannot modify a ressource that does not exist.",
     }
-
-    # Fallback lock datetime
-    app.config["LOCK_DATETIME"] = old_lock_datetime
