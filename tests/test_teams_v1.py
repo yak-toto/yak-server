@@ -28,7 +28,7 @@ def test_teams(app, client):
             "id": ANY,
             "code": "DE",
             "description": "Germany",
-            "flag": {"url": "https://fake-team-flag_germany.com"},
+            "flag": {"url": ANY},
         },
         {"id": ANY, "code": "GR", "description": "Greece", "flag": {"url": ANY}},
         {"id": ANY, "code": "GD", "description": "Grenada", "flag": {"url": ANY}},
@@ -38,7 +38,7 @@ def test_teams(app, client):
             "id": ANY,
             "code": "ML",
             "description": "Mali",
-            "flag": {"url": "https://fake-team-flag_mali.com"},
+            "flag": {"url": ANY},
         },
         {"id": ANY, "code": "NO", "description": "Norway", "flag": {"url": ANY}},
         {"id": ANY, "code": "UA", "description": "Ukraine", "flag": {"url": ANY}},
@@ -100,4 +100,25 @@ def test_teams(app, client):
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Team not found: {non_existing_team_id}",
+    }
+
+    # Check flag fetching
+    response_retrieve_flag = client.get(
+        response_one_team_by_code.json["result"]["team"]["flag"]["url"],
+    )
+
+    assert response_retrieve_flag.status_code == HTTPStatus.FOUND
+
+    # Check flag fetching with invalid team id
+    invalid_team_id = str(uuid4())
+
+    response_retrieve_flag_with_invalid_id = client.get(
+        f"/api/v1/teams/{invalid_team_id}/flag",
+    )
+
+    assert response_retrieve_flag_with_invalid_id.status_code == HTTPStatus.NOT_FOUND
+    assert response_retrieve_flag_with_invalid_id.json == {
+        "ok": False,
+        "error_code": HTTPStatus.NOT_FOUND,
+        "description": f"Team not found: {invalid_team_id}",
     }

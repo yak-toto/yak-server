@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from flask import Blueprint
+from flask import Blueprint, redirect
 
 from yak_server.database.models import TeamModel
 
@@ -32,3 +32,13 @@ def teams_get_by_id(team_id):
         raise TeamNotFound(team_id)
 
     return success_response(HTTPStatus.OK, {"team": team.to_dict()})
+
+
+@teams.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams/<string:team_id>/flag")
+def retrieve_team_flag(team_id):
+    team = TeamModel.query.filter_by(id=team_id).first()
+
+    if not team:
+        raise TeamNotFound(team_id)
+
+    return redirect(team.flag_url)

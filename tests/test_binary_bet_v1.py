@@ -81,14 +81,14 @@ def test_binary_bet(client, app):
                 "team1": {
                     "code": "FR",
                     "description": "France",
-                    "flag": {"url": None},
+                    "flag": {"url": ANY},
                     "id": ANY,
                     "won": True,
                 },
                 "team2": {
                     "code": "GR",
                     "description": "Germany",
-                    "flag": {"url": None},
+                    "flag": {"url": ANY},
                     "id": ANY,
                     "won": False,
                 },
@@ -170,14 +170,14 @@ def test_binary_bet(client, app):
                 "team1": {
                     "code": "FR",
                     "description": "France",
-                    "flag": {"url": None},
+                    "flag": {"url": ANY},
                     "id": ANY,
                     "won": True,
                 },
                 "team2": {
                     "code": "GR",
                     "description": "Germany",
-                    "flag": {"url": None},
+                    "flag": {"url": ANY},
                     "id": ANY,
                     "won": False,
                 },
