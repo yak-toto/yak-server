@@ -429,7 +429,6 @@ class GroupPositionModel(db.Model):
         nullable=False,
         default=lambda: str(uuid4()),
     )
-    played = db.Column(db.Integer, CheckConstraint("played>=0"), nullable=False, default=0)
     won = db.Column(db.Integer, CheckConstraint("won>=0"), nullable=False, default=0)
     drawn = db.Column(db.Integer, CheckConstraint("drawn>=0"), nullable=False, default=0)
     lost = db.Column(db.Integer, CheckConstraint("lost>=0"), nullable=False, default=0)
@@ -463,7 +462,7 @@ class GroupPositionModel(db.Model):
     def to_dict(self):
         return {
             "team": self.team.to_dict(),
-            "played": self.played,
+            "played": self.won + self.drawn + self.lost,
             "won": self.won,
             "drawn": self.drawn,
             "lost": self.lost,

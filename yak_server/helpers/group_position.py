@@ -68,18 +68,12 @@ def update_group_position(
         return
 
     elif old_bet_type == BetState.ANY_NONE:
-        group_position_team1.played += 1
-        group_position_team2.played += 1
-
         group_position_team1.goals_for += new_score1
         group_position_team1.goals_against += new_score2
         group_position_team2.goals_for += new_score2
         group_position_team2.goals_against += new_score1
 
     elif new_bet_type == BetState.ANY_NONE:
-        group_position_team1.played -= 1
-        group_position_team2.played -= 1
-
         group_position_team1.goals_for -= old_score1
         group_position_team1.goals_against -= old_score2
         group_position_team2.goals_for -= old_score2
