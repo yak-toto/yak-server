@@ -299,6 +299,7 @@ def test_group_rank(app, client):
         }
     """
 
+    # Success case : retrive group rank with group id
     response_group_rank_by_id = client.post(
         "/api/v2",
         json={"query": query_group_rank_by_id, "variables": {"id": group_id}},
@@ -307,6 +308,7 @@ def test_group_rank(app, client):
 
     assert response_group_rank_by_id.json["data"] == {"groupRankByIdResult": result_group_rank}
 
+    # Error case : invalid authentification
     response_group_rank_by_id_auth_error = client.post(
         "/api/v2",
         json={"query": query_group_rank_by_id, "variables": {"id": group_id}},
@@ -320,6 +322,7 @@ def test_group_rank(app, client):
         },
     }
 
+    # Error case : retrieve group rank with invalid id
     invalid_id = str(uuid4())
 
     response_group_rank_with_invalid_id = client.post(
