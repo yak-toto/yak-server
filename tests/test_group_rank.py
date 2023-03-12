@@ -110,6 +110,20 @@ def test_group_rank(app, client):
         },
     ]
 
+    # Error case : retrieve group rank with invalid code
+    invalid_group_code = get_random_string(2)
+
+    response_group_rank_with_invalid_code = client.get(
+        f"/api/v1/bets/groups/rank/{invalid_group_code}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response_group_rank_with_invalid_code.json == {
+        "description": f"Group not found: {invalid_group_code}",
+        "error_code": HTTPStatus.NOT_FOUND,
+        "ok": False,
+    }
+
     query_group_rank = """
         query ModifyScoreBet($code: String!) {
             groupRankByCodeResult(code: $code) {

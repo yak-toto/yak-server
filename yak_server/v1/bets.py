@@ -268,6 +268,9 @@ def group_result_get(current_user, group_code):
 def get_group_rank_with_code(user_id, group_code):
     group = GroupModel.query.filter_by(code=group_code).first()
 
+    if not group:
+        raise GroupNotFound(group_code)
+
     group_rank = GroupPositionModel.query.filter_by(group_id=group.id, user_id=user_id)
 
     return {
