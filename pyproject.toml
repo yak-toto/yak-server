@@ -31,6 +31,7 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP",
 ]
 dependencies = [
+    "greenlet ==3.0.0a1",
     "PyJWT >=2.6.0,<3.0.0",
     "PyMySQL[rsa] >=1.0.2,<2.0.0",
     "argon2-cffi >=21.3.0,<24.0.0",
