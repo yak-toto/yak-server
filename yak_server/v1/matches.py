@@ -14,7 +14,7 @@ from yak_server.database.models import (
 )
 from yak_server.database.query import matches_from_group_code, matches_from_phase_code
 
-from .utils.auth_utils import token_required
+from .utils.auth_utils import is_authentificated
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import GroupNotFound, InvalidTeamId, MatchNotFound, PhaseNotFound, TeamNotFound
 from .utils.flask_utils import is_iso_3166_1_alpha_2_code, is_uuid4, success_response
@@ -23,7 +23,7 @@ matches = Blueprint("matches", __name__)
 
 
 @matches.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches")
-@token_required
+@is_authentificated
 def matches_get_all(current_user):
     binary_bets = (
         current_user.binary_bets.join(BinaryBetModel.match)
@@ -54,7 +54,7 @@ def matches_get_all(current_user):
 
 
 @matches.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/<string:match_id>")
-@token_required
+@is_authentificated
 def matches_get_by_id(current_user, match_id):
     bet = current_user.binary_bets.filter_by(match_id=match_id).first()
 
@@ -75,7 +75,7 @@ def matches_get_by_id(current_user, match_id):
 
 
 @matches.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/groups/<string:group_code>")
-@token_required
+@is_authentificated
 def matches_by_group_code(current_user, group_code):
     group, matches = matches_from_group_code(current_user, group_code)
 
@@ -93,7 +93,7 @@ def matches_by_group_code(current_user, group_code):
 
 
 @matches.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/phases/<string:phase_code>")
-@token_required
+@is_authentificated
 def matches_by_phase_code(current_user, phase_code):
     phase, groups, matches = matches_from_phase_code(current_user, phase_code)
 
@@ -111,7 +111,7 @@ def matches_by_phase_code(current_user, phase_code):
 
 
 @matches.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/matches/teams/<string:team_id>")
-@token_required
+@is_authentificated
 def matches_teams_get(current_user, team_id):
     if is_uuid4(team_id):
         team = TeamModel.query.get(team_id)
