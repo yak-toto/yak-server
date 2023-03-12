@@ -131,13 +131,14 @@ def backup_database(app):
     file_name = f"{backup_location}/yak_toto_backup_{backup_date}T{backup_time}.sql"
 
     result = subprocess.run(
-        [
-            "mysqldump",
-            app.config["MYSQL_DB"],
-            "-u",
-            app.config["MYSQL_USER_NAME"],
-            f"--password={app.config['MYSQL_PASSWORD']}",
-        ],
+        (
+            f"mysqldump {app.config['MYSQL_DB']} "
+            f"-u {app.config['MYSQL_USER_NAME']} "
+            f"-P {app.config['MYSQL_PORT']} "
+            "--protocol=tcp "
+            f"--password={app.config['MYSQL_PASSWORD']}"
+        ),
+        shell=True,
         capture_output=True,
         encoding="utf-8",
     )
