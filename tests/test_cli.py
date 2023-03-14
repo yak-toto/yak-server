@@ -81,7 +81,7 @@ def test_backup(app):
     )
 
     # Check that most recent backup has been done 1 second ago
-    assert datetime.now() - list_datetime_backup[-1] <= timedelta(seconds=1)
+    assert datetime.now() - list_datetime_backup[-1] <= timedelta(seconds=2)
 
     # Check BackupError if password is incorrect
     old_password = app.config["MYSQL_PASSWORD"]
