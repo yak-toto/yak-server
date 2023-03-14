@@ -12,8 +12,9 @@ def encode_bearer_token(sub: str, expiration_time: timedelta, secret_key: str) -
             "exp": datetime.utcnow() + expiration_time,
         },
         secret_key,
+        algorithm="HS512",
     )
 
 
 def decode_bearer_token(token: str, secret_key: str):
-    return jwt_decode(token, secret_key, algorithms=["HS256"])
+    return jwt_decode(token, secret_key, algorithms=["HS512"])
