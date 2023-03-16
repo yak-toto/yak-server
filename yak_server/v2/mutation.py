@@ -5,6 +5,7 @@ from uuid import UUID
 
 import strawberry
 from flask import current_app
+from sqlalchemy import sql
 from strawberry.types import Info
 
 from yak_server import db
@@ -77,7 +78,8 @@ class Mutation:
 
         # Initialize bets and integrate in db
         db.session.add_all(
-            ScoreBetModel(user_id=user.id, match_id=match.id) for match in MatchModel.query.all()
+            match.bet_type_from_match.value(user_id=user.id, match_id=match.id)
+            for match in MatchModel.query.filter(MatchModel.bet_type_from_match is not sql.null())
         )
         db.session.commit()
 
