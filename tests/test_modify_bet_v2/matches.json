@@ -3,36 +3,42 @@
         "group_code": "A",
         "index": 1,
         "team1_code": "HR",
-        "team2_code": "FI"
+        "team2_code": "FI",
+        "bet_type_from_match": "SCORE_BET"
     },
     {
         "group_code": "A",
         "index": 2,
         "team1_code": "NA",
-        "team2_code": "IQ"
+        "team2_code": "IQ",
+        "bet_type_from_match": "SCORE_BET"
     },
     {
         "group_code": "A",
         "index": 3,
         "team1_code": "HR",
-        "team2_code": "NA"
+        "team2_code": "NA",
+        "bet_type_from_match": "SCORE_BET"
     },
     {
         "group_code": "A",
         "index": 4,
         "team1_code": "FI",
-        "team2_code": "IQ"
+        "team2_code": "IQ",
+        "bet_type_from_match": "SCORE_BET"
     },
     {
         "group_code": "A",
         "index": 5,
         "team1_code": "HR",
-        "team2_code": "IQ"
+        "team2_code": "IQ",
+        "bet_type_from_match": "SCORE_BET"
     },
     {
         "group_code": "A",
         "index": 6,
         "team1_code": "FI",
-        "team2_code": "NA"
+        "team2_code": "NA",
+        "bet_type_from_match": "SCORE_BET"
     }
 ]

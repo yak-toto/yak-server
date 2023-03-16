@@ -1,9 +1,11 @@
 from datetime import datetime
+from enum import Enum
 from uuid import uuid4
 
 from dateutil import parser
 from flask import current_app, url_for
 from sqlalchemy import CheckConstraint
+from sqlalchemy import Enum as SqlEnum
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from yak_server import db
@@ -130,56 +132,6 @@ class UserModel(db.Model):
             "number_final_guess": self.number_final_guess,
             "number_winner_guess": self.number_winner_guess,
             "points": round(self.points, 3),
-        }
-
-
-class MatchModel(db.Model):
-    __tablename__ = "match"
-    id = db.Column(
-        db.String(100),
-        primary_key=True,
-        nullable=False,
-        default=lambda: str(uuid4()),
-    )
-
-    group_id = db.Column(db.String(100), db.ForeignKey("group.id"), nullable=False)
-    group = db.relationship("GroupModel", foreign_keys=group_id, backref="matches")
-
-    index = db.Column(db.Integer, nullable=False)
-
-    team1_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
-    team1 = db.relationship("TeamModel", foreign_keys=team1_id, backref="match1")
-
-    team2_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
-    team2 = db.relationship("TeamModel", foreign_keys=team2_id, backref="match2")
-
-    score_bets = db.relationship("ScoreBetModel", back_populates="match")
-    binary_bets = db.relationship("BinaryBetModel", back_populates="match")
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "index": self.index,
-            "group": self.group.to_dict(),
-            "team1": self.team1.to_dict(),
-            "team2": self.team2.to_dict(),
-        }
-
-    def to_dict_with_group_id(self):
-        return {
-            "id": self.id,
-            "index": self.index,
-            "group": {"id": self.group_id},
-            "team1": self.team1.to_dict(),
-            "team2": self.team2.to_dict(),
-        }
-
-    def to_dict_without_group(self):
-        return {
-            "id": self.id,
-            "index": self.index,
-            "team1": self.team1.to_dict(),
-            "team2": self.team2.to_dict(),
         }
 
 
@@ -334,6 +286,63 @@ class BinaryBetModel(db.Model):
             "locked": is_locked(self.user.name),
             "team1": self.match.team1.to_dict() | {"won": bet_results[0]},
             "team2": self.match.team2.to_dict() | {"won": bet_results[1]},
+        }
+
+
+class BetMapping(Enum):
+    SCORE_BET = ScoreBetModel
+    BINARY_BET = BinaryBetModel
+
+
+class MatchModel(db.Model):
+    __tablename__ = "match"
+    id = db.Column(
+        db.String(100),
+        primary_key=True,
+        nullable=False,
+        default=lambda: str(uuid4()),
+    )
+
+    group_id = db.Column(db.String(100), db.ForeignKey("group.id"), nullable=False)
+    group = db.relationship("GroupModel", foreign_keys=group_id, backref="matches")
+
+    index = db.Column(db.Integer, nullable=False)
+
+    team1_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
+    team1 = db.relationship("TeamModel", foreign_keys=team1_id, backref="match1")
+
+    team2_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
+    team2 = db.relationship("TeamModel", foreign_keys=team2_id, backref="match2")
+
+    score_bets = db.relationship("ScoreBetModel", back_populates="match")
+    binary_bets = db.relationship("BinaryBetModel", back_populates="match")
+
+    bet_type_from_match = db.Column(SqlEnum(BetMapping), default=None)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "index": self.index,
+            "group": self.group.to_dict(),
+            "team1": self.team1.to_dict(),
+            "team2": self.team2.to_dict(),
+        }
+
+    def to_dict_with_group_id(self):
+        return {
+            "id": self.id,
+            "index": self.index,
+            "group": {"id": self.group_id},
+            "team1": self.team1.to_dict(),
+            "team2": self.team2.to_dict(),
+        }
+
+    def to_dict_without_group(self):
+        return {
+            "id": self.id,
+            "index": self.index,
+            "team1": self.team1.to_dict(),
+            "team2": self.team2.to_dict(),
         }
 
 
