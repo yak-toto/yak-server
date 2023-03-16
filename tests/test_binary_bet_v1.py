@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 from http import HTTPStatus
+from importlib import resources
 from unittest.mock import ANY
 from uuid import uuid4
 
 import pytest
 
-from yak_server import db
-from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, PhaseModel, TeamModel
+from yak_server.cli.database import initialize_database
 
 from .test_utils import get_random_string
 
@@ -15,6 +15,12 @@ from .test_utils import get_random_string
 def setup_app(app):
     old_lock_datetime = app.config["LOCK_DATETIME"]
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
+
+    with resources.as_file(resources.files("tests") / "test_binary_bet") as path:
+        app.config["DATA_FOLDER"] = path
+
+    with app.app_context():
+        initialize_database(app)
 
     yield app
 
@@ -34,35 +40,7 @@ def test_binary_bet(client, setup_app):
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    user_id = response_signup.json["result"]["id"]
     token = response_signup.json["result"]["token"]
-
-    with setup_app.app_context():
-        phase = PhaseModel(index=1, code="GROUP", description="Group stage")
-        db.session.add(phase)
-        db.session.commit()
-
-        group = GroupModel(phase_id=phase.id, index=1, code="A", description="Group A")
-        db.session.add(group)
-        db.session.commit()
-
-        team1 = TeamModel(code="FR", description="France")
-        team2 = TeamModel(code="GR", description="Germany")
-        db.session.add_all([team1, team2])
-        db.session.commit()
-
-        match = MatchModel(
-            index=1,
-            group_id=group.id,
-            team1_id=team1.id,
-            team2_id=team2.id,
-        )
-        db.session.add(match)
-        db.session.commit()
-
-        binary_bet = BinaryBetModel(match_id=match.id, user_id=user_id)
-        db.session.add(binary_bet)
-        db.session.commit()
 
     response_bets = client.get("/api/v1/bets", headers={"Authorization": f"Bearer {token}"})
 
