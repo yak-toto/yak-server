@@ -288,3 +288,24 @@ GroupRankByIdResult = strawberry.union(
     "GroupRankByIdResult",
     types=(GroupRank, GroupByIdNotFound, InvalidToken, ExpiredToken),
 )
+
+
+@strawberry.type
+class UserNotFound:
+    id: strawberry.Private[UUID]
+
+    @strawberry.field
+    def message(self) -> str:
+        return f"User not found with id: {self.id}"
+
+
+ModifyUserResult = strawberry.union(
+    "ModifyUserResult",
+    types=(
+        UserWithoutSensitiveInfo,
+        UserNotFound,
+        InvalidToken,
+        ExpiredToken,
+        UnauthorizedAccessToAdminAPI,
+    ),
+)
