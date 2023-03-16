@@ -73,6 +73,7 @@ class UserWithoutSensitiveInfo:
 class User:
     instance: strawberry.Private[UserModel]
 
+    id: UUID
     pseudo: str
     first_name: str
     last_name: str
@@ -121,6 +122,7 @@ class User:
     def from_instance(cls, instance: UserModel):
         return cls(
             instance=instance,
+            id=instance.id,
             pseudo=instance.name,
             first_name=instance.first_name,
             last_name=instance.last_name,
@@ -136,6 +138,7 @@ class UserWithToken(User):
     def from_instance(cls, instance: UserModel, token: str):
         return cls(
             instance=instance,
+            id=instance.id,
             pseudo=instance.name,
             first_name=instance.first_name,
             last_name=instance.last_name,

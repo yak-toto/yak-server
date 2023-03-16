@@ -27,6 +27,7 @@ from yak_server.helpers.logging import (
 )
 
 from .bearer_authenfication import (
+    is_admin_authentificated,
     is_authentificated,
 )
 from .result import (
@@ -37,10 +38,13 @@ from .result import (
     LoginResult,
     ModifyBinaryBetResult,
     ModifyScoreBetResult,
+    ModifyUserResult,
     NewScoreNegative,
     ScoreBetNotFoundForUpdate,
     SignupResult,
     UserNameAlreadyExists,
+    UserNotFound,
+    UserWithoutSensitiveInfo,
 )
 from .schema import (
     BinaryBet,
@@ -185,3 +189,17 @@ class Mutation:
         db.session.commit()
 
         return ScoreBet.from_instance(instance=bet)
+
+    @strawberry.mutation
+    @is_authentificated
+    @is_admin_authentificated
+    def modify_user_result(self, id: UUID, password: str, info: Info) -> ModifyUserResult:
+        user = UserModel.query.filter_by(id=str(id)).first()
+
+        if not user:
+            return UserNotFound(id=id)
+
+        user.change_password(password)
+        db.session.commit()
+
+        return UserWithoutSensitiveInfo.from_instance(instance=user)
