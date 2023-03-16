@@ -64,7 +64,6 @@ def test_binary_bet(client, setup_app):
                 "id": ANY,
                 "index": 1,
                 "locked": False,
-                "match_id": ANY,
                 "team1": {
                     "code": "FR",
                     "description": "France",
@@ -153,7 +152,6 @@ def test_binary_bet(client, setup_app):
                 "id": ANY,
                 "index": 1,
                 "locked": False,
-                "match_id": ANY,
                 "team1": {
                     "code": "FR",
                     "description": "France",

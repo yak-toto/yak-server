@@ -78,7 +78,6 @@ def test_bets(client):
                 "id": ANY,
                 "index": 1,
                 "locked": True,
-                "match_id": ANY,
                 "team1": {
                     "code": "HR",
                     "description": "Crotia",
@@ -141,7 +140,6 @@ def test_bets(client):
                     "id": ANY,
                     "index": 1,
                     "locked": True,
-                    "match_id": ANY,
                     "team1": {
                         "code": "HR",
                         "description": "Crotia",
@@ -162,7 +160,6 @@ def test_bets(client):
                     "id": ANY,
                     "index": 2,
                     "locked": True,
-                    "match_id": ANY,
                     "team1": {
                         "code": "NA",
                         "description": "Namibia",
@@ -183,7 +180,6 @@ def test_bets(client):
                     "id": ANY,
                     "index": 3,
                     "locked": True,
-                    "match_id": ANY,
                     "team1": {
                         "code": "HR",
                         "description": "Crotia",
@@ -204,7 +200,6 @@ def test_bets(client):
                     "id": ANY,
                     "index": 4,
                     "locked": True,
-                    "match_id": ANY,
                     "team1": {
                         "code": "FI",
                         "description": "Finland",
@@ -225,7 +220,6 @@ def test_bets(client):
                     "id": ANY,
                     "index": 5,
                     "locked": True,
-                    "match_id": ANY,
                     "team1": {
                         "code": "HR",
                         "description": "Crotia",
@@ -246,7 +240,6 @@ def test_bets(client):
                     "id": ANY,
                     "index": 6,
                     "locked": True,
-                    "match_id": ANY,
                     "team1": {
                         "code": "FI",
                         "description": "Finland",

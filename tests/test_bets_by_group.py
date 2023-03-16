@@ -58,7 +58,6 @@ def test_bets_by_groups(client):
                 "id": ANY,
                 "index": 1,
                 "locked": True,
-                "match_id": ANY,
                 "team1": {
                     "code": "FR",
                     "description": "France",
@@ -78,7 +77,6 @@ def test_bets_by_groups(client):
                 "id": ANY,
                 "index": 2,
                 "locked": True,
-                "match_id": ANY,
                 "team1": {
                     "code": "FR",
                     "description": "France",
@@ -98,7 +96,6 @@ def test_bets_by_groups(client):
                 "id": ANY,
                 "index": 3,
                 "locked": True,
-                "match_id": ANY,
                 "team1": {
                     "code": "IE",
                     "description": "Ireland",

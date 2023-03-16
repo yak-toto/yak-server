@@ -1,5 +1,3 @@
-from itertools import chain
-
 from .models import BinaryBetModel, GroupModel, MatchModel, PhaseModel, ScoreBetModel
 
 
@@ -22,12 +20,6 @@ def bets_from_group_code(user, group_code):
     )
 
     return group, score_bets, binary_bets
-
-
-def matches_from_group_code(user, group_code):
-    group, score_bets, binary_bets = bets_from_group_code(user, group_code)
-
-    return group, (bet.match for bet in chain(score_bets, binary_bets))
 
 
 def bets_from_phase_code(user, phase_code):
@@ -71,9 +63,3 @@ def binary_bets_from_phase_code(user, phase_code):
     )
 
     return phase, groups, binary_bets
-
-
-def matches_from_phase_code(user, phase_code):
-    phase, groups, score_bets, binary_bets = bets_from_phase_code(user, phase_code)
-
-    return phase, groups, (bet.match for bet in chain(score_bets, binary_bets))

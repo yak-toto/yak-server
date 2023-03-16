@@ -363,7 +363,6 @@ class ScoreBet:
     instance: strawberry.Private[ScoreBetModel]
 
     id: UUID
-    match_id: UUID
     index: int
     locked: bool
     group: Group
@@ -375,7 +374,6 @@ class ScoreBet:
         return cls(
             instance=instance,
             id=instance.id,
-            match_id=instance.match_id,
             index=instance.match.index,
             locked=is_locked(instance.user.name),
             group=Group.from_instance(
@@ -398,7 +396,6 @@ class BinaryBet:
     instance: strawberry.Private[BinaryBetModel]
 
     id: UUID
-    match_id: UUID
     index: int
     locked: bool
     group: Group
@@ -412,7 +409,6 @@ class BinaryBet:
         return cls(
             instance=instance,
             id=instance.id,
-            match_id=instance.match_id,
             index=instance.match.index,
             locked=is_locked(instance.user.name),
             group=Group.from_instance(

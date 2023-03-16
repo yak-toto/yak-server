@@ -18,12 +18,6 @@ class NameAlreadyExists(HTTPException):
         self.code = HTTPStatus.UNAUTHORIZED
 
 
-class MatchNotFound(HTTPException):
-    def __init__(self, match_id) -> None:
-        super().__init__(f"Match not found: {match_id}")
-        self.code = HTTPStatus.NOT_FOUND
-
-
 class BetNotFound(HTTPException):
     def __init__(self, bet_id) -> None:
         super().__init__(f"Bet not found: {bet_id}")
