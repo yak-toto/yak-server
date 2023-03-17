@@ -13,20 +13,12 @@ config.read(f"{DATA_FOLDER}/config.ini")
 with Path(f"{DATA_FOLDER}/finale_phase_config.json").open() as file:
     FINALE_PHASE_CONFIG = json.loads(file.read())
 
-MYSQL_USER_NAME = os.environ["MYSQL_USER_NAME"]
-MYSQL_PASSWORD = os.environ["MYSQL_PASSWORD"]
-MYSQL_PORT = os.environ.get("MYSQL_PORT", 3306)
-MYSQL_DB = os.environ["MYSQL_DB"]
-
 YAK_CONFIG = {
     # Setup MySQL credentials
-    "MYSQL_USER_NAME": MYSQL_USER_NAME,
-    "MYSQL_PASSWORD": MYSQL_PASSWORD,
-    "MYSQL_PORT": MYSQL_PORT,
-    "MYSQL_DB": MYSQL_DB,
-    "SQLALCHEMY_DATABASE_URI": (
-        f"mysql+pymysql://{MYSQL_USER_NAME}:{MYSQL_PASSWORD}@localhost:{MYSQL_PORT}/{MYSQL_DB}"
-    ),
+    "MYSQL_USER_NAME": os.environ["MYSQL_USER_NAME"],
+    "MYSQL_PASSWORD": os.environ["MYSQL_PASSWORD"],
+    "MYSQL_PORT": os.environ.get("MYSQL_PORT", 3306),
+    "MYSQL_DB": os.environ["MYSQL_DB"],
     # Load jwt secret key from credentials file
     "SECRET_KEY": os.environ["JWT_SECRET_KEY"],
     "JWT_EXPIRATION_TIME": int(os.environ["JWT_EXPIRATION_TIME"]),
@@ -48,3 +40,15 @@ YAK_CONFIG = {
     "FINALE_PHASE_CONFIG": FINALE_PHASE_CONFIG,
     "DATA_FOLDER": DATA_FOLDER,
 }
+
+
+def compute_database_uri(mysql_user_name, mysql_password, mysql_port, mysql_db):
+    return f"mysql+pymysql://{mysql_user_name}:{mysql_password}@localhost:{mysql_port}/{mysql_db}"
+
+
+YAK_CONFIG["SQLALCHEMY_DATABASE_URI"] = compute_database_uri(
+    YAK_CONFIG["MYSQL_USER_NAME"],
+    YAK_CONFIG["MYSQL_PASSWORD"],
+    YAK_CONFIG["MYSQL_PORT"],
+    YAK_CONFIG["MYSQL_DB"],
+)
