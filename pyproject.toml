@@ -32,6 +32,7 @@ jsonschema = "^4.17.3"
 [tool.poetry.group.test.dependencies]
 pytest = "^7.2.1"
 pytest-cov = "^4.0.0"
+pexpect = "^4.8.0"
 
 
 [tool.poetry.group.pre_commit.dependencies]
