@@ -2,7 +2,6 @@ name: 🆙 Release
 
 on:
   push:
-    branches: [master]
     tags:
       - '*.*.*'
 
@@ -37,7 +36,7 @@ jobs:
         with:
           artifacts: "dist/*"
           token: ${{ secrets.GITHUB_TOKEN }}
-          draft: false
+          draft: true
           prerelease: steps.check-version.outputs.prerelease == 'true'
 
       - name: Publish to PyPI
