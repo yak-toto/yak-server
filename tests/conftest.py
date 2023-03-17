@@ -13,11 +13,7 @@ def app_session():
 
     # Create app and set TESTING config
     app = create_app()
-    app.config.update(
-        {
-            "TESTING": True,
-        },
-    )
+    app.config["TESTING"] = True
 
     # Clean database before running test
     with app.app_context():

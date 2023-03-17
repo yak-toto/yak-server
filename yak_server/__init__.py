@@ -22,9 +22,9 @@ def create_app():
         Migrate(app, db, directory=path)
 
     # Configuration setup
-    from .config_file import YAK_CONFIG
+    from .config_file import get_config
 
-    app.config.from_mapping(YAK_CONFIG)
+    app.config.from_mapping(get_config())
     app.json.sort_keys = False
 
     # Database setup
