@@ -1,27 +1,6 @@
-from enum import Enum, unique
+from dataclasses import dataclass
 
 from yak_server.database.models import GroupPositionModel
-
-
-@unique
-class BetState(Enum):
-    ANY_NONE = 1
-    DRAWN = 2
-    ONE_WIN = 3
-    TWO_WIN = 4
-
-
-def get_bet_state(score1, score2):
-    if score1 is None or score2 is None:
-        return BetState.ANY_NONE
-
-    if score1 == score2:
-        return BetState.DRAWN
-
-    if score1 > score2:
-        return BetState.ONE_WIN
-
-    return BetState.TWO_WIN
 
 
 def create_group_position(score_bets):
@@ -53,58 +32,52 @@ def create_group_position(score_bets):
     return group_positions
 
 
-def update_group_position(
-    old_score1,
-    old_score2,
-    new_score1,
-    new_score2,
-    group_position_team1,
-    group_position_team2,
-):
-    old_bet_type = get_bet_state(old_score1, old_score2)
-    new_bet_type = get_bet_state(new_score1, new_score2)
+@dataclass
+class GroupPosition:
+    won: int = 0
+    drawn: int = 0
+    lost: int = 0
+    goals_for: int = 0
+    goals_against: int = 0
 
-    if old_bet_type == BetState.ANY_NONE and new_bet_type == BetState.ANY_NONE:
-        return
 
-    elif old_bet_type == BetState.ANY_NONE:
-        group_position_team1.goals_for += new_score1
-        group_position_team1.goals_against += new_score2
-        group_position_team2.goals_for += new_score2
-        group_position_team2.goals_against += new_score1
+def compute_group_rank(group_rank, score_bets):
+    new_group_position = {}
 
-    elif new_bet_type == BetState.ANY_NONE:
-        group_position_team1.goals_for -= old_score1
-        group_position_team1.goals_against -= old_score2
-        group_position_team2.goals_for -= old_score2
-        group_position_team2.goals_against -= old_score1
+    for score_bet in score_bets:
+        team1_id = score_bet.match.team1_id
+        team2_id = score_bet.match.team2_id
 
-    else:
-        group_position_team1.goals_for += new_score1 - old_score1
-        group_position_team1.goals_against += new_score2 - old_score2
-        group_position_team2.goals_for += new_score2 - old_score2
-        group_position_team2.goals_against += new_score1 - old_score1
+        if team1_id not in new_group_position:
+            new_group_position[team1_id] = GroupPosition()
 
-    if old_bet_type == BetState.DRAWN:
-        group_position_team1.drawn -= 1
-        group_position_team2.drawn -= 1
+        if team2_id not in new_group_position:
+            new_group_position[team2_id] = GroupPosition()
 
-    if old_bet_type == BetState.ONE_WIN:
-        group_position_team1.won -= 1
-        group_position_team2.lost -= 1
+        if score_bet.score1 is None or score_bet.score2 is None:
+            continue
 
-    if old_bet_type == BetState.TWO_WIN:
-        group_position_team1.lost -= 1
-        group_position_team2.won -= 1
+        new_group_position[team1_id].goals_for += score_bet.score1
+        new_group_position[team1_id].goals_against += score_bet.score2
+        new_group_position[team2_id].goals_for += score_bet.score2
+        new_group_position[team2_id].goals_against += score_bet.score1
 
-    if new_bet_type == BetState.DRAWN:
-        group_position_team1.drawn += 1
-        group_position_team2.drawn += 1
+        if score_bet.score1 > score_bet.score2:
+            new_group_position[team1_id].won += 1
+            new_group_position[team2_id].lost += 1
+        elif score_bet.score1 == score_bet.score2:
+            new_group_position[team1_id].drawn += 1
+            new_group_position[team2_id].drawn += 1
+        else:
+            new_group_position[team1_id].lost += 1
+            new_group_position[team2_id].won += 1
 
-    if new_bet_type == BetState.ONE_WIN:
-        group_position_team1.won += 1
-        group_position_team2.lost += 1
+    for group_position in group_rank:
+        group_position.won = new_group_position[group_position.team_id].won
+        group_position.drawn = new_group_position[group_position.team_id].drawn
+        group_position.lost = new_group_position[group_position.team_id].lost
+        group_position.goals_for = new_group_position[group_position.team_id].goals_for
+        group_position.goals_against = new_group_position[group_position.team_id].goals_against
+        group_position.need_recomputation = False
 
-    if new_bet_type == BetState.TWO_WIN:
-        group_position_team1.lost += 1
-        group_position_team2.won += 1
+    return group_rank

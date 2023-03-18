@@ -438,6 +438,7 @@ class GroupPositionModel(db.Model):
         nullable=False,
         default=0,
     )
+    need_recomputation = db.Column(db.Boolean, nullable=False, default=False)
 
     user_id = db.Column(
         db.String(100),

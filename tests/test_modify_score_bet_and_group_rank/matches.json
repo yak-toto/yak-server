@@ -1,0 +1,44 @@
+[
+    {
+        "group_code": "H",
+        "index": 1,
+        "team1_code": "FR",
+        "team2_code": "ES",
+        "bet_type_from_match": "SCORE_BET"
+    },
+    {
+        "group_code": "H",
+        "index": 2,
+        "team1_code": "CH",
+        "team2_code": "VJ",
+        "bet_type_from_match": "SCORE_BET"
+    },
+    {
+        "group_code": "H",
+        "index": 3,
+        "team1_code": "FR",
+        "team2_code": "CH",
+        "bet_type_from_match": "SCORE_BET"
+    },
+    {
+        "group_code": "H",
+        "index": 4,
+        "team1_code": "ES",
+        "team2_code": "VJ",
+        "bet_type_from_match": "SCORE_BET"
+    },
+    {
+        "group_code": "H",
+        "index": 5,
+        "team1_code": "FR",
+        "team2_code": "VJ",
+        "bet_type_from_match": "SCORE_BET"
+    },
+    {
+        "group_code": "H",
+        "index": 6,
+        "team1_code": "ES",
+        "team2_code": "CH",
+        "bet_type_from_match": "SCORE_BET"
+    }
+]
