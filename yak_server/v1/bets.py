@@ -266,7 +266,7 @@ def modify_score_bet(user, bet_id):
     if is_locked(user.name):
         raise LockedBets
 
-    score_bet = ScoreBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
+    score_bet = ScoreBetModel.query.filter_by(user_id=user.id, id=bet_id).with_for_update().first()
 
     if not score_bet:
         raise BetNotFound(bet_id)
