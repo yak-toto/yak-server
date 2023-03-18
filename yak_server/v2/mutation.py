@@ -5,7 +5,7 @@ from uuid import UUID
 
 import strawberry
 from flask import current_app
-from sqlalchemy import sql
+from sqlalchemy import sql, update
 from strawberry.types import Info
 
 from yak_server import db
@@ -18,7 +18,7 @@ from yak_server.database.models import (
     is_locked,
 )
 from yak_server.helpers.authentification import encode_bearer_token
-from yak_server.helpers.group_position import create_group_position, update_group_position
+from yak_server.helpers.group_position import create_group_position
 from yak_server.helpers.logging import (
     logged_in_successfully,
     modify_binary_bet_successfully,
@@ -164,24 +164,25 @@ class Mutation:
         if score2 is not None and score2 < 0:
             return NewScoreNegative(variable_name="$score2", score=score2)
 
-        group_position_team1 = GroupPositionModel.query.filter_by(
-            team_id=bet.match.team1_id,
-            user_id=info.user.instance.id,
-        ).first()
-        group_position_team2 = GroupPositionModel.query.filter_by(
-            team_id=bet.match.team2_id,
-            user_id=info.user.instance.id,
-        ).first()
+        if score1 == bet.score1 and score2 == bet.score2:
+            return ScoreBet.from_instance(instance=bet)
 
-        update_group_position(
-            bet.score1,
-            bet.score2,
-            score1,
-            score2,
-            group_position_team1,
-            group_position_team2,
+        db.session.execute(
+            update(GroupPositionModel)
+            .values(need_recomputation=True)
+            .where(
+                GroupPositionModel.team_id == bet.match.team1_id,
+                GroupPositionModel.user_id == info.user.id,
+            ),
         )
-
+        db.session.execute(
+            update(GroupPositionModel)
+            .values(need_recomputation=True)
+            .where(
+                GroupPositionModel.team_id == bet.match.team2_id,
+                GroupPositionModel.user_id == info.user.id,
+            ),
+        )
         logger.info(modify_score_bet_successfully(info.user.pseudo, bet, score1, score2))
 
         bet.score1 = score1

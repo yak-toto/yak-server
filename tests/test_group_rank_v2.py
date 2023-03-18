@@ -87,6 +87,7 @@ def test_group_rank(client):
         }
     """
 
+    # Modify score bet
     new_scores = [(5, 1), (0, 0), (1, 2)]
 
     for bet, new_score in zip(
@@ -149,6 +150,7 @@ def test_group_rank(client):
         }
     """
 
+    # Success case : Fetch group rank and check updates
     response_group_rank_by_code = client.post(
         "/api/v2",
         json={"query": query_group_rank, "variables": {"code": "A"}},
@@ -212,6 +214,7 @@ def test_group_rank(client):
 
     assert response_group_rank_by_code.json["data"] == {"groupRankByCodeResult": result_group_rank}
 
+    # Error case : Retrieve group rank with invalid group code
     group_id = response_group_rank_by_code.json["data"]["groupRankByCodeResult"]["group"]["id"]
 
     invalid_group_code = "B"
@@ -229,6 +232,7 @@ def test_group_rank(client):
         },
     }
 
+    # Error case : Retrieve group rank with invalid token
     response_group_rank_with_auth_error = client.post(
         "/api/v2",
         json={"query": query_group_rank, "variables": {"code": "A"}},
@@ -320,4 +324,93 @@ def test_group_rank(client):
             "__typename": "GroupByIdNotFound",
             "message": f"Cannot find group with id: {invalid_id}",
         },
+    }
+
+    # Modify score bet and check group rank by id updates
+    response_modify_score_bet = client.post(
+        "/api/v2",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "query": query_modify_score_bet,
+            "variables": {
+                "id": bet["id"],
+                "score1": 4,
+                "score2": 3,
+            },
+        },
+    )
+
+    assert (
+        response_modify_score_bet.json["data"]["modifyScoreBetResult"]["__typename"] == "ScoreBet"
+    )
+
+    response_retrieve_group_rank_by_id = client.post(
+        "/api/v2",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "query": query_group_rank_by_id,
+            "variables": {
+                "id": group_id,
+            },
+        },
+    )
+
+    group_rank_result = {
+        "__typename": "GroupRank",
+        "group": {"description": "Groupe A", "id": group_id},
+        "groupRank": [
+            {
+                "team": ANY,
+                "played": 2,
+                "won": 1,
+                "drawn": 1,
+                "lost": 0,
+                "goalsFor": 5,
+                "goalsAgainst": 1,
+                "goalsDifference": 4,
+                "points": 4,
+            },
+            {
+                "team": ANY,
+                "played": 2,
+                "won": 1,
+                "drawn": 0,
+                "lost": 1,
+                "goalsFor": 5,
+                "goalsAgainst": 8,
+                "goalsDifference": -3,
+                "points": 3,
+            },
+            {
+                "team": ANY,
+                "played": 2,
+                "won": 0,
+                "drawn": 1,
+                "lost": 1,
+                "goalsFor": 3,
+                "goalsAgainst": 4,
+                "goalsDifference": -1,
+                "points": 1,
+            },
+        ],
+    }
+
+    assert response_retrieve_group_rank_by_id.json["data"] == {
+        "groupRankByIdResult": group_rank_result,
+    }
+
+    # Success case : No recomputation for group rank
+    response_retrieve_group_rank_by_code = client.post(
+        "/api/v2",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "query": query_group_rank,
+            "variables": {
+                "code": "A",
+            },
+        },
+    )
+
+    assert response_retrieve_group_rank_by_code.json["data"] == {
+        "groupRankByCodeResult": group_rank_result,
     }

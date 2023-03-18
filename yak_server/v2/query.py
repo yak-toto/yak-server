@@ -3,15 +3,18 @@ from uuid import UUID
 import strawberry
 from strawberry.types import Info
 
+from yak_server import db
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
     GroupPositionModel,
+    MatchModel,
     PhaseModel,
     ScoreBetModel,
     TeamModel,
     UserModel,
 )
+from yak_server.helpers.group_position import compute_group_rank
 
 from .bearer_authenfication import is_authentificated
 from .result import (
@@ -47,11 +50,11 @@ from .result import (
 from .schema import (
     BinaryBet,
     Group,
-    GroupPosition,
     Phase,
     ScoreBet,
     Team,
     UserWithoutSensitiveInfo,
+    send_group_position,
 )
 
 
@@ -199,21 +202,22 @@ class Query:
             group_id=group.id,
         )
 
-        return GroupRank(
-            group_rank=sorted(
-                [
-                    GroupPosition.from_instance(instance=group_position)
-                    for group_position in group_rank
-                ],
-                key=lambda team: (
-                    team.points(),
-                    team.goals_difference(),
-                    team.goals_for,
-                ),
-                reverse=True,
-            ),
-            group=Group.from_instance(instance=group, user_id=info.user.instance.id),
+        def send_response(user_id, group_rank):
+            return GroupRank(
+                group_rank=send_group_position(group_rank),
+                group=Group.from_instance(instance=group, user_id=user_id),
+            )
+
+        if not any(group_position.need_recomputation for group_position in group_rank):
+            return send_response(info.user.id, group_rank)
+
+        score_bets = info.user.instance.score_bets.filter(MatchModel.group_id == group.id).join(
+            ScoreBetModel.match,
         )
+        group_rank = compute_group_rank(group_rank, score_bets)
+        db.session.commit()
+
+        return send_response(info.user.id, group_rank)
 
     @strawberry.field
     @is_authentificated
@@ -228,18 +232,19 @@ class Query:
             group_id=group.id,
         )
 
-        return GroupRank(
-            group_rank=sorted(
-                [
-                    GroupPosition.from_instance(instance=group_position)
-                    for group_position in group_rank
-                ],
-                key=lambda team: (
-                    team.points(),
-                    team.goals_difference(),
-                    team.goals_for,
-                ),
-                reverse=True,
-            ),
-            group=Group.from_instance(instance=group, user_id=info.user.instance.id),
+        def send_response(user_id, group_rank):
+            return GroupRank(
+                group_rank=send_group_position(group_rank),
+                group=Group.from_instance(instance=group, user_id=user_id),
+            )
+
+        if not any(group_position.need_recomputation for group_position in group_rank):
+            return send_response(info.user.id, group_rank)
+
+        score_bets = info.user.instance.score_bets.filter(MatchModel.group_id == group.id).join(
+            ScoreBetModel.match,
         )
+        group_rank = compute_group_rank(group_rank, score_bets)
+        db.session.commit()
+
+        return send_response(info.user.id, group_rank)

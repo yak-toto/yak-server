@@ -1,0 +1,22 @@
+[
+    {
+        "code": "FR",
+        "description": "France",
+        "flag_url": "url"
+    },
+    {
+        "code": "ES",
+        "description": "Espagna",
+        "flag_url": "url"
+    },
+    {
+        "code": "CH",
+        "description": "Switzerland",
+        "flag_url": "url"
+    },
+    {
+        "code": "VJ",
+        "description": "United-States",
+        "flag_url": "url"
+    }
+]

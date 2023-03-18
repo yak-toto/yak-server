@@ -29,10 +29,3 @@ def logged_in_successfully(user_name):
 
 def modify_password_successfully(user_name):
     return f"admin user modify {user_name} password"
-
-
-def group_position_lock_retry(team1, team2, retry_time, number_of_retry):
-    return (
-        f"error due to group position locking {team1}-{team2} after {number_of_retry} tries. "
-        f"Retry in {retry_time} seconds."
-    )

@@ -2,11 +2,10 @@ import logging
 from http import HTTPStatus
 from itertools import chain
 from operator import attrgetter
-from time import sleep
 from uuid import uuid4
 
 from flask import Blueprint, current_app, request
-from sqlalchemy import and_
+from sqlalchemy import and_, update
 
 from yak_server import db
 from yak_server.database.models import (
@@ -23,9 +22,8 @@ from yak_server.database.query import (
     bets_from_phase_code,
     binary_bets_from_phase_code,
 )
-from yak_server.helpers.group_position import update_group_position
+from yak_server.helpers.group_position import compute_group_rank
 from yak_server.helpers.logging import (
-    group_position_lock_retry,
     modify_binary_bet_successfully,
     modify_score_bet_successfully,
 )
@@ -222,31 +220,43 @@ def group_get(current_user, group_code):
 def group_result_get(current_user, group_code):
     return success_response(
         HTTPStatus.OK,
-        get_group_rank_with_code(current_user.id, group_code),
+        get_group_rank_with_code(current_user, group_code),
     )
 
 
-def get_group_rank_with_code(user_id, group_code):
+def get_group_rank_with_code(user, group_code):
     group = GroupModel.query.filter_by(code=group_code).first()
 
     if not group:
         raise GroupNotFound(group_code)
 
-    group_rank = GroupPositionModel.query.filter_by(group_id=group.id, user_id=user_id)
+    group_rank = GroupPositionModel.query.filter_by(group_id=group.id, user_id=user.id)
 
-    return {
-        "phase": group.phase.to_dict(),
-        "group": group.to_dict_without_phase(),
-        "group_rank": sorted(
-            [group_position.to_dict() for group_position in group_rank],
-            key=lambda team: (
-                team["points"],
-                team["goals_difference"],
-                team["goals_for"],
+    def send_response(group, group_rank):
+        return {
+            "phase": group.phase.to_dict(),
+            "group": group.to_dict_without_phase(),
+            "group_rank": sorted(
+                [group_position.to_dict() for group_position in group_rank],
+                key=lambda team: (
+                    team["points"],
+                    team["goals_difference"],
+                    team["goals_for"],
+                ),
+                reverse=True,
             ),
-            reverse=True,
-        ),
-    }
+        }
+
+    if not any(group_position.need_recomputation for group_position in group_rank):
+        return send_response(group, group_rank)
+
+    score_bets = user.score_bets.filter(MatchModel.group_id == group.id).join(ScoreBetModel.match)
+
+    group_rank = compute_group_rank(group_rank, score_bets)
+
+    db.session.commit()
+
+    return send_response(group, group_rank)
 
 
 @bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
@@ -276,56 +286,29 @@ def modify_score_bet(user, bet_id):
     if score_bet.score1 == body["team1"]["score"] and score_bet.score2 == body["team2"]["score"]:
         return send_response(score_bet)
 
-    retry_time = 0.1
-    number_of_retries = 5
-
-    for i in range(number_of_retries):
-        try:
-            group_position_team1 = (
-                GroupPositionModel.query.filter_by(
-                    team_id=score_bet.match.team1_id,
-                    user_id=user.id,
-                )
-                .populate_existing()
-                .with_for_update()
-                .first()
-            )
-            group_position_team2 = (
-                GroupPositionModel.query.filter_by(
-                    team_id=score_bet.match.team2_id,
-                    user_id=user.id,
-                )
-                .populate_existing()
-                .with_for_update()
-                .first()
-            )
-            break
-        except Exception:
-            logger.info(
-                group_position_lock_retry(
-                    score_bet.match.team1.description,
-                    score_bet.match.team2.description,
-                    retry_time,
-                    i + 1,
-                ),
-            )
-            sleep(retry_time)
-
-    update_group_position(
-        score_bet.score1,
-        score_bet.score2,
-        body["team1"]["score"],
-        body["team2"]["score"],
-        group_position_team1,
-        group_position_team2,
-    )
-
     logger.info(
         modify_score_bet_successfully(
             user.name,
             score_bet,
             body["team1"]["score"],
             body["team2"]["score"],
+        ),
+    )
+
+    db.session.execute(
+        update(GroupPositionModel)
+        .values(need_recomputation=True)
+        .where(
+            GroupPositionModel.team_id == score_bet.match.team1_id,
+            GroupPositionModel.user_id == user.id,
+        ),
+    )
+    db.session.execute(
+        update(GroupPositionModel)
+        .values(need_recomputation=True)
+        .where(
+            GroupPositionModel.team_id == score_bet.match.team2_id,
+            GroupPositionModel.user_id == user.id,
         ),
     )
 
@@ -407,7 +390,7 @@ def commit_finale_phase(current_user):
     finale_phase_config = current_app.config["FINALE_PHASE_CONFIG"]
 
     groups_result = {
-        group.code: get_group_rank_with_code(current_user.id, group.code)["group_rank"]
+        group.code: get_group_rank_with_code(current_user, group.code)["group_rank"]
         for group in GroupModel.query.join(GroupModel.phase).filter(
             PhaseModel.code == "GROUP",
         )

@@ -131,7 +131,7 @@ def compute_points(
     for group in GroupModel.query.join(GroupModel.phase).filter(
         PhaseModel.code == "GROUP",
     ):
-        group_result_admin = get_group_rank_with_code(admin.id, group.code)["group_rank"]
+        group_result_admin = get_group_rank_with_code(admin, group.code)["group_rank"]
 
         if all_results_filled_in_group(group_result_admin):
             admin_first_team_id = group_result_admin[0]["team"]["id"]
@@ -144,7 +144,7 @@ def compute_points(
                         "number_first_qualified_guess": 0,
                     }
 
-                group_result_user = get_group_rank_with_code(user.id, group.code)["group_rank"]
+                group_result_user = get_group_rank_with_code(user, group.code)["group_rank"]
 
                 if all_results_filled_in_group(group_result_user):
                     user_first_team_id = group_result_user[0]["team"]["id"]

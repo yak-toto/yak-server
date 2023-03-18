@@ -3,6 +3,7 @@ from uuid import UUID
 
 import strawberry
 
+from yak_server import db
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
@@ -14,6 +15,7 @@ from yak_server.database.models import (
     UserModel,
     is_locked,
 )
+from yak_server.helpers.group_position import compute_group_rank
 
 
 @strawberry.type
@@ -238,6 +240,18 @@ class GroupPosition:
         )
 
 
+def send_group_position(group_rank):
+    return sorted(
+        [GroupPosition.from_instance(instance=group_position) for group_position in group_rank],
+        key=lambda team: (
+            team.points(),
+            team.goals_difference(),
+            team.goals_for,
+        ),
+        reverse=True,
+    )
+
+
 @strawberry.type
 class Group:
     instance: strawberry.Private[GroupModel]
@@ -251,15 +265,18 @@ class Group:
     def group_rank(self) -> list[GroupPosition]:
         group_rank = GroupPositionModel.query.filter_by(user_id=self.user_id, group_id=self.id)
 
-        return sorted(
-            [GroupPosition.from_instance(instance=group_position) for group_position in group_rank],
-            key=lambda team: (
-                team.points(),
-                team.goals_difference(),
-                team.goals_for,
-            ),
-            reverse=True,
+        if not any(group_position.need_recomputation for group_position in group_rank):
+            return send_group_position(group_rank)
+
+        user = UserModel.query.filter_by(id=self.user_id).first()
+
+        score_bets = user.score_bets.filter(MatchModel.group_id == self.id).join(
+            ScoreBetModel.match,
         )
+        group_rank = compute_group_rank(group_rank, score_bets)
+        db.session.commit()
+
+        return send_group_position(group_rank)
 
     @strawberry.field
     def phase(self) -> "Phase":
