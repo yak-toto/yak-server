@@ -1,4 +1,5 @@
 import logging
+import traceback
 from http import HTTPStatus
 
 from flask import Response, jsonify
@@ -99,6 +100,7 @@ def set_error_handler(app):
     @app.errorhandler(Exception)
     def handle_exception(e: Exception) -> Response:
         # Return JSON instead of HTML for generic errors.
+        logger.error(traceback.format_exc())
         logger.error(f"An unexcepted expection occurs: {type(e).__name__} {e}")
 
         return (

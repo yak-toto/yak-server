@@ -24,7 +24,7 @@ def setup_app(app):
     return app
 
 
-def test_group_v2(client):
+def test_group(client):
     # Signup one random user
     user_name = get_random_string(6)
     first_name = get_random_string(10)
