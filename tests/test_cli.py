@@ -18,7 +18,7 @@ from yak_server.cli.database import (
     drop_database,
 )
 
-from .test_utils import get_random_string
+from .utils import get_random_string
 
 
 def test_create_admin(client, app, monkeypatch):

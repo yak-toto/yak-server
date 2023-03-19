@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from uuid import uuid4
 
-from .test_utils import get_random_string
+from .utils import get_random_string
 
 
 def test_modify_password(client):

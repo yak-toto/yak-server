@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from .test_utils import get_random_string
+from .utils import get_random_string
 
 QUERY_SIGNUP = """
     mutation Root(

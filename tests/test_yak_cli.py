@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 import pexpect
 
-from .test_utils import get_random_string
+from .utils import get_random_string
 
 
 def test_cli(client):
