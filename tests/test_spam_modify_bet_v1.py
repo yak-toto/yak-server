@@ -9,7 +9,7 @@ import pytest
 
 from yak_server.cli.database import initialize_database
 
-from .test_utils import get_random_string
+from .utils import get_random_string
 
 
 @pytest.fixture(autouse=True)

@@ -3,7 +3,7 @@ from unittest.mock import ANY
 
 import pytest
 
-from .test_utils import get_random_string
+from .utils import get_random_string
 
 
 def test_valid_auth(client):
