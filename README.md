@@ -1,11 +1,12 @@
 # Yak-toto
 
-[![PyPI](https://img.shields.io/pypi/v/yak-server?logo=pypi&logoColor=white&style=for-the-badge)](https://pypi.org/project/yak-server/)
+[![PyPI](https://img.shields.io/pypi/v/yak-server?label=stable)](https://pypi.org/project/yak-server/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/yak-server)](https://pypi.org/project/yak-server/)
+[![codecov](https://codecov.io/gh/yak-toto/yak-server/branch/master/graph/badge.svg?token=EZZK5SY5BL)](https://codecov.io/gh/yak-toto/yak-server)
 
 ## Requisites
 
 - Ubuntu 22.04
-- Python 3.10.4
 - MySQL 8.0.30
 
 ## How to build the project
