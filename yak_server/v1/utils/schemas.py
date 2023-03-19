@@ -1,3 +1,50 @@
+SCHEMA_POST_SCORE_BET = {
+    "type": "object",
+    "properties": {
+        "index": {"type": "integer", "minimum": 1},
+        "team1": {
+            "type": "object",
+            "properties": {
+                "id": {"format": "uuid"},
+                "score": {
+                    "oneOf": [
+                        {
+                            "type": "integer",
+                            "minimum": 0,
+                        },
+                        {"type": "null"},
+                    ],
+                },
+            },
+            "required": ["id"],
+        },
+        "team2": {
+            "type": "object",
+            "properties": {
+                "id": {"format": "uuid"},
+                "score": {
+                    "oneOf": [
+                        {
+                            "type": "integer",
+                            "minimum": 0,
+                        },
+                        {"type": "null"},
+                    ],
+                },
+            },
+            "required": ["id"],
+        },
+        "group": {
+            "type": "object",
+            "properties": {
+                "id": {"format": "uuid"},
+            },
+            "required": ["id"],
+        },
+    },
+    "required": ["team1", "team2", "group", "index"],
+}
+
 SCHEMA_PATCH_SCORE_BET = {
     "type": "object",
     "properties": {
@@ -33,6 +80,38 @@ SCHEMA_PATCH_SCORE_BET = {
         },
     },
     "required": ["team1", "team2"],
+}
+
+SCHEMA_POST_BINARY_BET = {
+    "type": "object",
+    "properties": {
+        "is_one_won": {
+            "oneOf": [{"type": "boolean"}, {"type": "null"}],
+        },
+        "index": {"type": "integer", "minimum": 1},
+        "team1": {
+            "type": "object",
+            "properties": {
+                "id": {"format": "uuid"},
+            },
+            "required": ["id"],
+        },
+        "team2": {
+            "type": "object",
+            "properties": {
+                "id": {"format": "uuid"},
+            },
+            "required": ["id"],
+        },
+        "group": {
+            "type": "object",
+            "properties": {
+                "id": {"format": "uuid"},
+            },
+            "required": ["id"],
+        },
+    },
+    "required": ["index", "team1", "team2", "group"],
 }
 
 SCHEMA_PATCH_BINARY_BET = {

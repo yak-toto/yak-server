@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from flask import Blueprint, current_app, request
 from sqlalchemy import and_, update
+from sqlalchemy.exc import IntegrityError
 
 from yak_server import db
 from yak_server.database.models import (
@@ -35,11 +36,14 @@ from .utils.errors import (
     GroupNotFound,
     LockedBets,
     PhaseNotFound,
+    TeamNotFound,
 )
 from .utils.flask_utils import success_response
 from .utils.schemas import (
     SCHEMA_PATCH_BINARY_BET,
     SCHEMA_PATCH_SCORE_BET,
+    SCHEMA_POST_BINARY_BET,
+    SCHEMA_POST_SCORE_BET,
     SCHEMA_PUT_BINARY_BETS_BY_PHASE,
 )
 from .utils.validation import validate_body
@@ -259,6 +263,70 @@ def get_group_rank_with_code(user, group_code):
     return send_response(group, group_rank)
 
 
+@bets.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets")
+@validate_body(schema=SCHEMA_POST_SCORE_BET)
+@is_authentificated
+def create_score_bet(user):
+    if is_locked(user.name):
+        raise LockedBets
+
+    body = request.get_json()
+
+    match = MatchModel(
+        team1_id=body["team1"]["id"],
+        team2_id=body["team2"]["id"],
+        index=body["index"],
+        group_id=body["group"]["id"],
+    )
+
+    db.session.add(match)
+    try:
+        db.session.flush()
+    except IntegrityError as integrity_error:
+        if "FOREIGN KEY (`team1_id`)" in str(integrity_error):
+            raise TeamNotFound(team_id=body["team1"]["id"]) from integrity_error
+        elif "FOREIGN KEY (`team2_id`)" in str(integrity_error):
+            raise TeamNotFound(team_id=body["team2"]["id"]) from integrity_error
+        else:
+            raise GroupNotFound(group_id=body["group"]["id"]) from integrity_error
+
+    score_bet = ScoreBetModel(
+        match_id=match.id,
+        user_id=user.id,
+        score1=body["team1"].get("score"),
+        score2=body["team2"].get("score"),
+    )
+
+    db.session.execute(
+        update(GroupPositionModel)
+        .values(need_recomputation=True)
+        .where(
+            GroupPositionModel.team_id == body["team1"]["id"],
+            GroupPositionModel.user_id == user.id,
+        ),
+    )
+    db.session.execute(
+        update(GroupPositionModel)
+        .values(need_recomputation=True)
+        .where(
+            GroupPositionModel.team_id == body["team2"]["id"],
+            GroupPositionModel.user_id == user.id,
+        ),
+    )
+
+    db.session.add(score_bet)
+    db.session.commit()
+
+    return success_response(
+        HTTPStatus.CREATED,
+        {
+            "phase": score_bet.match.group.phase.to_dict(),
+            "group": score_bet.match.group.to_dict_without_phase(),
+            "score_bet": score_bet.to_dict_without_group(),
+        },
+    )
+
+
 @bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
 @validate_body(schema=SCHEMA_PATCH_SCORE_BET)
 @is_authentificated
@@ -319,6 +387,93 @@ def modify_score_bet(user, bet_id):
     return send_response(score_bet)
 
 
+@bets.delete(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
+@is_authentificated
+def delete_score_bet(user, bet_id):
+    if is_locked(user.name):
+        raise LockedBets
+
+    score_bet = ScoreBetModel.query.filter_by(id=bet_id, user_id=user.id).first()
+
+    if not score_bet:
+        raise BetNotFound(bet_id)
+
+    response_body = {
+        "phase": score_bet.match.group.phase.to_dict(),
+        "group": score_bet.match.group.to_dict_without_phase(),
+        "score_bet": score_bet.to_dict_without_group(),
+    }
+
+    db.session.execute(
+        update(GroupPositionModel)
+        .values(need_recomputation=True)
+        .where(
+            GroupPositionModel.team_id == score_bet.match.team1_id,
+            GroupPositionModel.user_id == user.id,
+        ),
+    )
+    db.session.execute(
+        update(GroupPositionModel)
+        .values(need_recomputation=True)
+        .where(
+            GroupPositionModel.team_id == score_bet.match.team2_id,
+            GroupPositionModel.user_id == user.id,
+        ),
+    )
+
+    db.session.delete(score_bet)
+    db.session.commit()
+
+    return success_response(HTTPStatus.OK, response_body)
+
+
+@bets.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets")
+@validate_body(schema=SCHEMA_POST_BINARY_BET)
+@is_authentificated
+def create_binary_bet(user):
+    if is_locked(user.name):
+        raise LockedBets
+
+    body = request.get_json()
+
+    match = MatchModel(
+        team1_id=body["team1"]["id"],
+        team2_id=body["team2"]["id"],
+        index=body["index"],
+        group_id=body["group"]["id"],
+    )
+
+    db.session.add(match)
+
+    try:
+        db.session.flush()
+    except IntegrityError as integrity_error:
+        if "FOREIGN KEY (`team1_id`)" in str(integrity_error):
+            raise TeamNotFound(team_id=body["team1"]["id"]) from integrity_error
+        elif "FOREIGN KEY (`team2_id`)" in str(integrity_error):
+            raise TeamNotFound(team_id=body["team2"]["id"]) from integrity_error
+        else:
+            raise GroupNotFound(group_id=body["group"]["id"]) from integrity_error
+
+    binary_bet = BinaryBetModel(
+        match_id=match.id,
+        user_id=user.id,
+        is_one_won=body.get("is_one_won"),
+    )
+
+    db.session.add(binary_bet)
+    db.session.commit()
+
+    return success_response(
+        HTTPStatus.CREATED,
+        {
+            "phase": binary_bet.match.group.phase.to_dict(),
+            "group": binary_bet.match.group.to_dict_without_phase(),
+            "binary_bet": binary_bet.to_dict_without_group(),
+        },
+    )
+
+
 @bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
 @validate_body(schema=SCHEMA_PATCH_BINARY_BET)
 @is_authentificated
@@ -346,6 +501,29 @@ def modify_binary_bet(user, bet_id):
             "binary_bet": binary_bet.to_dict_without_group(),
         },
     )
+
+
+@bets.delete(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
+@is_authentificated
+def delete_binary_bet(user, bet_id):
+    if is_locked(user.name):
+        raise LockedBets
+
+    binary_bet = BinaryBetModel.query.filter_by(id=bet_id, user_id=user.id).first()
+
+    if not binary_bet:
+        raise BetNotFound(bet_id)
+
+    response_body = {
+        "phase": binary_bet.match.group.phase.to_dict(),
+        "group": binary_bet.match.group.to_dict_without_phase(),
+        "binary_bet": binary_bet.to_dict_without_group(),
+    }
+
+    db.session.delete(binary_bet)
+    db.session.commit()
+
+    return success_response(HTTPStatus.OK, response_body)
 
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")

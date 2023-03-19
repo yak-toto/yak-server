@@ -1,0 +1,12 @@
+[
+    {
+        "code": "FR",
+        "description": "France",
+        "flag_url": "https://fake-team-flag_france.com"
+    },
+    {
+        "code": "BR",
+        "description": "Brazil",
+        "flag_url": "https://fake-team-flag_brazil.com"
+    }
+]
