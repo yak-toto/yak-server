@@ -78,3 +78,36 @@ def test_cli(client):
         "error_code": HTTPStatus.NOT_FOUND,
         "description": "User not found",
     }
+
+    # Check the same error with v2 api
+    response_login_user_not_found_v2 = client.post(
+        "/api/v2",
+        headers={"Authorization": f"Bearer {auth_token}"},
+        json={
+            "query": """
+                query {
+                    currentUserResult {
+                        __typename
+                        ... on User {
+                            fullName
+                        }
+                        ... on InvalidToken {
+                            message
+                        }
+                        ... on ExpiredToken {
+                            message
+                        }
+                    }
+                }
+            """,
+        },
+    )
+
+    assert response_login_user_not_found_v2.json == {
+        "data": {
+            "currentUserResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token. Cannot authentify.",
+            },
+        },
+    }
