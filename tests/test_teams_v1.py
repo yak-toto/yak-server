@@ -12,7 +12,7 @@ from yak_server.cli.database import initialize_database
 @pytest.fixture(autouse=True)
 def setup_up(app):
     # location of test data
-    with resources.as_file(resources.files("tests") / "test_teams_v1") as path:
+    with resources.as_file(resources.files("tests") / "test_data/test_teams_v1") as path:
         app.config["DATA_FOLDER"] = path
 
     # initialize sql database

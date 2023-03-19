@@ -82,7 +82,7 @@ def put_finale_phase(client, token, is_one_won):
 
 @pytest.fixture(autouse=True)
 def setup_app(app):
-    with resources.as_file(resources.files("tests") / "test_compute_points_v1") as path:
+    with resources.as_file(resources.files("tests") / "test_data/test_compute_points_v1") as path:
         app.config["DATA_FOLDER"] = path
     old_lock_datetime = app.config["LOCK_DATETIME"]
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))

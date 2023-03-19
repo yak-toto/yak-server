@@ -12,7 +12,7 @@ from .utils import get_random_string
 
 @pytest.fixture(autouse=True)
 def setup_app(app):
-    with resources.as_file(resources.files("tests") / "test_teams_v1") as path:
+    with resources.as_file(resources.files("tests") / "test_data/test_teams_v1") as path:
         app.config["DATA_FOLDER"] = path
 
     with app.app_context():

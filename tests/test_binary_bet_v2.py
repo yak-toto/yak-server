@@ -15,7 +15,7 @@ def setup_app(app):
     old_lock_datetime = app.config["LOCK_DATETIME"]
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=10))
 
-    with resources.as_file(resources.files("tests") / "test_binary_bet") as path:
+    with resources.as_file(resources.files("tests") / "test_data/test_binary_bet") as path:
         app.config["DATA_FOLDER"] = path
 
     with app.app_context():

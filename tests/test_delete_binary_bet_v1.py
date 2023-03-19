@@ -11,10 +11,8 @@ from .utils import get_random_string
 
 @pytest.fixture()
 def setup_app(app):
-    testcase = "test_binary_bet"
-
     # location of test data
-    with resources.as_file(resources.files("tests") / testcase) as path:
+    with resources.as_file(resources.files("tests") / "test_data/test_binary_bet") as path:
         app.config["DATA_FOLDER"] = path
     old_lock_datetime = app.config["LOCK_DATETIME"]
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))

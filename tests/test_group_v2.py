@@ -11,10 +11,8 @@ from .utils import get_random_string
 
 @pytest.fixture(autouse=True)
 def setup_app(app):
-    testcase = "test_matches_db"
-
     # location of test data
-    with resources.as_file(resources.files("tests") / testcase) as path:
+    with resources.as_file(resources.files("tests") / "test_data/test_matches_db") as path:
         app.config["DATA_FOLDER"] = path
 
     # initialize sql database
