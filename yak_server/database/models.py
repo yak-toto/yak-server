@@ -191,16 +191,6 @@ class ScoreBetModel(db.Model):
             and self.score2 == other.score2
         )
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "index": self.match.index,
-            "locked": is_locked(self.user.name),
-            "group": self.match.group.to_dict(),
-            "team1": self.match.team1.to_dict() | {"score": self.score1},
-            "team2": self.match.team2.to_dict() | {"score": self.score2},
-        }
-
     def to_dict_with_group_id(self):
         return {
             "id": self.id,
@@ -246,18 +236,6 @@ class BinaryBetModel(db.Model):
             return (None, None)
 
         return (self.is_one_won, not self.is_one_won)
-
-    def to_dict(self):
-        bet_results = self.bet_from_is_one_won()
-
-        return {
-            "id": self.id,
-            "index": self.match.index,
-            "locked": is_locked(self.user.name),
-            "group": self.match.group.to_dict(),
-            "team1": self.match.team1.to_dict() | {"won": bet_results[0]},
-            "team2": self.match.team2.to_dict() | {"won": bet_results[1]},
-        }
 
     def to_dict_with_group_id(self):
         bet_results = self.bet_from_is_one_won()
@@ -313,32 +291,6 @@ class MatchModel(db.Model):
 
     bet_type_from_match = db.Column(SqlEnum(BetMapping), default=None)
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "index": self.index,
-            "group": self.group.to_dict(),
-            "team1": self.team1.to_dict(),
-            "team2": self.team2.to_dict(),
-        }
-
-    def to_dict_with_group_id(self):
-        return {
-            "id": self.id,
-            "index": self.index,
-            "group": {"id": self.group_id},
-            "team1": self.team1.to_dict(),
-            "team2": self.team2.to_dict(),
-        }
-
-    def to_dict_without_group(self):
-        return {
-            "id": self.id,
-            "index": self.index,
-            "team1": self.team1.to_dict(),
-            "team2": self.team2.to_dict(),
-        }
-
 
 class TeamModel(db.Model):
     __tablename__ = "team"
@@ -375,14 +327,6 @@ class GroupModel(db.Model):
 
     phase_id = db.Column(db.String(100), db.ForeignKey("phase.id"), nullable=False)
     phase = db.relationship("PhaseModel", backref="groups")
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "code": self.code,
-            "phase": self.phase.to_dict(),
-            "description": self.description,
-        }
 
     def to_dict_with_phase_id(self):
         return {
