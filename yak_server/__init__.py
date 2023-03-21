@@ -42,16 +42,20 @@ def create_app():
     # Registrer blueprint
     from .v1.auth import auth as auth_blueprint
     from .v1.bets import bets as bets_blueprint
+    from .v1.binary_bets import binary_bets as binary_bets_blueprint
     from .v1.groups import groups as groups_blueprint
     from .v1.phase import phase as phase_blueprint
     from .v1.results import results as results_blueprint
+    from .v1.score_bets import score_bets as score_bets_blueprint
     from .v1.teams import teams as teams_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(bets_blueprint)
+    app.register_blueprint(binary_bets_blueprint)
     app.register_blueprint(groups_blueprint)
     app.register_blueprint(phase_blueprint)
     app.register_blueprint(results_blueprint)
+    app.register_blueprint(score_bets_blueprint)
     app.register_blueprint(teams_blueprint)
 
     # --------------------------------------------- #
