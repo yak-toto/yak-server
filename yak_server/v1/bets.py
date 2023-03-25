@@ -275,7 +275,7 @@ def commit_finale_phase(current_user):
         ),
     )
 
-    existing_matches = map(attrgetter("match"), existing_binary_bets)
+    map(attrgetter("match"), existing_binary_bets)
 
     new_binary_bets = []
     new_matches = []
@@ -339,12 +339,6 @@ def commit_finale_phase(current_user):
         if bet.id not in map(attrgetter("id"), new_binary_bets):
             is_bet_modified = True
             db.session.delete(bet)
-
-    db.session.flush()
-
-    for match in existing_matches:
-        if match.id not in map(attrgetter("id"), new_matches) and not match.binary_bets:
-            db.session.delete(match)
 
     db.session.flush()
 
