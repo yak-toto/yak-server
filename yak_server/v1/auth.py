@@ -69,7 +69,7 @@ def signup_post():
     # Initialize bets and integrate in db
     db.session.add_all(
         match.bet_type_from_match.value(user_id=user.id, match_id=match.id)
-        for match in MatchModel.query.filter(MatchModel.bet_type_from_match is not sql.null())
+        for match in MatchModel.query.filter(MatchModel.bet_type_from_match != sql.null())
     )
     db.session.commit()
 
