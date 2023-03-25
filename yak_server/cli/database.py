@@ -80,7 +80,7 @@ def initialize_database(app):
         phases = json.loads(file.read())
 
         db.session.add_all(PhaseModel(**phase) for phase in phases)
-        db.session.commit()
+        db.session.flush()
 
     with Path(f"{DATA_FOLDER}/groups.json").open() as file:
         groups = json.loads(file.read())
@@ -91,13 +91,13 @@ def initialize_database(app):
             group["phase_id"] = phase.id
 
         db.session.add_all(GroupModel(**group) for group in groups)
-        db.session.commit()
+        db.session.flush()
 
     with Path(f"{DATA_FOLDER}/teams.json").open() as file:
         teams = json.loads(file.read())
 
         db.session.add_all(TeamModel(**team) for team in teams)
-        db.session.commit()
+        db.session.flush()
 
     with Path(f"{DATA_FOLDER}/matches.json").open() as file:
         matches = json.loads(file.read())
@@ -116,7 +116,9 @@ def initialize_database(app):
             match["group_id"] = group.id
 
         db.session.add_all(MatchModel(**match) for match in matches)
-        db.session.commit()
+        db.session.flush()
+
+    db.session.commit()
 
 
 def backup_database(app):
