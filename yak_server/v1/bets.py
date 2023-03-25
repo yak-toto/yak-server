@@ -111,10 +111,10 @@ def create_bet(current_user, phase_code):
         new_binary_bets.append(binary_bet)
 
     db.session.add_all(new_matches)
-    db.session.commit()
+    db.session.flush()
 
     db.session.add_all(new_binary_bets)
-    db.session.commit()
+    db.session.flush()
 
     for bet in existing_binary_bets:
         if bet.id not in map(attrgetter("id"), new_binary_bets):
@@ -328,10 +328,10 @@ def commit_finale_phase(current_user):
 
     # Compare existing matches/bets and new matches/bets
     db.session.add_all(new_matches)
-    db.session.commit()
+    db.session.flush()
 
     db.session.add_all(new_binary_bets)
-    db.session.commit()
+    db.session.flush()
 
     is_bet_modified = False
 
@@ -340,13 +340,13 @@ def commit_finale_phase(current_user):
             is_bet_modified = True
             db.session.delete(bet)
 
-    db.session.commit()
+    db.session.flush()
 
     for match in existing_matches:
         if match.id not in map(attrgetter("id"), new_matches) and not match.binary_bets:
             db.session.delete(match)
 
-    db.session.commit()
+    db.session.flush()
 
     if is_bet_modified:
         for bet in BinaryBetModel.query.filter_by(user_id=current_user.id):
@@ -357,7 +357,9 @@ def commit_finale_phase(current_user):
                 ),
             ):
                 db.session.delete(bet)
-        db.session.commit()
+        db.session.flush()
+
+    db.session.commit()
 
     phase, groups, score_bets, binary_bets = bets_from_phase_code(current_user, "FINAL")
 

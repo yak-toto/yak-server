@@ -78,14 +78,14 @@ class Mutation:
             password=password,
         )
         db.session.add(user)
-        db.session.commit()
+        db.session.flush()
 
         # Initialize bets and integrate in db
         db.session.add_all(
             match.bet_type_from_match.value(user_id=user.id, match_id=match.id)
             for match in MatchModel.query.filter(MatchModel.bet_type_from_match is not sql.null())
         )
-        db.session.commit()
+        db.session.flush()
 
         # Create group position records
         db.session.add_all(create_group_position(ScoreBetModel.query.filter_by(user_id=user.id)))
