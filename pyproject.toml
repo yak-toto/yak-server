@@ -17,7 +17,7 @@ build-backend = "poetry.masonry.api"
 
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 
 Flask-SQLAlchemy = "^3.0.3"
 PyJWT = "^2.6.0"
@@ -48,7 +48,7 @@ yak = "yak_server.cli:main"
 [tool.black]
 line-length = 100
 include = '\.pyi?$'
-target-version = ['py39']
+target-version = ['py38']
 exclude = '''
 (
   /(
@@ -76,7 +76,7 @@ omit = ["./yak_server/database/migrations/*"]
 [tool.ruff]
 line-length = 100
 select = ["ALL"]
-target-version = "py39"
+target-version = "py38"
 ignore = [
     "TID252",
 

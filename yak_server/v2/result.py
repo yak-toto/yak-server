@@ -1,3 +1,4 @@
+from typing import List
 from uuid import UUID
 
 import strawberry
@@ -93,7 +94,7 @@ CurrentUserResult = strawberry.union("CurrentUserResult", types=(User, InvalidTo
 
 @strawberry.type
 class AllTeamsSuccessful:
-    teams: list[Team]
+    teams: List[Team]
 
 
 AllTeamsResult = strawberry.union(
@@ -167,7 +168,7 @@ BinaryBetResult = strawberry.union(
 
 @strawberry.type
 class Groups:
-    groups: list[Group]
+    groups: List[Group]
 
 
 AllGroupsResult = strawberry.union("AllGroupsResult", types=(Groups, InvalidToken, ExpiredToken))
@@ -205,7 +206,7 @@ GroupByIdResult = strawberry.union(
 
 @strawberry.type
 class Phases:
-    phases: list[Phase]
+    phases: List[Phase]
 
 
 AllPhasesResult = strawberry.union("AllPhasesResult", types=(Phases, InvalidToken, ExpiredToken))
@@ -243,7 +244,7 @@ PhaseByIdResult = strawberry.union(
 
 @strawberry.type
 class ScoreBoard:
-    users: list[UserWithoutSensitiveInfo]
+    users: List[UserWithoutSensitiveInfo]
 
 
 ScoreBoardResult = strawberry.union(
@@ -274,7 +275,7 @@ LoginResult = strawberry.union("LoginResult", types=(UserWithToken, InvalidCrede
 
 @strawberry.type
 class GroupRank:
-    group_rank: list[GroupPosition]
+    group_rank: List[GroupPosition]
     group: Group
 
 

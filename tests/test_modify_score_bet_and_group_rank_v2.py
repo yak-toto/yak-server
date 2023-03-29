@@ -1,5 +1,11 @@
+import sys
 from datetime import datetime, timedelta
-from importlib import resources
+
+if sys.version_info >= (3, 9):
+    from importlib import resources
+else:
+    import importlib_resources as resources
+
 from random import randint
 
 import pytest

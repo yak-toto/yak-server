@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 import strawberry
@@ -87,7 +87,7 @@ class User:
     result: Result
 
     @strawberry.field
-    def binary_bets(self) -> list["BinaryBet"]:
+    def binary_bets(self) -> List["BinaryBet"]:
         return [
             BinaryBet.from_instance(instance=binary_bet)
             for binary_bet in BinaryBetModel.query.filter_by(user_id=self.instance.id)
@@ -97,7 +97,7 @@ class User:
         ]
 
     @strawberry.field
-    def score_bets(self) -> list["ScoreBet"]:
+    def score_bets(self) -> List["ScoreBet"]:
         return [
             ScoreBet.from_instance(instance=score_bet)
             for score_bet in ScoreBetModel.query.filter_by(user_id=self.instance.id)
@@ -107,14 +107,14 @@ class User:
         ]
 
     @strawberry.field
-    def groups(self) -> list["Group"]:
+    def groups(self) -> List["Group"]:
         return [
             Group.from_instance(instance=group, user_id=self.instance.id)
             for group in GroupModel.query.order_by(GroupModel.index)
         ]
 
     @strawberry.field
-    def phases(self) -> list["Phase"]:
+    def phases(self) -> List["Phase"]:
         return [
             Phase.from_instance(instance=phase, user_id=self.instance.id)
             for phase in PhaseModel.query.order_by(PhaseModel.index)
@@ -262,7 +262,7 @@ class Group:
     description: str
 
     @strawberry.field
-    def group_rank(self) -> list[GroupPosition]:
+    def group_rank(self) -> List[GroupPosition]:
         group_rank = GroupPositionModel.query.filter_by(user_id=self.user_id, group_id=self.id)
 
         if not any(group_position.need_recomputation for group_position in group_rank):
@@ -283,7 +283,7 @@ class Group:
         return Phase.from_instance(instance=self.instance.phase, user_id=self.user_id)
 
     @strawberry.field
-    def score_bets(self) -> list["ScoreBet"]:
+    def score_bets(self) -> List["ScoreBet"]:
         return [
             ScoreBet.from_instance(instance=score_bet)
             for score_bet in (
@@ -298,7 +298,7 @@ class Group:
         ]
 
     @strawberry.field
-    def binary_bets(self) -> list["BinaryBet"]:
+    def binary_bets(self) -> List["BinaryBet"]:
         return [
             BinaryBet.from_instance(instance=binary_bet)
             for binary_bet in (
@@ -333,7 +333,7 @@ class Phase:
     description: str
 
     @strawberry.field
-    def groups(self) -> list[Group]:
+    def groups(self) -> List[Group]:
         return [
             Group.from_instance(instance=group, user_id=self.user_id)
             for group in GroupModel.query.filter_by(phase_id=self.instance.id).order_by(
@@ -342,7 +342,7 @@ class Phase:
         ]
 
     @strawberry.field
-    def binary_bets(self) -> list["BinaryBet"]:
+    def binary_bets(self) -> List["BinaryBet"]:
         return [
             BinaryBet.from_instance(instance=binary_bet)
             for binary_bet in BinaryBetModel.query.filter_by(user_id=self.user_id)
@@ -355,7 +355,7 @@ class Phase:
         ]
 
     @strawberry.field
-    def score_bets(self) -> list["ScoreBet"]:
+    def score_bets(self) -> List["ScoreBet"]:
         return [
             ScoreBet.from_instance(instance=score_bet)
             for score_bet in ScoreBetModel.query.filter_by(user_id=self.user_id)

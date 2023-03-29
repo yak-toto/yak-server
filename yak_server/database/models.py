@@ -197,8 +197,8 @@ class ScoreBetModel(db.Model):
             "index": self.match.index,
             "locked": is_locked(self.user.name),
             "group": {"id": self.match.group_id},
-            "team1": self.match.team1.to_dict() | {"score": self.score1},
-            "team2": self.match.team2.to_dict() | {"score": self.score2},
+            "team1": {**self.match.team1.to_dict(), "score": self.score1},
+            "team2": {**self.match.team2.to_dict(), "score": self.score2},
         }
 
     def to_dict_without_group(self):
@@ -206,8 +206,8 @@ class ScoreBetModel(db.Model):
             "id": self.id,
             "index": self.match.index,
             "locked": is_locked(self.user.name),
-            "team1": self.match.team1.to_dict() | {"score": self.score1},
-            "team2": self.match.team2.to_dict() | {"score": self.score2},
+            "team1": {**self.match.team1.to_dict(), "score": self.score1},
+            "team2": {**self.match.team2.to_dict(), "score": self.score2},
         }
 
 
@@ -245,8 +245,8 @@ class BinaryBetModel(db.Model):
             "index": self.match.index,
             "locked": is_locked(self.user.name),
             "group": {"id": self.match.group_id},
-            "team1": self.match.team1.to_dict() | {"won": bet_results[0]},
-            "team2": self.match.team2.to_dict() | {"won": bet_results[1]},
+            "team1": {**self.match.team1.to_dict(), "won": bet_results[0]},
+            "team2": {**self.match.team2.to_dict(), "won": bet_results[1]},
         }
 
     def to_dict_without_group(self):
@@ -256,8 +256,8 @@ class BinaryBetModel(db.Model):
             "id": self.id,
             "index": self.match.index,
             "locked": is_locked(self.user.name),
-            "team1": self.match.team1.to_dict() | {"won": bet_results[0]},
-            "team2": self.match.team2.to_dict() | {"won": bet_results[1]},
+            "team1": {**self.match.team1.to_dict(), "won": bet_results[0]},
+            "team2": {**self.match.team2.to_dict(), "won": bet_results[1]},
         }
 
 

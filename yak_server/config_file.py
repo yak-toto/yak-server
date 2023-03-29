@@ -1,7 +1,13 @@
 import json
 import os
+import sys
 from configparser import ConfigParser
-from importlib import resources
+
+if sys.version_info >= (3, 9):
+    from importlib import resources
+else:
+    import importlib_resources as resources
+
 from pathlib import Path
 
 
@@ -79,4 +85,4 @@ def get_yak_config():
 
 
 def get_config():
-    return get_mysql_config() | get_jwt_config() | get_yak_config()
+    return {**get_mysql_config(), **get_jwt_config(), **get_yak_config()}
