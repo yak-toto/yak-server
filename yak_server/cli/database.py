@@ -1,9 +1,15 @@
 import json
 import logging
 import subprocess
+import sys
 from datetime import datetime
 from getpass import getpass
-from importlib import resources
+
+if sys.version_info >= (3, 9):
+    from importlib import resources
+else:
+    import importlib_resources as resources
+
 from pathlib import Path
 
 from yak_server import db

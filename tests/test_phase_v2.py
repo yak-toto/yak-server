@@ -1,4 +1,10 @@
-from importlib import resources
+import sys
+
+if sys.version_info >= (3, 9):
+    from importlib import resources
+else:
+    import importlib_resources as resources
+
 from unittest.mock import ANY
 from uuid import uuid4
 

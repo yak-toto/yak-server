@@ -48,7 +48,7 @@ def login_post():
 
     logger.info(logged_in_successfully(user.name))
 
-    return success_response(HTTPStatus.CREATED, user.to_user_dict() | {"token": token})
+    return success_response(HTTPStatus.CREATED, {**user.to_user_dict(), "token": token})
 
 
 @auth.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/signup")
@@ -85,7 +85,7 @@ def signup_post():
 
     logger.info(signed_up_successfully(user.name))
 
-    return success_response(HTTPStatus.CREATED, user.to_user_dict() | {"token": token})
+    return success_response(HTTPStatus.CREATED, {**user.to_user_dict(), "token": token})
 
 
 @auth.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/<string:user_id>")

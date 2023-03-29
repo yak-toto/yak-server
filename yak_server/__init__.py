@@ -1,5 +1,10 @@
 import logging
-from importlib import resources
+import sys
+
+if sys.version_info >= (3, 9):
+    from importlib import resources
+else:
+    import importlib_resources as resources
 
 from flask import Flask
 from flask.cli import load_dotenv
@@ -77,7 +82,6 @@ def create_app():
     # --------------------------------------------- #
     logging.basicConfig(
         filename="yak.log",
-        encoding="utf-8",
         level=logging.DEBUG if app.config.get("DEBUG") else logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )

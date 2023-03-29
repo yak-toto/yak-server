@@ -1,8 +1,14 @@
 import asyncio
+import sys
 from copy import copy
 from datetime import datetime, timedelta
 from http import HTTPStatus
-from importlib import resources
+
+if sys.version_info >= (3, 9):
+    from importlib import resources
+else:
+    import importlib_resources as resources
+
 from random import randint, shuffle
 
 import pytest

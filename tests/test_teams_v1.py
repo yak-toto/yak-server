@@ -1,5 +1,11 @@
+import sys
 from http import HTTPStatus
-from importlib import resources
+
+if sys.version_info >= (3, 9):
+    from importlib import resources
+else:
+    import importlib_resources as resources
+
 from operator import itemgetter
 from unittest.mock import ANY
 from uuid import uuid4

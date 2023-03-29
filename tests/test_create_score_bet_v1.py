@@ -1,6 +1,12 @@
+import sys
 from datetime import datetime, timedelta
 from http import HTTPStatus
-from importlib import resources
+
+if sys.version_info >= (3, 9):
+    from importlib import resources
+else:
+    import importlib_resources as resources
+
 from random import randint
 from unittest.mock import ANY
 from uuid import uuid4
@@ -89,8 +95,8 @@ def test_create_score_bet(client, setup_app):
                 "id": ANY,
                 "index": 1,
                 "locked": False,
-                "team1": team1 | {"score": score1},
-                "team2": team2 | {"score": None},
+                "team1": {**team1, "score": score1},
+                "team2": {**team2, "score": None},
             },
         },
     }
