@@ -96,6 +96,12 @@ class ExpiredToken(HTTPException):
     description = EXPIRED_TOKEN_MESSAGE
 
 
+class RuleNotFound(HTTPException):
+    def __init__(self, rule_id) -> None:
+        super().__init__(f"Rule not found: {rule_id}")
+        self.code = HTTPStatus.NOT_FOUND
+
+
 class RequestValidationError(HTTPException):
     def __init__(self, schema, path, description):
         super().__init__(description)

@@ -10,6 +10,13 @@ else:
 
 from pathlib import Path
 
+from .helpers.rules import RULE_MAPPING
+
+
+class RuleNotDefined(Exception):
+    def __init__(self, rule_id) -> None:
+        super().__init__(f"Rule not defined: {rule_id}")
+
 
 def compute_database_uri(mysql_user_name, mysql_password, mysql_port, mysql_db):
     return f"mysql+pymysql://{mysql_user_name}:{mysql_password}@localhost:{mysql_port}/{mysql_db}"
@@ -50,9 +57,6 @@ def get_yak_config():
     config = ConfigParser()
     config.read(f"{DATA_FOLDER}/config.ini")
 
-    with Path(f"{DATA_FOLDER}/finale_phase_config.json").open() as file:
-        FINALE_PHASE_CONFIG = json.loads(file.read())
-
     with resources.as_file(
         resources.files("yak_server") / "data" / os.environ["COMPETITION"],
     ) as path:
@@ -61,8 +65,16 @@ def get_yak_config():
     config = ConfigParser()
     config.read(f"{DATA_FOLDER}/config.ini")
 
-    with Path(f"{DATA_FOLDER}/finale_phase_config.json").open() as file:
-        FINALE_PHASE_CONFIG = json.loads(file.read())
+    RULES = {}
+
+    for rule_file in Path(f"{DATA_FOLDER}/rules").glob("*.json"):
+        rule_id = rule_file.stem
+
+        if rule_id not in RULE_MAPPING:
+            raise RuleNotDefined(rule_id)
+
+        with rule_file.open() as rule_content:
+            RULES[rule_id] = json.loads(rule_content.read())
 
     return {
         # SQL Alchemy features
@@ -79,8 +91,8 @@ def get_yak_config():
         ),
         "TEAM_QUALIFIED": config.getint("points", "team_qualified"),
         "FIRST_TEAM_QUALIFIED": config.getint("points", "first_team_qualified"),
-        "FINALE_PHASE_CONFIG": FINALE_PHASE_CONFIG,
         "DATA_FOLDER": DATA_FOLDER,
+        "RULES": RULES,
     }
 
 

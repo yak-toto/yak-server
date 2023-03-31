@@ -51,6 +51,7 @@ def create_app():
     from .v1.groups import groups as groups_blueprint
     from .v1.phase import phase as phase_blueprint
     from .v1.results import results as results_blueprint
+    from .v1.rules import rules as rules_blueprint
     from .v1.score_bets import score_bets as score_bets_blueprint
     from .v1.teams import teams as teams_blueprint
 
@@ -60,6 +61,7 @@ def create_app():
     app.register_blueprint(groups_blueprint)
     app.register_blueprint(phase_blueprint)
     app.register_blueprint(results_blueprint)
+    app.register_blueprint(rules_blueprint)
     app.register_blueprint(score_bets_blueprint)
     app.register_blueprint(teams_blueprint)
 
