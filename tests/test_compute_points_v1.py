@@ -53,11 +53,18 @@ def patch_score_bets(client, user_name, new_scores):
 
 def put_finale_phase(client, token, is_one_won):
     response_post_finale_phase_bets_admin = client.post(
-        "/api/v1/bets/finale_phase",
+        "/api/v1/rules/492345de-8d4a-45b6-8b94-d219f2b0c3e9",
         headers={"Authorization": f"Bearer {token}"},
     )
 
     assert response_post_finale_phase_bets_admin.status_code == HTTPStatus.OK
+
+    response_get_finale_phase = client.get(
+        "/api/v1/bets/phases/FINAL",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response_get_finale_phase.status_code == HTTPStatus.OK
 
     response_put_finale_phase = client.put(
         "/api/v1/binary_bets/phases/FINAL",
@@ -66,17 +73,13 @@ def put_finale_phase(client, token, is_one_won):
                 "is_one_won": is_one_won,
                 "index": 1,
                 "group": {
-                    "id": response_post_finale_phase_bets_admin.json["result"]["groups"][0]["id"],
+                    "id": response_get_finale_phase.json["result"]["groups"][0]["id"],
                 },
                 "team1": {
-                    "id": response_post_finale_phase_bets_admin.json["result"]["binary_bets"][0][
-                        "team1"
-                    ]["id"],
+                    "id": response_get_finale_phase.json["result"]["binary_bets"][0]["team1"]["id"],
                 },
                 "team2": {
-                    "id": response_post_finale_phase_bets_admin.json["result"]["binary_bets"][0][
-                        "team2"
-                    ]["id"],
+                    "id": response_get_finale_phase.json["result"]["binary_bets"][0]["team2"]["id"],
                 },
             },
         ],
@@ -92,9 +95,11 @@ def setup_app(app):
         app.config["DATA_FOLDER"] = path
     old_lock_datetime = app.config["LOCK_DATETIME"]
     app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
-    app.config["FINALE_PHASE_CONFIG"] = {
-        "first_group": "1",
-        "versus": [{"team1": {"rank": 1, "group": "A"}, "team2": {"rank": 2, "group": "A"}}],
+    app.config["RULES"] = {
+        "492345de-8d4a-45b6-8b94-d219f2b0c3e9": {
+            "first_group": "1",
+            "versus": [{"team1": {"rank": 1, "group": "A"}, "team2": {"rank": 2, "group": "A"}}],
+        },
     }
 
     with app.app_context():
