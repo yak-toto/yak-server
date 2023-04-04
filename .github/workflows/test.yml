@@ -24,9 +24,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Shutdown Ubuntu MySQL
-        run: sudo service mysql stop # Shutdown the Default MySQL
-
       - name: Set up MySQL
         uses: mirromutth/mysql-action@v1.1
         with:
@@ -51,13 +48,17 @@ jobs:
       - name: Install dependencies
         run: poetry install --without pre_commit
 
-      - name: Create .flaskenv file
-        run: echo -e "MYSQL_USER_NAME=${{ secrets.MYSQL_USER_NAME }}\nMYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}\nMYSQL_DB=yak_toto_test\nJWT_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(16))')\nJWT_EXPIRATION_TIME=1800\nFLASK_DEBUG=1\nCOMPETITION=world_cup_2022" > .flaskenv
-
       - name: Run test
+        env:
+          MYSQL_USER_NAME: ${{ secrets.MYSQL_USER_NAME }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_DB: yak_toto_test
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          JWT_EXPIRATION_TIME: 1800
+          FLASK_DEBUG: 1
+          COMPETITION: world_cup_2022
         run:
           poetry run pytest --cov=yak_server --cov-report=xml -vv
-
         if: ${{ always() }}
 
       - name: Upload coverage reports to Codecov
