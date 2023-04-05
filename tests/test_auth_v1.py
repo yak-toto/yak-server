@@ -143,7 +143,7 @@ def test_invalid_token(client):
     assert response_get_all_bets.json == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Invalid token. Registration and / or authentication required",
+        "description": "Invalid token, authentication required",
     }
 
     response_get_all_bets_with_cropped_token = client.get(
@@ -155,7 +155,7 @@ def test_invalid_token(client):
     assert response_get_all_bets_with_cropped_token.json == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Invalid token. Registration and / or authentication required",
+        "description": "Invalid token, authentication required",
     }
 
 
@@ -196,7 +196,7 @@ def test_expired_token(client, setup_app_for_expired_token):
     assert response_current_user.json == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Expired token. Reauthentication required.",
+        "description": "Expired token, reauthentication required",
     }
 
 

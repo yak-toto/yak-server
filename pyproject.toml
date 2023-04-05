@@ -149,6 +149,7 @@ src = ["yak_server", "tests"]
 
 [tool.ruff.per-file-ignores]
 "yak_server/cli/*" = ["T20"]
+"yak_server/helpers/errors.py" = ["S105"]
 "tests/*" = ["S101", "S105", "S311"]
 "setup.py" = ["INP001"]
 

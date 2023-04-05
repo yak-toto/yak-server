@@ -3,6 +3,16 @@ from uuid import UUID
 
 import strawberry
 
+from yak_server.helpers.errors import (
+    EXPIRED_TOKEN_MESSAGE,
+    INVALID_CREDENTIALS_MESSAGE,
+    INVALID_TOKEN_MESSAGE,
+    LOCKED_BINARY_BET_MESSAGE,
+    LOCKED_SCORE_BET_MESSAGE,
+    UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE,
+    name_already_exists_message,
+)
+
 from .schema import (
     BinaryBet,
     Group,
@@ -18,22 +28,22 @@ from .schema import (
 
 @strawberry.type
 class InvalidToken:
-    message: str = "Invalid token. Cannot authentify."
+    message: str = INVALID_TOKEN_MESSAGE
 
 
 @strawberry.type
 class ExpiredToken:
-    message: str = "Token is expired. Please reauthentify."
+    message: str = EXPIRED_TOKEN_MESSAGE
 
 
 @strawberry.type
 class UnauthorizedAccessToAdminAPI:
-    message: str = "Unauthorized access to admin API"
+    message: str = UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE
 
 
 @strawberry.type
 class LockedScoreBetError:
-    message: str = "Cannot modify score bet, resource is locked."
+    message: str = LOCKED_SCORE_BET_MESSAGE
 
 
 @strawberry.type
@@ -69,7 +79,7 @@ ModifyScoreBetResult = strawberry.union(
 
 @strawberry.type
 class LockedBinaryBetError:
-    message: str = "Cannot modify binary bet, resource is locked."
+    message: str = LOCKED_BINARY_BET_MESSAGE
 
 
 @strawberry.type
@@ -259,7 +269,7 @@ class UserNameAlreadyExists:
 
     @strawberry.field
     def message(self) -> str:
-        return f"Name already exists: {self.user_name}"
+        return name_already_exists_message(self.user_name)
 
 
 SignupResult = strawberry.union("SignupResult", types=(UserWithToken, UserNameAlreadyExists))
@@ -267,7 +277,7 @@ SignupResult = strawberry.union("SignupResult", types=(UserWithToken, UserNameAl
 
 @strawberry.type
 class InvalidCredentials:
-    message: str = "Invalid credentials"
+    message: str = INVALID_CREDENTIALS_MESSAGE
 
 
 LoginResult = strawberry.union("LoginResult", types=(UserWithToken, InvalidCredentials))

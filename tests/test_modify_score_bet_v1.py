@@ -129,7 +129,7 @@ def test_modify_score_bet(setup_app, client):
     assert response_locked_bet.json == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Cannot modify bets because locked date is exceeded",
+        "description": "Cannot modify score bet, lock date is exceeded",
     }
 
     setup_app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))

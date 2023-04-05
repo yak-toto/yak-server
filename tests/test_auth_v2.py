@@ -237,7 +237,7 @@ def test_signup_and_invalid_token(client):
 
     assert response_current_user.json["data"]["currentUserResult"] == {
         "__typename": "InvalidToken",
-        "message": "Invalid token. Cannot authentify.",
+        "message": "Invalid token, authentication required",
     }
 
     response_current_user_invalid_key = client.post(
@@ -248,7 +248,7 @@ def test_signup_and_invalid_token(client):
 
     assert response_current_user_invalid_key.json["data"]["currentUserResult"] == {
         "__typename": "InvalidToken",
-        "message": "Invalid token. Cannot authentify.",
+        "message": "Invalid token, authentication required",
     }
 
 
@@ -390,7 +390,7 @@ def test_expired_token(client, setup_app_for_expired_token):
         "data": {
             "currentUserResult": {
                 "__typename": "ExpiredToken",
-                "message": "Token is expired. Please reauthentify.",
+                "message": "Expired token, reauthentication required",
             },
         },
     }

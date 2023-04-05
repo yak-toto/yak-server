@@ -203,7 +203,7 @@ def test_binary_bet(client, setup_app):
         "data": {
             "modifyBinaryBetResult": {
                 "__typename": "LockedBinaryBetError",
-                "message": "Cannot modify binary bet, resource is locked.",
+                "message": "Cannot modify binary bet, lock date is exceeded",
             },
         },
     }

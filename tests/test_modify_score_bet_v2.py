@@ -219,7 +219,7 @@ def test_modify_score_bet(setup_app, client):
         "data": {
             "modifyScoreBetResult": {
                 "__typename": "LockedScoreBetError",
-                "message": "Cannot modify score bet, resource is locked.",
+                "message": "Cannot modify score bet, lock date is exceeded",
             },
         },
     }

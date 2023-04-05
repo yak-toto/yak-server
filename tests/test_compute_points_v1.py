@@ -86,7 +86,7 @@ def put_finale_phase(client, token, is_one_won):
     assert response_put_finale_phase.status_code == HTTPStatus.OK
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture()
 def setup_app(app):
     with resources.as_file(resources.files("tests") / "test_data/test_compute_points_v1") as path:
         app.config["DATA_FOLDER"] = path
@@ -105,7 +105,7 @@ def setup_app(app):
     app.config["LOCK_DATETIME"] = old_lock_datetime
 
 
-def test_compute_points(client):
+def test_compute_points(client, setup_app):
     # Create 4 accounts and patch bets
     admin_token = patch_score_bets(client, "admin", [(1, 2), (5, 1), (5, 5)])
     user_token = patch_score_bets(client, "user", [(2, 2), (5, 1), (5, 5)])
@@ -282,3 +282,22 @@ def test_compute_points(client):
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "No results for admin user",
     }
+
+    # Error case : push finale phase bets with lock error
+    old_lock_datetime = setup_app.config["LOCK_DATETIME"]
+    setup_app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(minutes=10))
+
+    response_put_finale_phase = client.put(
+        "/api/v1/binary_bets/phases/FINAL",
+        json=[],
+        headers={"Authorization": f"Bearer {user_token}"},
+    )
+
+    assert response_put_finale_phase.status_code == HTTPStatus.UNAUTHORIZED
+    assert response_put_finale_phase.json == {
+        "ok": False,
+        "error_code": HTTPStatus.UNAUTHORIZED,
+        "description": "Cannot modify binary bet, lock date is exceeded",
+    }
+
+    setup_app.config["LOCK_DATETIME"] = old_lock_datetime
