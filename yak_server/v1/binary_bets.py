@@ -17,7 +17,7 @@ from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import (
     BetNotFound,
     GroupNotFound,
-    LockedBets,
+    LockedBinaryBet,
     TeamNotFound,
 )
 from .utils.flask_utils import success_response
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 @is_authentificated
 def create_binary_bet(user):
     if is_locked(user.name):
-        raise LockedBets
+        raise LockedBinaryBet
 
     body = request.get_json()
 
@@ -99,7 +99,7 @@ def retrieve_binary_bet(user, bet_id):
 @is_authentificated
 def modify_binary_bet(user, bet_id):
     if is_locked(user.name):
-        raise LockedBets
+        raise LockedBinaryBet
 
     binary_bet = BinaryBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
 
@@ -127,7 +127,7 @@ def modify_binary_bet(user, bet_id):
 @is_authentificated
 def delete_binary_bet(user, bet_id):
     if is_locked(user.name):
-        raise LockedBets
+        raise LockedBinaryBet
 
     binary_bet = BinaryBetModel.query.filter_by(id=bet_id, user_id=user.id).first()
 

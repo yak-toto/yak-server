@@ -5,17 +5,27 @@ from http import HTTPStatus
 from flask import Response, jsonify
 from werkzeug.exceptions import HTTPException
 
+from yak_server.helpers.errors import (
+    EXPIRED_TOKEN_MESSAGE,
+    INVALID_CREDENTIALS_MESSAGE,
+    INVALID_TOKEN_MESSAGE,
+    LOCKED_BINARY_BET_MESSAGE,
+    LOCKED_SCORE_BET_MESSAGE,
+    UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE,
+    name_already_exists_message,
+)
+
 logger = logging.getLogger(__name__)
 
 
 class InvalidCredentials(HTTPException):
     code = HTTPStatus.UNAUTHORIZED
-    description = "Invalid credentials"
+    description = INVALID_CREDENTIALS_MESSAGE
 
 
 class NameAlreadyExists(HTTPException):
     def __init__(self, name) -> None:
-        super().__init__(f"Name already exists: {name}")
+        super().__init__(name_already_exists_message(name))
         self.code = HTTPStatus.UNAUTHORIZED
 
 
@@ -32,7 +42,7 @@ class UserNotFound(HTTPException):
 
 class UnauthorizedAccessToAdminAPI(HTTPException):
     code = HTTPStatus.UNAUTHORIZED
-    description = "Unauthorized access to admin API"
+    description = UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE
 
 
 class InvalidTeamId(HTTPException):
@@ -49,9 +59,14 @@ class TeamNotFound(HTTPException):
         self.code = HTTPStatus.NOT_FOUND
 
 
-class LockedBets(HTTPException):
+class LockedScoreBet(HTTPException):
     code = HTTPStatus.UNAUTHORIZED
-    description = "Cannot modify bets because locked date is exceeded"
+    description = LOCKED_SCORE_BET_MESSAGE
+
+
+class LockedBinaryBet(HTTPException):
+    code = HTTPStatus.UNAUTHORIZED
+    description = LOCKED_BINARY_BET_MESSAGE
 
 
 class NoResultsForAdminUser(HTTPException):
@@ -73,12 +88,12 @@ class PhaseNotFound(HTTPException):
 
 class InvalidToken(HTTPException):
     code = HTTPStatus.UNAUTHORIZED
-    description = "Invalid token. Registration and / or authentication required"
+    description = INVALID_TOKEN_MESSAGE
 
 
 class ExpiredToken(HTTPException):
     code = HTTPStatus.UNAUTHORIZED
-    description = "Expired token. Reauthentication required."
+    description = EXPIRED_TOKEN_MESSAGE
 
 
 class RequestValidationError(HTTPException):

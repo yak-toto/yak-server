@@ -196,7 +196,7 @@ def test_create_binary_bet(client, setup_app):
     assert response_create_locked_binary_bet.json == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Cannot modify bets because locked date is exceeded",
+        "description": "Cannot modify binary bet, lock date is exceeded",
     }
 
     setup_app.config["LOCK_DATETIME"] = old_lock_datetime

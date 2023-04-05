@@ -107,7 +107,7 @@ def test_cli(client):
         "data": {
             "currentUserResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token. Cannot authentify.",
+                "message": "Invalid token, authentication required",
             },
         },
     }

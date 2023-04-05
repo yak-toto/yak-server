@@ -19,7 +19,7 @@ from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import (
     BetNotFound,
     GroupNotFound,
-    LockedBets,
+    LockedScoreBet,
     TeamNotFound,
 )
 from .utils.flask_utils import success_response
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 @is_authentificated
 def create_score_bet(user):
     if is_locked(user.name):
-        raise LockedBets
+        raise LockedScoreBet
 
     body = request.get_json()
 
@@ -118,7 +118,7 @@ def retrieve_score_bet(user, bet_id):
 @is_authentificated
 def modify_score_bet(user, bet_id):
     if is_locked(user.name):
-        raise LockedBets
+        raise LockedScoreBet
 
     score_bet = ScoreBetModel.query.filter_by(user_id=user.id, id=bet_id).with_for_update().first()
 
@@ -177,7 +177,7 @@ def modify_score_bet(user, bet_id):
 @is_authentificated
 def delete_score_bet(user, bet_id):
     if is_locked(user.name):
-        raise LockedBets
+        raise LockedScoreBet
 
     score_bet = ScoreBetModel.query.filter_by(id=bet_id, user_id=user.id).first()
 

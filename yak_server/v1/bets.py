@@ -28,7 +28,7 @@ from .utils.auth_utils import is_authentificated
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import (
     GroupNotFound,
-    LockedBets,
+    LockedBinaryBet,
     PhaseNotFound,
 )
 from .utils.flask_utils import success_response
@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)
 @is_authentificated
 def create_bet(current_user, phase_code):
     if is_locked(current_user.name):
-        raise LockedBets
+        raise LockedBinaryBet
 
     phase = PhaseModel.query.filter_by(code=phase_code).first()
 

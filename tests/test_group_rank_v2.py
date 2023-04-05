@@ -248,7 +248,7 @@ def test_group_rank(client):
     assert response_group_rank_with_auth_error.json["data"] == {
         "groupRankByCodeResult": {
             "__typename": "InvalidToken",
-            "message": "Invalid token. Cannot authentify.",
+            "message": "Invalid token, authentication required",
         },
     }
 
@@ -312,7 +312,7 @@ def test_group_rank(client):
     assert response_group_rank_by_id_auth_error.json["data"] == {
         "groupRankByIdResult": {
             "__typename": "InvalidToken",
-            "message": "Invalid token. Cannot authentify.",
+            "message": "Invalid token, authentication required",
         },
     }
 
