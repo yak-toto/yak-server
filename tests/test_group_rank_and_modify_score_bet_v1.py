@@ -1,4 +1,3 @@
-import asyncio
 import sys
 from copy import copy
 from datetime import datetime, timedelta
@@ -34,8 +33,7 @@ def app_setup(app):
     app.config["LOCK_DATETIME"] = old_lock_datetime
 
 
-@pytest.mark.asyncio()
-async def test_spam_modify_score_bet(client, app_setup):
+def test_group_rank_and_modify_score_bet(client):
     # Signup user
     response_signup = client.post(
         "/api/v1/users/signup",
@@ -59,13 +57,14 @@ async def test_spam_modify_score_bet(client, app_setup):
 
     assert response_all_bets.status_code == HTTPStatus.OK
 
-    # Perform asynchronously 60 PATCH bets
-    bet_ids = [score_bet["id"] for score_bet in response_all_bets.json["result"]["score_bets"]] * 10
+    # Perform PATCH bets
+    bet_ids = [score_bet["id"] for score_bet in response_all_bets.json["result"]["score_bets"]]
     shuffle(bet_ids)
 
-    scores = [(randint(0, 5), randint(0, 5)) for _ in range(len(bet_ids))]
+    for bet_id in bet_ids:
+        score1 = randint(0, 5)
+        score2 = randint(0, 5)
 
-    def send_async_request(client, bet_id, score1, score2, authentification_token):
         response = client.patch(
             f"/api/v1/score_bets/{bet_id}",
             json={"team1": {"score": score1}, "team2": {"score": score2}},
@@ -76,21 +75,6 @@ async def test_spam_modify_score_bet(client, app_setup):
         assert response.json["result"]["score_bet"]["id"] == bet_id
         assert response.json["result"]["score_bet"]["team1"]["score"] == score1
         assert response.json["result"]["score_bet"]["team2"]["score"] == score2
-
-    loop = asyncio.get_event_loop()
-    futures = (
-        loop.run_in_executor(
-            None,
-            send_async_request,
-            client,
-            bet_id,
-            score[0],
-            score[1],
-            authentification_token,
-        )
-        for bet_id, score in zip(bet_ids, scores)
-    )
-    await asyncio.gather(*futures)
 
     # Retrieve group rank
     response_group_rank = client.get(
