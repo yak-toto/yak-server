@@ -98,6 +98,8 @@ def setup_app(app):
     app.config["RULES"] = {
         "492345de-8d4a-45b6-8b94-d219f2b0c3e9": {
             "first_group": "1",
+            "first_phase": "GROUP",
+            "second_phase": "FINAL",
             "versus": [{"team1": {"rank": 1, "group": "A"}, "team2": {"rank": 2, "group": "A"}}],
         },
     }

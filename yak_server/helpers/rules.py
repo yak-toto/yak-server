@@ -13,7 +13,7 @@ def compute_finale_phase_from_group_rank(user, rule_config):
     groups_result = {
         group.code: get_group_rank_with_code(user, group.code)["group_rank"]
         for group in GroupModel.query.join(GroupModel.phase).filter(
-            PhaseModel.code == "GROUP",
+            PhaseModel.code == rule_config["first_phase"],
         )
     }
 
@@ -97,7 +97,7 @@ def compute_finale_phase_from_group_rank(user, rule_config):
         for bet in BinaryBetModel.query.filter_by(user_id=user.id):
             if bet.match.group.code in GroupModel.query.join(GroupModel.phase).filter(
                 and_(
-                    PhaseModel.code == "FINAL",
+                    PhaseModel.code == rule_config["second_phase"],
                     GroupModel.id == first_phase_phase_group.id,
                 ),
             ):
