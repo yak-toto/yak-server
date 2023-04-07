@@ -114,17 +114,6 @@ def test_binary_bet(client, setup_app):
     )
 
     assert response_invalid_inputs.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-    assert response_invalid_inputs.json == {
-        "ok": False,
-        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
-        "description": "'is_one_won' is a required property",
-        "schema": {
-            "type": "object",
-            "properties": {"is_one_won": {"oneOf": [{"type": "boolean"}, {"type": "null"}]}},
-            "required": ["is_one_won"],
-        },
-        "path": [],
-    }
 
     # Error case : invalid bet id
     invalid_bet_id = str(uuid4())
@@ -190,3 +179,77 @@ def test_binary_bet(client, setup_app):
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Bet not found: {invalid_bet_id}",
     }
+
+    # Success case : Modify team1 id by setting it to None
+    response_change_team1_to_none = client.patch(
+        f"/api/v1/binary_bets/{bet_id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"team1": {"id": None}},
+    )
+
+    assert response_change_team1_to_none.status_code == HTTPStatus.OK
+    assert response_change_team1_to_none.json["result"]["binary_bet"] == {
+        "id": bet_id,
+        "index": 1,
+        "locked": False,
+        "team1": None,
+        "team2": {
+            "id": ANY,
+            "code": "GR",
+            "description": "Germany",
+            "flag": ANY,
+            "won": False,
+        },
+    }
+
+    # Success case : Change team2
+    response_all_teams = client.get(
+        "/api/v1/teams",
+    )
+
+    for team in response_all_teams.json["result"]["teams"]:
+        if team["code"] == "ES":
+            team_id = team["id"]
+            break
+
+    response_change_team2 = client.patch(
+        f"/api/v1/binary_bets/{bet_id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"team2": {"id": team_id}},
+    )
+
+    assert response_change_team2.status_code == HTTPStatus.OK
+    assert response_change_team2.json["result"]["binary_bet"] == {
+        "id": ANY,
+        "index": 1,
+        "locked": False,
+        "team1": None,
+        "team2": {
+            "id": team_id,
+            "code": "ES",
+            "description": "Spain",
+            "flag": ANY,
+            "won": False,
+        },
+    }
+
+    # Error case : modify team id with invalid team id
+    invalid_team_id = uuid4()
+
+    response_invalid_team1_id = client.patch(
+        f"/api/v1/binary_bets/{bet_id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"team1": {"id": invalid_team_id}},
+    )
+
+    assert response_invalid_team1_id.status_code == HTTPStatus.NOT_FOUND
+    assert response_invalid_team1_id.json["description"] == f"Team not found: {invalid_team_id}"
+
+    response_invalid_team2_id = client.patch(
+        f"/api/v1/binary_bets/{bet_id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"team2": {"id": invalid_team_id}},
+    )
+
+    assert response_invalid_team2_id.status_code == HTTPStatus.NOT_FOUND
+    assert response_invalid_team2_id.json["description"] == f"Team not found: {invalid_team_id}"

@@ -120,8 +120,29 @@ SCHEMA_PATCH_BINARY_BET = {
         "is_one_won": {
             "oneOf": [{"type": "boolean"}, {"type": "null"}],
         },
+        "team1": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {"type": "string", "format": "uuid"},
+                        {"type": "null"},
+                    ],
+                },
+            },
+            "required": ["id"],
+        },
+        "team2": {
+            "type": "object",
+            "properties": {"id": {"format": "uuid"}},
+            "required": ["id"],
+        },
     },
-    "required": ["is_one_won"],
+    "anyOf": [
+        {"required": ["is_one_won"]},
+        {"required": ["team1"]},
+        {"required": ["team2"]},
+    ],
 }
 
 SCHEMA_SIGNUP = {

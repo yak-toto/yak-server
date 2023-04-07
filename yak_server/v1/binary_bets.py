@@ -108,9 +108,27 @@ def modify_binary_bet(user, bet_id):
 
     body = request.get_json()
 
-    logger.info(modify_binary_bet_successfully(user.name, binary_bet, body["is_one_won"]))
+    logger.info(modify_binary_bet_successfully(user.name, binary_bet, body.get("is_one_won")))
 
-    binary_bet.is_one_won = body["is_one_won"]
+    if "is_one_won" in body:
+        binary_bet.is_one_won = body["is_one_won"]
+
+    if "team1" in body:
+        binary_bet.match.team1_id = body.get("team1")["id"]
+
+        try:
+            db.session.flush()
+        except IntegrityError as integrity_error:
+            raise TeamNotFound(body.get("team1")["id"]) from integrity_error
+
+    if "team2" in body:
+        binary_bet.match.team2_id = body.get("team2")["id"]
+
+        try:
+            db.session.flush()
+        except IntegrityError as integrity_error:
+            raise TeamNotFound(body.get("team2")["id"]) from integrity_error
+
     db.session.commit()
 
     return success_response(

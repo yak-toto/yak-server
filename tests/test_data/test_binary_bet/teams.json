@@ -8,5 +8,10 @@
         "code": "GR",
         "description": "Germany",
         "flag_url": null
+    },
+    {
+        "code": "ES",
+        "description": "Spain",
+        "flag_url": null
     }
 ]
