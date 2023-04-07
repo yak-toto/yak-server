@@ -386,8 +386,8 @@ class ScoreBet:
     index: int
     locked: bool
     group: Group
-    team1: TeamWithScore
-    team2: TeamWithScore
+    team1: Optional[TeamWithScore]
+    team2: Optional[TeamWithScore]
 
     @classmethod
     def from_instance(cls, instance: ScoreBetModel):
@@ -403,11 +403,15 @@ class ScoreBet:
             team1=TeamWithScore.from_instance(
                 instance=instance.match.team1,
                 score=instance.score1,
-            ),
+            )
+            if instance.match.team1
+            else None,
             team2=TeamWithScore.from_instance(
                 instance=instance.match.team2,
                 score=instance.score2,
-            ),
+            )
+            if instance.match.team2
+            else None,
         )
 
 
@@ -419,8 +423,8 @@ class BinaryBet:
     index: int
     locked: bool
     group: Group
-    team1: TeamWithVictory
-    team2: TeamWithVictory
+    team1: Optional[TeamWithVictory]
+    team2: Optional[TeamWithVictory]
 
     @classmethod
     def from_instance(cls, instance: BinaryBetModel):
@@ -438,9 +442,13 @@ class BinaryBet:
             team1=TeamWithVictory.from_instance(
                 instance=instance.match.team1,
                 won=bet_results[0],
-            ),
+            )
+            if instance.match.team1
+            else None,
             team2=TeamWithVictory.from_instance(
                 instance=instance.match.team2,
                 won=bet_results[1],
-            ),
+            )
+            if instance.match.team2
+            else None,
         )

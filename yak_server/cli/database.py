@@ -18,6 +18,7 @@ from yak_server.database.models import (
     GroupModel,
     GroupPositionModel,
     MatchModel,
+    MatchReferenceModel,
     PhaseModel,
     ScoreBetModel,
     TeamModel,
@@ -109,19 +110,26 @@ def initialize_database(app):
         matches = json.loads(file.read())
 
         for match in matches:
-            team1 = TeamModel.query.filter_by(code=match["team1_code"]).first()
-            match.pop("team1_code")
-            match["team1_id"] = team1.id
+            if match["team1_code"] is None:
+                match["team1_id"] = None
+            else:
+                team1 = TeamModel.query.filter_by(code=match["team1_code"]).first()
+                match["team1_id"] = team1.id
 
-            team2 = TeamModel.query.filter_by(code=match["team2_code"]).first()
-            match.pop("team2_code")
-            match["team2_id"] = team2.id
+            if match["team2_code"] is None:
+                match["team2_id"] = None
+            else:
+                team2 = TeamModel.query.filter_by(code=match["team2_code"]).first()
+                match["team2_id"] = team2.id
 
             group = GroupModel.query.filter_by(code=match["group_code"]).first()
-            match.pop("group_code")
             match["group_id"] = group.id
 
-        db.session.add_all(MatchModel(**match) for match in matches)
+            match.pop("team1_code")
+            match.pop("team2_code")
+            match.pop("group_code")
+
+        db.session.add_all(MatchReferenceModel(**match) for match in matches)
         db.session.flush()
 
     db.session.commit()
@@ -174,6 +182,7 @@ def delete_database(app):
     ScoreBetModel.query.delete()
     BinaryBetModel.query.delete()
     UserModel.query.delete()
+    MatchReferenceModel.query.delete()
     MatchModel.query.delete()
     GroupModel.query.delete()
     PhaseModel.query.delete()

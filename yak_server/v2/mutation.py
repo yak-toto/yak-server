@@ -5,7 +5,7 @@ from uuid import UUID
 
 import strawberry
 from flask import current_app
-from sqlalchemy import sql, update
+from sqlalchemy import update
 from strawberry.types import Info
 
 from yak_server import db
@@ -13,6 +13,7 @@ from yak_server.database.models import (
     BinaryBetModel,
     GroupPositionModel,
     MatchModel,
+    MatchReferenceModel,
     ScoreBetModel,
     UserModel,
     is_locked,
@@ -80,12 +81,21 @@ class Mutation:
         db.session.add(user)
         db.session.flush()
 
-        # Initialize bets and integrate in db
-        db.session.add_all(
-            match.bet_type_from_match.value(user_id=user.id, match_id=match.id)
-            for match in MatchModel.query.filter(MatchModel.bet_type_from_match is not sql.null())
-        )
-        db.session.flush()
+        # Initialize matches and bets and integrate in db
+        for match_reference in MatchReferenceModel.query.all():
+            match = MatchModel(
+                team1_id=match_reference.team1_id,
+                team2_id=match_reference.team2_id,
+                index=match_reference.index,
+                group_id=match_reference.group_id,
+            )
+            db.session.add(match)
+            db.session.flush()
+
+            db.session.add(
+                match_reference.bet_type_from_match.value(user_id=user.id, match_id=match.id),
+            )
+            db.session.flush()
 
         # Create group position records
         db.session.add_all(create_group_position(ScoreBetModel.query.filter_by(user_id=user.id)))
