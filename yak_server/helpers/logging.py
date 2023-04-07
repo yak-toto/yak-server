@@ -11,7 +11,8 @@ def modify_score_bet_successfully(user_name, original_bet, new_score1, new_score
 def modify_binary_bet_successfully(user_name, original_bet, new_is_one_won) -> str:
     return (
         f"{user_name} modify "
-        f"{original_bet.match.team1.description}-{original_bet.match.team2.description} "
+        f"{original_bet.match.team1.description if original_bet.match.team1 else None}"
+        f"-{original_bet.match.team2.description if original_bet.match.team2 else None} "
         f"in {original_bet.match.group.description} "
         f"from {original_bet.is_one_won}-"
         f"{not original_bet.is_one_won if isinstance(original_bet.is_one_won, bool) else None} "
