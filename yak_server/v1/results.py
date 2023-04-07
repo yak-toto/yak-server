@@ -100,10 +100,11 @@ def compute_points(
         user_ids_found_correct_result = []
         user_ids_found_correct_score = []
 
-        for user_score in ScoreBetModel.query.filter(
+        for user_score in ScoreBetModel.query.join(ScoreBetModel.match).filter(
             and_(
-                ScoreBetModel.match_id == real_score.match_id,
                 ScoreBetModel.user_id != admin.id,
+                MatchModel.index == real_score.match.index,
+                MatchModel.group_id == real_score.match.group_id,
             ),
         ):
             if user_score.is_same_results(real_score):
@@ -116,7 +117,6 @@ def compute_points(
 
         results.append(
             {
-                "match_id": real_score.match_id,
                 "number_correct_result": number_correct_result,
                 "user_ids_found_correct_result": user_ids_found_correct_result,
                 "number_correct_score": number_correct_score,
@@ -226,6 +226,7 @@ def team_from_group_code(user, group_code):
                 for bet in user.binary_bets.filter(GroupModel.code == group_code)
                 .join(BinaryBetModel.match)
                 .join(MatchModel.group)
+                if bet.match.team1 is not None and bet.match.team2 is not None
             ),
         ),
     )

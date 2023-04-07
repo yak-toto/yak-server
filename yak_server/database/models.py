@@ -240,30 +240,71 @@ class BinaryBetModel(db.Model):
     def to_dict_with_group_id(self):
         bet_results = self.bet_from_is_one_won()
 
+        team1_dict = (
+            {**self.match.team1.to_dict(), "won": bet_results[0]}
+            if self.match.team1 is not None
+            else None
+        )
+        team2_dict = (
+            {**self.match.team2.to_dict(), "won": bet_results[1]}
+            if self.match.team2 is not None
+            else None
+        )
+
         return {
             "id": self.id,
             "index": self.match.index,
             "locked": is_locked(self.user.name),
             "group": {"id": self.match.group_id},
-            "team1": {**self.match.team1.to_dict(), "won": bet_results[0]},
-            "team2": {**self.match.team2.to_dict(), "won": bet_results[1]},
+            "team1": team1_dict,
+            "team2": team2_dict,
         }
 
     def to_dict_without_group(self):
         bet_results = self.bet_from_is_one_won()
 
+        team1_dict = (
+            {**self.match.team1.to_dict(), "won": bet_results[0]}
+            if self.match.team1 is not None
+            else None
+        )
+        team2_dict = (
+            {**self.match.team2.to_dict(), "won": bet_results[1]}
+            if self.match.team2 is not None
+            else None
+        )
+
         return {
             "id": self.id,
             "index": self.match.index,
             "locked": is_locked(self.user.name),
-            "team1": {**self.match.team1.to_dict(), "won": bet_results[0]},
-            "team2": {**self.match.team2.to_dict(), "won": bet_results[1]},
+            "team1": team1_dict,
+            "team2": team2_dict,
         }
 
 
 class BetMapping(Enum):
     SCORE_BET = ScoreBetModel
     BINARY_BET = BinaryBetModel
+
+
+class MatchReferenceModel(db.Model):
+    __tablename__ = "match_reference"
+    id = db.Column(
+        db.String(100),
+        primary_key=True,
+        nullable=False,
+        default=lambda: str(uuid4()),
+    )
+
+    group_id = db.Column(db.String(100), db.ForeignKey("group.id"), nullable=False)
+
+    index = db.Column(db.Integer, nullable=False)
+
+    team1_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=True)
+    team2_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=True)
+
+    bet_type_from_match = db.Column(SqlEnum(BetMapping), nullable=False)
 
 
 class MatchModel(db.Model):
@@ -280,16 +321,14 @@ class MatchModel(db.Model):
 
     index = db.Column(db.Integer, nullable=False)
 
-    team1_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
-    team1 = db.relationship("TeamModel", foreign_keys=team1_id, backref="match1")
+    team1_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=True)
+    team1 = db.relationship("TeamModel", foreign_keys=team1_id)
 
-    team2_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=False)
-    team2 = db.relationship("TeamModel", foreign_keys=team2_id, backref="match2")
+    team2_id = db.Column(db.String(100), db.ForeignKey("team.id"), nullable=True)
+    team2 = db.relationship("TeamModel", foreign_keys=team2_id)
 
     score_bets = db.relationship("ScoreBetModel", back_populates="match")
     binary_bets = db.relationship("BinaryBetModel", back_populates="match")
-
-    bet_type_from_match = db.Column(SqlEnum(BetMapping), default=None)
 
 
 class TeamModel(db.Model):

@@ -1,7 +1,6 @@
 {
-    "first_group": "8",
-    "first_phase": "GROUP",
-    "second_phase": "FINAL",
+    "to_group": "8",
+    "from_phase": "GROUP",
     "versus": [
         {
             "team1": {
