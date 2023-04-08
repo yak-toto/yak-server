@@ -189,6 +189,12 @@ def test_signup_and_invalid_token(client):
                             numberMatchGuess
                             points
                         }
+                        groups {
+                            description
+                        }
+                        phases {
+                            description
+                        }
                         scoreBets {
                             group {
                                 id
@@ -226,6 +232,8 @@ def test_signup_and_invalid_token(client):
     )
 
     assert response_current_user.json["data"]["currentUserResult"]["__typename"] == "User"
+    assert response_current_user.json["data"]["currentUserResult"]["groups"] == []
+    assert response_current_user.json["data"]["currentUserResult"]["phases"] == []
 
     # invalidate authentification token and check currentUser query
     # send InvalidToken response
