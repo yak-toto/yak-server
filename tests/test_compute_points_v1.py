@@ -66,27 +66,15 @@ def put_finale_phase(client, token, is_one_won):
 
     assert response_get_finale_phase.status_code == HTTPStatus.OK
 
-    response_put_finale_phase = client.put(
-        "/api/v1/binary_bets/phases/FINAL",
-        json=[
-            {
-                "is_one_won": is_one_won,
-                "index": 1,
-                "group": {
-                    "id": response_get_finale_phase.json["result"]["groups"][0]["id"],
-                },
-                "team1": {
-                    "id": response_get_finale_phase.json["result"]["binary_bets"][0]["team1"]["id"],
-                },
-                "team2": {
-                    "id": response_get_finale_phase.json["result"]["binary_bets"][0]["team2"]["id"],
-                },
-            },
-        ],
+    response_patch_finale_phase = client.patch(
+        f"/api/v1/binary_bets/{response_get_finale_phase.json['result']['binary_bets'][0]['id']}",
+        json={
+            "is_one_won": is_one_won,
+        },
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    assert response_put_finale_phase.status_code == HTTPStatus.OK
+    assert response_patch_finale_phase.status_code == HTTPStatus.OK
 
 
 @pytest.fixture()
@@ -288,22 +276,3 @@ def test_compute_points(client, setup_app):
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "No results for admin user",
     }
-
-    # Error case : push finale phase bets with lock error
-    old_lock_datetime = setup_app.config["LOCK_DATETIME"]
-    setup_app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(minutes=10))
-
-    response_put_finale_phase = client.put(
-        "/api/v1/binary_bets/phases/FINAL",
-        json=[],
-        headers={"Authorization": f"Bearer {user_token}"},
-    )
-
-    assert response_put_finale_phase.status_code == HTTPStatus.UNAUTHORIZED
-    assert response_put_finale_phase.json == {
-        "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Cannot modify binary bet, lock date is exceeded",
-    }
-
-    setup_app.config["LOCK_DATETIME"] = old_lock_datetime
