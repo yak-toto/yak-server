@@ -45,21 +45,3 @@ def bets_from_phase_code(user, phase_code):
     )
 
     return phase, groups, score_bets, binary_bets
-
-
-def binary_bets_from_phase_code(user, phase_code):
-    phase = PhaseModel.query.filter_by(code=phase_code).first()
-
-    if not phase:
-        return None, [], [], []
-
-    groups = GroupModel.query.filter_by(phase_id=phase.id).order_by(GroupModel.index)
-
-    binary_bets = (
-        user.binary_bets.filter(GroupModel.phase_id == phase.id)
-        .join(BinaryBetModel.match)
-        .join(MatchModel.group)
-        .order_by(GroupModel.index, MatchModel.index)
-    )
-
-    return phase, groups, binary_bets
