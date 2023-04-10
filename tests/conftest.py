@@ -14,6 +14,7 @@ def app_session():
     # Create app and set TESTING config
     app = create_app()
     app.config["TESTING"] = True
+    app.config["DEBUG"] = True
 
     # Clean database before running test
     with app.app_context():
