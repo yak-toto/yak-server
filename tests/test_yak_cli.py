@@ -1,3 +1,4 @@
+import os
 import subprocess
 from http import HTTPStatus
 
@@ -12,6 +13,7 @@ def test_cli(client):
         "yak db drop",
         shell=True,
         capture_output=True,
+        env={**os.environ, "FLASK_DEBUG": "1"},
     )
 
     assert result.returncode == 0
@@ -62,6 +64,7 @@ def test_cli(client):
         "yak db delete",
         shell=True,
         capture_output=True,
+        env={**os.environ, "FLASK_DEBUG": "1"},
     )
 
     assert result.returncode == 0
