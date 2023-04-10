@@ -26,16 +26,11 @@ You can also set MySQL port by adding `MYSQL_PORT=my_port` to `.flaskenv` file. 
 
 ### Backend
 
-Run your project in a Python env is highly recommend. You can use `venv` with the following command:
+Run your project in a Python env is highly recommend. You can use poetry env using the following command:
 
 ```bash
-python3 -m venv <my_env_name>
-```
-
-Then activate it with:
-
-```bash
-source <my_env_name>/bin/activate
+poetry env use 3.9
+poetry shell
 ```
 
 Fetch all packages using poetry with the following command:
@@ -55,9 +50,10 @@ login system is using JSON Web Token, a secret key is required and an expiration
 
 ```text
 JWT_SECRET_KEY=9292f79e10ed7ed03ffad66d196217c4
+JWT_EXPIRATION_TIME=1800
 ```
 
-Also, automatic backup can be done through `yak_server/cli/backup_database` script. It can be run using `flask db backup`.
+Also, automatic backup can be done through `yak_server/cli/backup_database` script. It can be run using `yak db backup`.
 
 Finally, flask needs some configuration to start. Please add `FLASK_APP=yak_server` variable to indicate main location. Last thing, for development environment, debug needs to be activated with a addditional environment variable:
 
