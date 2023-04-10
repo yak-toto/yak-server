@@ -243,7 +243,7 @@ def test_teams(client):
         "data": {
             "teamByIdResult": {
                 "__typename": "TeamByIdNotFound",
-                "message": f"Cannot find team with id: {invalid_team_id}",
+                "message": f"Team not found: {invalid_team_id}",
             },
         },
     }
@@ -311,7 +311,7 @@ def test_teams(client):
         "data": {
             "teamByCodeResult": {
                 "__typename": "TeamByCodeNotFound",
-                "message": "Cannot find team with code: NA",
+                "message": "Team not found: NA",
             },
         },
     }

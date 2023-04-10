@@ -25,7 +25,7 @@ def user_from_token(auth_headers):
 
     user = UserModel.query.filter_by(id=data["sub"]).first()
     if not user:
-        raise UserNotFound
+        raise UserNotFound(data["sub"])
 
     return user
 

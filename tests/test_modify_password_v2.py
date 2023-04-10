@@ -170,5 +170,5 @@ def test_modify_password(client):
 
     assert response_wrong_input.json["data"]["modifyUserResult"] == {
         "__typename": "UserNotFound",
-        "message": f"User not found with id: {invalid_user_id}",
+        "message": f"User not found: {invalid_user_id}",
     }

@@ -104,7 +104,7 @@ def patch_user(_, user_id):
 
     user = UserModel.query.filter_by(id=user_id).first()
     if not user:
-        raise UserNotFound
+        raise UserNotFound(user_id)
 
     user.change_password(body["password"])
 

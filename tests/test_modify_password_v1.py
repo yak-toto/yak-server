@@ -90,12 +90,14 @@ def test_modify_password(client):
     }
 
     # Check call is rejected if user_id is invalid
+    invalid_user_id = uuid4()
+
     response_wrong_input = client.patch(
-        f"/api/v1/users/{uuid4()}",
+        f"/api/v1/users/{invalid_user_id}",
         headers={"Authorization": f"Bearer {authentification_token}"},
         json={"password": "new_password_for_unknown_user"},
     )
 
     assert response_wrong_input.status_code == HTTPStatus.NOT_FOUND
     assert response_wrong_input.json["error_code"] == HTTPStatus.NOT_FOUND
-    assert response_wrong_input.json["description"] == "User not found"
+    assert response_wrong_input.json["description"] == f"User not found: {invalid_user_id}"

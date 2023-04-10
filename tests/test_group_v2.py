@@ -242,7 +242,7 @@ def test_group(client):
         "data": {
             "groupByCodeResult": {
                 "__typename": "GroupByCodeNotFound",
-                "message": f"Cannot find group with code: {invalid_group_code}",
+                "message": f"Group not found: {invalid_group_code}",
             },
         },
     }
@@ -300,7 +300,7 @@ def test_group(client):
         "data": {
             "groupByIdResult": {
                 "__typename": "GroupByIdNotFound",
-                "message": f"Cannot find group with id: {invalid_group_id}",
+                "message": f"Group not found: {invalid_group_id}",
             },
         },
     }

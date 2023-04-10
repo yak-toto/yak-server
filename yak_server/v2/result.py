@@ -10,7 +10,13 @@ from yak_server.helpers.errors import (
     LOCKED_BINARY_BET_MESSAGE,
     LOCKED_SCORE_BET_MESSAGE,
     UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE,
+    binary_bet_not_found_message,
+    group_not_found_message,
     name_already_exists_message,
+    phase_not_found_message,
+    score_bet_not_found_message,
+    team_not_found_message,
+    user_not_found_message,
 )
 
 from .schema import (
@@ -119,7 +125,7 @@ class TeamByIdNotFound:
 
     @strawberry.field
     def message(self) -> str:
-        return f"Cannot find team with id: {self.id}"
+        return team_not_found_message(self.id)
 
 
 @strawberry.type
@@ -128,7 +134,7 @@ class TeamByCodeNotFound:
 
     @strawberry.field
     def message(self) -> str:
-        return f"Cannot find team with code: {self.code}"
+        return team_not_found_message(self.code)
 
 
 TeamByIdResult = strawberry.union(
@@ -147,7 +153,7 @@ class ScoreBetNotFound:
 
     @strawberry.field
     def message(self) -> str:
-        return f"Cannot find score bet with id: {self.id}"
+        return score_bet_not_found_message(self.id)
 
 
 ScoreBetResult = strawberry.union(
@@ -162,7 +168,7 @@ class BinaryBetNotFound:
 
     @strawberry.field
     def message(self) -> str:
-        return f"Cannot find binary bet with id: {self.id}"
+        return binary_bet_not_found_message(self.id)
 
 
 BinaryBetResult = strawberry.union(
@@ -190,7 +196,7 @@ class GroupByCodeNotFound:
 
     @strawberry.field
     def message(self) -> str:
-        return f"Cannot find group with code: {self.code}"
+        return group_not_found_message(self.code)
 
 
 GroupByCodeResult = strawberry.union(
@@ -205,7 +211,7 @@ class GroupByIdNotFound:
 
     @strawberry.field
     def message(self) -> str:
-        return f"Cannot find group with id: {self.id}"
+        return group_not_found_message(self.id)
 
 
 GroupByIdResult = strawberry.union(
@@ -228,7 +234,7 @@ class PhaseByCodeNotFound:
 
     @strawberry.field
     def message(self) -> str:
-        return f"Cannot find phase with code: {self.code}"
+        return phase_not_found_message(self.code)
 
 
 PhaseByCodeResult = strawberry.union(
@@ -243,7 +249,7 @@ class PhaseByIdNotFound:
 
     @strawberry.field
     def message(self) -> str:
-        return f"Cannot find phase with id: {self.id}"
+        return phase_not_found_message(self.id)
 
 
 PhaseByIdResult = strawberry.union(
@@ -307,7 +313,7 @@ class UserNotFound:
 
     @strawberry.field
     def message(self) -> str:
-        return f"User not found with id: {self.id}"
+        return user_not_found_message(self.id)
 
 
 ModifyUserResult = strawberry.union(

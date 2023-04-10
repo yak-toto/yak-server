@@ -234,7 +234,7 @@ def test_group_rank(client):
     assert response_group_rank_with_invalid_code.json["data"] == {
         "groupRankByCodeResult": {
             "__typename": "GroupByCodeNotFound",
-            "message": f"Cannot find group with code: {invalid_group_code}",
+            "message": f"Group not found: {invalid_group_code}",
         },
     }
 
@@ -328,7 +328,7 @@ def test_group_rank(client):
     assert response_group_rank_with_invalid_id.json["data"] == {
         "groupRankByIdResult": {
             "__typename": "GroupByIdNotFound",
-            "message": f"Cannot find group with id: {invalid_id}",
+            "message": f"Group not found: {invalid_id}",
         },
     }
 

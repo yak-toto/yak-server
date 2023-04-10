@@ -1,5 +1,7 @@
+import json
 import os
 import subprocess
+from base64 import b64decode
 from http import HTTPStatus
 
 import pexpect
@@ -75,11 +77,13 @@ def test_cli(client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
+    user_id = json.loads(b64decode(auth_token.split(".")[1] + "=="))["sub"]
+
     assert response_login_user_not_found.status_code == HTTPStatus.NOT_FOUND
     assert response_login_user_not_found.json == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
-        "description": "User not found",
+        "description": f"User not found: {user_id}",
     }
 
     # Check the same error with v2 api
