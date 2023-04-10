@@ -12,7 +12,13 @@ from yak_server.helpers.errors import (
     LOCKED_BINARY_BET_MESSAGE,
     LOCKED_SCORE_BET_MESSAGE,
     UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE,
+    bet_not_found_message,
+    group_not_found_message,
     name_already_exists_message,
+    phase_not_found_message,
+    rule_not_found_message,
+    team_not_found_message,
+    user_not_found_message,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,13 +37,14 @@ class NameAlreadyExists(HTTPException):
 
 class BetNotFound(HTTPException):
     def __init__(self, bet_id) -> None:
-        super().__init__(f"Bet not found: {bet_id}")
+        super().__init__(bet_not_found_message(bet_id))
         self.code = HTTPStatus.NOT_FOUND
 
 
 class UserNotFound(HTTPException):
-    code = HTTPStatus.NOT_FOUND
-    description = "User not found"
+    def __init__(self, user_id) -> None:
+        super().__init__(user_not_found_message(user_id))
+        self.code = HTTPStatus.NOT_FOUND
 
 
 class UnauthorizedAccessToAdminAPI(HTTPException):
@@ -55,7 +62,7 @@ class InvalidTeamId(HTTPException):
 
 class TeamNotFound(HTTPException):
     def __init__(self, team_id):
-        super().__init__(f"Team not found: {team_id}")
+        super().__init__(team_not_found_message(team_id))
         self.code = HTTPStatus.NOT_FOUND
 
 
@@ -76,13 +83,13 @@ class NoResultsForAdminUser(HTTPException):
 
 class GroupNotFound(HTTPException):
     def __init__(self, group_id) -> None:
-        super().__init__(f"Group not found: {group_id}")
+        super().__init__(group_not_found_message(group_id))
         self.code = HTTPStatus.NOT_FOUND
 
 
 class PhaseNotFound(HTTPException):
     def __init__(self, phase_id) -> None:
-        super().__init__(f"Phase not found: {phase_id}")
+        super().__init__(phase_not_found_message(phase_id))
         self.code = HTTPStatus.NOT_FOUND
 
 
@@ -98,7 +105,7 @@ class ExpiredToken(HTTPException):
 
 class RuleNotFound(HTTPException):
     def __init__(self, rule_id) -> None:
-        super().__init__(f"Rule not found: {rule_id}")
+        super().__init__(rule_not_found_message(rule_id))
         self.code = HTTPStatus.NOT_FOUND
 
 

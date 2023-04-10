@@ -282,7 +282,7 @@ def test_binary_bet(client, setup_app):
         "data": {
             "binaryBetResult": {
                 "__typename": "BinaryBetNotFound",
-                "message": f"Cannot find binary bet with id: {invalid_bet_id}",
+                "message": f"Binary bet not found: {invalid_bet_id}",
             },
         },
     }

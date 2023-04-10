@@ -257,7 +257,7 @@ def test_phase(client):
         "data": {
             "phaseByIdResult": {
                 "__typename": "PhaseByIdNotFound",
-                "message": f"Cannot find phase with id: {invalid_phase_id}",
+                "message": f"Phase not found: {invalid_phase_id}",
             },
         },
     }
@@ -316,7 +316,7 @@ def test_phase(client):
         "data": {
             "phaseByCodeResult": {
                 "__typename": "PhaseByCodeNotFound",
-                "message": f"Cannot find phase with code: {invalid_phase_code}",
+                "message": f"Phase not found: {invalid_phase_code}",
             },
         },
     }

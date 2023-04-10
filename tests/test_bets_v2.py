@@ -141,7 +141,7 @@ def test_bets(client):
         "data": {
             "scoreBetResult": {
                 "__typename": "ScoreBetNotFound",
-                "message": f"Cannot find score bet with id: {invalid_bet_id}",
+                "message": f"Score bet not found: {invalid_bet_id}",
             },
         },
     }
