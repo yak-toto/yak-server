@@ -12,7 +12,7 @@ from .schema import User
 NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
 
 
-def is_authentificated(f):
+def is_authentificated(f):  # noqa: ANN201
     @wraps(f)
     def _verify(*args, **kwargs):
         auth_headers = kwargs["info"].context["request"].headers.get("Authorization", "").split()
@@ -39,7 +39,7 @@ def is_authentificated(f):
     return _verify
 
 
-def is_admin_authentificated(f):
+def is_admin_authentificated(f):  # noqa: ANN201
     @wraps(f)
     def _verify(*args, **kwargs):
         if kwargs["info"].user.pseudo != "admin":

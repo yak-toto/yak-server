@@ -1,9 +1,10 @@
 from dataclasses import dataclass
+from typing import List
 
 from yak_server.database.models import GroupPositionModel
 
 
-def create_group_position(score_bets):
+def create_group_position(score_bets) -> List[GroupPositionModel]:
     team_ids = []
 
     group_positions = []
@@ -41,7 +42,7 @@ class GroupPosition:
     goals_against: int = 0
 
 
-def compute_group_rank(group_rank, score_bets):
+def compute_group_rank(group_rank, score_bets) -> List[GroupPositionModel]:
     new_group_position = {}
 
     for score_bet in score_bets:

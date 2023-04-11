@@ -70,6 +70,7 @@ branch = "true"
 
 [tool.coverage.report]
 omit = ["./yak_server/database/migrations/*"]
+exclude_lines = ["if TYPE_CHECKING:"]
 
 
 [tool.ruff]
@@ -86,7 +87,6 @@ ignore = [
     "ANN002",
     "ANN003",
     "ANN102",
-    "ANN201",
     "ANN202",
     "ANN204",
     "ANN205",
@@ -130,8 +130,6 @@ ignore = [
     "C901",
     "PLR",
 
-    "TCH003",
-
     "G004"
 ]
 fix = true
@@ -148,8 +146,9 @@ src = ["yak_server", "tests"]
 
 [tool.ruff.per-file-ignores]
 "yak_server/cli/*" = ["T20"]
+"yak_server/database/migrations/*" = ["ANN201"]
 "yak_server/helpers/errors.py" = ["S105"]
-"tests/*" = ["S101", "S105", "S311"]
+"tests/*" = ["S101", "S105", "S311", "ANN201"]
 "setup.py" = ["INP001"]
 
 [tool.ruff.isort]

@@ -6,7 +6,7 @@ from jsonschema import Draft202012Validator, ValidationError, validate
 from .errors import RequestValidationError
 
 
-def validate_body(schema):
+def validate_body(schema):  # noqa: ANN201
     def decorator(f):
         @wraps(f)
         def _verify(*args, **kwargs):

@@ -1,6 +1,7 @@
 import logging
 from datetime import timedelta
 from http import HTTPStatus
+from typing import TYPE_CHECKING, Tuple
 
 from flask import Blueprint, current_app, request
 
@@ -25,6 +26,10 @@ from .utils.flask_utils import success_response
 from .utils.schemas import SCHEMA_LOGIN, SCHEMA_PATCH_USER, SCHEMA_SIGNUP
 from .utils.validation import validate_body
 
+if TYPE_CHECKING:
+    from flask import Response
+
+
 auth = Blueprint("auth", __name__)
 
 logger = logging.getLogger(__name__)
@@ -32,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 @auth.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/login")
 @validate_body(schema=SCHEMA_LOGIN)
-def login_post():
+def login_post() -> Tuple["Response", int]:
     body = request.get_json()
     user = UserModel.authenticate(body["name"], body["password"])
 
@@ -52,7 +57,7 @@ def login_post():
 
 @auth.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/signup")
 @validate_body(schema=SCHEMA_SIGNUP)
-def signup_post():
+def signup_post() -> Tuple["Response", int]:
     data = request.get_json()
 
     # Check existing user in db
@@ -99,7 +104,7 @@ def signup_post():
 @auth.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/<string:user_id>")
 @validate_body(schema=SCHEMA_PATCH_USER)
 @is_admin_authentificated
-def patch_user(_, user_id):
+def patch_user(_, user_id) -> Tuple["Response", int]:
     body = request.get_json()
 
     user = UserModel.query.filter_by(id=user_id).first()
@@ -117,5 +122,5 @@ def patch_user(_, user_id):
 
 @auth.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/current_user")
 @is_authentificated
-def current_user(current_user):
+def current_user(current_user) -> Tuple["Response", int]:
     return success_response(HTTPStatus.OK, current_user.to_user_dict())

@@ -1,6 +1,7 @@
 import logging
 import traceback
 from http import HTTPStatus
+from typing import TYPE_CHECKING
 
 from flask import Response, jsonify
 from werkzeug.exceptions import HTTPException
@@ -20,6 +21,10 @@ from yak_server.helpers.errors import (
     team_not_found_message,
     user_not_found_message,
 )
+
+if TYPE_CHECKING:
+    from flask import Flask
+
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +58,7 @@ class UnauthorizedAccessToAdminAPI(HTTPException):
 
 
 class InvalidTeamId(HTTPException):
-    def __init__(self, team_id):
+    def __init__(self, team_id) -> None:
         super().__init__(
             f"Invalid team id: {team_id}. Retry with a uuid or ISO 3166-1 alpha-2 code",
         )
@@ -61,7 +66,7 @@ class InvalidTeamId(HTTPException):
 
 
 class TeamNotFound(HTTPException):
-    def __init__(self, team_id):
+    def __init__(self, team_id) -> None:
         super().__init__(team_not_found_message(team_id))
         self.code = HTTPStatus.NOT_FOUND
 
@@ -110,14 +115,14 @@ class RuleNotFound(HTTPException):
 
 
 class RequestValidationError(HTTPException):
-    def __init__(self, schema, path, description):
+    def __init__(self, schema, path, description) -> None:
         super().__init__(description)
         self.schema = schema
         self.path = path
         self.code = HTTPStatus.UNPROCESSABLE_ENTITY
 
 
-def set_error_handler(app):
+def set_error_handler(app: "Flask") -> None:
     @app.errorhandler(HTTPException)
     def handle_http_exception(e: HTTPException) -> Response:
         # Return JSON instead of HTML for HTTP errors.

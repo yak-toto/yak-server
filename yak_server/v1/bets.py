@@ -1,5 +1,6 @@
 import logging
 from http import HTTPStatus
+from typing import TYPE_CHECKING, Any, Dict, Tuple
 
 from flask import Blueprint
 
@@ -26,6 +27,9 @@ from .utils.errors import (
 )
 from .utils.flask_utils import success_response
 
+if TYPE_CHECKING:
+    from flask import Response
+
 bets = Blueprint("bets", __name__)
 
 logger = logging.getLogger(__name__)
@@ -33,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets")
 @is_authentificated
-def get_all_bets(current_user):
+def get_all_bets(current_user) -> Tuple["Response", int]:
     binary_bets_query = (
         current_user.binary_bets.join(BinaryBetModel.match)
         .join(MatchModel.group)
@@ -63,7 +67,7 @@ def get_all_bets(current_user):
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/phases/<string:phase_code>")
 @is_authentificated
-def get_bets_by_phase(current_user, phase_code):
+def get_bets_by_phase(current_user, phase_code) -> Tuple["Response", int]:
     phase, groups, score_bets, binary_bets = bets_from_phase_code(
         current_user,
         phase_code,
@@ -85,7 +89,7 @@ def get_bets_by_phase(current_user, phase_code):
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/<string:group_code>")
 @is_authentificated
-def group_get(current_user, group_code):
+def group_get(current_user, group_code) -> Tuple["Response", int]:
     group, score_bets, binary_bets = bets_from_group_code(current_user, group_code)
 
     if not group:
@@ -104,14 +108,14 @@ def group_get(current_user, group_code):
 
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets/groups/rank/<string:group_code>")
 @is_authentificated
-def group_result_get(current_user, group_code):
+def group_result_get(current_user, group_code) -> Tuple["Response", int]:
     return success_response(
         HTTPStatus.OK,
         get_group_rank_with_code(current_user, group_code),
     )
 
 
-def get_group_rank_with_code(user, group_code):
+def get_group_rank_with_code(user, group_code) -> Dict[str, Any]:
     group = GroupModel.query.filter_by(code=group_code).first()
 
     if not group:

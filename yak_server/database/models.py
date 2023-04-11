@@ -112,13 +112,13 @@ class UserModel(db.Model):
     def change_password(self, new_password) -> None:
         self.password = generate_password_hash(new_password, method="sha256")
 
-    def to_user_dict(self):
+    def to_user_dict(self) -> dict:
         return {
             "id": self.id,
             "name": self.name,
         }
 
-    def to_result_dict(self):
+    def to_result_dict(self) -> dict:
         return {
             "first_name": self.first_name,
             "last_name": self.last_name,
@@ -135,7 +135,7 @@ class UserModel(db.Model):
         }
 
 
-def is_locked(user_name):
+def is_locked(user_name) -> bool:
     locked_date = parser.parse(current_app.config["LOCK_DATETIME"])
     return user_name != "admin" and datetime.now() > locked_date
 
@@ -191,7 +191,7 @@ class ScoreBetModel(db.Model):
             and self.score2 == other.score2
         )
 
-    def to_dict_with_group_id(self):
+    def to_dict_with_group_id(self) -> str:
         return {
             "id": self.id,
             "index": self.match.index,
@@ -201,7 +201,7 @@ class ScoreBetModel(db.Model):
             "team2": {**self.match.team2.to_dict(), "score": self.score2},
         }
 
-    def to_dict_without_group(self):
+    def to_dict_without_group(self) -> dict:
         return {
             "id": self.id,
             "index": self.match.index,
@@ -231,13 +231,13 @@ class BinaryBetModel(db.Model):
 
     is_one_won = db.Column(db.Boolean, default=None)
 
-    def bet_from_is_one_won(self):
+    def bet_from_is_one_won(self) -> tuple:
         if self.is_one_won is None:
             return (None, None)
 
         return (self.is_one_won, not self.is_one_won)
 
-    def to_dict_with_group_id(self):
+    def to_dict_with_group_id(self) -> dict:
         bet_results = self.bet_from_is_one_won()
 
         team1_dict = (
@@ -260,7 +260,7 @@ class BinaryBetModel(db.Model):
             "team2": team2_dict,
         }
 
-    def to_dict_without_group(self):
+    def to_dict_without_group(self) -> dict:
         bet_results = self.bet_from_is_one_won()
 
         team1_dict = (
@@ -343,7 +343,7 @@ class TeamModel(db.Model):
     description = db.Column(db.String(100), unique=True, nullable=False)
     flag_url = db.Column(db.String(100))
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "code": self.code,
@@ -367,7 +367,7 @@ class GroupModel(db.Model):
     phase_id = db.Column(db.String(100), db.ForeignKey("phase.id"), nullable=False)
     phase = db.relationship("PhaseModel", backref="groups")
 
-    def to_dict_with_phase_id(self):
+    def to_dict_with_phase_id(self) -> dict:
         return {
             "id": self.id,
             "code": self.code,
@@ -375,7 +375,7 @@ class GroupModel(db.Model):
             "description": self.description,
         }
 
-    def to_dict_without_phase(self):
+    def to_dict_without_phase(self) -> dict:
         return {
             "id": self.id,
             "code": self.code,
@@ -395,7 +395,7 @@ class PhaseModel(db.Model):
     description = db.Column(db.String(100), nullable=False)
     index = db.Column(db.Integer, nullable=False)
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "code": self.code,
@@ -442,7 +442,7 @@ class GroupPositionModel(db.Model):
         nullable=False,
     )
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "team": self.team.to_dict(),
             "played": self.won + self.drawn + self.lost,

@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from itertools import chain
+from typing import TYPE_CHECKING, Tuple
 
 from flask import Blueprint, current_app
 from sqlalchemy import and_
@@ -20,12 +21,16 @@ from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import NoResultsForAdminUser
 from .utils.flask_utils import success_response
 
+if TYPE_CHECKING:
+    from flask import Response
+
+
 results = Blueprint("results", __name__)
 
 
 @results.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_board")
 @is_authentificated
-def score_board(current_user):
+def score_board(current_user) -> Tuple["Response", int]:
     return success_response(
         HTTPStatus.OK,
         [
@@ -39,7 +44,7 @@ def score_board(current_user):
 
 @results.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/results")
 @is_authentificated
-def results_get(current_user):
+def results_get(current_user) -> Tuple["Response", int]:
     if current_user.name == "admin":
         raise NoResultsForAdminUser
 
@@ -61,7 +66,7 @@ def results_get(current_user):
 
 @results.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/compute_points")
 @is_admin_authentificated
-def compute_points_post(_):
+def compute_points_post(_) -> Tuple["Response", int]:
     compute_points(
         current_app.config["BASE_CORRECT_RESULT"],
         current_app.config["MULTIPLYING_FACTOR_CORRECT_RESULT"],
@@ -89,7 +94,7 @@ def compute_points(
     multiplying_factor_correct_score,
     team_qualified,
     first_team_qualified,
-):
+) -> None:
     admin = UserModel.query.filter_by(name="admin").first()
 
     results = []
@@ -214,11 +219,11 @@ def compute_points(
     db.session.commit()
 
 
-def all_results_filled_in_group(group_result):
+def all_results_filled_in_group(group_result) -> bool:
     return all(team["played"] == len(group_result) - 1 for team in group_result)
 
 
-def team_from_group_code(user, group_code):
+def team_from_group_code(user, group_code) -> set:
     return set(
         chain(
             *(
@@ -232,7 +237,7 @@ def team_from_group_code(user, group_code):
     )
 
 
-def winner_from_user(user):
+def winner_from_user(user) -> set:
     finale_bet = list(
         user.binary_bets.filter(GroupModel.code == "1")
         .join(BinaryBetModel.match)

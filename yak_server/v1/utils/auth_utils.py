@@ -11,7 +11,7 @@ from .errors import ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI, Us
 NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
 
 
-def user_from_token(auth_headers):
+def user_from_token(auth_headers) -> UserModel:
     if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION or auth_headers[0] != "Bearer":
         raise InvalidToken
 
@@ -30,7 +30,7 @@ def user_from_token(auth_headers):
     return user
 
 
-def is_authentificated(f):
+def is_authentificated(f):  # noqa: ANN201
     @wraps(f)
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get("Authorization", "").split()
@@ -42,7 +42,7 @@ def is_authentificated(f):
     return _verify
 
 
-def is_admin_authentificated(f):
+def is_admin_authentificated(f):  # noqa: ANN201
     @wraps(f)
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get("Authorization", "").split()
