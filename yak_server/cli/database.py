@@ -53,11 +53,11 @@ class BackupError(Exception):
         super().__init__(f"Error during backup. {description}")
 
 
-def create_database(app):
+def create_database(app) -> None:
     db.create_all()
 
 
-def create_admin(app):
+def create_admin(app) -> None:
     password = getpass(prompt="Admin user password: ")
     confirm_password = getpass(prompt="Confirm admin password: ")
 
@@ -80,7 +80,7 @@ def create_admin(app):
         raise SignupError(response_signup.json["description"])
 
 
-def initialize_database(app):
+def initialize_database(app) -> None:
     DATA_FOLDER = app.config["DATA_FOLDER"]
 
     with Path(f"{DATA_FOLDER}/phases.json").open() as file:
@@ -135,7 +135,7 @@ def initialize_database(app):
     db.session.commit()
 
 
-def backup_database(app):
+def backup_database(app) -> None:
     with resources.as_file(resources.files("yak_server") / "cli/backup_files") as path:
         backup_location = path
 
@@ -174,7 +174,7 @@ def backup_database(app):
         logger.info(f"Backup done on {backup_date} at {backup_time}")
 
 
-def delete_database(app):
+def delete_database(app) -> None:
     if not app.config.get("DEBUG"):
         raise RecordDeletionInProduction
 
@@ -190,7 +190,7 @@ def delete_database(app):
     db.session.commit()
 
 
-def drop_database(app):
+def drop_database(app) -> None:
     if not app.config.get("DEBUG"):
         raise TableDropInProduction
 

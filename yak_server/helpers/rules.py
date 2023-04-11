@@ -7,7 +7,7 @@ from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, P
 from yak_server.v1.bets import get_group_rank_with_code
 
 
-def compute_finale_phase_from_group_rank(user, rule_config):
+def compute_finale_phase_from_group_rank(user, rule_config) -> None:
     first_phase_phase_group = GroupModel.query.filter_by(
         code=rule_config["to_group"],
     ).first()

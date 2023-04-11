@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 
-def create_app():
+def create_app() -> Flask:
     app = Flask(__name__)
 
     with resources.as_file(resources.files("yak_server") / "database/migrations") as path:

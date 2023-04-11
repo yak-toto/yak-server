@@ -18,11 +18,11 @@ class RuleNotDefined(Exception):
         super().__init__(f"Rule not defined: {rule_id}")
 
 
-def compute_database_uri(mysql_user_name, mysql_password, mysql_port, mysql_db):
+def compute_database_uri(mysql_user_name, mysql_password, mysql_port, mysql_db) -> str:
     return f"mysql+pymysql://{mysql_user_name}:{mysql_password}@localhost:{mysql_port}/{mysql_db}"
 
 
-def get_mysql_config():
+def get_mysql_config() -> dict:
     mysql_config = {
         "MYSQL_USER_NAME": os.environ["MYSQL_USER_NAME"],
         "MYSQL_PASSWORD": os.environ["MYSQL_PASSWORD"],
@@ -41,14 +41,14 @@ def get_mysql_config():
     return mysql_config
 
 
-def get_jwt_config():
+def get_jwt_config() -> dict:
     return {
         "SECRET_KEY": os.environ["JWT_SECRET_KEY"],
         "JWT_EXPIRATION_TIME": int(os.environ["JWT_EXPIRATION_TIME"]),
     }
 
 
-def get_yak_config():
+def get_yak_config() -> dict:
     with resources.as_file(
         resources.files("yak_server") / "data" / os.environ["COMPETITION"],
     ) as path:
@@ -96,5 +96,5 @@ def get_yak_config():
     }
 
 
-def get_config():
+def get_config() -> dict:
     return {**get_mysql_config(), **get_jwt_config(), **get_yak_config()}

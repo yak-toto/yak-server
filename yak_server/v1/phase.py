@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from typing import TYPE_CHECKING, Tuple
 
 from flask import Blueprint
 
@@ -9,12 +10,16 @@ from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import PhaseNotFound
 from .utils.flask_utils import success_response
 
+if TYPE_CHECKING:
+    from flask import Response
+
+
 phase = Blueprint("phase", __name__)
 
 
 @phase.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/phases")
 @is_authentificated
-def retrieve_all_phases(user):
+def retrieve_all_phases(user) -> Tuple["Response", int]:
     return success_response(
         HTTPStatus.OK,
         [phase.to_dict() for phase in PhaseModel.query.order_by(PhaseModel.index)],
@@ -23,7 +28,7 @@ def retrieve_all_phases(user):
 
 @phase.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/phases/<string:phase_id>")
 @is_authentificated
-def retrieve_by_phase_id(user, phase_id):
+def retrieve_by_phase_id(user, phase_id) -> Tuple["Response", int]:
     phase = PhaseModel.query.filter_by(id=phase_id).first()
 
     if not phase:

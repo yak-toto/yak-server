@@ -1,5 +1,6 @@
 import logging
 from http import HTTPStatus
+from typing import TYPE_CHECKING, Tuple
 
 from flask import Blueprint, request
 from sqlalchemy.exc import IntegrityError
@@ -24,6 +25,10 @@ from .utils.flask_utils import success_response
 from .utils.schemas import SCHEMA_PATCH_BINARY_BET, SCHEMA_POST_BINARY_BET
 from .utils.validation import validate_body
 
+if TYPE_CHECKING:
+    from flask import Response
+
+
 binary_bets = Blueprint("binary_bets", __name__)
 
 logger = logging.getLogger(__name__)
@@ -32,7 +37,7 @@ logger = logging.getLogger(__name__)
 @binary_bets.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets")
 @validate_body(schema=SCHEMA_POST_BINARY_BET)
 @is_authentificated
-def create_binary_bet(user):
+def create_binary_bet(user) -> Tuple["Response", int]:
     if is_locked(user.name):
         raise LockedBinaryBet
 
@@ -78,7 +83,7 @@ def create_binary_bet(user):
 
 @binary_bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
 @is_authentificated
-def retrieve_binary_bet(user, bet_id):
+def retrieve_binary_bet(user, bet_id) -> Tuple["Response", int]:
     binary_bet = BinaryBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
 
     if not binary_bet:
@@ -97,7 +102,7 @@ def retrieve_binary_bet(user, bet_id):
 @binary_bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
 @validate_body(schema=SCHEMA_PATCH_BINARY_BET)
 @is_authentificated
-def modify_binary_bet(user, bet_id):
+def modify_binary_bet(user, bet_id) -> Tuple["Response", int]:
     if is_locked(user.name):
         raise LockedBinaryBet
 
@@ -143,7 +148,7 @@ def modify_binary_bet(user, bet_id):
 
 @binary_bets.delete(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
 @is_authentificated
-def delete_binary_bet(user, bet_id):
+def delete_binary_bet(user, bet_id) -> Tuple["Response", int]:
     if is_locked(user.name):
         raise LockedBinaryBet
 

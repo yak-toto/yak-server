@@ -20,13 +20,13 @@ def modify_binary_bet_successfully(user_name, original_bet, new_is_one_won) -> s
     )
 
 
-def signed_up_successfully(user_name):
+def signed_up_successfully(user_name: str) -> str:
     return f"{user_name} signed up successfully"
 
 
-def logged_in_successfully(user_name):
+def logged_in_successfully(user_name: str) -> str:
     return f"{user_name} logged in successfully"
 
 
-def modify_password_successfully(user_name):
+def modify_password_successfully(user_name: str) -> str:
     return f"admin user modify {user_name} password"

@@ -13,55 +13,55 @@ from .database import (
 
 
 @click.command()
-def create():
-    """Create all database tables"""
+def create() -> None:
+    """Create all database tables."""
     app = create_app()
     with app.app_context():
         create_database(app)
 
 
 @click.command()
-def init():
-    """Initialize database"""
+def init() -> None:
+    """Initialize database."""
     app = create_app()
     with app.app_context():
         initialize_database(app)
 
 
 @click.command()
-def drop():
-    """Drop all tables"""
+def drop() -> None:
+    """Drop all tables."""
     app = create_app()
     with app.app_context():
         drop_database(app)
 
 
 @click.command()
-def delete():
-    """Delete all records"""
+def delete() -> None:
+    """Delete all records."""
     app = create_app()
     with app.app_context():
         delete_database(app)
 
 
 @click.command()
-def admin():
-    """Create admin account in database"""
+def admin() -> None:
+    """Create admin account in database."""
     app = create_app()
     with app.app_context():
         create_admin(app)
 
 
 @click.command()
-def backup():
-    """Backup database in a sql file"""
+def backup() -> None:
+    """Backup database in a sql file."""
     app = create_app()
     with app.app_context():
         backup_database(app)
 
 
 @click.group()
-def db():
+def db() -> None:
     pass
 
 
@@ -74,7 +74,7 @@ db.add_command(backup)
 
 
 @click.group()
-def main():
+def main() -> None:
     pass
 
 
