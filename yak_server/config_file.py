@@ -52,29 +52,21 @@ def get_yak_config() -> dict:
     with resources.as_file(
         resources.files("yak_server") / "data" / os.environ["COMPETITION"],
     ) as path:
-        DATA_FOLDER = path
+        data_folder = path
 
     config = ConfigParser()
-    config.read(f"{DATA_FOLDER}/config.ini")
+    config.read(f"{data_folder}/config.ini")
 
-    with resources.as_file(
-        resources.files("yak_server") / "data" / os.environ["COMPETITION"],
-    ) as path:
-        DATA_FOLDER = path
+    rules = {}
 
-    config = ConfigParser()
-    config.read(f"{DATA_FOLDER}/config.ini")
-
-    RULES = {}
-
-    for rule_file in Path(f"{DATA_FOLDER}/rules").glob("*.json"):
+    for rule_file in Path(f"{data_folder}/rules").glob("*.json"):
         rule_id = rule_file.stem
 
         if rule_id not in RULE_MAPPING:
             raise RuleNotDefined(rule_id)
 
         with rule_file.open() as rule_content:
-            RULES[rule_id] = json.loads(rule_content.read())
+            rules[rule_id] = json.loads(rule_content.read())
 
     return {
         # SQL Alchemy features
@@ -91,8 +83,8 @@ def get_yak_config() -> dict:
         ),
         "TEAM_QUALIFIED": config.getint("points", "team_qualified"),
         "FIRST_TEAM_QUALIFIED": config.getint("points", "first_team_qualified"),
-        "DATA_FOLDER": DATA_FOLDER,
-        "RULES": RULES,
+        "DATA_FOLDER": data_folder,
+        "RULES": rules,
     }
 
 
