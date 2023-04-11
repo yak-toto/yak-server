@@ -81,15 +81,15 @@ def create_admin(app) -> None:
 
 
 def initialize_database(app) -> None:
-    DATA_FOLDER = app.config["DATA_FOLDER"]
+    data_folder = app.config["DATA_FOLDER"]
 
-    with Path(f"{DATA_FOLDER}/phases.json").open() as file:
+    with Path(f"{data_folder}/phases.json").open() as file:
         phases = json.loads(file.read())
 
         db.session.add_all(PhaseModel(**phase) for phase in phases)
         db.session.flush()
 
-    with Path(f"{DATA_FOLDER}/groups.json").open() as file:
+    with Path(f"{data_folder}/groups.json").open() as file:
         groups = json.loads(file.read())
 
         for group in groups:
@@ -100,13 +100,13 @@ def initialize_database(app) -> None:
         db.session.add_all(GroupModel(**group) for group in groups)
         db.session.flush()
 
-    with Path(f"{DATA_FOLDER}/teams.json").open() as file:
+    with Path(f"{data_folder}/teams.json").open() as file:
         teams = json.loads(file.read())
 
         db.session.add_all(TeamModel(**team) for team in teams)
         db.session.flush()
 
-    with Path(f"{DATA_FOLDER}/matches.json").open() as file:
+    with Path(f"{data_folder}/matches.json").open() as file:
         matches = json.loads(file.read())
 
         for match in matches:

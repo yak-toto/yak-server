@@ -58,10 +58,11 @@ def create_score_bet(user) -> Tuple["Response", int]:
     except IntegrityError as integrity_error:
         if "FOREIGN KEY (`team1_id`)" in str(integrity_error):
             raise TeamNotFound(team_id=body["team1"]["id"]) from integrity_error
-        elif "FOREIGN KEY (`team2_id`)" in str(integrity_error):
+
+        if "FOREIGN KEY (`team2_id`)" in str(integrity_error):
             raise TeamNotFound(team_id=body["team2"]["id"]) from integrity_error
-        else:
-            raise GroupNotFound(group_id=body["group"]["id"]) from integrity_error
+
+        raise GroupNotFound(group_id=body["group"]["id"]) from integrity_error
 
     score_bet = ScoreBetModel(
         match_id=match.id,

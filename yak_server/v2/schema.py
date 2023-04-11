@@ -33,7 +33,7 @@ class Result:
     points: float
 
     @classmethod
-    def from_instance(cls, instance: UserModel):
+    def from_instance(cls, instance: UserModel) -> "Result":
         return cls(
             instance=instance,
             number_match_guess=instance.number_match_guess,
@@ -62,7 +62,7 @@ class UserWithoutSensitiveInfo:
     result: Result
 
     @classmethod
-    def from_instance(cls, instance: UserModel):
+    def from_instance(cls, instance: UserModel) -> "UserWithoutSensitiveInfo":
         return cls(
             instance=instance,
             first_name=instance.first_name,
@@ -121,7 +121,7 @@ class User:
         ]
 
     @classmethod
-    def from_instance(cls, instance: UserModel):
+    def from_instance(cls, instance: UserModel) -> "User":
         return cls(
             instance=instance,
             id=instance.id,
@@ -137,7 +137,7 @@ class UserWithToken(User):
     token: str
 
     @classmethod
-    def from_instance(cls, instance: UserModel, token: str):
+    def from_instance(cls, instance: UserModel, token: str) -> "UserWithToken":
         return cls(
             instance=instance,
             id=instance.id,
@@ -164,7 +164,7 @@ class Team:
     flag: Flag
 
     @classmethod
-    def from_instance(cls, instance: TeamModel):
+    def from_instance(cls, instance: TeamModel) -> "Team":
         return cls(
             instance=instance,
             id=instance.id,
@@ -179,7 +179,7 @@ class TeamWithScore(Team):
     score: Optional[int]
 
     @classmethod
-    def from_instance(cls, instance: TeamModel, score: Optional[int]):
+    def from_instance(cls, instance: TeamModel, score: Optional[int]) -> "TeamWithScore":
         return cls(
             instance=instance,
             id=instance.id,
@@ -195,7 +195,7 @@ class TeamWithVictory(Team):
     won: Optional[bool]
 
     @classmethod
-    def from_instance(cls, instance: TeamModel, won: Optional[bool]):
+    def from_instance(cls, instance: TeamModel, won: Optional[bool]) -> "TeamWithVictory":
         return cls(
             instance=instance,
             id=instance.id,
@@ -227,7 +227,7 @@ class GroupPosition:
         return self.won * 3 + self.drawn
 
     @classmethod
-    def from_instance(cls, instance: GroupPositionModel):
+    def from_instance(cls, instance: GroupPositionModel) -> "GroupPosition":
         return cls(
             instance=instance,
             team=Team.from_instance(instance=instance.team),
@@ -313,7 +313,7 @@ class Group:
         ]
 
     @classmethod
-    def from_instance(cls, instance: GroupModel, user_id: str):
+    def from_instance(cls, instance: GroupModel, user_id: str) -> "Group":
         return cls(
             instance=instance,
             user_id=user_id,
@@ -368,7 +368,7 @@ class Phase:
         ]
 
     @classmethod
-    def from_instance(cls, instance: PhaseModel, user_id: str):
+    def from_instance(cls, instance: PhaseModel, user_id: str) -> "Phase":
         return cls(
             instance=instance,
             user_id=user_id,
@@ -390,7 +390,7 @@ class ScoreBet:
     team2: Optional[TeamWithScore]
 
     @classmethod
-    def from_instance(cls, instance: ScoreBetModel):
+    def from_instance(cls, instance: ScoreBetModel) -> "ScoreBet":
         return cls(
             instance=instance,
             id=instance.id,
@@ -427,7 +427,7 @@ class BinaryBet:
     team2: Optional[TeamWithVictory]
 
     @classmethod
-    def from_instance(cls, instance: BinaryBetModel):
+    def from_instance(cls, instance: BinaryBetModel) -> "BinaryBet":
         bet_results = instance.bet_from_is_one_won()
 
         return cls(
