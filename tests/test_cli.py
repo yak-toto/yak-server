@@ -1,5 +1,5 @@
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 
 if sys.version_info >= (3, 9):
@@ -82,12 +82,12 @@ def test_backup(app):
     backup_database(app)
 
     list_datetime_backup = sorted(
-        parser.parse(str(file).split("_")[-1].split(".")[0])
+        parser.parse(file.name.replace(".sql", "").replace("yak_toto_backup_", ""))
         for file in (resources.files("yak_server") / "cli/backup_files").iterdir()
     )
 
     # Check that most recent backup has been done 1 second ago
-    assert datetime.now() - list_datetime_backup[-1] <= timedelta(seconds=2)
+    assert datetime.now(tz=timezone.utc) - list_datetime_backup[-1] <= timedelta(seconds=2)
 
     # Check BackupError if password is incorrect
     old_password = app.config["MYSQL_PASSWORD"]
