@@ -2,7 +2,7 @@ import json
 import logging
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from getpass import getpass
 
 if sys.version_info >= (3, 9):
@@ -142,9 +142,9 @@ def backup_database(app) -> None:
     if not Path(backup_location).exists():
         Path(backup_location).mkdir()
 
-    backup_date, backup_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S").split()
+    backup_datetime = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%z")
 
-    file_name = f"{backup_location}/yak_toto_backup_{backup_date}T{backup_time}.sql"
+    file_name = f"{backup_location}/yak_toto_backup_{backup_datetime}.sql"
 
     result = subprocess.run(
         (
@@ -161,7 +161,7 @@ def backup_database(app) -> None:
 
     if result.returncode:
         error_message = (
-            f"Something went wrong when backup on {backup_date} at {backup_time}: "
+            f"Something went wrong when backup on {backup_datetime}: "
             f"{result.stderr.replace(app.config['MYSQL_PASSWORD'], '********')}"
         )
 
@@ -171,7 +171,7 @@ def backup_database(app) -> None:
 
     with Path(file_name).open(mode="w") as file:
         file.write(result.stdout)
-        logger.info(f"Backup done on {backup_date} at {backup_time}")
+        logger.info(f"Backup done on {backup_datetime}")
 
 
 def delete_database(app) -> None:
