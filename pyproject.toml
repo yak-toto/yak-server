@@ -82,8 +82,6 @@ line-length = 100
 select = ["ALL"]
 target-version = "py38"
 ignore = [
-    "TID252",
-
     "D",
     "ANN101",  # missing annotation for self?
 
@@ -102,7 +100,6 @@ ignore = [
     "ARG001",
     "ARG002",
     "ARG005",
-    "FBT003",
 
     "C901",
     "PLR",

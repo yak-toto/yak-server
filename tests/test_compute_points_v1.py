@@ -179,10 +179,10 @@ def test_compute_points(client, setup_app):
     ]
 
     # Push finale phase bets
-    put_finale_phase(client, admin_token, True)
-    put_finale_phase(client, user_token, False)
-    put_finale_phase(client, user2_token, True)
-    put_finale_phase(client, user3_token, False)
+    put_finale_phase(client, admin_token, is_one_won=True)
+    put_finale_phase(client, user_token, is_one_won=False)
+    put_finale_phase(client, user2_token, is_one_won=True)
+    put_finale_phase(client, user3_token, is_one_won=False)
 
     # Compute points again
     response_compute_points = client.post(

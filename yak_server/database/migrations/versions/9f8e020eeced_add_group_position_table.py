@@ -1,4 +1,4 @@
-"""Add group position table
+"""Add group position table.
 
 Revision ID: 9f8e020eeced
 Revises: f33dc66104ad

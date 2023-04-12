@@ -1,4 +1,4 @@
-"""Introduce match reference table and allow nullable team_id foreign key in match table
+"""Introduce match reference table and allow nullable team_id foreign key in match table.
 
 Revision ID: 9b91a1a350a0
 Revises: e0f551c7766c

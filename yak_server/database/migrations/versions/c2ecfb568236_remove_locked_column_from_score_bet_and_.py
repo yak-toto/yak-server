@@ -1,4 +1,4 @@
-"""Remove locked column from score bet and binary bet
+"""Remove locked column from score bet and binary bet.
 
 Revision ID: c2ecfb568236
 Revises: d75e76959af8

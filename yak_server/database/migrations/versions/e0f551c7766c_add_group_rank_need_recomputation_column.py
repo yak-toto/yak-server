@@ -1,4 +1,4 @@
-"""Add group rank need_recomputation column
+"""Add group rank need_recomputation column.
 
 Revision ID: e0f551c7766c
 Revises: b36763d4cb42

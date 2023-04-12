@@ -1,4 +1,4 @@
-"""Add bet type from match
+"""Add bet type from match.
 
 Revision ID: b36763d4cb42
 Revises: c2ecfb568236

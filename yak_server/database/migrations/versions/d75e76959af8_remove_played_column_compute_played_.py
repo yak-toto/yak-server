@@ -1,4 +1,4 @@
-"""Remove played column. Compute played property as won + drawn + lost
+"""Remove played column. Compute played property as won + drawn + lost.
 
 Revision ID: d75e76959af8
 Revises: 9f8e020eeced
