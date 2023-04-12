@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from uuid import uuid4
 
-from dateutil import parser, tz
+from dateutil import parser
 from flask import current_app, url_for
 from sqlalchemy import CheckConstraint
 from sqlalchemy import Enum as SqlEnum
@@ -137,7 +137,7 @@ class UserModel(db.Model):
 
 def is_locked(user_name) -> bool:
     locked_date = parser.parse(current_app.config["LOCK_DATETIME"])
-    return user_name != "admin" and datetime.now(tz=tz.gettz("Europe/Paris")) > locked_date
+    return user_name != "admin" and datetime.now(tz=timezone.utc) > locked_date
 
 
 class ScoreBetModel(db.Model):
