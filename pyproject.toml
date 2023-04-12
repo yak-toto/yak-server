@@ -40,6 +40,10 @@ pre-commit = "^3.2.0"
 ruff = ">=0.0.257,<0.0.262"
 
 
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+
+
 [tool.poetry.scripts]
 yak = "yak_server.cli:main"
 
