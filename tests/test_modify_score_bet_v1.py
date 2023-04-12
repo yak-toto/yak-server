@@ -1,5 +1,5 @@
 import sys
-from datetime import datetime, timedelta
+from datetime import timedelta
 from http import HTTPStatus
 
 if sys.version_info >= (3, 9):
@@ -14,7 +14,7 @@ import pytest
 
 from yak_server.cli.database import initialize_database
 
-from .utils import get_random_string
+from .utils import get_paris_datetime_now, get_random_string
 
 
 @pytest.fixture()
@@ -23,7 +23,7 @@ def setup_app(app):
     with resources.as_file(resources.files("tests") / "test_data/test_modify_bet_v2") as path:
         app.config["DATA_FOLDER"] = path
     old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
+    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
 
     with app.app_context():
         initialize_database(app)
@@ -118,7 +118,7 @@ def test_modify_score_bet(setup_app, client):
     }
 
     # Error case : check locked bet
-    setup_app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(minutes=10))
+    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() - timedelta(minutes=10))
 
     response_locked_bet = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[0]}",
@@ -132,7 +132,7 @@ def test_modify_score_bet(setup_app, client):
         "description": "Cannot modify score bet, lock date is exceeded",
     }
 
-    setup_app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
+    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
 
     # Error case : check bet not found
     non_existing_bet_id = str(uuid4())

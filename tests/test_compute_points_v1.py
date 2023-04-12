@@ -1,5 +1,5 @@
 import sys
-from datetime import datetime, timedelta
+from datetime import timedelta
 from http import HTTPStatus
 
 if sys.version_info >= (3, 9):
@@ -13,7 +13,7 @@ import pytest
 
 from yak_server.cli.database import initialize_database
 
-from .utils import get_random_string
+from .utils import get_paris_datetime_now, get_random_string
 
 
 def patch_score_bets(client, user_name, new_scores):
@@ -82,7 +82,7 @@ def setup_app(app):
     with resources.as_file(resources.files("tests") / "test_data/test_compute_points_v1") as path:
         app.config["DATA_FOLDER"] = path
     old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
+    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
     app.config["RULES"] = {
         "492345de-8d4a-45b6-8b94-d219f2b0c3e9": {
             "to_group": "1",
