@@ -1,5 +1,5 @@
 import sys
-from datetime import datetime, timedelta
+from datetime import timedelta
 from http import HTTPStatus
 
 if sys.version_info >= (3, 9):
@@ -14,7 +14,7 @@ import pytest
 
 from yak_server.cli.database import initialize_database
 
-from .utils import get_random_string
+from .utils import get_paris_datetime_now, get_random_string
 
 
 @pytest.fixture()
@@ -23,7 +23,7 @@ def setup_app(app):
     with resources.as_file(resources.files("tests") / "test_data/test_create_bet") as path:
         app.config["DATA_FOLDER"] = path
     old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(minutes=10))
+    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
 
     with app.app_context():
         initialize_database(app)
@@ -179,7 +179,7 @@ def test_create_binary_bet(client, setup_app):
 
     # Check bet locking
     old_lock_datetime = setup_app.config["LOCK_DATETIME"]
-    setup_app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(minutes=10))
+    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() - timedelta(minutes=10))
 
     response_create_locked_binary_bet = client.post(
         "/api/v1/binary_bets",

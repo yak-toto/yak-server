@@ -1,5 +1,5 @@
 import sys
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 if sys.version_info >= (3, 9):
     from importlib import resources
@@ -13,13 +13,13 @@ import pytest
 
 from yak_server.cli.database import initialize_database
 
-from .utils import get_random_string
+from .utils import get_paris_datetime_now, get_random_string
 
 
 @pytest.fixture()
 def setup_app(app):
     old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
+    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(seconds=30))
 
     # location of test data
     with resources.as_file(resources.files("tests") / "test_data/test_modify_bet_v2") as path:
@@ -200,7 +200,7 @@ def test_modify_score_bet(setup_app, client):
     }
 
     # Error case : check locked score bet
-    setup_app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(seconds=30))
+    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() - timedelta(seconds=30))
 
     response_modify_locked_score_bet = client.post(
         "/api/v2",
@@ -224,7 +224,7 @@ def test_modify_score_bet(setup_app, client):
         },
     }
 
-    setup_app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
+    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(seconds=30))
 
     # Error case : check ScoreBetNotFoundForUpdate error if score bet does not exist
     score1 = 1

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 
 from jwt import decode as jwt_decode
@@ -9,8 +9,8 @@ def encode_bearer_token(sub: str, expiration_time: timedelta, secret_key: str) -
     return jwt_encode(
         {
             "sub": sub,
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + expiration_time,
+            "iat": datetime.now(tz=timezone.utc),
+            "exp": datetime.now(tz=timezone.utc) + expiration_time,
         },
         secret_key,
         algorithm="HS512",

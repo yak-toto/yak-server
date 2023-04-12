@@ -1,5 +1,5 @@
 import sys
-from datetime import datetime, timedelta
+from datetime import timedelta
 from http import HTTPStatus
 
 if sys.version_info >= (3, 9):
@@ -14,13 +14,13 @@ import pytest
 
 from yak_server.cli.database import initialize_database
 
-from .utils import get_random_string
+from .utils import get_paris_datetime_now, get_random_string
 
 
 @pytest.fixture()
 def setup_app(app):
     old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
+    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(seconds=30))
 
     with resources.as_file(resources.files("tests") / "test_data/test_binary_bet") as path:
         app.config["DATA_FOLDER"] = path
@@ -89,7 +89,7 @@ def test_binary_bet(client, setup_app):
     }
 
     # Error case : locked bet
-    setup_app.config["LOCK_DATETIME"] = str(datetime.now() - timedelta(seconds=10))
+    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() - timedelta(seconds=10))
 
     response_lock_bet = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
@@ -104,7 +104,7 @@ def test_binary_bet(client, setup_app):
         "description": "Cannot modify binary bet, lock date is exceeded",
     }
 
-    setup_app.config["LOCK_DATETIME"] = str(datetime.now() + timedelta(seconds=30))
+    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(seconds=30))
 
     # Error case : Invalid input
     response_invalid_inputs = client.patch(
