@@ -18,7 +18,7 @@ def app_session():
 
     # Clean database before running test
     with app.app_context():
-        create_database(app)
+        create_database()
 
     yield app
 

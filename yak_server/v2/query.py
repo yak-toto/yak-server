@@ -67,14 +67,14 @@ class Query:
 
     @strawberry.field
     @is_authentificated
-    def all_teams_result(self, info: Info) -> AllTeamsResult:
+    def all_teams_result(self, info: Info) -> AllTeamsResult:  # noqa: ARG002
         return AllTeamsSuccessful(
             teams=[Team.from_instance(instance=team) for team in TeamModel.query.all()],
         )
 
     @strawberry.field
     @is_authentificated
-    def team_by_id_result(self, id: UUID, info: Info) -> TeamByIdResult:
+    def team_by_id_result(self, id: UUID, info: Info) -> TeamByIdResult:  # noqa: ARG002
         team_record = TeamModel.query.filter_by(id=str(id)).first()
 
         if not team_record:
@@ -84,7 +84,7 @@ class Query:
 
     @strawberry.field
     @is_authentificated
-    def team_by_code_result(self, code: str, info: Info) -> TeamByCodeResult:
+    def team_by_code_result(self, code: str, info: Info) -> TeamByCodeResult:  # noqa: ARG002
         team_record = TeamModel.query.filter_by(code=code).first()
 
         if not team_record:
@@ -182,7 +182,7 @@ class Query:
 
     @strawberry.field
     @is_authentificated
-    def score_board_result(self, info: Info) -> ScoreBoardResult:
+    def score_board_result(self, info: Info) -> ScoreBoardResult:  # noqa: ARG002
         users = UserModel.query.filter(UserModel.name != "admin")
 
         return ScoreBoard(

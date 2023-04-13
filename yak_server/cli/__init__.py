@@ -17,7 +17,7 @@ def create() -> None:
     """Create all database tables."""
     app = create_app()
     with app.app_context():
-        create_database(app)
+        create_database()
 
 
 @click.command()

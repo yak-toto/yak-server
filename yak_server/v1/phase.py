@@ -19,7 +19,7 @@ phase = Blueprint("phase", __name__)
 
 @phase.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/phases")
 @is_authentificated
-def retrieve_all_phases(user) -> Tuple["Response", int]:
+def retrieve_all_phases(_) -> Tuple["Response", int]:
     return success_response(
         HTTPStatus.OK,
         [phase.to_dict() for phase in PhaseModel.query.order_by(PhaseModel.index)],
@@ -28,7 +28,7 @@ def retrieve_all_phases(user) -> Tuple["Response", int]:
 
 @phase.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/phases/<string:phase_id>")
 @is_authentificated
-def retrieve_by_phase_id(user, phase_id) -> Tuple["Response", int]:
+def retrieve_by_phase_id(_, phase_id) -> Tuple["Response", int]:
     phase = PhaseModel.query.filter_by(id=phase_id).first()
 
     if not phase:

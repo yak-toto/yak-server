@@ -30,7 +30,7 @@ results = Blueprint("results", __name__)
 
 @results.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_board")
 @is_authentificated
-def score_board(current_user) -> Tuple["Response", int]:
+def score_board(_) -> Tuple["Response", int]:
     return success_response(
         HTTPStatus.OK,
         [
