@@ -1,7 +1,7 @@
 from functools import wraps
 
 from flask import current_app
-from jwt import ExpiredSignatureError
+from jwt import ExpiredSignatureError, PyJWTError
 
 from yak_server.database.models import UserModel
 from yak_server.helpers.authentification import decode_bearer_token
@@ -25,7 +25,7 @@ def is_authentificated(f):  # noqa: ANN201
             data = decode_bearer_token(token, current_app.config["SECRET_KEY"])
         except ExpiredSignatureError:
             return ExpiredToken()
-        except Exception:
+        except PyJWTError:
             return InvalidToken()
 
         user = UserModel.query.filter_by(id=data["sub"]).first()

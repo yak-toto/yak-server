@@ -90,7 +90,6 @@ ignore = [
     "ANN003",
     "ANN102",
     "ANN202",
-    "BLE001",
     "N818",
 
     # shadowing builtins
