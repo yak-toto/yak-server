@@ -53,7 +53,7 @@ class BackupError(Exception):
         super().__init__(f"Error during backup. {description}")
 
 
-def create_database(app) -> None:
+def create_database() -> None:
     db.create_all()
 
 

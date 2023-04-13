@@ -31,8 +31,8 @@ def test_create_admin(client, app, monkeypatch):
     # Error case : password and confirm password does not match
     mock_password_does_not_match = Mock(
         side_effect=[
-            lambda prompt: get_random_string(6),
-            lambda prompt: get_random_string(8),
+            lambda prompt: get_random_string(6),  # noqa: ARG005
+            lambda prompt: get_random_string(8),  # noqa: ARG005
         ],
     )
 
@@ -44,7 +44,10 @@ def test_create_admin(client, app, monkeypatch):
     # Success case : create admin using script and test login is OK
     password_admin = get_random_string(6)
 
-    monkeypatch.setattr("yak_server.cli.database.getpass", lambda prompt: password_admin)
+    monkeypatch.setattr(
+        "yak_server.cli.database.getpass",
+        lambda prompt: password_admin,  # noqa: ARG005
+    )
 
     create_admin(app)
 
@@ -62,7 +65,10 @@ def test_create_admin(client, app, monkeypatch):
     # if signup call is KO (Here admin already exists in db)
     password_admin = get_random_string(6)
 
-    monkeypatch.setattr("yak_server.cli.database.getpass", lambda prompt: password_admin)
+    monkeypatch.setattr(
+        "yak_server.cli.database.getpass",
+        lambda prompt: password_admin,  # noqa: ARG005
+    )
 
     with pytest.raises(SignupError):
         create_admin(app)

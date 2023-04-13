@@ -19,7 +19,7 @@ groups = Blueprint("group", __name__)
 
 @groups.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups")
 @is_authentificated
-def get_groups(current_user) -> Tuple["Response", int]:
+def get_groups(_) -> Tuple["Response", int]:
     group_query = GroupModel.query.order_by(GroupModel.index)
     groups = [group.to_dict_with_phase_id() for group in group_query]
 
@@ -37,7 +37,7 @@ def get_groups(current_user) -> Tuple["Response", int]:
 
 @groups.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/<string:group_code>")
 @is_authentificated
-def get_group_by_code(current_user, group_code) -> Tuple["Response", int]:
+def get_group_by_code(_, group_code) -> Tuple["Response", int]:
     group = GroupModel.query.filter_by(code=group_code).first()
 
     if not group:
@@ -54,7 +54,7 @@ def get_group_by_code(current_user, group_code) -> Tuple["Response", int]:
 
 @groups.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/groups/phases/<string:phase_code>")
 @is_authentificated
-def get_groups_by_phase_code(current_user, phase_code) -> Tuple["Response", int]:
+def get_groups_by_phase_code(_, phase_code) -> Tuple["Response", int]:
     phase = PhaseModel.query.filter_by(code=phase_code).first()
 
     if not phase:

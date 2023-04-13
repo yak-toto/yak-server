@@ -204,7 +204,12 @@ class Mutation:
     @strawberry.mutation
     @is_authentificated
     @is_admin_authentificated
-    def modify_user_result(self, id: UUID, password: str, info: Info) -> ModifyUserResult:
+    def modify_user_result(
+        self,
+        id: UUID,
+        password: str,
+        info: Info,  # noqa: ARG002
+    ) -> ModifyUserResult:
         user = UserModel.query.filter_by(id=str(id)).first()
 
         if not user:

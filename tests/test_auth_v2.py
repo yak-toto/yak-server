@@ -328,7 +328,8 @@ def setup_app_for_expired_token(app):
     app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
 
 
-def test_expired_token(client, setup_app_for_expired_token):
+@pytest.mark.usefixtures("setup_app_for_expired_token")
+def test_expired_token(client):
     user_name = get_random_string(6)
     password = get_random_string(15)
 
@@ -436,7 +437,8 @@ QUERY_SIGNUP = """
 """
 
 
-def test_unexcepted_error_debug(client, debug_app_for_unexcepted_error_check):
+@pytest.mark.usefixtures("debug_app_for_unexcepted_error_check")
+def test_unexcepted_error_debug(client):
     # Check unexpected error in debug mode, error should not obfuscated
     response_signup_debug_unexpected_error = client.post(
         "/api/v2",
@@ -473,7 +475,8 @@ def production_app_unexcepted_error_check(debug_app_for_unexcepted_error_check):
     debug_app_for_unexcepted_error_check.config["DEBUG"] = True
 
 
-def test_unexcepted_error_production(client, production_app_unexcepted_error_check):
+@pytest.mark.usefixtures("production_app_unexcepted_error_check")
+def test_unexcepted_error_production(client):
     response_signup_production_unexpected_error = client.post(
         "/api/v2",
         json={
