@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from configparser import ConfigParser
+from dataclasses import dataclass
 
 if sys.version_info >= (3, 9):
     from importlib import resources
@@ -10,7 +11,18 @@ else:
 
 from pathlib import Path
 
-from .helpers.rules import RULE_MAPPING
+from yak_server.helpers.rules import compute_finale_phase_from_group_rank
+
+
+@dataclass
+class RuleContainer:
+    config: dict
+    function: callable
+
+
+RULE_MAPPING = {
+    "492345de-8d4a-45b6-8b94-d219f2b0c3e9": compute_finale_phase_from_group_rank,
+}
 
 
 class RuleNotDefined(Exception):
@@ -66,7 +78,10 @@ def get_yak_config() -> dict:
             raise RuleNotDefined(rule_id)
 
         with rule_file.open() as rule_content:
-            rules[rule_id] = json.loads(rule_content.read())
+            rules[rule_id] = RuleContainer(
+                config=json.loads(rule_content.read()),
+                function=RULE_MAPPING[rule_id],
+            )
 
     return {
         # SQL Alchemy features

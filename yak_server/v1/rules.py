@@ -3,8 +3,6 @@ from typing import TYPE_CHECKING, Tuple
 
 from flask import Blueprint, current_app
 
-from yak_server.helpers.rules import RULE_MAPPING
-
 from .utils.auth_utils import is_authentificated
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import RuleNotFound
@@ -23,6 +21,9 @@ def execute_rule(user, rule_id) -> Tuple["Response", int]:
     if rule_id not in current_app.config["RULES"]:
         raise RuleNotFound(rule_id)
 
-    RULE_MAPPING[rule_id](user, current_app.config["RULES"][rule_id])
+    rule_config = current_app.config["RULES"][rule_id].config
+    rule_function = current_app.config["RULES"][rule_id].function
+
+    rule_function(user, rule_config)
 
     return success_response(HTTPStatus.OK, None)

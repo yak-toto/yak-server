@@ -12,6 +12,8 @@ from unittest.mock import ANY
 import pytest
 
 from yak_server.cli.database import initialize_database
+from yak_server.config_file import RuleContainer
+from yak_server.helpers.rules import compute_finale_phase_from_group_rank
 
 from .utils import get_paris_datetime_now, get_random_string
 
@@ -84,11 +86,16 @@ def setup_app(app):
     old_lock_datetime = app.config["LOCK_DATETIME"]
     app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
     app.config["RULES"] = {
-        "492345de-8d4a-45b6-8b94-d219f2b0c3e9": {
-            "to_group": "1",
-            "from_phase": "GROUP",
-            "versus": [{"team1": {"rank": 1, "group": "A"}, "team2": {"rank": 2, "group": "A"}}],
-        },
+        "492345de-8d4a-45b6-8b94-d219f2b0c3e9": RuleContainer(
+            config={
+                "to_group": "1",
+                "from_phase": "GROUP",
+                "versus": [
+                    {"team1": {"rank": 1, "group": "A"}, "team2": {"rank": 2, "group": "A"}},
+                ],
+            },
+            function=compute_finale_phase_from_group_rank,
+        ),
     }
 
     with app.app_context():
