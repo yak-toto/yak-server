@@ -2,19 +2,26 @@ from itertools import chain
 
 from sqlalchemy import and_
 
-from yak_server import db
-from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, PhaseModel
+from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, PhaseModel, get_db
 from yak_server.v1.bets import get_group_rank_with_code
 
 
 def compute_finale_phase_from_group_rank(user, rule_config) -> None:
-    first_phase_phase_group = GroupModel.query.filter_by(
-        code=rule_config["to_group"],
-    ).first()
+    db = get_db()
+
+    first_phase_phase_group = (
+        db.query(GroupModel)
+        .filter_by(
+            code=rule_config["to_group"],
+        )
+        .first()
+    )
 
     groups_result = {
         group.code: get_group_rank_with_code(user, group.code)["group_rank"]
-        for group in GroupModel.query.join(GroupModel.phase).filter(
+        for group in db.query(GroupModel)
+        .join(GroupModel.phase)
+        .filter(
             PhaseModel.code == rule_config["from_phase"],
         )
     }
@@ -35,7 +42,8 @@ def compute_finale_phase_from_group_rank(user, rule_config) -> None:
             ]["team"]
 
             binary_bet = (
-                BinaryBetModel.query.join(BinaryBetModel.match)
+                db.query(BinaryBetModel)
+                .join(BinaryBetModel.match)
                 .filter(
                     and_(
                         MatchModel.index == index,
@@ -49,6 +57,6 @@ def compute_finale_phase_from_group_rank(user, rule_config) -> None:
             binary_bet.match.team1_id = team1["id"]
             binary_bet.match.team2_id = team2["id"]
 
-            db.session.flush()
+            db.flush()
 
-    db.session.commit()
+    db.commit()

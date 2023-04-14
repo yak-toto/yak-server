@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Tuple
 from flask import Blueprint, current_app
 from sqlalchemy import and_
 
-from yak_server import db
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
@@ -13,6 +12,7 @@ from yak_server.database.models import (
     PhaseModel,
     ScoreBetModel,
     UserModel,
+    get_db,
 )
 
 from .bets import get_group_rank_with_code
@@ -31,11 +31,15 @@ results = Blueprint("results", __name__)
 @results.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_board")
 @is_authentificated
 def score_board(_) -> Tuple["Response", int]:
+    db = get_db()
+
     return success_response(
         HTTPStatus.OK,
         [
             user.to_result_dict()
-            for user in UserModel.query.order_by(UserModel.points.desc()).filter(
+            for user in db.query(UserModel)
+            .order_by(UserModel.points.desc())
+            .filter(
                 UserModel.name != "admin",
             )
         ],
@@ -45,11 +49,17 @@ def score_board(_) -> Tuple["Response", int]:
 @results.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/results")
 @is_authentificated
 def results_get(current_user) -> Tuple["Response", int]:
+    db = get_db()
+
     if current_user.name == "admin":
         raise NoResultsForAdminUser
 
-    results = UserModel.query.order_by(UserModel.points.desc()).filter(
-        UserModel.name != "admin",
+    results = (
+        db.query(UserModel)
+        .order_by(UserModel.points.desc())
+        .filter(
+            UserModel.name != "admin",
+        )
     )
 
     rank = [
@@ -60,13 +70,18 @@ def results_get(current_user) -> Tuple["Response", int]:
 
     return success_response(
         HTTPStatus.OK,
-        {**UserModel.query.filter_by(id=current_user.id).first().to_result_dict(), "rank": rank},
+        {
+            **db.query(UserModel).filter_by(id=current_user.id).first().to_result_dict(),
+            "rank": rank,
+        },
     )
 
 
 @results.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/compute_points")
 @is_admin_authentificated
 def compute_points_post(_) -> Tuple["Response", int]:
+    db = get_db()
+
     compute_points(
         current_app.config["BASE_CORRECT_RESULT"],
         current_app.config["MULTIPLYING_FACTOR_CORRECT_RESULT"],
@@ -80,7 +95,9 @@ def compute_points_post(_) -> Tuple["Response", int]:
         HTTPStatus.OK,
         [
             user.to_result_dict()
-            for user in UserModel.query.order_by(UserModel.points.desc()).filter(
+            for user in db.query(UserModel)
+            .order_by(UserModel.points.desc())
+            .filter(
                 UserModel.name != "admin",
             )
         ],
@@ -95,22 +112,28 @@ def compute_points(
     team_qualified,
     first_team_qualified,
 ) -> None:
-    admin = UserModel.query.filter_by(name="admin").first()
+    db = get_db()
+
+    admin = db.query(UserModel).filter_by(name="admin").first()
 
     results = []
 
-    for real_score in admin.score_bets:
+    for real_score in db.query(ScoreBetModel).filter_by(user_id=admin.id):
         number_correct_result = 0
         number_correct_score = 0
         user_ids_found_correct_result = []
         user_ids_found_correct_score = []
 
-        for user_score in ScoreBetModel.query.join(ScoreBetModel.match).filter(
-            and_(
-                ScoreBetModel.user_id != admin.id,
-                MatchModel.index == real_score.match.index,
-                MatchModel.group_id == real_score.match.group_id,
-            ),
+        for user_score in (
+            db.query(ScoreBetModel)
+            .join(ScoreBetModel.match)
+            .filter(
+                and_(
+                    ScoreBetModel.user_id != admin.id,
+                    MatchModel.index == real_score.match.index,
+                    MatchModel.group_id == real_score.match.group_id,
+                ),
+            )
         ):
             if user_score.is_same_results(real_score):
                 number_correct_result += 1
@@ -131,10 +154,14 @@ def compute_points(
 
     result_groups = {}
 
-    users = UserModel.query.filter(UserModel.name != "admin")
+    users = db.query(UserModel).filter(UserModel.name != "admin")
 
-    for group in GroupModel.query.join(GroupModel.phase).filter(
-        PhaseModel.code == "GROUP",
+    for group in (
+        db.query(GroupModel)
+        .join(GroupModel.phase)
+        .filter(
+            PhaseModel.code == "GROUP",
+        )
     ):
         group_result_admin = get_group_rank_with_code(admin, group.code)["group_rank"]
 
@@ -216,7 +243,7 @@ def compute_points(
         user.points += 120 * user.number_final_guess
         user.points += 200 * user.number_winner_guess
 
-    db.session.commit()
+    db.commit()
 
 
 def all_results_filled_in_group(group_result) -> bool:

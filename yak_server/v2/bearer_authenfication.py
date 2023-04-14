@@ -3,7 +3,7 @@ from functools import wraps
 from flask import current_app
 from jwt import ExpiredSignatureError, PyJWTError
 
-from yak_server.database.models import UserModel
+from yak_server.database.models import UserModel, get_db
 from yak_server.helpers.authentification import decode_bearer_token
 
 from .result import ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI
@@ -15,6 +15,8 @@ NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
 def is_authentificated(f):  # noqa: ANN201
     @wraps(f)
     def _verify(*args, **kwargs):
+        db = get_db()
+
         auth_headers = kwargs["info"].context["request"].headers.get("Authorization", "").split()
 
         if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION or auth_headers[0] != "Bearer":
@@ -28,7 +30,7 @@ def is_authentificated(f):  # noqa: ANN201
         except PyJWTError:
             return InvalidToken()
 
-        user = UserModel.query.filter_by(id=data["sub"]).first()
+        user = db.query(UserModel).filter_by(id=data["sub"]).first()
         if not user:
             return InvalidToken()
 

@@ -10,10 +10,9 @@ from flask import Flask
 from flask.cli import load_dotenv
 from flask_cors import CORS
 from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
 from strawberry.flask.views import GraphQLView
 
-db = SQLAlchemy()
+from .database.models import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ def create_app() -> Flask:
     app = Flask(__name__)
 
     with resources.as_file(resources.files("yak_server") / "database/migrations") as path:
-        Migrate(app, db, directory=path)
+        Migrate(app, get_db(), directory=path)
 
     # Configuration setup
     from .config_file import get_config
@@ -32,8 +31,7 @@ def create_app() -> Flask:
     app.config.from_mapping(get_config())
     app.json.sort_keys = False
 
-    # Database setup
-    db.init_app(app)
+    app.db = get_db()
 
     # --------------------------------------------- #
     # Version 1 setup (REST api)

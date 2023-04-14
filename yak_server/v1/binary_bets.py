@@ -2,13 +2,13 @@ import logging
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Tuple
 
-from flask import Blueprint, request
+from flask import Blueprint, current_app, request
 from sqlalchemy.exc import IntegrityError
 
-from yak_server import db
 from yak_server.database.models import (
     BinaryBetModel,
     MatchModel,
+    get_db,
     is_locked,
 )
 from yak_server.helpers.logging import modify_binary_bet_successfully
@@ -38,6 +38,8 @@ logger = logging.getLogger(__name__)
 @validate_body(schema=SCHEMA_POST_BINARY_BET)
 @is_authentificated
 def create_binary_bet(user) -> Tuple["Response", int]:
+    db = get_db()
+
     if is_locked(user.name):
         raise LockedBinaryBet
 
@@ -50,11 +52,12 @@ def create_binary_bet(user) -> Tuple["Response", int]:
         group_id=body["group"]["id"],
     )
 
-    db.session.add(match)
+    db.add(match)
 
     try:
-        db.session.flush()
+        db.flush()
     except IntegrityError as integrity_error:
+        db.rollback()
         if "FOREIGN KEY (`team1_id`)" in str(integrity_error):
             raise TeamNotFound(team_id=body["team1"]["id"]) from integrity_error
 
@@ -69,8 +72,8 @@ def create_binary_bet(user) -> Tuple["Response", int]:
         is_one_won=body.get("is_one_won"),
     )
 
-    db.session.add(binary_bet)
-    db.session.commit()
+    db.add(binary_bet)
+    db.commit()
 
     return success_response(
         HTTPStatus.CREATED,
@@ -85,7 +88,9 @@ def create_binary_bet(user) -> Tuple["Response", int]:
 @binary_bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
 @is_authentificated
 def retrieve_binary_bet(user, bet_id) -> Tuple["Response", int]:
-    binary_bet = BinaryBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
+    db = current_app.db
+
+    binary_bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=bet_id).first()
 
     if not binary_bet:
         raise BetNotFound(bet_id)
@@ -104,10 +109,12 @@ def retrieve_binary_bet(user, bet_id) -> Tuple["Response", int]:
 @validate_body(schema=SCHEMA_PATCH_BINARY_BET)
 @is_authentificated
 def modify_binary_bet(user, bet_id) -> Tuple["Response", int]:
+    db = current_app.db
+
     if is_locked(user.name):
         raise LockedBinaryBet
 
-    binary_bet = BinaryBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
+    binary_bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=bet_id).first()
 
     if not binary_bet:
         raise BetNotFound(bet_id)
@@ -123,19 +130,21 @@ def modify_binary_bet(user, bet_id) -> Tuple["Response", int]:
         binary_bet.match.team1_id = body.get("team1")["id"]
 
         try:
-            db.session.flush()
+            db.flush()
         except IntegrityError as integrity_error:
+            db.rollback()
             raise TeamNotFound(body.get("team1")["id"]) from integrity_error
 
     if "team2" in body:
         binary_bet.match.team2_id = body.get("team2")["id"]
 
         try:
-            db.session.flush()
+            db.flush()
         except IntegrityError as integrity_error:
+            db.rollback()
             raise TeamNotFound(body.get("team2")["id"]) from integrity_error
 
-    db.session.commit()
+    db.commit()
 
     return success_response(
         HTTPStatus.OK,
@@ -150,10 +159,12 @@ def modify_binary_bet(user, bet_id) -> Tuple["Response", int]:
 @binary_bets.delete(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
 @is_authentificated
 def delete_binary_bet(user, bet_id) -> Tuple["Response", int]:
+    db = get_db()
+
     if is_locked(user.name):
         raise LockedBinaryBet
 
-    binary_bet = BinaryBetModel.query.filter_by(id=bet_id, user_id=user.id).first()
+    binary_bet = db.query(BinaryBetModel).filter_by(id=bet_id, user_id=user.id).first()
 
     if not binary_bet:
         raise BetNotFound(bet_id)
@@ -164,7 +175,7 @@ def delete_binary_bet(user, bet_id) -> Tuple["Response", int]:
         "binary_bet": binary_bet.to_dict_without_group(),
     }
 
-    db.session.delete(binary_bet)
-    db.session.commit()
+    db.delete(binary_bet)
+    db.commit()
 
     return success_response(HTTPStatus.OK, response_body)

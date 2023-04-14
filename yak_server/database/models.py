@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from enum import Enum
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import sqlalchemy as sa
@@ -10,10 +11,14 @@ from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from yak_server import db
+from . import models
+from .base import Base, SessionLocal, engine
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 
-class UserModel(db.Model):
+class UserModel(Base):
     __tablename__ = "user"
     id = sa.Column(
         sa.String(100),
@@ -105,7 +110,9 @@ class UserModel(db.Model):
 
     @classmethod
     def authenticate(cls, name, password) -> "UserModel":
-        user = cls.query.filter_by(name=name).first()
+        db = get_db()
+
+        user = db.query(cls).filter_by(name=name).first()
         if not user or not check_password_hash(user.password, password):
             return None
 
@@ -142,7 +149,7 @@ def is_locked(user_name) -> bool:
     return user_name != "admin" and datetime.now(tz=timezone.utc) > locked_date
 
 
-class ScoreBetModel(db.Model):
+class ScoreBetModel(Base):
     __tablename__ = "score_bet"
     id = sa.Column(
         sa.String(100),
@@ -213,7 +220,7 @@ class ScoreBetModel(db.Model):
         }
 
 
-class BinaryBetModel(db.Model):
+class BinaryBetModel(Base):
     __tablename__ = "binary_bet"
     id = sa.Column(
         sa.String(100),
@@ -290,7 +297,7 @@ class BetMapping(Enum):
     BINARY_BET = BinaryBetModel
 
 
-class MatchReferenceModel(db.Model):
+class MatchReferenceModel(Base):
     __tablename__ = "match_reference"
     id = sa.Column(
         sa.String(100),
@@ -309,7 +316,7 @@ class MatchReferenceModel(db.Model):
     bet_type_from_match = sa.Column(SqlEnum(BetMapping), nullable=False)
 
 
-class MatchModel(db.Model):
+class MatchModel(Base):
     __tablename__ = "match"
     id = sa.Column(
         sa.String(100),
@@ -333,7 +340,7 @@ class MatchModel(db.Model):
     binary_bets = relationship("BinaryBetModel", back_populates="match")
 
 
-class TeamModel(db.Model):
+class TeamModel(Base):
     __tablename__ = "team"
     id = sa.Column(
         sa.String(100),
@@ -354,7 +361,7 @@ class TeamModel(db.Model):
         }
 
 
-class GroupModel(db.Model):
+class GroupModel(Base):
     __tablename__ = "group"
     id = sa.Column(
         sa.String(100),
@@ -385,7 +392,7 @@ class GroupModel(db.Model):
         }
 
 
-class PhaseModel(db.Model):
+class PhaseModel(Base):
     __tablename__ = "phase"
     id = sa.Column(
         sa.String(100),
@@ -405,7 +412,7 @@ class PhaseModel(db.Model):
         }
 
 
-class GroupPositionModel(db.Model):
+class GroupPositionModel(Base):
     __tablename__ = "group_position"
     id = sa.Column(
         sa.String(100),
@@ -456,3 +463,14 @@ class GroupPositionModel(db.Model):
             "goals_difference": self.goals_for - self.goals_against,
             "points": self.won * 3 + self.drawn,
         }
+
+
+models.Base.metadata.create_all(bind=engine)
+
+
+def get_db() -> "Session":
+    db = SessionLocal()
+    try:
+        return db
+    finally:
+        db.close()

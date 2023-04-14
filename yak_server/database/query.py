@@ -1,13 +1,15 @@
 from typing import List, Tuple
 
-from .models import BinaryBetModel, GroupModel, MatchModel, PhaseModel, ScoreBetModel
+from .models import BinaryBetModel, GroupModel, MatchModel, PhaseModel, ScoreBetModel, get_db
 
 
 def bets_from_group_code(
     user,
     group_code,
 ) -> Tuple[GroupModel, List[ScoreBetModel], List[BinaryBetModel]]:
-    group = GroupModel.query.filter_by(code=group_code).first()
+    db = get_db()
+
+    group = db.query(GroupModel).filter_by(code=group_code).first()
 
     if not group:
         return None, [], []
@@ -31,12 +33,14 @@ def bets_from_phase_code(
     user,
     phase_code,
 ) -> Tuple[PhaseModel, List[GroupModel], List[ScoreBetModel], List[BinaryBetModel]]:
-    phase = PhaseModel.query.filter_by(code=phase_code).first()
+    db = get_db()
+
+    phase = db.query(PhaseModel).filter_by(code=phase_code).first()
 
     if not phase:
         return None, [], [], []
 
-    groups = GroupModel.query.filter_by(phase_id=phase.id).order_by(GroupModel.index)
+    groups = db.query(GroupModel).filter_by(phase_id=phase.id).order_by(GroupModel.index)
 
     binary_bets = (
         user.binary_bets.filter(GroupModel.phase_id == phase.id)

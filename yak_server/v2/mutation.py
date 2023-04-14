@@ -8,7 +8,6 @@ from flask import current_app
 from sqlalchemy import update
 from strawberry.types import Info
 
-from yak_server import db
 from yak_server.database.models import (
     BinaryBetModel,
     GroupPositionModel,
@@ -16,6 +15,7 @@ from yak_server.database.models import (
     MatchReferenceModel,
     ScoreBetModel,
     UserModel,
+    get_db,
     is_locked,
 )
 from yak_server.helpers.authentification import encode_bearer_token
@@ -66,8 +66,10 @@ class Mutation:
         first_name: str,
         last_name: str,
     ) -> SignupResult:
+        db = get_db()
+
         # Check existing user in db
-        existing_user = UserModel.query.filter_by(name=user_name).first()
+        existing_user = db.query(UserModel).filter_by(name=user_name).first()
         if existing_user:
             return UserNameAlreadyExists(user_name=user_name)
 
@@ -78,28 +80,30 @@ class Mutation:
             last_name=last_name,
             password=password,
         )
-        db.session.add(user)
-        db.session.flush()
+        db.add(user)
+        db.flush()
 
         # Initialize matches and bets and integrate in db
-        for match_reference in MatchReferenceModel.query.all():
+        for match_reference in db.query(MatchReferenceModel).all():
             match = MatchModel(
                 team1_id=match_reference.team1_id,
                 team2_id=match_reference.team2_id,
                 index=match_reference.index,
                 group_id=match_reference.group_id,
             )
-            db.session.add(match)
-            db.session.flush()
+            db.add(match)
+            db.flush()
 
-            db.session.add(
+            db.add(
                 match_reference.bet_type_from_match.value(user_id=user.id, match_id=match.id),
             )
-            db.session.flush()
+            db.flush()
 
         # Create group position records
-        db.session.add_all(create_group_position(ScoreBetModel.query.filter_by(user_id=user.id)))
-        db.session.commit()
+        db.add_all(
+            create_group_position(db.query(ScoreBetModel).filter_by(user_id=user.id)),
+        )
+        db.commit()
 
         token = encode_bearer_token(
             sub=user.id,
@@ -136,7 +140,9 @@ class Mutation:
         is_one_won: Optional[bool],
         info: Info,
     ) -> ModifyBinaryBetResult:
-        bet = BinaryBetModel.query.filter_by(user_id=info.user.instance.id, id=str(id)).first()
+        db = get_db()
+
+        bet = db.query(BinaryBetModel).filter_by(user_id=info.user.instance.id, id=str(id)).first()
 
         if is_locked(info.user.pseudo):
             return LockedBinaryBetError()
@@ -147,7 +153,7 @@ class Mutation:
         logger.info(modify_binary_bet_successfully(info.user.pseudo, bet, is_one_won))
 
         bet.is_one_won = is_one_won
-        db.session.commit()
+        db.commit()
 
         return BinaryBet.from_instance(instance=bet)
 
@@ -160,7 +166,9 @@ class Mutation:
         score2: Optional[int],
         info: Info,
     ) -> ModifyScoreBetResult:
-        bet = ScoreBetModel.query.filter_by(user_id=info.user.instance.id, id=str(id)).first()
+        db = get_db()
+
+        bet = db.query(ScoreBetModel).filter_by(user_id=info.user.instance.id, id=str(id)).first()
 
         if is_locked(info.user.pseudo):
             return LockedScoreBetError()
@@ -177,7 +185,7 @@ class Mutation:
         if score1 == bet.score1 and score2 == bet.score2:
             return ScoreBet.from_instance(instance=bet)
 
-        db.session.execute(
+        db.execute(
             update(GroupPositionModel)
             .values(need_recomputation=True)
             .where(
@@ -185,7 +193,7 @@ class Mutation:
                 GroupPositionModel.user_id == info.user.id,
             ),
         )
-        db.session.execute(
+        db.execute(
             update(GroupPositionModel)
             .values(need_recomputation=True)
             .where(
@@ -197,7 +205,7 @@ class Mutation:
 
         bet.score1 = score1
         bet.score2 = score2
-        db.session.commit()
+        db.commit()
 
         return ScoreBet.from_instance(instance=bet)
 
@@ -210,12 +218,14 @@ class Mutation:
         password: str,
         info: Info,  # noqa: ARG002
     ) -> ModifyUserResult:
-        user = UserModel.query.filter_by(id=str(id)).first()
+        db = get_db()
+
+        user = db.query(UserModel).filter_by(id=str(id)).first()
 
         if not user:
             return UserNotFound(id=id)
 
         user.change_password(password)
-        db.session.commit()
+        db.commit()
 
         return UserWithoutSensitiveInfo.from_instance(instance=user)

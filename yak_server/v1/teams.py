@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Tuple
 
 from flask import Blueprint, redirect
 
-from yak_server.database.models import TeamModel
+from yak_server.database.models import TeamModel, get_db
 
 from .utils.constants import GLOBAL_ENDPOINT, VERSION
 from .utils.errors import InvalidTeamId, TeamNotFound
@@ -18,18 +18,22 @@ teams = Blueprint("team", __name__)
 
 @teams.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams")
 def teams_get() -> Tuple["Response", int]:
+    db = get_db()
+
     return success_response(
         HTTPStatus.OK,
-        {"teams": [team.to_dict() for team in TeamModel.query.all()]},
+        {"teams": [team.to_dict() for team in db.query(TeamModel).all()]},
     )
 
 
 @teams.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams/<string:team_id>")
 def teams_get_by_id(team_id) -> Tuple["Response", int]:
+    db = get_db()
+
     if is_uuid4(team_id):
-        team = TeamModel.query.filter_by(id=team_id).first()
+        team = db.query(TeamModel).filter_by(id=team_id).first()
     elif is_iso_3166_1_alpha_2_code(team_id):
-        team = TeamModel.query.filter_by(code=team_id).first()
+        team = db.query(TeamModel).filter_by(code=team_id).first()
     else:
         raise InvalidTeamId(team_id)
 
@@ -41,7 +45,9 @@ def teams_get_by_id(team_id) -> Tuple["Response", int]:
 
 @teams.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams/<string:team_id>/flag")
 def retrieve_team_flag(team_id) -> Tuple["Response", int]:
-    team = TeamModel.query.filter_by(id=team_id).first()
+    db = get_db()
+
+    team = db.query(TeamModel).filter_by(id=team_id).first()
 
     if not team:
         raise TeamNotFound(team_id)

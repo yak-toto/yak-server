@@ -1,3 +1,4 @@
+import logging
 from functools import wraps
 
 from flask import current_app, request
@@ -10,8 +11,10 @@ from .errors import ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI, Us
 
 NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
 
+logger = logging.getLogger(__name__)
 
-def user_from_token(auth_headers) -> UserModel:
+
+def user_from_token(auth_headers, db) -> UserModel:
     if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION or auth_headers[0] != "Bearer":
         raise InvalidToken
 
@@ -23,7 +26,7 @@ def user_from_token(auth_headers) -> UserModel:
     except PyJWTError as exc:
         raise InvalidToken from exc
 
-    user = UserModel.query.filter_by(id=data["sub"]).first()
+    user = db.query(UserModel).filter_by(id=data["sub"]).first()
     if not user:
         raise UserNotFound(data["sub"])
 
@@ -35,7 +38,7 @@ def is_authentificated(f):  # noqa: ANN201
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get("Authorization", "").split()
 
-        user = user_from_token(auth_headers)
+        user = user_from_token(auth_headers, current_app.db)
 
         return f(user, *args, **kwargs)
 
@@ -47,7 +50,9 @@ def is_admin_authentificated(f):  # noqa: ANN201
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get("Authorization", "").split()
 
-        user = user_from_token(auth_headers)
+        db = kwargs["db"]
+
+        user = user_from_token(auth_headers, db)
 
         if user.name != "admin":
             raise UnauthorizedAccessToAdminAPI

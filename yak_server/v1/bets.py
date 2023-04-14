@@ -2,9 +2,8 @@ import logging
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Any, Dict, Tuple
 
-from flask import Blueprint
+from flask import Blueprint, current_app
 
-from yak_server import db
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
@@ -12,6 +11,7 @@ from yak_server.database.models import (
     MatchModel,
     PhaseModel,
     ScoreBetModel,
+    get_db,
 )
 from yak_server.database.query import (
     bets_from_group_code,
@@ -38,6 +38,8 @@ logger = logging.getLogger(__name__)
 @bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/bets")
 @is_authentificated
 def get_all_bets(current_user) -> Tuple["Response", int]:
+    db = current_app.db
+
     binary_bets_query = (
         current_user.binary_bets.join(BinaryBetModel.match)
         .join(MatchModel.group)
@@ -50,9 +52,9 @@ def get_all_bets(current_user) -> Tuple["Response", int]:
         .order_by(GroupModel.index, MatchModel.index)
     )
 
-    group_query = GroupModel.query.order_by(GroupModel.index)
+    group_query = db.query(GroupModel).order_by(GroupModel.index)
 
-    phase_query = PhaseModel.query.order_by(PhaseModel.index)
+    phase_query = db.query(PhaseModel).order_by(PhaseModel.index)
 
     return success_response(
         HTTPStatus.OK,
@@ -116,12 +118,14 @@ def group_result_get(current_user, group_code) -> Tuple["Response", int]:
 
 
 def get_group_rank_with_code(user, group_code) -> Dict[str, Any]:
-    group = GroupModel.query.filter_by(code=group_code).first()
+    db = get_db()
+
+    group = db.query(GroupModel).filter_by(code=group_code).first()
 
     if not group:
         raise GroupNotFound(group_code)
 
-    group_rank = GroupPositionModel.query.filter_by(group_id=group.id, user_id=user.id)
+    group_rank = db.query(GroupPositionModel).filter_by(group_id=group.id, user_id=user.id)
 
     def send_response(group, group_rank):
         return {
@@ -145,6 +149,6 @@ def get_group_rank_with_code(user, group_code) -> Dict[str, Any]:
 
     group_rank = compute_group_rank(group_rank, score_bets)
 
-    db.session.commit()
+    db.commit()
 
     return send_response(group, group_rank)

@@ -12,7 +12,8 @@ else:
 
 from pathlib import Path
 
-from yak_server import db
+from yak_server.database import models
+from yak_server.database.base import engine
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
@@ -23,6 +24,7 @@ from yak_server.database.models import (
     ScoreBetModel,
     TeamModel,
     UserModel,
+    get_db,
 )
 
 logger = logging.getLogger(__name__)
@@ -54,7 +56,7 @@ class BackupError(Exception):
 
 
 def create_database() -> None:
-    db.create_all()
+    models.Base.metadata.create_all(bind=engine)
 
 
 def create_admin(app) -> None:
@@ -81,30 +83,32 @@ def create_admin(app) -> None:
 
 
 def initialize_database(app) -> None:
+    db = get_db()
+
     data_folder = app.config["DATA_FOLDER"]
 
     with Path(f"{data_folder}/phases.json").open() as file:
         phases = json.loads(file.read())
 
-        db.session.add_all(PhaseModel(**phase) for phase in phases)
-        db.session.flush()
+        db.add_all(PhaseModel(**phase) for phase in phases)
+        db.flush()
 
     with Path(f"{data_folder}/groups.json").open() as file:
         groups = json.loads(file.read())
 
         for group in groups:
-            phase = PhaseModel.query.filter_by(code=group["phase_code"]).first()
+            phase = db.query(PhaseModel).filter_by(code=group["phase_code"]).first()
             group.pop("phase_code")
             group["phase_id"] = phase.id
 
-        db.session.add_all(GroupModel(**group) for group in groups)
-        db.session.flush()
+        db.add_all(GroupModel(**group) for group in groups)
+        db.flush()
 
     with Path(f"{data_folder}/teams.json").open() as file:
         teams = json.loads(file.read())
 
-        db.session.add_all(TeamModel(**team) for team in teams)
-        db.session.flush()
+        db.add_all(TeamModel(**team) for team in teams)
+        db.flush()
 
     with Path(f"{data_folder}/matches.json").open() as file:
         matches = json.loads(file.read())
@@ -113,26 +117,26 @@ def initialize_database(app) -> None:
             if match["team1_code"] is None:
                 match["team1_id"] = None
             else:
-                team1 = TeamModel.query.filter_by(code=match["team1_code"]).first()
+                team1 = db.query(TeamModel).filter_by(code=match["team1_code"]).first()
                 match["team1_id"] = team1.id
 
             if match["team2_code"] is None:
                 match["team2_id"] = None
             else:
-                team2 = TeamModel.query.filter_by(code=match["team2_code"]).first()
+                team2 = db.query(TeamModel).filter_by(code=match["team2_code"]).first()
                 match["team2_id"] = team2.id
 
-            group = GroupModel.query.filter_by(code=match["group_code"]).first()
+            group = db.query(GroupModel).filter_by(code=match["group_code"]).first()
             match["group_id"] = group.id
 
             match.pop("team1_code")
             match.pop("team2_code")
             match.pop("group_code")
 
-        db.session.add_all(MatchReferenceModel(**match) for match in matches)
-        db.session.flush()
+        db.add_all(MatchReferenceModel(**match) for match in matches)
+        db.flush()
 
-    db.session.commit()
+    db.commit()
 
 
 def backup_database(app) -> None:
@@ -175,23 +179,25 @@ def backup_database(app) -> None:
 
 
 def delete_database(app) -> None:
+    db = get_db()
+
     if not app.config.get("DEBUG"):
         raise RecordDeletionInProduction
 
-    GroupPositionModel.query.delete()
-    ScoreBetModel.query.delete()
-    BinaryBetModel.query.delete()
-    UserModel.query.delete()
-    MatchReferenceModel.query.delete()
-    MatchModel.query.delete()
-    GroupModel.query.delete()
-    PhaseModel.query.delete()
-    TeamModel.query.delete()
-    db.session.commit()
+    db.query(GroupPositionModel).delete()
+    db.query(ScoreBetModel).delete()
+    db.query(BinaryBetModel).delete()
+    db.query(UserModel).delete()
+    db.query(MatchReferenceModel).delete()
+    db.query(MatchModel).delete()
+    db.query(GroupModel).delete()
+    db.query(PhaseModel).delete()
+    db.query(TeamModel).delete()
+    db.commit()
 
 
 def drop_database(app) -> None:
     if not app.config.get("DEBUG"):
         raise TableDropInProduction
 
-    db.drop_all()
+    models.Base.metadata.drop_all(bind=engine)

@@ -6,11 +6,11 @@ from flask import Blueprint, request
 from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
 
-from yak_server import db
 from yak_server.database.models import (
     GroupPositionModel,
     MatchModel,
     ScoreBetModel,
+    get_db,
     is_locked,
 )
 from yak_server.helpers.logging import modify_score_bet_successfully
@@ -40,6 +40,8 @@ logger = logging.getLogger(__name__)
 @validate_body(schema=SCHEMA_POST_SCORE_BET)
 @is_authentificated
 def create_score_bet(user) -> Tuple["Response", int]:
+    db = get_db()
+
     if is_locked(user.name):
         raise LockedScoreBet
 
@@ -52,10 +54,11 @@ def create_score_bet(user) -> Tuple["Response", int]:
         group_id=body["group"]["id"],
     )
 
-    db.session.add(match)
+    db.add(match)
     try:
-        db.session.flush()
+        db.flush()
     except IntegrityError as integrity_error:
+        db.rollback()
         if "FOREIGN KEY (`team1_id`)" in str(integrity_error):
             raise TeamNotFound(team_id=body["team1"]["id"]) from integrity_error
 
@@ -71,7 +74,7 @@ def create_score_bet(user) -> Tuple["Response", int]:
         score2=body["team2"].get("score"),
     )
 
-    db.session.execute(
+    db.execute(
         update(GroupPositionModel)
         .values(need_recomputation=True)
         .where(
@@ -79,7 +82,7 @@ def create_score_bet(user) -> Tuple["Response", int]:
             GroupPositionModel.user_id == user.id,
         ),
     )
-    db.session.execute(
+    db.execute(
         update(GroupPositionModel)
         .values(need_recomputation=True)
         .where(
@@ -88,8 +91,8 @@ def create_score_bet(user) -> Tuple["Response", int]:
         ),
     )
 
-    db.session.add(score_bet)
-    db.session.commit()
+    db.add(score_bet)
+    db.commit()
 
     return success_response(
         HTTPStatus.CREATED,
@@ -104,7 +107,9 @@ def create_score_bet(user) -> Tuple["Response", int]:
 @score_bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
 @is_authentificated
 def retrieve_score_bet(user, bet_id) -> Tuple["Response", int]:
-    score_bet = ScoreBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
+    db = get_db()
+
+    score_bet = db.query(ScoreBetModel).filter_by(user_id=user.id, id=bet_id).first()
 
     if not score_bet:
         raise BetNotFound(bet_id)
@@ -123,10 +128,14 @@ def retrieve_score_bet(user, bet_id) -> Tuple["Response", int]:
 @validate_body(schema=SCHEMA_PATCH_SCORE_BET)
 @is_authentificated
 def modify_score_bet(user, bet_id) -> Tuple["Response", int]:
+    db = get_db()
+
     if is_locked(user.name):
         raise LockedScoreBet
 
-    score_bet = ScoreBetModel.query.filter_by(user_id=user.id, id=bet_id).with_for_update().first()
+    score_bet = (
+        db.query(ScoreBetModel).filter_by(user_id=user.id, id=bet_id).with_for_update().first()
+    )
 
     if not score_bet:
         raise BetNotFound(bet_id)
@@ -155,7 +164,7 @@ def modify_score_bet(user, bet_id) -> Tuple["Response", int]:
         ),
     )
 
-    db.session.execute(
+    db.execute(
         update(GroupPositionModel)
         .values(need_recomputation=True)
         .where(
@@ -163,7 +172,7 @@ def modify_score_bet(user, bet_id) -> Tuple["Response", int]:
             GroupPositionModel.user_id == user.id,
         ),
     )
-    db.session.execute(
+    db.execute(
         update(GroupPositionModel)
         .values(need_recomputation=True)
         .where(
@@ -174,7 +183,7 @@ def modify_score_bet(user, bet_id) -> Tuple["Response", int]:
 
     score_bet.score1 = body["team1"]["score"]
     score_bet.score2 = body["team2"]["score"]
-    db.session.commit()
+    db.commit()
 
     return send_response(score_bet)
 
@@ -182,10 +191,12 @@ def modify_score_bet(user, bet_id) -> Tuple["Response", int]:
 @score_bets.delete(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
 @is_authentificated
 def delete_score_bet(user, bet_id) -> Tuple["Response", int]:
+    db = get_db()
+
     if is_locked(user.name):
         raise LockedScoreBet
 
-    score_bet = ScoreBetModel.query.filter_by(id=bet_id, user_id=user.id).first()
+    score_bet = db.query(ScoreBetModel).filter_by(id=bet_id, user_id=user.id).first()
 
     if not score_bet:
         raise BetNotFound(bet_id)
@@ -196,7 +207,7 @@ def delete_score_bet(user, bet_id) -> Tuple["Response", int]:
         "score_bet": score_bet.to_dict_without_group(),
     }
 
-    db.session.execute(
+    db.execute(
         update(GroupPositionModel)
         .values(need_recomputation=True)
         .where(
@@ -204,7 +215,7 @@ def delete_score_bet(user, bet_id) -> Tuple["Response", int]:
             GroupPositionModel.user_id == user.id,
         ),
     )
-    db.session.execute(
+    db.execute(
         update(GroupPositionModel)
         .values(need_recomputation=True)
         .where(
@@ -213,7 +224,7 @@ def delete_score_bet(user, bet_id) -> Tuple["Response", int]:
         ),
     )
 
-    db.session.delete(score_bet)
-    db.session.commit()
+    db.delete(score_bet)
+    db.commit()
 
     return success_response(HTTPStatus.OK, response_body)
