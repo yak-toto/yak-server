@@ -12,7 +12,6 @@ from .utils.flask_utils import is_iso_3166_1_alpha_2_code, is_uuid4, success_res
 if TYPE_CHECKING:
     from flask import Response
 
-
 teams = Blueprint("team", __name__)
 
 
@@ -25,7 +24,7 @@ def teams_get() -> Tuple["Response", int]:
 
 
 @teams.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams/<string:team_id>")
-def teams_get_by_id(team_id) -> Tuple["Response", int]:
+def teams_get_by_id(team_id: str) -> Tuple["Response", int]:
     if is_uuid4(team_id):
         team = TeamModel.query.filter_by(id=team_id).first()
     elif is_iso_3166_1_alpha_2_code(team_id):
@@ -40,7 +39,7 @@ def teams_get_by_id(team_id) -> Tuple["Response", int]:
 
 
 @teams.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/teams/<string:team_id>/flag")
-def retrieve_team_flag(team_id) -> Tuple["Response", int]:
+def retrieve_team_flag(team_id: str) -> Tuple["Response", int]:
     team = TeamModel.query.filter_by(id=team_id).first()
 
     if not team:

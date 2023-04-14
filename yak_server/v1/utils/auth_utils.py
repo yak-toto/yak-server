@@ -1,4 +1,5 @@
 from functools import wraps
+from typing import List
 
 from flask import current_app, request
 from jwt import ExpiredSignatureError, PyJWTError
@@ -11,7 +12,7 @@ from .errors import ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI, Us
 NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
 
 
-def user_from_token(auth_headers) -> UserModel:
+def user_from_token(auth_headers: List[str]) -> UserModel:
     if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION or auth_headers[0] != "Bearer":
         raise InvalidToken
 
@@ -30,7 +31,7 @@ def user_from_token(auth_headers) -> UserModel:
     return user
 
 
-def is_authentificated(f):  # noqa: ANN201
+def is_authentificated(f):  # noqa: ANN001, ANN201
     @wraps(f)
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get("Authorization", "").split()
@@ -42,7 +43,7 @@ def is_authentificated(f):  # noqa: ANN201
     return _verify
 
 
-def is_admin_authentificated(f):  # noqa: ANN201
+def is_admin_authentificated(f):  # noqa: ANN001, ANN201
     @wraps(f)
     def _verify(*args, **kwargs):
         auth_headers = request.headers.get("Authorization", "").split()

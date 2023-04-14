@@ -1,4 +1,5 @@
 from itertools import chain
+from typing import TYPE_CHECKING
 
 from sqlalchemy import and_
 
@@ -6,8 +7,11 @@ from yak_server import db
 from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, PhaseModel
 from yak_server.v1.bets import get_group_rank_with_code
 
+if TYPE_CHECKING:
+    from yak_server.database.models import UserModel
 
-def compute_finale_phase_from_group_rank(user, rule_config) -> None:
+
+def compute_finale_phase_from_group_rank(user: "UserModel", rule_config: dict) -> None:
     first_phase_phase_group = GroupModel.query.filter_by(
         code=rule_config["to_group"],
     ).first()

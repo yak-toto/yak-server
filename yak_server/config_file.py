@@ -26,11 +26,16 @@ RULE_MAPPING = {
 
 
 class RuleNotDefined(Exception):
-    def __init__(self, rule_id) -> None:
+    def __init__(self, rule_id: str) -> None:
         super().__init__(f"Rule not defined: {rule_id}")
 
 
-def compute_database_uri(mysql_user_name, mysql_password, mysql_port, mysql_db) -> str:
+def compute_database_uri(
+    mysql_user_name: str,
+    mysql_password: str,
+    mysql_port: int,
+    mysql_db: str,
+) -> str:
     return f"mysql+pymysql://{mysql_user_name}:{mysql_password}@localhost:{mysql_port}/{mysql_db}"
 
 
@@ -38,7 +43,7 @@ def get_mysql_config() -> dict:
     mysql_config = {
         "MYSQL_USER_NAME": os.environ["MYSQL_USER_NAME"],
         "MYSQL_PASSWORD": os.environ["MYSQL_PASSWORD"],
-        "MYSQL_PORT": os.environ.get("MYSQL_PORT", 3306),
+        "MYSQL_PORT": int(os.environ["MYSQL_PORT"]) if "MYSQL_PORT" in os.environ else 3306,
         "MYSQL_DB": os.environ["MYSQL_DB"],
         "SQLALCHEMY_TRACK_MODIFICATIONS": False,
     }

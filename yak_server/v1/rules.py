@@ -11,13 +11,14 @@ from .utils.flask_utils import success_response
 if TYPE_CHECKING:
     from flask import Response
 
+    from yak_server.database.models import UserModel
 
 rules = Blueprint("rules", __name__)
 
 
 @rules.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/rules/<string:rule_id>")
 @is_authentificated
-def execute_rule(user, rule_id) -> Tuple["Response", int]:
+def execute_rule(user: "UserModel", rule_id: str) -> Tuple["Response", int]:
     if rule_id not in current_app.config["RULES"]:
         raise RuleNotFound(rule_id)
 

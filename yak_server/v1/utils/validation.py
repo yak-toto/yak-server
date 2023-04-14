@@ -1,4 +1,5 @@
 from functools import wraps
+from typing import Any, Dict
 
 from flask import request
 from jsonschema import Draft202012Validator, ValidationError, validate
@@ -6,8 +7,8 @@ from jsonschema import Draft202012Validator, ValidationError, validate
 from .errors import RequestValidationError
 
 
-def validate_body(schema):  # noqa: ANN201
-    def decorator(f):
+def validate_body(schema: Dict[str, Any]):  # noqa: ANN201
+    def decorator(f):  # noqa: ANN001
         @wraps(f)
         def _verify(*args, **kwargs):
             try:
