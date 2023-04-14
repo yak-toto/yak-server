@@ -1,24 +1,26 @@
-import sys
 from datetime import timedelta
 from http import HTTPStatus
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
+from typing import TYPE_CHECKING, List, Optional, Tuple
 from unittest.mock import ANY
 
-import pytest
+from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
-from yak_server.config_file import RuleContainer
+from yak_server.config_file import RuleContainer, get_settings
 from yak_server.helpers.rules import compute_finale_phase_from_group_rank
 
-from .utils import get_paris_datetime_now, get_random_string
+from .utils import get_random_string
+from .utils.mock import create_mock
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 
-def patch_score_bets(client, user_name, new_scores):
+def patch_score_bets(
+    client: TestClient,
+    user_name: str,
+    new_scores: List[Tuple[Optional[int], Optional[int]]],
+):
     # signup admin user
     response_signup = client.post(
         "/api/v1/users/signup",
@@ -32,13 +34,13 @@ def patch_score_bets(client, user_name, new_scores):
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    token = response_signup.json["result"]["token"]
+    token = response_signup.json()["result"]["token"]
 
     response_get_all_bets = client.get("/api/v1/bets", headers={"Authorization": f"Bearer {token}"})
 
     assert response_get_all_bets.status_code == HTTPStatus.OK
 
-    for bet, new_score in zip(response_get_all_bets.json["result"]["score_bets"], new_scores):
+    for bet, new_score in zip(response_get_all_bets.json()["result"]["score_bets"], new_scores):
         response_patch_score_bet = client.patch(
             f"/api/v1/score_bets/{bet['id']}",
             headers={"Authorization": f"Bearer {token}"},
@@ -53,7 +55,7 @@ def patch_score_bets(client, user_name, new_scores):
     return token
 
 
-def put_finale_phase(client, token, is_one_won):
+def put_finale_phase(client: TestClient, token: str, is_one_won: Optional[bool]):
     response_post_finale_phase_bets_admin = client.post(
         "/api/v1/rules/492345de-8d4a-45b6-8b94-d219f2b0c3e9",
         headers={"Authorization": f"Bearer {token}"},
@@ -69,7 +71,7 @@ def put_finale_phase(client, token, is_one_won):
     assert response_get_finale_phase.status_code == HTTPStatus.OK
 
     response_patch_finale_phase = client.patch(
-        f"/api/v1/binary_bets/{response_get_finale_phase.json['result']['binary_bets'][0]['id']}",
+        f"/api/v1/binary_bets/{response_get_finale_phase.json()['result']['binary_bets'][0]['id']}",
         json={
             "is_one_won": is_one_won,
         },
@@ -79,34 +81,39 @@ def put_finale_phase(client, token, is_one_won):
     assert response_patch_finale_phase.status_code == HTTPStatus.OK
 
 
-@pytest.fixture(autouse=True)
-def setup_app(app):
-    with resources.as_file(resources.files("tests") / "test_data/test_compute_points_v1") as path:
-        app.config["DATA_FOLDER"] = path
-    old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
-    app.config["RULES"] = {
-        "492345de-8d4a-45b6-8b94-d219f2b0c3e9": RuleContainer(
-            config={
-                "to_group": "1",
-                "from_phase": "GROUP",
-                "versus": [
-                    {"team1": {"rank": 1, "group": "A"}, "team2": {"rank": 2, "group": "A"}},
-                ],
-            },
-            function=compute_finale_phase_from_group_rank,
-        ),
-    }
+def test_compute_points(app: "FastAPI", monkeypatch):
+    client = TestClient(app)
 
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_expiration_time=10,
+        jwt_secret_key=get_random_string(100),
+        lock_datetime_shift=timedelta(seconds=10),
+        rules={
+            "492345de-8d4a-45b6-8b94-d219f2b0c3e9": RuleContainer(
+                config={
+                    "to_group": "1",
+                    "from_phase": "GROUP",
+                    "versus": [
+                        {"team1": {"rank": 1, "group": "A"}, "team2": {"rank": 2, "group": "A"}},
+                    ],
+                },
+                function=compute_finale_phase_from_group_rank,
+            ),
+        },
+        base_correct_result=1,
+        multiplying_factor_correct_result=2,
+        base_correct_score=3,
+        multiplying_factor_correct_score=7,
+        team_qualified=10,
+        first_team_qualified=20,
+    )
 
-    yield app
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_compute_points_v1"),
+    )
+    initialize_database(app)
 
-    app.config["LOCK_DATETIME"] = old_lock_datetime
-
-
-def test_compute_points(client):
     # Create 4 accounts and patch bets
     admin_token = patch_score_bets(client, "admin", [(1, 2), (5, 1), (5, 5)])
     user_token = patch_score_bets(client, "user", [(2, 2), (5, 1), (5, 5)])
@@ -128,7 +135,7 @@ def test_compute_points(client):
     )
 
     assert response_compute_points_unauthorized.status_code == HTTPStatus.UNAUTHORIZED
-    assert response_compute_points_unauthorized.json == {
+    assert response_compute_points_unauthorized.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Unauthorized access to admin API",
@@ -140,8 +147,9 @@ def test_compute_points(client):
         headers={"Authorization": f"Bearer {user_token}"},
     )
 
-    assert score_board_response.json["result"] == [
+    assert score_board_response.json()["result"] == [
         {
+            "rank": 1,
             "first_name": ANY,
             "full_name": ANY,
             "last_name": ANY,
@@ -156,6 +164,7 @@ def test_compute_points(client):
             "points": 46.0,
         },
         {
+            "rank": 2,
             "first_name": ANY,
             "full_name": ANY,
             "last_name": ANY,
@@ -170,6 +179,7 @@ def test_compute_points(client):
             "points": 43.0,
         },
         {
+            "rank": 3,
             "first_name": ANY,
             "full_name": ANY,
             "last_name": ANY,
@@ -205,8 +215,9 @@ def test_compute_points(client):
         headers={"Authorization": f"Bearer {user_token}"},
     )
 
-    assert score_board_response_after_finale_phase.json["result"] == [
+    assert score_board_response_after_finale_phase.json()["result"] == [
         {
+            "rank": 1,
             "first_name": ANY,
             "full_name": ANY,
             "last_name": ANY,
@@ -221,6 +232,7 @@ def test_compute_points(client):
             "points": 483.0,
         },
         {
+            "rank": 2,
             "first_name": ANY,
             "full_name": ANY,
             "last_name": ANY,
@@ -235,6 +247,7 @@ def test_compute_points(client):
             "points": 286.0,
         },
         {
+            "rank": 3,
             "first_name": ANY,
             "full_name": ANY,
             "last_name": ANY,
@@ -256,10 +269,11 @@ def test_compute_points(client):
         headers={"Authorization": f"Bearer {user_token}"},
     )
 
-    assert get_results_response.json["result"] == {
+    assert get_results_response.json()["result"] == {
+        "rank": 1,
         "first_name": ANY,
-        "full_name": ANY,
         "last_name": ANY,
+        "full_name": ANY,
         "number_final_guess": 2,
         "number_first_qualified_guess": 0,
         "number_match_guess": 2,
@@ -269,7 +283,6 @@ def test_compute_points(client):
         "number_semi_final_guess": 0,
         "number_winner_guess": 1,
         "points": 483.0,
-        "rank": 1,
     }
 
     # Error case : check not result for admin user
@@ -278,7 +291,7 @@ def test_compute_points(client):
         headers={"Authorization": f"Bearer {admin_token}"},
     )
 
-    assert get_results_response_admin.json == {
+    assert get_results_response_admin.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "No results for admin user",

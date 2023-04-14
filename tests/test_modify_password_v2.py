@@ -1,6 +1,12 @@
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
+from starlette.testclient import TestClient
+
 from .utils import get_random_string
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 QUERY_SIGNUP = """
     mutation Root(
@@ -65,7 +71,9 @@ QUERY_MODIFY_USER = """
 """
 
 
-def test_modify_password(client):
+def test_modify_password(app_with_valid_jwt_config: "FastAPI"):
+    client = TestClient(app_with_valid_jwt_config)
+
     # Create admin account
     admin_name = "admin"
 
@@ -82,8 +90,8 @@ def test_modify_password(client):
         },
     )
 
-    assert response_signup_admin.json["data"]["signupResult"]["__typename"] == "UserWithToken"
-    authentification_token = response_signup_admin.json["data"]["signupResult"]["token"]
+    assert response_signup_admin.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
+    authentification_token = response_signup_admin.json()["data"]["signupResult"]["token"]
 
     # Create non admin user account
     other_user_name = get_random_string(6)
@@ -104,9 +112,9 @@ def test_modify_password(client):
         },
     )
 
-    assert response_signup_glepape.json["data"]["signupResult"]["__typename"] == "UserWithToken"
-    user_id = response_signup_glepape.json["data"]["signupResult"]["id"]
-    authentification_token_glepape = response_signup_glepape.json["data"]["signupResult"]["token"]
+    assert response_signup_glepape.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
+    user_id = response_signup_glepape.json()["data"]["signupResult"]["id"]
+    authentification_token_glepape = response_signup_glepape.json()["data"]["signupResult"]["token"]
 
     # Check update is properly process
     new_password_other_user = "new_password"
@@ -121,7 +129,11 @@ def test_modify_password(client):
     )
 
     assert (
-        response_modify_password.json["data"]["modifyUserResult"]["fullName"]
+        response_modify_password.json()["data"]["modifyUserResult"]["__typename"]
+        == "UserWithoutSensitiveInfo"
+    )
+    assert (
+        response_modify_password.json()["data"]["modifyUserResult"]["fullName"]
         == f"{other_user_first_name} {other_user_last_name}"
     )
 
@@ -134,7 +146,7 @@ def test_modify_password(client):
         },
     )
 
-    assert response_login_glepape.json["data"]["loginResult"] == {
+    assert response_login_glepape.json()["data"]["loginResult"] == {
         "__typename": "UserWithToken",
         "firstName": other_user_first_name,
         "fullName": f"{other_user_first_name} {other_user_last_name}",
@@ -151,7 +163,7 @@ def test_modify_password(client):
         },
     )
 
-    assert response_modify_password_with_glepape_user.json["data"]["modifyUserResult"] == {
+    assert response_modify_password_with_glepape_user.json()["data"]["modifyUserResult"] == {
         "__typename": "UnauthorizedAccessToAdminAPI",
         "message": "Unauthorized access to admin API",
     }
@@ -164,11 +176,11 @@ def test_modify_password(client):
         headers={"Authorization": f"Bearer {authentification_token}"},
         json={
             "query": QUERY_MODIFY_USER,
-            "variables": {"id": invalid_user_id, "password": "new_password_for_unknown_user"},
+            "variables": {"id": str(invalid_user_id), "password": "new_password_for_unknown_user"},
         },
     )
 
-    assert response_wrong_input.json["data"]["modifyUserResult"] == {
+    assert response_wrong_input.json()["data"]["modifyUserResult"] == {
         "__typename": "UserNotFound",
         "message": f"User not found: {invalid_user_id}",
     }

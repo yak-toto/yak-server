@@ -1,33 +1,28 @@
-import sys
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
 from operator import itemgetter
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pytest
+from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
 
 from .utils import get_random_string
+from .utils.mock import create_mock
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 
-@pytest.fixture(autouse=True)
-def setup_app(app):
-    with resources.as_file(resources.files("tests") / "test_data/test_teams_v1") as path:
-        app.config["DATA_FOLDER"] = path
+def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch):
+    client = TestClient(app_with_valid_jwt_config)
 
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_teams_v1"),
+    )
+    initialize_database(app_with_valid_jwt_config)
 
-    return app
-
-
-def test_teams(client):
     user_name = get_random_string(6)
     first_name = get_random_string(10)
     last_name = get_random_string(2)
@@ -64,9 +59,9 @@ def test_teams(client):
         },
     )
 
-    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
+    assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
 
-    auth_token = response_signup.json["data"]["signupResult"]["token"]
+    auth_token = response_signup.json()["data"]["signupResult"]["token"]
 
     all_teams_query = """
         query {
@@ -102,7 +97,7 @@ def test_teams(client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert response_all_teams.json["data"]["allTeamsResult"]["__typename"] == "AllTeamsSuccessful"
+    assert response_all_teams.json()["data"]["allTeamsResult"]["__typename"] == "AllTeamsSuccessful"
     expected_teams = [
         {
             "id": ANY,
@@ -158,13 +153,13 @@ def test_teams(client):
         assert f"/api/v1/teams/{team['id']}/flag" == team["flag"]["url"]
 
     assert sorted(
-        response_all_teams.json["data"]["allTeamsResult"]["teams"],
+        response_all_teams.json()["data"]["allTeamsResult"]["teams"],
         key=itemgetter("code"),
     ) == sorted(expected_teams, key=itemgetter("code"))
 
     team_id = [
         team["id"]
-        for team in response_all_teams.json["data"]["allTeamsResult"]["teams"]
+        for team in response_all_teams.json()["data"]["allTeamsResult"]["teams"]
         if team["description"] == "Norway"
     ][0]
 
@@ -177,7 +172,7 @@ def test_teams(client):
     )
 
     assert (
-        response_all_teams_invalid_token.json["data"]["allTeamsResult"]["__typename"]
+        response_all_teams_invalid_token.json()["data"]["allTeamsResult"]["__typename"]
         == "InvalidToken"
     )
 
@@ -217,7 +212,7 @@ def test_teams(client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert response_team_by_id.json == {
+    assert response_team_by_id.json() == {
         "data": {
             "teamByIdResult": {
                 "__typename": "Team",
@@ -242,7 +237,7 @@ def test_teams(client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert response_team_with_invalid_id.json == {
+    assert response_team_with_invalid_id.json() == {
         "data": {
             "teamByIdResult": {
                 "__typename": "TeamByIdNotFound",
@@ -287,7 +282,7 @@ def test_teams(client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert response_team_by_code.json == {
+    assert response_team_by_code.json() == {
         "data": {
             "teamByCodeResult": {
                 "__typename": "Team",
@@ -310,7 +305,7 @@ def test_teams(client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
-    assert response_team_with_invalid_code.json == {
+    assert response_team_with_invalid_code.json() == {
         "data": {
             "teamByCodeResult": {
                 "__typename": "TeamByCodeNotFound",

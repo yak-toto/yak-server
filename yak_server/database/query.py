@@ -3,14 +3,17 @@ from typing import TYPE_CHECKING, List, Tuple
 from .models import BinaryBetModel, GroupModel, MatchModel, PhaseModel, ScoreBetModel
 
 if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
     from .models import UserModel
 
 
 def bets_from_group_code(
+    db: "Session",
     user: "UserModel",
     group_code: str,
 ) -> Tuple[GroupModel, List[ScoreBetModel], List[BinaryBetModel]]:
-    group = GroupModel.query.filter_by(code=group_code).first()
+    group = db.query(GroupModel).filter_by(code=group_code).first()
 
     if not group:
         return None, [], []
@@ -31,15 +34,16 @@ def bets_from_group_code(
 
 
 def bets_from_phase_code(
+    db: "Session",
     user: "UserModel",
     phase_code: str,
 ) -> Tuple[PhaseModel, List[GroupModel], List[ScoreBetModel], List[BinaryBetModel]]:
-    phase = PhaseModel.query.filter_by(code=phase_code).first()
+    phase = db.query(PhaseModel).filter_by(code=phase_code).first()
 
     if not phase:
         return None, [], [], []
 
-    groups = GroupModel.query.filter_by(phase_id=phase.id).order_by(GroupModel.index)
+    groups = db.query(GroupModel).filter_by(phase_id=phase.id).order_by(GroupModel.index)
 
     binary_bets = (
         user.binary_bets.filter(GroupModel.phase_id == phase.id)

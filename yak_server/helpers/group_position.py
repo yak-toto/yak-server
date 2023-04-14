@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, List
 
-from yak_server.database.models import GroupPositionModel
+from yak_server.database.models import GroupPositionModel, MatchModel, ScoreBetModel
 
 if TYPE_CHECKING:
-    from yak_server.database.models import ScoreBetModel
+    from sqlalchemy.orm import Session
+
+    from yak_server.database.models import UserModel
 
 
 def create_group_position(score_bets: List["ScoreBetModel"]) -> List[GroupPositionModel]:
@@ -87,4 +89,47 @@ def compute_group_rank(
         group_position.goals_against = new_group_position[group_position.team_id].goals_against
         group_position.need_recomputation = False
 
-    return group_rank
+    return sorted(
+        group_rank,
+        key=lambda team_result: (
+            team_result.points,
+            team_result.goals_difference,
+            team_result.goals_for,
+        ),
+        reverse=True,
+    )
+
+
+def get_group_rank_with_code(
+    db: "Session",
+    user: "UserModel",
+    group_id: str,
+) -> List[GroupPositionModel]:
+    group_rank = db.query(GroupPositionModel).filter_by(group_id=group_id, user_id=user.id)
+
+    if not any(group_position.need_recomputation for group_position in group_rank):
+        return sorted(
+            group_rank,
+            key=lambda team_result: (
+                team_result.points,
+                team_result.goals_difference,
+                team_result.goals_for,
+            ),
+            reverse=True,
+        )
+
+    score_bets = user.score_bets.filter(MatchModel.group_id == group_id).join(ScoreBetModel.match)
+
+    group_rank = compute_group_rank(group_rank, score_bets)
+
+    db.commit()
+
+    return sorted(
+        group_rank,
+        key=lambda team_result: (
+            team_result.points,
+            team_result.goals_difference,
+            team_result.goals_for,
+        ),
+        reverse=True,
+    )

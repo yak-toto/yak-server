@@ -1,39 +1,36 @@
-import sys
 from datetime import timedelta
 from http import HTTPStatus
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
 from random import randint
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
-import pytest
-
 from yak_server.cli.database import initialize_database
+from yak_server.config_file import get_settings
 
-from .utils import get_paris_datetime_now, get_random_string
+from .utils import get_random_string
+from .utils.mock import create_mock
 
-
-@pytest.fixture()
-def setup_app(app):
-    # location of test data
-    with resources.as_file(resources.files("tests") / "test_data/test_modify_bet_v2") as path:
-        app.config["DATA_FOLDER"] = path
-    old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
-
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
-
-    yield app
-
-    app.config["LOCK_DATETIME"] = old_lock_datetime
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+    from starlette.testclient import TestClient
 
 
-def test_modify_score_bet(setup_app, client):
+def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
+    fake_jwt_secret_key = get_random_string(100)
+
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_expiration_time=10,
+        jwt_secret_key=fake_jwt_secret_key,
+        lock_datetime_shift=timedelta(minutes=10),
+    )
+
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_modify_bet_v2"),
+    )
+
+    initialize_database(app)
+
     user_name = get_random_string(10)
     first_name = get_random_string(5)
     last_name = get_random_string(8)
@@ -50,7 +47,7 @@ def test_modify_score_bet(setup_app, client):
     )
 
     assert response_signup.status_code == HTTPStatus.CREATED
-    authentification_token = response_signup.json["result"]["token"]
+    authentification_token = response_signup.json()["result"]["token"]
 
     response_get_all_bets = client.get(
         "/api/v1/bets",
@@ -60,7 +57,7 @@ def test_modify_score_bet(setup_app, client):
     assert response_get_all_bets.status_code == HTTPStatus.OK
 
     score_bet_ids = [
-        score_bet["id"] for score_bet in response_get_all_bets.json["result"]["score_bets"]
+        score_bet["id"] for score_bet in response_get_all_bets.json()["result"]["score_bets"]
     ]
 
     # Success case : check update is OK
@@ -74,8 +71,8 @@ def test_modify_score_bet(setup_app, client):
     )
 
     assert response_patch_one_bet.status_code == HTTPStatus.OK
-    assert response_patch_one_bet.json["result"]["score_bet"]["team1"]["score"] == score1
-    assert response_patch_one_bet.json["result"]["score_bet"]["team2"]["score"] == score2
+    assert response_patch_one_bet.json()["result"]["score_bet"]["team1"]["score"] == score1
+    assert response_patch_one_bet.json()["result"]["score_bet"]["team2"]["score"] == score2
 
     # Success case : check no updates
     response_patch_no_updates = client.patch(
@@ -85,40 +82,30 @@ def test_modify_score_bet(setup_app, client):
     )
 
     assert response_patch_no_updates.status_code == HTTPStatus.OK
-    assert response_patch_no_updates.json["result"]["score_bet"]["team1"]["score"] == score1
-    assert response_patch_no_updates.json["result"]["score_bet"]["team2"]["score"] == score2
+    assert response_patch_no_updates.json()["result"]["score_bet"]["team1"]["score"] == score1
+    assert response_patch_no_updates.json()["result"]["score_bet"]["team2"]["score"] == score2
 
     # Error case : check wrong inputs
     response_patch_wrong_inputs = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[0]}",
-        json={"team1": {}, "team2": {"score": score2}},
+        json={"team2": {"score": score2}},
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
 
-    assert response_patch_wrong_inputs.json == {
+    assert response_patch_wrong_inputs.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
-        "description": "'score' is a required property",
-        "schema": {
-            "properties": {
-                "score": {
-                    "oneOf": [
-                        {
-                            "type": "integer",
-                            "minimum": 0,
-                        },
-                        {"type": "null"},
-                    ],
-                },
-            },
-            "required": ["score"],
-            "type": "object",
-        },
-        "path": ["team1"],
+        "description": [
+            {"loc": ["body", "team1"], "msg": "field required", "type": "value_error.missing"},
+        ],
     }
 
     # Error case : check locked bet
-    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() - timedelta(minutes=10))
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_expiration_time=10,
+        jwt_secret_key=fake_jwt_secret_key,
+        lock_datetime_shift=-timedelta(minutes=10),
+    )
 
     response_locked_bet = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[0]}",
@@ -126,13 +113,17 @@ def test_modify_score_bet(setup_app, client):
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
 
-    assert response_locked_bet.json == {
+    assert response_locked_bet.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Cannot modify score bet, lock date is exceeded",
     }
 
-    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_expiration_time=10,
+        jwt_secret_key=fake_jwt_secret_key,
+        lock_datetime_shift=timedelta(minutes=10),
+    )
 
     # Error case : check bet not found
     non_existing_bet_id = str(uuid4())
@@ -143,7 +134,7 @@ def test_modify_score_bet(setup_app, client):
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
 
-    assert response_bet_not_found.json == {
+    assert response_bet_not_found.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Bet not found: {non_existing_bet_id}",
@@ -156,12 +147,17 @@ def test_modify_score_bet(setup_app, client):
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
 
-    assert response_new_score_negative.json == {
+    assert response_new_score_negative.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
-        "description": "-1 is less than the minimum of 0",
-        "schema": {"type": "integer", "minimum": 0},
-        "path": ["team1", "score"],
+        "description": [
+            {
+                "ctx": {"limit_value": -1},
+                "loc": ["body", "team1", "score"],
+                "msg": "ensure this value is greater than -1",
+                "type": "value_error.number.not_gt",
+            },
+        ],
     }
 
     # Patch second bet

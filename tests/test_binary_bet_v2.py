@@ -1,38 +1,31 @@
-import sys
 from datetime import timedelta
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
 from random import choice
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
-import pytest
+from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
+from yak_server.config_file import get_settings
 
-from .utils import get_paris_datetime_now, get_random_string
+from .utils import get_random_string
+from .utils.mock import create_mock
 
-
-@pytest.fixture()
-def setup_app(app):
-    old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(seconds=10))
-
-    with resources.as_file(resources.files("tests") / "test_data/test_binary_bet") as path:
-        app.config["DATA_FOLDER"] = path
-
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
-
-    yield app
-
-    app.config["LOCK_DATETIME"] = old_lock_datetime
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 
-def test_binary_bet(client, setup_app):
+def test_binary_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
+    client = TestClient(app_with_valid_jwt_config)
+
+    jwt_secret_key = app_with_valid_jwt_config.dependency_overrides[get_settings]().jwt_secret_key
+
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_binary_bet"),
+    )
+    initialize_database(app_with_valid_jwt_config)
+
     user_name = get_random_string(10)
     password = get_random_string(30)
 
@@ -67,7 +60,7 @@ def test_binary_bet(client, setup_app):
         },
     )
 
-    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
+    assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
 
     response_login = client.post(
         "/api/v2",
@@ -95,9 +88,9 @@ def test_binary_bet(client, setup_app):
         },
     )
 
-    assert response_login.json["data"]["loginResult"]["__typename"] == "UserWithToken"
-    token = response_login.json["data"]["loginResult"]["token"]
-    bet_id = response_login.json["data"]["loginResult"]["binaryBets"][0]["id"]
+    assert response_login.json()["data"]["loginResult"]["__typename"] == "UserWithToken"
+    token = response_login.json()["data"]["loginResult"]["token"]
+    bet_id = response_login.json()["data"]["loginResult"]["binaryBets"][0]["id"]
 
     mutation_modify_binary_bet = """
         mutation Root($id: UUID!, $isOneWon: Boolean) {
@@ -148,7 +141,7 @@ def test_binary_bet(client, setup_app):
         },
     )
 
-    assert response_modify_binary_bet.json == {
+    assert response_modify_binary_bet.json() == {
         "data": {
             "modifyBinaryBetResult": {
                 "__typename": "BinaryBet",
@@ -178,7 +171,7 @@ def test_binary_bet(client, setup_app):
         },
     )
 
-    assert response_modify_binary_bet_with_invalid_id.json == {
+    assert response_modify_binary_bet_with_invalid_id.json() == {
         "data": {
             "modifyBinaryBetResult": {
                 "__typename": "BinaryBetNotFoundForUpdate",
@@ -188,7 +181,11 @@ def test_binary_bet(client, setup_app):
     }
 
     # Error case : locked binary bet
-    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() - timedelta(seconds=10))
+    app_with_valid_jwt_config.dependency_overrides[get_settings] = create_mock(
+        jwt_expiration_time=10,
+        jwt_secret_key=jwt_secret_key,
+        lock_datetime_shift=-timedelta(seconds=10),
+    )
 
     response_modify_locked_binary_bet = client.post(
         "/api/v2",
@@ -199,7 +196,7 @@ def test_binary_bet(client, setup_app):
         },
     )
 
-    assert response_modify_locked_binary_bet.json == {
+    assert response_modify_locked_binary_bet.json() == {
         "data": {
             "modifyBinaryBetResult": {
                 "__typename": "LockedBinaryBetError",
@@ -208,7 +205,11 @@ def test_binary_bet(client, setup_app):
         },
     }
 
-    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(seconds=30))
+    app_with_valid_jwt_config.dependency_overrides[get_settings] = create_mock(
+        jwt_expiration_time=10,
+        jwt_secret_key=jwt_secret_key,
+        lock_datetime_shift=timedelta(seconds=10),
+    )
 
     # Success case : Retrive one binary bet
     query_binary_bet = """
@@ -251,7 +252,7 @@ def test_binary_bet(client, setup_app):
         json={"query": query_binary_bet, "variables": {"id": bet_id}},
     )
 
-    assert response_retrieve_binary_bet.json == {
+    assert response_retrieve_binary_bet.json() == {
         "data": {
             "binaryBetResult": {
                 "__typename": "BinaryBet",
@@ -278,7 +279,7 @@ def test_binary_bet(client, setup_app):
         json={"query": query_binary_bet, "variables": {"id": invalid_bet_id}},
     )
 
-    assert response_binary_with_invalid_id.json == {
+    assert response_binary_with_invalid_id.json() == {
         "data": {
             "binaryBetResult": {
                 "__typename": "BinaryBetNotFound",

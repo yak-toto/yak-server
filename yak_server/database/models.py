@@ -1,22 +1,25 @@
-from datetime import datetime, timezone
+from dataclasses import dataclass
 from enum import Enum
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import sqlalchemy as sa
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
-from dateutil import parser
-from flask import current_app
 from sqlalchemy import CheckConstraint
 from sqlalchemy import Enum as SqlEnum
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
-from yak_server import db
+from . import Base
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 ph = PasswordHasher()
 
 
-class UserModel(db.Model):
+class UserModel(Base):
     __tablename__ = "user"
     id = sa.Column(
         sa.String(100),
@@ -27,6 +30,11 @@ class UserModel(db.Model):
     name = sa.Column(sa.String(100), unique=True, nullable=False)
     first_name = sa.Column(sa.String(100), nullable=False)
     last_name = sa.Column(sa.String(100), nullable=False)
+
+    @hybrid_property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}"
+
     password = sa.Column(sa.String(100), nullable=False)
     number_match_guess = sa.Column(
         sa.Integer,
@@ -107,8 +115,8 @@ class UserModel(db.Model):
         self.password = ph.hash(password)
 
     @classmethod
-    def authenticate(cls, name: str, password: str) -> "UserModel":
-        user = cls.query.filter_by(name=name).first()
+    def authenticate(cls, db: "Session", name: str, password: str) -> "UserModel":
+        user = db.query(cls).filter_by(name=name).first()
 
         if not user:
             return None
@@ -123,35 +131,8 @@ class UserModel(db.Model):
     def change_password(self, new_password: str) -> None:
         self.password = ph.hash(new_password)
 
-    def to_user_dict(self) -> dict:
-        return {
-            "id": self.id,
-            "name": self.name,
-        }
 
-    def to_result_dict(self) -> dict:
-        return {
-            "first_name": self.first_name,
-            "last_name": self.last_name,
-            "full_name": f"{self.first_name} {self.last_name}",
-            "number_match_guess": self.number_match_guess,
-            "number_score_guess": self.number_score_guess,
-            "number_qualified_teams_guess": self.number_qualified_teams_guess,
-            "number_first_qualified_guess": self.number_first_qualified_guess,
-            "number_quarter_final_guess": self.number_quarter_final_guess,
-            "number_semi_final_guess": self.number_semi_final_guess,
-            "number_final_guess": self.number_final_guess,
-            "number_winner_guess": self.number_winner_guess,
-            "points": round(self.points, 3),
-        }
-
-
-def is_locked(user_name: str) -> bool:
-    locked_date = parser.parse(current_app.config["LOCK_DATETIME"])
-    return user_name != "admin" and datetime.now(tz=timezone.utc) > locked_date
-
-
-class ScoreBetModel(db.Model):
+class ScoreBetModel(Base):
     __tablename__ = "score_bet"
     id = sa.Column(
         sa.String(100),
@@ -202,27 +183,8 @@ class ScoreBetModel(db.Model):
             and self.score2 == other.score2
         )
 
-    def to_dict_with_group_id(self) -> str:
-        return {
-            "id": self.id,
-            "index": self.match.index,
-            "locked": is_locked(self.user.name),
-            "group": {"id": self.match.group_id},
-            "team1": {**self.match.team1.to_dict(), "score": self.score1},
-            "team2": {**self.match.team2.to_dict(), "score": self.score2},
-        }
 
-    def to_dict_without_group(self) -> dict:
-        return {
-            "id": self.id,
-            "index": self.match.index,
-            "locked": is_locked(self.user.name),
-            "team1": {**self.match.team1.to_dict(), "score": self.score1},
-            "team2": {**self.match.team2.to_dict(), "score": self.score2},
-        }
-
-
-class BinaryBetModel(db.Model):
+class BinaryBetModel(Base):
     __tablename__ = "binary_bet"
     id = sa.Column(
         sa.String(100),
@@ -248,58 +210,13 @@ class BinaryBetModel(db.Model):
 
         return (self.is_one_won, not self.is_one_won)
 
-    def to_dict_with_group_id(self) -> dict:
-        bet_results = self.bet_from_is_one_won()
-
-        team1_dict = (
-            {**self.match.team1.to_dict(), "won": bet_results[0]}
-            if self.match.team1 is not None
-            else None
-        )
-        team2_dict = (
-            {**self.match.team2.to_dict(), "won": bet_results[1]}
-            if self.match.team2 is not None
-            else None
-        )
-
-        return {
-            "id": self.id,
-            "index": self.match.index,
-            "locked": is_locked(self.user.name),
-            "group": {"id": self.match.group_id},
-            "team1": team1_dict,
-            "team2": team2_dict,
-        }
-
-    def to_dict_without_group(self) -> dict:
-        bet_results = self.bet_from_is_one_won()
-
-        team1_dict = (
-            {**self.match.team1.to_dict(), "won": bet_results[0]}
-            if self.match.team1 is not None
-            else None
-        )
-        team2_dict = (
-            {**self.match.team2.to_dict(), "won": bet_results[1]}
-            if self.match.team2 is not None
-            else None
-        )
-
-        return {
-            "id": self.id,
-            "index": self.match.index,
-            "locked": is_locked(self.user.name),
-            "team1": team1_dict,
-            "team2": team2_dict,
-        }
-
 
 class BetMapping(Enum):
     SCORE_BET = ScoreBetModel
     BINARY_BET = BinaryBetModel
 
 
-class MatchReferenceModel(db.Model):
+class MatchReferenceModel(Base):
     __tablename__ = "match_reference"
     id = sa.Column(
         sa.String(100),
@@ -318,7 +235,7 @@ class MatchReferenceModel(db.Model):
     bet_type_from_match = sa.Column(SqlEnum(BetMapping), nullable=False)
 
 
-class MatchModel(db.Model):
+class MatchModel(Base):
     __tablename__ = "match"
     id = sa.Column(
         sa.String(100),
@@ -342,7 +259,12 @@ class MatchModel(db.Model):
     binary_bets = relationship("BinaryBetModel", back_populates="match")
 
 
-class TeamModel(db.Model):
+@dataclass
+class Flag:
+    url: str
+
+
+class TeamModel(Base):
     __tablename__ = "team"
     id = sa.Column(
         sa.String(100),
@@ -355,16 +277,12 @@ class TeamModel(db.Model):
     flag_url = sa.Column(sa.String(100))
     internal_flag_url = sa.Column(sa.String(300))
 
-    def to_dict(self) -> dict:
-        return {
-            "id": self.id,
-            "code": self.code,
-            "description": self.description,
-            "flag": {"url": self.flag_url},
-        }
+    @hybrid_property
+    def flag(self) -> Flag:
+        return Flag(url=self.flag_url)
 
 
-class GroupModel(db.Model):
+class GroupModel(Base):
     __tablename__ = "group"
     id = sa.Column(
         sa.String(100),
@@ -379,23 +297,8 @@ class GroupModel(db.Model):
     phase_id = sa.Column(sa.String(100), sa.ForeignKey("phase.id"), nullable=False)
     phase = relationship("PhaseModel", backref="groups")
 
-    def to_dict_with_phase_id(self) -> dict:
-        return {
-            "id": self.id,
-            "code": self.code,
-            "phase": {"id": self.phase_id},
-            "description": self.description,
-        }
 
-    def to_dict_without_phase(self) -> dict:
-        return {
-            "id": self.id,
-            "code": self.code,
-            "description": self.description,
-        }
-
-
-class PhaseModel(db.Model):
+class PhaseModel(Base):
     __tablename__ = "phase"
     id = sa.Column(
         sa.String(100),
@@ -407,15 +310,8 @@ class PhaseModel(db.Model):
     description = sa.Column(sa.String(100), nullable=False)
     index = sa.Column(sa.Integer, nullable=False)
 
-    def to_dict(self) -> dict:
-        return {
-            "id": self.id,
-            "code": self.code,
-            "description": self.description,
-        }
 
-
-class GroupPositionModel(db.Model):
+class GroupPositionModel(Base):
     __tablename__ = "group_position"
     id = sa.Column(
         sa.String(100),
@@ -433,6 +329,19 @@ class GroupPositionModel(db.Model):
         nullable=False,
         default=0,
     )
+
+    @hybrid_property
+    def played(self) -> int:
+        return self.won + self.drawn + self.lost
+
+    @hybrid_property
+    def goals_difference(self) -> int:
+        return self.goals_for - self.goals_against
+
+    @hybrid_property
+    def points(self) -> int:
+        return self.won * 3 + self.drawn
+
     need_recomputation = sa.Column(sa.Boolean, nullable=False, default=False)
 
     user_id = sa.Column(
@@ -453,16 +362,3 @@ class GroupPositionModel(db.Model):
         sa.ForeignKey("group.id"),
         nullable=False,
     )
-
-    def to_dict(self) -> dict:
-        return {
-            "team": self.team.to_dict(),
-            "played": self.won + self.drawn + self.lost,
-            "won": self.won,
-            "drawn": self.drawn,
-            "lost": self.lost,
-            "goals_for": self.goals_for,
-            "goals_against": self.goals_against,
-            "goals_difference": self.goals_for - self.goals_against,
-            "points": self.won * 3 + self.drawn,
-        }

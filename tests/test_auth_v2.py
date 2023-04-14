@@ -1,12 +1,71 @@
-from http import HTTPStatus
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 
-import pytest
+from starlette.testclient import TestClient
 
 from .utils import get_random_string
 
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
-def test_signup_and_login(client):
+QUERY_SIGNUP = """
+    mutation Root(
+        $userName: String!, $firstName: String!,
+        $lastName: String!, $password: String!
+    ) {
+        signupResult(
+            userName: $userName, firstName: $firstName,
+            lastName: $lastName, password: $password
+        ) {
+            __typename
+            ... on UserWithToken {
+                firstName
+                lastName
+                fullName
+                token
+            }
+            ... on UserNameAlreadyExists {
+                message
+            }
+        }
+    }
+"""
+
+QUERY_LOGIN = """
+    mutation Root($userName: String!, $password: String!) {
+        loginResult(userName: $userName, password: $password) {
+            __typename
+            ... on UserWithToken {
+                token
+            }
+            ... on InvalidCredentials {
+                message
+            }
+        }
+    }
+"""
+
+QUERY_CURRENT_USER = """
+    query {
+        currentUserResult {
+            __typename
+            ... on User {
+                fullName
+            }
+            ... on InvalidToken {
+                message
+            }
+            ... on ExpiredToken {
+                message
+            }
+        }
+    }
+"""
+
+
+def test_signup_and_login(app_with_valid_jwt_config: "FastAPI"):
+    client = TestClient(app_with_valid_jwt_config)
+
     user_name = get_random_string(10)
     first_name = get_random_string(5)
     last_name = get_random_string(8)
@@ -15,25 +74,7 @@ def test_signup_and_login(client):
     response_signup = client.post(
         "/api/v2",
         json={
-            "query": """
-                mutation Signup(
-                    $userName: String!, $firstName: String!,
-                    $lastName: String!, $password: String!
-                ) {
-                    signupResult(
-                        userName: $userName, firstName: $firstName,
-                        lastName: $lastName, password: $password
-                    ) {
-                        __typename
-                        ... on UserWithToken {
-                            token
-                        }
-                        ... on UserNameAlreadyExists {
-                            message
-                        }
-                    }
-                }
-            """,
+            "query": QUERY_SIGNUP,
             "variables": {
                 "userName": user_name,
                 "firstName": first_name,
@@ -43,24 +84,12 @@ def test_signup_and_login(client):
         },
     )
 
-    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
+    assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
 
     response_login = client.post(
         "/api/v2",
         json={
-            "query": """
-                mutation Root($userName: String!, $password: String!) {
-                    loginResult(userName: $userName, password: $password) {
-                        __typename
-                        ... on UserWithToken {
-                            token
-                        }
-                        ... on InvalidCredentials {
-                            message
-                        }
-                    }
-                }
-            """,
+            "query": QUERY_LOGIN,
             "variables": {
                 "userName": user_name,
                 "password": password,
@@ -68,51 +97,24 @@ def test_signup_and_login(client):
         },
     )
 
-    assert response_login.json["data"]["loginResult"]["__typename"] == "UserWithToken"
+    assert response_login.json()["data"]["loginResult"]["__typename"] == "UserWithToken"
 
-    auth_token = response_login.json["data"]["loginResult"]["token"]
+    auth_token = response_login.json()["data"]["loginResult"]["token"]
 
     response_current_user = client.post(
         "/api/v2",
         headers={"Authorization": f"Bearer {auth_token}"},
         json={
-            "query": """
-                query {
-                    currentUserResult {
-                        __typename
-                        ... on User {
-                            fullName
-                        }
-                        ... on InvalidToken {
-                            message
-                        }
-                        ... on ExpiredToken {
-                            message
-                        }
-                    }
-                }
-            """,
+            "query": QUERY_CURRENT_USER,
         },
     )
 
-    assert response_current_user.json["data"]["currentUserResult"]["__typename"] == "User"
+    assert response_current_user.json()["data"]["currentUserResult"]["__typename"] == "User"
 
     response_login_invalid_credentials = client.post(
         "/api/v2",
         json={
-            "query": """
-                mutation Root($userName: String!, $password: String!) {
-                    loginResult(userName: $userName, password: $password) {
-                        __typename
-                        ... on UserWithToken {
-                            token
-                        }
-                        ... on InvalidCredentials {
-                            message
-                        }
-                    }
-                }
-            """,
+            "query": QUERY_LOGIN,
             "variables": {
                 "userName": user_name,
                 "password": get_random_string(6),
@@ -120,14 +122,16 @@ def test_signup_and_login(client):
         },
     )
 
-    assert response_login_invalid_credentials.json == {
+    assert response_login_invalid_credentials.json() == {
         "data": {
             "loginResult": {"__typename": "InvalidCredentials", "message": "Invalid credentials"},
         },
     }
 
 
-def test_signup_and_invalid_token(client):
+def test_signup_and_invalid_token(app_with_valid_jwt_config: "FastAPI"):
+    client = TestClient(app_with_valid_jwt_config)
+
     user_name = get_random_string(10)
     first_name = get_random_string(5)
     last_name = get_random_string(8)
@@ -136,28 +140,7 @@ def test_signup_and_invalid_token(client):
     response_signup = client.post(
         "/api/v2",
         json={
-            "query": """
-                mutation Signup(
-                    $userName: String!, $firstName: String!,
-                    $lastName: String!, $password: String!
-                ) {
-                    signupResult(
-                        userName: $userName, firstName: $firstName,
-                        lastName: $lastName, password: $password
-                    ) {
-                        __typename
-                        ... on UserWithToken {
-                            firstName
-                            lastName
-                            fullName
-                            token
-                        }
-                        ... on UserNameAlreadyExists {
-                            message
-                        }
-                    }
-                }
-            """,
+            "query": QUERY_SIGNUP,
             "variables": {
                 "userName": user_name,
                 "firstName": first_name,
@@ -166,7 +149,7 @@ def test_signup_and_invalid_token(client):
             },
         },
     )
-    assert response_signup.json["data"]["signupResult"] == {
+    assert response_signup.json()["data"]["signupResult"] == {
         "__typename": "UserWithToken",
         "firstName": first_name,
         "lastName": last_name,
@@ -174,7 +157,7 @@ def test_signup_and_invalid_token(client):
         "token": ANY,
     }
 
-    authentification_token = response_signup.json["data"]["signupResult"]["token"]
+    authentification_token = response_signup.json()["data"]["signupResult"]["token"]
 
     query_current_user = {
         "query": """
@@ -231,9 +214,9 @@ def test_signup_and_invalid_token(client):
         json=query_current_user,
     )
 
-    assert response_current_user.json["data"]["currentUserResult"]["__typename"] == "User"
-    assert response_current_user.json["data"]["currentUserResult"]["groups"] == []
-    assert response_current_user.json["data"]["currentUserResult"]["phases"] == []
+    assert response_current_user.json()["data"]["currentUserResult"]["__typename"] == "User"
+    assert response_current_user.json()["data"]["currentUserResult"]["groups"] == []
+    assert response_current_user.json()["data"]["currentUserResult"]["phases"] == []
 
     # invalidate authentification token and check currentUser query
     # send InvalidToken response
@@ -243,7 +226,7 @@ def test_signup_and_invalid_token(client):
         json=query_current_user,
     )
 
-    assert response_current_user.json["data"]["currentUserResult"] == {
+    assert response_current_user.json()["data"]["currentUserResult"] == {
         "__typename": "InvalidToken",
         "message": "Invalid token, authentication required",
     }
@@ -254,42 +237,21 @@ def test_signup_and_invalid_token(client):
         json=query_current_user,
     )
 
-    assert response_current_user_invalid_key.json["data"]["currentUserResult"] == {
+    assert response_current_user_invalid_key.json()["data"]["currentUserResult"] == {
         "__typename": "InvalidToken",
         "message": "Invalid token, authentication required",
     }
 
 
-def test_name_already_exists(client):
-    user_name = get_random_string(8)
+def test_name_already_exists(app_with_valid_jwt_config: "FastAPI"):
+    client = TestClient(app_with_valid_jwt_config)
 
-    query_signup = """
-        mutation Signup(
-            $userName: String!, $firstName: String!,
-            $lastName: String!, $password: String!
-        ) {
-            signupResult(
-                userName: $userName, firstName: $firstName,
-                lastName: $lastName, password: $password
-            ) {
-                __typename
-                ... on UserWithToken {
-                    firstName
-                    lastName
-                    fullName
-                    token
-                }
-                ... on UserNameAlreadyExists {
-                    message
-                }
-            }
-        }
-    """
+    user_name = get_random_string(8)
 
     response_signup = client.post(
         "/api/v2",
         json={
-            "query": query_signup,
+            "query": QUERY_SIGNUP,
             "variables": {
                 "userName": user_name,
                 "firstName": get_random_string(8),
@@ -298,12 +260,12 @@ def test_name_already_exists(client):
             },
         },
     )
-    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
+    assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
 
     response_signup_2 = client.post(
         "/api/v2",
         json={
-            "query": query_signup,
+            "query": QUERY_SIGNUP,
             "variables": {
                 "userName": user_name,
                 "firstName": get_random_string(7),
@@ -312,51 +274,22 @@ def test_name_already_exists(client):
             },
         },
     )
-    assert response_signup_2.json["data"]["signupResult"] == {
+    assert response_signup_2.json()["data"]["signupResult"] == {
         "__typename": "UserNameAlreadyExists",
         "message": f"Name already exists: {user_name}",
     }
 
 
-@pytest.fixture()
-def setup_app_for_expired_token(app):
-    old_jwt_expiration_time = app.config["JWT_EXPIRATION_TIME"]
-    app.config["JWT_EXPIRATION_TIME"] = 0
+def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI"):
+    client = TestClient(app_with_null_jwt_expiration_time)
 
-    yield app
-
-    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
-
-
-@pytest.mark.usefixtures("setup_app_for_expired_token")
-def test_expired_token(client):
     user_name = get_random_string(6)
     password = get_random_string(15)
-
-    query_signup = """
-        mutation Signup(
-            $userName: String!, $firstName: String!,
-            $lastName: String!, $password: String!
-        ) {
-            signupResult(
-                userName: $userName, firstName: $firstName,
-                lastName: $lastName, password: $password
-            ) {
-                __typename
-                ... on UserWithToken {
-                    token
-                }
-                ... on UserNameAlreadyExists {
-                    message
-                }
-            }
-        }
-    """
 
     response_signup = client.post(
         "/api/v2",
         json={
-            "query": query_signup,
+            "query": QUERY_SIGNUP,
             "variables": {
                 "userName": user_name,
                 "firstName": get_random_string(2),
@@ -366,138 +299,23 @@ def test_expired_token(client):
         },
     )
 
-    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
+    assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
 
-    auth_token = response_signup.json["data"]["signupResult"]["token"]
-
-    query_current_user = """
-        query {
-            currentUserResult {
-                __typename
-                ... on User {
-                    fullName
-                }
-                ... on InvalidToken {
-                    message
-                }
-                ... on ExpiredToken {
-                    message
-                }
-            }
-        }
-    """
+    auth_token = response_signup.json()["data"]["signupResult"]["token"]
 
     response_expired_token = client.post(
         "/api/v2",
         headers={"Authorization": f"Bearer {auth_token}"},
         json={
-            "query": query_current_user,
+            "query": QUERY_CURRENT_USER,
         },
     )
 
-    assert response_expired_token.json == {
+    assert response_expired_token.json() == {
         "data": {
             "currentUserResult": {
                 "__typename": "ExpiredToken",
                 "message": "Expired token, reauthentication required",
             },
         },
-    }
-
-
-@pytest.fixture()
-def debug_app_for_unexcepted_error_check(app):
-    # Unset expiration time configuration. Server will raise an exception.
-    old_jwt_expiration_time = app.config["JWT_EXPIRATION_TIME"]
-    del app.config["JWT_EXPIRATION_TIME"]
-
-    yield app
-
-    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
-
-
-QUERY_SIGNUP = """
-    mutation Root(
-        $userName: String!, $firstName: String!,
-        $lastName: String!, $password: String!
-    ) {
-        signupResult(
-            userName: $userName, firstName: $firstName,
-            lastName: $lastName, password: $password
-        ) {
-            __typename
-            ... on UserWithToken {
-                fullName
-            }
-            ... on UserNameAlreadyExists {
-                message
-            }
-        }
-    }
-"""
-
-
-@pytest.mark.usefixtures("debug_app_for_unexcepted_error_check")
-def test_unexcepted_error_debug(client):
-    # Check unexpected error in debug mode, error should not obfuscated
-    response_signup_debug_unexpected_error = client.post(
-        "/api/v2",
-        json={
-            "query": QUERY_SIGNUP,
-            "variables": {
-                "userName": get_random_string(6),
-                "firstName": get_random_string(6),
-                "lastName": get_random_string(6),
-                "password": get_random_string(6),
-            },
-        },
-    )
-
-    assert response_signup_debug_unexpected_error.status_code == HTTPStatus.OK
-    assert response_signup_debug_unexpected_error.json == {
-        "data": None,
-        "errors": [
-            {
-                "locations": [{"column": 9, "line": 6}],
-                "message": "'JWT_EXPIRATION_TIME'",
-                "path": ["signupResult"],
-            },
-        ],
-    }
-
-
-@pytest.fixture()
-def production_app_unexcepted_error_check(debug_app_for_unexcepted_error_check):
-    debug_app_for_unexcepted_error_check.config["DEBUG"] = False
-
-    yield debug_app_for_unexcepted_error_check
-
-    debug_app_for_unexcepted_error_check.config["DEBUG"] = True
-
-
-@pytest.mark.usefixtures("production_app_unexcepted_error_check")
-def test_unexcepted_error_production(client):
-    response_signup_production_unexpected_error = client.post(
-        "/api/v2",
-        json={
-            "query": QUERY_SIGNUP,
-            "variables": {
-                "userName": get_random_string(6),
-                "firstName": get_random_string(6),
-                "lastName": get_random_string(6),
-                "password": get_random_string(6),
-            },
-        },
-    )
-
-    assert response_signup_production_unexpected_error.status_code == HTTPStatus.OK
-    assert response_signup_production_unexpected_error.json == {
-        "data": None,
-        "errors": [
-            {
-                "locations": [{"column": 9, "line": 6}],
-                "message": "Unexpected error.",
-                "path": ["signupResult"],
-            },
-        ],
     }

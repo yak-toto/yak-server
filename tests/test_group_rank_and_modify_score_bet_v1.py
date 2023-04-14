@@ -1,39 +1,36 @@
-import sys
 from copy import copy
 from datetime import timedelta
 from http import HTTPStatus
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
 from random import randint, shuffle
-
-import pytest
+from typing import TYPE_CHECKING
 
 from yak_server.cli.database import initialize_database
+from yak_server.config_file import get_settings
 
-from .utils import get_paris_datetime_now, get_random_string
+from .utils import get_random_string
+from .utils.mock import create_mock
 
-
-@pytest.fixture(autouse=True)
-def app_setup(app):
-    # location of test data
-    with resources.as_file(resources.files("tests") / "test_data/test_modify_bet_v2") as path:
-        app.config["DATA_FOLDER"] = path
-    old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
-
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
-
-    yield app
-
-    app.config["LOCK_DATETIME"] = old_lock_datetime
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+    from starlette.testclient import TestClient
 
 
-def test_group_rank_and_modify_score_bet(client):
+def test_group_rank_and_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
+    fake_jwt_secret_key = get_random_string(100)
+
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_secret_key=fake_jwt_secret_key,
+        jwt_expiration_time=10,
+        lock_datetime_shift=timedelta(minutes=10),
+    )
+
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_modify_bet_v2"),
+    )
+
+    initialize_database(app)
+
     # Signup user
     response_signup = client.post(
         "/api/v1/users/signup",
@@ -47,7 +44,7 @@ def test_group_rank_and_modify_score_bet(client):
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    authentification_token = response_signup.json["result"]["token"]
+    authentification_token = response_signup.json()["result"]["token"]
 
     # Retrieve all the bets
     response_all_bets = client.get(
@@ -58,7 +55,7 @@ def test_group_rank_and_modify_score_bet(client):
     assert response_all_bets.status_code == HTTPStatus.OK
 
     # Perform PATCH bets
-    bet_ids = [score_bet["id"] for score_bet in response_all_bets.json["result"]["score_bets"]]
+    bet_ids = [score_bet["id"] for score_bet in response_all_bets.json()["result"]["score_bets"]]
     shuffle(bet_ids)
 
     for bet_id in bet_ids:
@@ -72,9 +69,9 @@ def test_group_rank_and_modify_score_bet(client):
             follow_redirects=True,
         )
         assert response.status_code == HTTPStatus.OK
-        assert response.json["result"]["score_bet"]["id"] == bet_id
-        assert response.json["result"]["score_bet"]["team1"]["score"] == score1
-        assert response.json["result"]["score_bet"]["team2"]["score"] == score2
+        assert response.json()["result"]["score_bet"]["id"] == bet_id
+        assert response.json()["result"]["score_bet"]["team1"]["score"] == score1
+        assert response.json()["result"]["score_bet"]["team2"]["score"] == score2
 
     # Retrieve group rank
     response_group_rank = client.get(
@@ -84,14 +81,14 @@ def test_group_rank_and_modify_score_bet(client):
 
     assert response_group_rank.status_code == HTTPStatus.OK
 
-    group_rank = response_group_rank.json["result"]["group_rank"]
+    group_rank = response_group_rank.json()["result"]["group_rank"]
 
     response_group_by_bet = client.get(
         "/api/v1/bets/groups/A",
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
 
-    score_bets = response_group_by_bet.json["result"]["score_bets"]
+    score_bets = response_group_by_bet.json()["result"]["score_bets"]
 
     teams = {}
 

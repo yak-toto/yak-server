@@ -4,6 +4,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from getpass import getpass
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if sys.version_info >= (3, 9):
@@ -11,11 +12,10 @@ if sys.version_info >= (3, 9):
 else:
     import importlib_resources as resources
 
-from pathlib import Path
+from fastapi.testclient import TestClient
 
-from flask import url_for
-
-from yak_server import db
+from yak_server.config_file import get_settings
+from yak_server.database import Base, SessionLocal, engine, mysql_settings
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
@@ -29,7 +29,7 @@ from yak_server.database.models import (
 )
 
 if TYPE_CHECKING:
-    from flask import Flask
+    from fastapi import FastAPI
 
 logger = logging.getLogger(__name__)
 
@@ -60,17 +60,17 @@ class BackupError(Exception):
 
 
 def create_database() -> None:
-    db.create_all()
+    Base.metadata.create_all(bind=engine)
 
 
-def create_admin(app: "Flask") -> None:
+def create_admin(app: "FastAPI") -> None:
     password = getpass(prompt="Admin user password: ")
     confirm_password = getpass(prompt="Confirm admin password: ")
 
     if password != confirm_password:
         raise ConfirmPasswordDoesNotMatch
 
-    client = app.test_client()
+    client = TestClient(app)
 
     response_signup = client.post(
         "/api/v1/users/signup",
@@ -82,29 +82,31 @@ def create_admin(app: "Flask") -> None:
         },
     )
 
-    if not response_signup.json["ok"]:
-        raise SignupError(response_signup.json["description"])
+    if not response_signup.json()["ok"]:
+        raise SignupError(response_signup.json()["description"])
 
 
-def initialize_database(app: "Flask") -> None:
-    data_folder = app.config["DATA_FOLDER"]
+def initialize_database(app: "FastAPI") -> None:
+    db = SessionLocal()
+
+    data_folder = get_settings().data_folder
 
     with Path(f"{data_folder}/phases.json").open() as file:
         phases = json.loads(file.read())
 
-        db.session.add_all(PhaseModel(**phase) for phase in phases)
-        db.session.flush()
+        db.add_all(PhaseModel(**phase) for phase in phases)
+        db.flush()
 
     with Path(f"{data_folder}/groups.json").open() as file:
         groups = json.loads(file.read())
 
         for group in groups:
-            phase = PhaseModel.query.filter_by(code=group["phase_code"]).first()
+            phase = db.query(PhaseModel).filter_by(code=group["phase_code"]).first()
             group.pop("phase_code")
             group["phase_id"] = phase.id
 
-        db.session.add_all(GroupModel(**group) for group in groups)
-        db.session.flush()
+        db.add_all(GroupModel(**group) for group in groups)
+        db.flush()
 
     with Path(f"{data_folder}/teams.json").open() as file:
         teams = json.loads(file.read())
@@ -113,11 +115,14 @@ def initialize_database(app: "Flask") -> None:
             team["flag_url"] = ""
 
             team_instance = TeamModel(**team)
-            db.session.add(team_instance)
-            db.session.flush()
+            db.add(team_instance)
+            db.flush()
 
-            team_instance.flag_url = url_for("team.retrieve_team_flag", team_id=team_instance.id)
-            db.session.flush()
+            team_instance.flag_url = app.url_path_for(
+                "retrieve_team_flag_by_id",
+                team_id=team_instance.id,
+            )
+            db.flush()
 
     with Path(f"{data_folder}/matches.json").open() as file:
         matches = json.loads(file.read())
@@ -126,29 +131,29 @@ def initialize_database(app: "Flask") -> None:
             if match["team1_code"] is None:
                 match["team1_id"] = None
             else:
-                team1 = TeamModel.query.filter_by(code=match["team1_code"]).first()
+                team1 = db.query(TeamModel).filter_by(code=match["team1_code"]).first()
                 match["team1_id"] = team1.id
 
             if match["team2_code"] is None:
                 match["team2_id"] = None
             else:
-                team2 = TeamModel.query.filter_by(code=match["team2_code"]).first()
+                team2 = db.query(TeamModel).filter_by(code=match["team2_code"]).first()
                 match["team2_id"] = team2.id
 
-            group = GroupModel.query.filter_by(code=match["group_code"]).first()
+            group = db.query(GroupModel).filter_by(code=match["group_code"]).first()
             match["group_id"] = group.id
 
             match.pop("team1_code")
             match.pop("team2_code")
             match.pop("group_code")
 
-        db.session.add_all(MatchReferenceModel(**match) for match in matches)
-        db.session.flush()
+        db.add_all(MatchReferenceModel(**match) for match in matches)
+        db.flush()
 
-    db.session.commit()
+    db.commit()
 
 
-def backup_database(app: "Flask") -> None:
+def backup_database() -> None:
     with resources.as_file(resources.files("yak_server") / "cli/backup_files") as path:
         backup_location = path
 
@@ -161,11 +166,11 @@ def backup_database(app: "Flask") -> None:
 
     result = subprocess.run(
         (
-            f"mysqldump {app.config['MYSQL_DB']} "
-            f"-u {app.config['MYSQL_USER_NAME']} "
-            f"-P {app.config['MYSQL_PORT']} "
+            f"mysqldump {mysql_settings.db} "
+            f"-u {mysql_settings.user_name} "
+            f"-P {mysql_settings.port} "
             "--protocol=tcp "
-            f"--password={app.config['MYSQL_PASSWORD']}"
+            f"--password={mysql_settings.password}"
         ),
         shell=True,
         capture_output=True,
@@ -175,7 +180,7 @@ def backup_database(app: "Flask") -> None:
     if result.returncode:
         error_message = (
             f"Something went wrong when backup on {backup_datetime}: "
-            f"{result.stderr.replace(app.config['MYSQL_PASSWORD'], '********')}"
+            f"{result.stderr.replace(mysql_settings.password, '********')}"
         )
 
         logger.error(error_message)
@@ -187,24 +192,26 @@ def backup_database(app: "Flask") -> None:
         logger.info(f"Backup done on {backup_datetime}")
 
 
-def delete_database(app: "Flask") -> None:
-    if not app.config.get("DEBUG"):
+def delete_database(app: "FastAPI") -> None:
+    if not app.debug:
         raise RecordDeletionInProduction
 
-    GroupPositionModel.query.delete()
-    ScoreBetModel.query.delete()
-    BinaryBetModel.query.delete()
-    UserModel.query.delete()
-    MatchReferenceModel.query.delete()
-    MatchModel.query.delete()
-    GroupModel.query.delete()
-    PhaseModel.query.delete()
-    TeamModel.query.delete()
-    db.session.commit()
+    db = SessionLocal()
+
+    db.query(GroupPositionModel).delete()
+    db.query(ScoreBetModel).delete()
+    db.query(BinaryBetModel).delete()
+    db.query(UserModel).delete()
+    db.query(MatchReferenceModel).delete()
+    db.query(MatchModel).delete()
+    db.query(GroupModel).delete()
+    db.query(PhaseModel).delete()
+    db.query(TeamModel).delete()
+    db.commit()
 
 
-def drop_database(app: "Flask") -> None:
-    if not app.config.get("DEBUG"):
+def drop_database(app: "FastAPI") -> None:
+    if not app.debug:
         raise TableDropInProduction
 
-    db.drop_all()
+    Base.metadata.drop_all(bind=engine)

@@ -15,7 +15,7 @@
 
 ### Database
 
-Install and start mysql server on port 3306. Add a database named `yak_toto`. In root folder, create a dotenv file named `.flaskenv` and fill your MySQL user name, password and database. When backend start, this configuration is automaticaly loaded.
+Install and start mysql server on port 3306. Add a database named `yak_toto`. In root folder, create a dotenv file named `.env` and fill your MySQL user name, password and database. When backend start, this configuration is automaticaly loaded.
 
 ```text
 MYSQL_USER_NAME=my_user_name
@@ -23,7 +23,7 @@ MYSQL_PASSWORD=my_password
 MYSQL_DB=my_database_name
 ```
 
-You can also set MySQL port by adding `MYSQL_PORT=my_port` to `.flaskenv` file. If not set, it will be 3306 by default.
+You can also set MySQL port by adding `MYSQL_PORT=my_port` to `.env` file. If not set, it will be 3306 by default.
 
 ### Backend
 
@@ -40,7 +40,7 @@ Fetch all packages using poetry with the following command:
 poetry install
 ```
 
-Before starting the backend, add `JWT_SECRET_KEY` and `JWT_EXPIRATION_TIME` in `.flaskenv` same as the MySQL user name and password. As
+Before starting the backend, add `JWT_SECRET_KEY` and `JWT_EXPIRATION_TIME` in `.env` same as the MySQL user name and password. As
 login system is using JSON Web Token, a secret key is required and an expiration time (in seconds). To generate one, you can use the python built-in `secrets` module.
 
 ```py
@@ -56,21 +56,21 @@ JWT_EXPIRATION_TIME=1800
 
 Also, automatic backup can be done through `yak_server/cli/backup_database` script. It can be run using `yak db backup`.
 
-Finally, flask needs some configuration to start. Please add `FLASK_APP=yak_server` variable to indicate main location. Last thing, for development environment, debug needs to be activated with a addditional environment variable:
+Finally, fastapi needs some configuration to start. Last thing, for development environment, debug needs to be activated with a addditional environment variable:
 
 ```text
-FLASK_DEBUG=1
+DEBUG=1
 ```
 
 And then start backend with:
 
 ```bash
-flask run
+uvicorn --reload yak_server:create_fast_api_app --factory
 ```
 
 ### Data initialization
 
-To run local testing, you can use the script `create_database.py`, `initialize_database.py` and `create_admin.py` located in `yak_server/cli` folder. To select, set `COMPETITION` environment variable in `.flaskenv`. It will read data from `yak_server/data/{COMPETITION}/`.
+To run local testing, you can use the script `create_database.py`, `initialize_database.py` and `create_admin.py` located in `yak_server/cli` folder. To select, set `COMPETITION` environment variable in `.env`. It will read data from `yak_server/data/{COMPETITION}/`.
 
 ### Testing
 

@@ -1,33 +1,36 @@
-import sys
+from datetime import timedelta
 from http import HTTPStatus
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pytest
-
 from yak_server.cli.database import initialize_database
+from yak_server.config_file import get_settings
 
 from .utils import get_random_string
+from .utils.mock import create_mock
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+    from starlette.testclient import TestClient
 
 
-@pytest.fixture(autouse=True)
-def setup_app(app):
-    with resources.as_file(resources.files("tests") / "test_data/test_modify_bet_v2") as path:
-        app.config["DATA_FOLDER"] = path
+def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
+    fake_jwt_secret_key = get_random_string(100)
 
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_expiration_time=10,
+        jwt_secret_key=fake_jwt_secret_key,
+        lock_datetime_shift=-timedelta(minutes=10),
+    )
 
-    return app
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_modify_bet_v2"),
+    )
 
+    initialize_database(app)
 
-def test_bets(client):
     user_name = get_random_string(10)
     first_name = get_random_string(5)
     last_name = get_random_string(8)
@@ -44,7 +47,7 @@ def test_bets(client):
     )
 
     assert response_signup.status_code == HTTPStatus.CREATED
-    authentification_token = response_signup.json["result"]["token"]
+    authentification_token = response_signup.json()["result"]["token"]
 
     # Get all bets to retrieve ids
     response_get_all_bets = client.get(
@@ -55,7 +58,7 @@ def test_bets(client):
     assert response_get_all_bets.status_code == HTTPStatus.OK
 
     score_bet_ids = [
-        score_bet["id"] for score_bet in response_get_all_bets.json["result"]["score_bets"]
+        score_bet["id"] for score_bet in response_get_all_bets.json()["result"]["score_bets"]
     ]
 
     # Success case : check get one bet
@@ -65,7 +68,7 @@ def test_bets(client):
     )
 
     assert response_bet_by_id.status_code == HTTPStatus.OK
-    assert response_bet_by_id.json == {
+    assert response_bet_by_id.json() == {
         "ok": True,
         "result": {
             "group": {
@@ -109,7 +112,7 @@ def test_bets(client):
     )
 
     assert response_bet_with_invalid_id.status_code == HTTPStatus.NOT_FOUND
-    assert response_bet_with_invalid_id.json == {
+    assert response_bet_with_invalid_id.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Bet not found: {invalid_bet_id}",
@@ -122,7 +125,7 @@ def test_bets(client):
     )
 
     assert response_by_phase.status_code == HTTPStatus.OK
-    assert response_by_phase.json == {
+    assert response_by_phase.json() == {
         "ok": True,
         "result": {
             "binary_bets": [],
@@ -271,7 +274,7 @@ def test_bets(client):
         headers={"Authorization": f"Bearer {authentification_token}"},
     )
 
-    assert response_by_phase_with_invalid_code.json == {
+    assert response_by_phase_with_invalid_code.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Phase not found: {invalid_phase_code}",

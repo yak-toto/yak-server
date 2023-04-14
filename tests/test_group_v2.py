@@ -1,34 +1,27 @@
-import sys
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pytest
+from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
 
 from .utils import get_random_string
+from .utils.mock import create_mock
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 
-@pytest.fixture(autouse=True)
-def setup_app(app):
-    # location of test data
-    with resources.as_file(resources.files("tests") / "test_data/test_matches_db") as path:
-        app.config["DATA_FOLDER"] = path
+def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch):
+    client = TestClient(app_with_valid_jwt_config)
 
-    # initialize sql database
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_matches_db"),
+    )
+    initialize_database(app_with_valid_jwt_config)
 
-    return app
-
-
-def test_group(client):
     # Signup one random user
     user_name = get_random_string(6)
     first_name = get_random_string(10)
@@ -66,9 +59,9 @@ def test_group(client):
         },
     )
 
-    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
+    assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
 
-    auth_token = response_signup.json["data"]["signupResult"]["token"]
+    auth_token = response_signup.json()["data"]["signupResult"]["token"]
 
     # Success case : Get all groups
     response_all_groups = client.post(
@@ -103,7 +96,7 @@ def test_group(client):
         },
     )
 
-    assert response_all_groups.json["data"]["allGroupsResult"] == {
+    assert response_all_groups.json()["data"]["allGroupsResult"] == {
         "__typename": "Groups",
         "groups": [
             {
@@ -161,7 +154,7 @@ def test_group(client):
         json={"query": query_group_by_code, "variables": {"code": "A"}},
     )
 
-    assert response_group_by_code.json["data"]["groupByCodeResult"] == {
+    assert response_group_by_code.json()["data"]["groupByCodeResult"] == {
         "__typename": "Group",
         "id": ANY,
         "description": "Groupe A",
@@ -227,7 +220,7 @@ def test_group(client):
         ],
     }
 
-    group_id = response_group_by_code.json["data"]["groupByCodeResult"]["id"]
+    group_id = response_group_by_code.json()["data"]["groupByCodeResult"]["id"]
 
     # Error case : check invalid code
     invalid_group_code = "B"
@@ -238,7 +231,7 @@ def test_group(client):
         json={"query": query_group_by_code, "variables": {"code": invalid_group_code}},
     )
 
-    assert response_group_with_invalid_code.json == {
+    assert response_group_with_invalid_code.json() == {
         "data": {
             "groupByCodeResult": {
                 "__typename": "GroupByCodeNotFound",
@@ -277,7 +270,7 @@ def test_group(client):
         json={"query": query_by_id, "variables": {"id": group_id}},
     )
 
-    assert response_group_by_id.json == {
+    assert response_group_by_id.json() == {
         "data": {
             "groupByIdResult": {
                 "__typename": "Group",
@@ -296,7 +289,7 @@ def test_group(client):
         json={"query": query_by_id, "variables": {"id": invalid_group_id}},
     )
 
-    assert response_group_with_invalid_id.json == {
+    assert response_group_with_invalid_id.json() == {
         "data": {
             "groupByIdResult": {
                 "__typename": "GroupByIdNotFound",

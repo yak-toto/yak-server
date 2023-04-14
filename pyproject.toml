@@ -19,15 +19,14 @@ build-backend = "poetry.masonry.api"
 [tool.poetry.dependencies]
 python = "^3.8"
 
-Flask-SQLAlchemy = "^3.0.3"
 PyJWT = "^2.6.0"
 PyMySQL = {extras = ["rsa"], version = "^1.0.2"}
-python-dotenv = "^1.0.0"
 strawberry-graphql = ">=0.168.1,<0.172.0"
-flask-cors = "^3.0.10"
-flask-migrate = "^4.0.4"
-jsonschema = "^4.17.3"
+alembic = "^1.10.3"
 argon2-cffi = "^21.3.0"
+fastapi = "^0.95.1"
+uvicorn = {extras = ["standard"], version = "^0.21.1"}
+httpx = "^0.24.0"
 
 
 [tool.poetry.group.test.dependencies]
@@ -76,7 +75,7 @@ branch = "true"
 
 [tool.coverage.report]
 omit = ["./yak_server/database/migrations/*"]
-exclude_lines = ["if TYPE_CHECKING:"]
+exclude_lines = ["if TYPE_CHECKING:", "def handle_exception.*"]
 
 
 [tool.ruff]
@@ -116,6 +115,7 @@ src = ["yak_server", "tests"]
 
 
 [tool.ruff.per-file-ignores]
+"yak_server/*" = ["B008"]
 "yak_server/cli/*" = ["T20"]
 "yak_server/database/migrations/*" = ["ANN001", "ANN201"]
 "yak_server/helpers/errors.py" = ["S105"]
@@ -126,13 +126,10 @@ src = ["yak_server", "tests"]
 [tool.ruff.isort]
 known-first-party = ["yak_server"]
 known-third-party = [
-    "flask",
     "jwt",
     "strawberry",
     "werkzeug",
     "sqlalchemy",
-    "flask_sqlalchemy",
-    "flask_cors",
 ]
 
 

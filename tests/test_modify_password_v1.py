@@ -1,10 +1,14 @@
 from http import HTTPStatus
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from .utils import get_random_string
 
+if TYPE_CHECKING:
+    from starlette.testclient import TestClient
 
-def test_modify_password(client):
+
+def test_modify_password(client: "TestClient"):
     admin_name = "admin"
     other_user_name = get_random_string(6)
 
@@ -19,7 +23,7 @@ def test_modify_password(client):
         },
     )
 
-    authentification_token = response_signup_admin.json["result"]["token"]
+    authentification_token = response_signup_admin.json()["result"]["token"]
 
     # Create non admin user account
     response_signup_glepape = client.post(
@@ -32,8 +36,8 @@ def test_modify_password(client):
         },
     )
 
-    user_id = response_signup_glepape.json["result"]["id"]
-    authentification_token_glepape = response_signup_glepape.json["result"]["token"]
+    user_id = response_signup_glepape.json()["result"]["id"]
+    authentification_token_glepape = response_signup_glepape.json()["result"]["token"]
 
     # Check update is properly process
     new_password_other_user = "new_password"
@@ -45,7 +49,7 @@ def test_modify_password(client):
     )
 
     assert response_modify_password.status_code == HTTPStatus.OK
-    assert response_modify_password.json["result"]["name"] == other_user_name
+    assert response_modify_password.json()["result"]["name"] == other_user_name
 
     # Check login succesful with the new password
     response_login_glepape = client.post(
@@ -54,7 +58,7 @@ def test_modify_password(client):
     )
 
     assert response_login_glepape.status_code == HTTPStatus.CREATED
-    assert response_login_glepape.json["result"]["name"] == other_user_name
+    assert response_login_glepape.json()["result"]["name"] == other_user_name
 
     # Check glepape user cannot update any password
     response_modify_password_with_glepape_user = client.patch(
@@ -65,7 +69,7 @@ def test_modify_password(client):
 
     assert response_modify_password_with_glepape_user.status_code == HTTPStatus.UNAUTHORIZED
     assert (
-        response_modify_password_with_glepape_user.json["description"]
+        response_modify_password_with_glepape_user.json()["description"]
         == "Unauthorized access to admin API"
     )
 
@@ -77,16 +81,17 @@ def test_modify_password(client):
     )
 
     assert response_wrong_input.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-    assert response_wrong_input.json == {
+    assert response_wrong_input.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
-        "description": "'password' is a required property",
-        "schema": {
-            "type": "object",
-            "properties": {"password": {"type": "string"}},
-            "required": ["password"],
-        },
-        "path": [],
+        "description": [
+            {"loc": ["body", "password"], "msg": "field required", "type": "value_error.missing"},
+            {
+                "loc": ["body", "name"],
+                "msg": "extra fields not permitted",
+                "type": "value_error.extra",
+            },
+        ],
     }
 
     # Check call is rejected if user_id is invalid
@@ -99,5 +104,5 @@ def test_modify_password(client):
     )
 
     assert response_wrong_input.status_code == HTTPStatus.NOT_FOUND
-    assert response_wrong_input.json["error_code"] == HTTPStatus.NOT_FOUND
-    assert response_wrong_input.json["description"] == f"User not found: {invalid_user_id}"
+    assert response_wrong_input.json()["error_code"] == HTTPStatus.NOT_FOUND
+    assert response_wrong_input.json()["description"] == f"User not found: {invalid_user_id}"

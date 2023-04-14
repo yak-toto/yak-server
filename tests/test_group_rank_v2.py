@@ -1,37 +1,27 @@
-import sys
-from datetime import timedelta
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pytest
+from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
 
-from .utils import get_paris_datetime_now, get_random_string
+from .utils import get_random_string
+from .utils.mock import create_mock
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 
-@pytest.fixture(autouse=True)
-def setup_app(app):
-    with resources.as_file(resources.files("tests") / "test_data/test_compute_points_v1") as path:
-        app.config["DATA_FOLDER"] = path
-    old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
+def test_group_rank(app_with_valid_jwt_config: "FastAPI", monkeypatch):
+    client = TestClient(app_with_valid_jwt_config)
 
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_compute_points_v1"),
+    )
+    initialize_database(app_with_valid_jwt_config)
 
-    yield app
-
-    app.config["LOCK_DATETIME"] = old_lock_datetime
-
-
-def test_group_rank(client):
     response_signup = client.post(
         "/api/v2",
         json={
@@ -66,9 +56,9 @@ def test_group_rank(client):
         },
     )
 
-    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
+    assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
 
-    token = response_signup.json["data"]["signupResult"]["token"]
+    token = response_signup.json()["data"]["signupResult"]["token"]
 
     query_modify_score_bet = """
         mutation Root($id: UUID!, $score1: Int!, $score2: Int!) {
@@ -97,7 +87,7 @@ def test_group_rank(client):
     new_scores = [(5, 1), (0, 0), (1, 2)]
 
     for bet, new_score in zip(
-        response_signup.json["data"]["signupResult"]["scoreBets"],
+        response_signup.json()["data"]["signupResult"]["scoreBets"],
         new_scores,
     ):
         response_patch_bet = client.post(
@@ -113,7 +103,7 @@ def test_group_rank(client):
             },
         )
 
-        assert response_patch_bet.json["data"]["modifyScoreBetResult"]["__typename"] == "ScoreBet"
+        assert response_patch_bet.json()["data"]["modifyScoreBetResult"]["__typename"] == "ScoreBet"
 
     query_group_rank = """
         query Root($code: String!) {
@@ -218,10 +208,12 @@ def test_group_rank(client):
         ],
     }
 
-    assert response_group_rank_by_code.json["data"] == {"groupRankByCodeResult": result_group_rank}
+    assert response_group_rank_by_code.json()["data"] == {
+        "groupRankByCodeResult": result_group_rank,
+    }
 
     # Error case : Retrieve group rank with invalid group code
-    group_id = response_group_rank_by_code.json["data"]["groupRankByCodeResult"]["group"]["id"]
+    group_id = response_group_rank_by_code.json()["data"]["groupRankByCodeResult"]["group"]["id"]
 
     invalid_group_code = "B"
 
@@ -231,7 +223,7 @@ def test_group_rank(client):
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    assert response_group_rank_with_invalid_code.json["data"] == {
+    assert response_group_rank_with_invalid_code.json()["data"] == {
         "groupRankByCodeResult": {
             "__typename": "GroupByCodeNotFound",
             "message": f"Group not found: {invalid_group_code}",
@@ -245,7 +237,7 @@ def test_group_rank(client):
         headers={"Authorization": f"Bearer {token[:-1]}"},
     )
 
-    assert response_group_rank_with_auth_error.json["data"] == {
+    assert response_group_rank_with_auth_error.json()["data"] == {
         "groupRankByCodeResult": {
             "__typename": "InvalidToken",
             "message": "Invalid token, authentication required",
@@ -300,7 +292,7 @@ def test_group_rank(client):
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    assert response_group_rank_by_id.json["data"] == {"groupRankByIdResult": result_group_rank}
+    assert response_group_rank_by_id.json()["data"] == {"groupRankByIdResult": result_group_rank}
 
     # Error case : invalid authentification
     response_group_rank_by_id_auth_error = client.post(
@@ -309,7 +301,7 @@ def test_group_rank(client):
         headers={"Authorization": f"Bearer {token[:-1]}"},
     )
 
-    assert response_group_rank_by_id_auth_error.json["data"] == {
+    assert response_group_rank_by_id_auth_error.json()["data"] == {
         "groupRankByIdResult": {
             "__typename": "InvalidToken",
             "message": "Invalid token, authentication required",
@@ -325,7 +317,7 @@ def test_group_rank(client):
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    assert response_group_rank_with_invalid_id.json["data"] == {
+    assert response_group_rank_with_invalid_id.json()["data"] == {
         "groupRankByIdResult": {
             "__typename": "GroupByIdNotFound",
             "message": f"Group not found: {invalid_id}",
@@ -347,7 +339,7 @@ def test_group_rank(client):
     )
 
     assert (
-        response_modify_score_bet.json["data"]["modifyScoreBetResult"]["__typename"] == "ScoreBet"
+        response_modify_score_bet.json()["data"]["modifyScoreBetResult"]["__typename"] == "ScoreBet"
     )
 
     response_retrieve_group_rank_by_id = client.post(
@@ -401,7 +393,7 @@ def test_group_rank(client):
         ],
     }
 
-    assert response_retrieve_group_rank_by_id.json["data"] == {
+    assert response_retrieve_group_rank_by_id.json()["data"] == {
         "groupRankByIdResult": group_rank_result,
     }
 
@@ -417,6 +409,6 @@ def test_group_rank(client):
         },
     )
 
-    assert response_retrieve_group_rank_by_code.json["data"] == {
+    assert response_retrieve_group_rank_by_code.json()["data"] == {
         "groupRankByCodeResult": group_rank_result,
     }

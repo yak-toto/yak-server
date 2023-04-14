@@ -1,38 +1,28 @@
-import sys
 from http import HTTPStatus
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
 from operator import itemgetter
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pytest
-
 from yak_server.cli.database import initialize_database
 
+from .utils.mock import create_mock
 
-@pytest.fixture(autouse=True)
-def setup_up(app):
-    # location of test data
-    with resources.as_file(resources.files("tests") / "test_data/test_teams_v1") as path:
-        app.config["DATA_FOLDER"] = path
-
-    # initialize sql database
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
-
-    return app
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+    from starlette.testclient import TestClient
 
 
-def test_teams(client):
-    # Fetch all the teams
-    response_get_all_teams = client.get(
-        "api/v1/teams",
+def test_teams(app: "FastAPI", client: "TestClient", monkeypatch):
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_teams_v1"),
     )
+
+    initialize_database(app)
+
+    # Fetch all the teams
+    response_get_all_teams = client.get("api/v1/teams")
 
     assert response_get_all_teams.status_code == HTTPStatus.OK
 
@@ -58,7 +48,7 @@ def test_teams(client):
     ]
 
     assert sorted(
-        response_get_all_teams.json["result"]["teams"],
+        response_get_all_teams.json()["result"]["teams"],
         key=itemgetter("description"),
     ) == sorted(excepted_teams, key=itemgetter("description"))
 
@@ -67,7 +57,7 @@ def test_teams(client):
         "api/v1/teams/DE",
     )
 
-    assert response_one_team_by_code.json["result"]["team"] == {
+    assert response_one_team_by_code.json()["result"]["team"] == {
         "id": ANY,
         "code": "DE",
         "description": "Germany",
@@ -75,13 +65,13 @@ def test_teams(client):
     }
 
     # Fetch one team using id
-    team_id = response_one_team_by_code.json["result"]["team"]["id"]
+    team_id = response_one_team_by_code.json()["result"]["team"]["id"]
 
     response_one_team_by_id = client.get(
         f"api/v1/teams/{team_id}",
     )
 
-    assert response_one_team_by_id.json["result"]["team"] == {
+    assert response_one_team_by_id.json()["result"]["team"] == {
         "id": team_id,
         "code": "DE",
         "description": "Germany",
@@ -95,7 +85,7 @@ def test_teams(client):
         f"api/v1/teams/{invalid_team_id}",
     )
 
-    assert response_one_team_with_invalid_id.json == {
+    assert response_one_team_with_invalid_id.json() == {
         "ok": False,
         "error_code": HTTPStatus.BAD_REQUEST,
         "description": f"Invalid team id: {invalid_team_id}. "
@@ -109,7 +99,7 @@ def test_teams(client):
         f"api/v1/teams/{non_existing_team_id}",
     )
 
-    assert response_non_existing_team_id.json == {
+    assert response_non_existing_team_id.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Team not found: {non_existing_team_id}",
@@ -117,10 +107,11 @@ def test_teams(client):
 
     # Check flag fetching
     response_retrieve_flag = client.get(
-        response_one_team_by_code.json["result"]["team"]["flag"]["url"],
+        response_one_team_by_code.json()["result"]["team"]["flag"]["url"],
+        follow_redirects=False,
     )
 
-    assert response_retrieve_flag.status_code == HTTPStatus.FOUND
+    assert response_retrieve_flag.status_code == HTTPStatus.TEMPORARY_REDIRECT
 
     # Check flag fetching with invalid team id
     invalid_team_id = str(uuid4())
@@ -130,7 +121,7 @@ def test_teams(client):
     )
 
     assert response_retrieve_flag_with_invalid_id.status_code == HTTPStatus.NOT_FOUND
-    assert response_retrieve_flag_with_invalid_id.json == {
+    assert response_retrieve_flag_with_invalid_id.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Team not found: {invalid_team_id}",
