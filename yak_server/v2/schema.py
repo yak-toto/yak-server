@@ -240,7 +240,7 @@ class GroupPosition:
         )
 
 
-def send_group_position(group_rank) -> List[GroupPosition]:
+def send_group_position(group_rank: List[GroupPositionModel]) -> List[GroupPosition]:
     return sorted(
         [GroupPosition.from_instance(instance=group_position) for group_position in group_rank],
         key=lambda team: (

@@ -4,6 +4,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from getpass import getpass
+from typing import TYPE_CHECKING
 
 if sys.version_info >= (3, 9):
     from importlib import resources
@@ -25,6 +26,9 @@ from yak_server.database.models import (
     UserModel,
 )
 
+if TYPE_CHECKING:
+    from flask import Flask
+
 logger = logging.getLogger(__name__)
 
 
@@ -34,7 +38,7 @@ class ConfirmPasswordDoesNotMatch(Exception):
 
 
 class SignupError(Exception):
-    def __init__(self, description) -> None:
+    def __init__(self, description: str) -> None:
         super().__init__(f"Error during signup. {description}")
 
 
@@ -49,7 +53,7 @@ class TableDropInProduction(Exception):
 
 
 class BackupError(Exception):
-    def __init__(self, description) -> None:
+    def __init__(self, description: str) -> None:
         super().__init__(f"Error during backup. {description}")
 
 
@@ -57,7 +61,7 @@ def create_database() -> None:
     db.create_all()
 
 
-def create_admin(app) -> None:
+def create_admin(app: "Flask") -> None:
     password = getpass(prompt="Admin user password: ")
     confirm_password = getpass(prompt="Confirm admin password: ")
 
@@ -80,7 +84,7 @@ def create_admin(app) -> None:
         raise SignupError(response_signup.json["description"])
 
 
-def initialize_database(app) -> None:
+def initialize_database(app: "Flask") -> None:
     data_folder = app.config["DATA_FOLDER"]
 
     with Path(f"{data_folder}/phases.json").open() as file:
@@ -135,7 +139,7 @@ def initialize_database(app) -> None:
     db.session.commit()
 
 
-def backup_database(app) -> None:
+def backup_database(app: "Flask") -> None:
     with resources.as_file(resources.files("yak_server") / "cli/backup_files") as path:
         backup_location = path
 
@@ -174,7 +178,7 @@ def backup_database(app) -> None:
         logger.info(f"Backup done on {backup_datetime}")
 
 
-def delete_database(app) -> None:
+def delete_database(app: "Flask") -> None:
     if not app.config.get("DEBUG"):
         raise RecordDeletionInProduction
 
@@ -190,7 +194,7 @@ def delete_database(app) -> None:
     db.session.commit()
 
 
-def drop_database(app) -> None:
+def drop_database(app: "Flask") -> None:
     if not app.config.get("DEBUG"):
         raise TableDropInProduction
 

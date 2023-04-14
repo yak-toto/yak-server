@@ -28,6 +28,7 @@ from .utils.validation import validate_body
 if TYPE_CHECKING:
     from flask import Response
 
+    from yak_server.database.models import UserModel
 
 binary_bets = Blueprint("binary_bets", __name__)
 
@@ -37,7 +38,7 @@ logger = logging.getLogger(__name__)
 @binary_bets.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets")
 @validate_body(schema=SCHEMA_POST_BINARY_BET)
 @is_authentificated
-def create_binary_bet(user) -> Tuple["Response", int]:
+def create_binary_bet(user: "UserModel") -> Tuple["Response", int]:
     if is_locked(user.name):
         raise LockedBinaryBet
 
@@ -84,7 +85,7 @@ def create_binary_bet(user) -> Tuple["Response", int]:
 
 @binary_bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
 @is_authentificated
-def retrieve_binary_bet(user, bet_id) -> Tuple["Response", int]:
+def retrieve_binary_bet(user: "UserModel", bet_id: str) -> Tuple["Response", int]:
     binary_bet = BinaryBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
 
     if not binary_bet:
@@ -103,7 +104,7 @@ def retrieve_binary_bet(user, bet_id) -> Tuple["Response", int]:
 @binary_bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
 @validate_body(schema=SCHEMA_PATCH_BINARY_BET)
 @is_authentificated
-def modify_binary_bet(user, bet_id) -> Tuple["Response", int]:
+def modify_binary_bet(user: "UserModel", bet_id: str) -> Tuple["Response", int]:
     if is_locked(user.name):
         raise LockedBinaryBet
 
@@ -149,7 +150,7 @@ def modify_binary_bet(user, bet_id) -> Tuple["Response", int]:
 
 @binary_bets.delete(f"/{GLOBAL_ENDPOINT}/{VERSION}/binary_bets/<string:bet_id>")
 @is_authentificated
-def delete_binary_bet(user, bet_id) -> Tuple["Response", int]:
+def delete_binary_bet(user: "UserModel", bet_id: str) -> Tuple["Response", int]:
     if is_locked(user.name):
         raise LockedBinaryBet
 

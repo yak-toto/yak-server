@@ -29,7 +29,6 @@ from .utils.validation import validate_body
 if TYPE_CHECKING:
     from flask import Response
 
-
 auth = Blueprint("auth", __name__)
 
 logger = logging.getLogger(__name__)
@@ -104,7 +103,7 @@ def signup_post() -> Tuple["Response", int]:
 @auth.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/<string:user_id>")
 @validate_body(schema=SCHEMA_PATCH_USER)
 @is_admin_authentificated
-def patch_user(_, user_id) -> Tuple["Response", int]:
+def patch_user(_: UserModel, user_id: str) -> Tuple["Response", int]:
     body = request.get_json()
 
     user = UserModel.query.filter_by(id=user_id).first()
@@ -122,5 +121,5 @@ def patch_user(_, user_id) -> Tuple["Response", int]:
 
 @auth.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/current_user")
 @is_authentificated
-def current_user(current_user) -> Tuple["Response", int]:
+def current_user(current_user: UserModel) -> Tuple["Response", int]:
     return success_response(HTTPStatus.OK, current_user.to_user_dict())

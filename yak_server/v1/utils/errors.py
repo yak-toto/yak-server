@@ -1,7 +1,7 @@
 import logging
 import traceback
 from http import HTTPStatus
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from flask import Response, jsonify
 from werkzeug.exceptions import HTTPException
@@ -35,19 +35,19 @@ class InvalidCredentials(HTTPException):
 
 
 class NameAlreadyExists(HTTPException):
-    def __init__(self, name) -> None:
+    def __init__(self, name: str) -> None:
         super().__init__(name_already_exists_message(name))
         self.code = HTTPStatus.UNAUTHORIZED
 
 
 class BetNotFound(HTTPException):
-    def __init__(self, bet_id) -> None:
+    def __init__(self, bet_id: str) -> None:
         super().__init__(bet_not_found_message(bet_id))
         self.code = HTTPStatus.NOT_FOUND
 
 
 class UserNotFound(HTTPException):
-    def __init__(self, user_id) -> None:
+    def __init__(self, user_id: str) -> None:
         super().__init__(user_not_found_message(user_id))
         self.code = HTTPStatus.NOT_FOUND
 
@@ -58,7 +58,7 @@ class UnauthorizedAccessToAdminAPI(HTTPException):
 
 
 class InvalidTeamId(HTTPException):
-    def __init__(self, team_id) -> None:
+    def __init__(self, team_id: str) -> None:
         super().__init__(
             f"Invalid team id: {team_id}. Retry with a uuid or ISO 3166-1 alpha-2 code",
         )
@@ -66,7 +66,7 @@ class InvalidTeamId(HTTPException):
 
 
 class TeamNotFound(HTTPException):
-    def __init__(self, team_id) -> None:
+    def __init__(self, team_id: str) -> None:
         super().__init__(team_not_found_message(team_id))
         self.code = HTTPStatus.NOT_FOUND
 
@@ -87,13 +87,13 @@ class NoResultsForAdminUser(HTTPException):
 
 
 class GroupNotFound(HTTPException):
-    def __init__(self, group_id) -> None:
+    def __init__(self, group_id: str) -> None:
         super().__init__(group_not_found_message(group_id))
         self.code = HTTPStatus.NOT_FOUND
 
 
 class PhaseNotFound(HTTPException):
-    def __init__(self, phase_id) -> None:
+    def __init__(self, phase_id: str) -> None:
         super().__init__(phase_not_found_message(phase_id))
         self.code = HTTPStatus.NOT_FOUND
 
@@ -109,13 +109,13 @@ class ExpiredToken(HTTPException):
 
 
 class RuleNotFound(HTTPException):
-    def __init__(self, rule_id) -> None:
+    def __init__(self, rule_id: str) -> None:
         super().__init__(rule_not_found_message(rule_id))
         self.code = HTTPStatus.NOT_FOUND
 
 
 class RequestValidationError(HTTPException):
-    def __init__(self, schema, path, description) -> None:
+    def __init__(self, schema: dict, path: List[str], description: str) -> None:
         super().__init__(description)
         self.schema = schema
         self.path = path

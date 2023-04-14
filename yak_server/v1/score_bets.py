@@ -30,6 +30,7 @@ from .utils.validation import validate_body
 if TYPE_CHECKING:
     from flask import Response
 
+    from yak_server.database.models import UserModel
 
 score_bets = Blueprint("score_bets", __name__)
 
@@ -39,7 +40,7 @@ logger = logging.getLogger(__name__)
 @score_bets.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets")
 @validate_body(schema=SCHEMA_POST_SCORE_BET)
 @is_authentificated
-def create_score_bet(user) -> Tuple["Response", int]:
+def create_score_bet(user: "UserModel") -> Tuple["Response", int]:
     if is_locked(user.name):
         raise LockedScoreBet
 
@@ -103,7 +104,7 @@ def create_score_bet(user) -> Tuple["Response", int]:
 
 @score_bets.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
 @is_authentificated
-def retrieve_score_bet(user, bet_id) -> Tuple["Response", int]:
+def retrieve_score_bet(user: "UserModel", bet_id: str) -> Tuple["Response", int]:
     score_bet = ScoreBetModel.query.filter_by(user_id=user.id, id=bet_id).first()
 
     if not score_bet:
@@ -122,7 +123,7 @@ def retrieve_score_bet(user, bet_id) -> Tuple["Response", int]:
 @score_bets.patch(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
 @validate_body(schema=SCHEMA_PATCH_SCORE_BET)
 @is_authentificated
-def modify_score_bet(user, bet_id) -> Tuple["Response", int]:
+def modify_score_bet(user: "UserModel", bet_id: str) -> Tuple["Response", int]:
     if is_locked(user.name):
         raise LockedScoreBet
 
@@ -131,7 +132,7 @@ def modify_score_bet(user, bet_id) -> Tuple["Response", int]:
     if not score_bet:
         raise BetNotFound(bet_id)
 
-    def send_response(score_bet):
+    def send_response(score_bet: ScoreBetModel) -> dict:
         return success_response(
             HTTPStatus.OK,
             {
@@ -181,7 +182,7 @@ def modify_score_bet(user, bet_id) -> Tuple["Response", int]:
 
 @score_bets.delete(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_bets/<string:bet_id>")
 @is_authentificated
-def delete_score_bet(user, bet_id) -> Tuple["Response", int]:
+def delete_score_bet(user: "UserModel", bet_id: str) -> Tuple["Response", int]:
     if is_locked(user.name):
         raise LockedScoreBet
 

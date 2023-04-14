@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 import strawberry
 from flask import current_app
 from strawberry.extensions import MaskErrors, QueryDepthLimiter
@@ -5,8 +7,11 @@ from strawberry.extensions import MaskErrors, QueryDepthLimiter
 from .mutation import Mutation
 from .query import Query
 
+if TYPE_CHECKING:
+    from graphql.error import GraphQLError
 
-def mask_errors(_) -> bool:
+
+def mask_errors(_: "GraphQLError") -> bool:
     return not current_app.config["DEBUG"]
 
 

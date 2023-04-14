@@ -1,4 +1,15 @@
-def modify_score_bet_successfully(user_name, original_bet, new_score1, new_score2) -> str:
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from yak_server.database.models import BinaryBetModel, ScoreBetModel
+
+
+def modify_score_bet_successfully(
+    user_name: str,
+    original_bet: "ScoreBetModel",
+    new_score1: Optional[int],
+    new_score2: Optional[int],
+) -> str:
     return (
         f"{user_name} modify "
         f"{original_bet.match.team1.description}-{original_bet.match.team2.description} "
@@ -8,7 +19,11 @@ def modify_score_bet_successfully(user_name, original_bet, new_score1, new_score
     )
 
 
-def modify_binary_bet_successfully(user_name, original_bet, new_is_one_won) -> str:
+def modify_binary_bet_successfully(
+    user_name: str,
+    original_bet: "BinaryBetModel",
+    new_is_one_won: Optional[bool],
+) -> str:
     return (
         f"{user_name} modify "
         f"{original_bet.match.team1.description if original_bet.match.team1 else None}"

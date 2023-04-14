@@ -97,21 +97,21 @@ class UserModel(db.Model):
         passive_deletes=True,
     )
 
-    def __init__(self, name, first_name, last_name, password) -> None:
+    def __init__(self, name: str, first_name: str, last_name: str, password: str) -> None:
         self.name = name
         self.first_name = first_name
         self.last_name = last_name
         self.password = generate_password_hash(password, method="sha256")
 
     @classmethod
-    def authenticate(cls, name, password) -> "UserModel":
+    def authenticate(cls, name: str, password: str) -> "UserModel":
         user = cls.query.filter_by(name=name).first()
         if not user or not check_password_hash(user.password, password):
             return None
 
         return user
 
-    def change_password(self, new_password) -> None:
+    def change_password(self, new_password: str) -> None:
         self.password = generate_password_hash(new_password, method="sha256")
 
     def to_user_dict(self) -> dict:
@@ -137,7 +137,7 @@ class UserModel(db.Model):
         }
 
 
-def is_locked(user_name) -> bool:
+def is_locked(user_name: str) -> bool:
     locked_date = parser.parse(current_app.config["LOCK_DATETIME"])
     return user_name != "admin" and datetime.now(tz=timezone.utc) > locked_date
 
@@ -178,14 +178,14 @@ class ScoreBetModel(db.Model):
     def is_2_win(self) -> bool:
         return self.is_valid() and self.score1 < self.score2
 
-    def is_same_results(self, other) -> bool:
+    def is_same_results(self, other: "ScoreBetModel") -> bool:
         return (
             (self.is_1_win() and other.is_1_win())
             or (self.is_draw() and other.is_draw())
             or (self.is_2_win() and other.is_2_win())
         )
 
-    def is_same_scores(self, other) -> bool:
+    def is_same_scores(self, other: "ScoreBetModel") -> bool:
         return (
             self.is_valid()
             and other.is_valid()

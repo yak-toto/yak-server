@@ -1,3 +1,4 @@
+from typing import List
 from uuid import UUID
 
 import strawberry
@@ -202,7 +203,7 @@ class Query:
             group_id=group.id,
         )
 
-        def send_response(user_id, group_rank):
+        def send_response(user_id: UUID, group_rank: List[GroupPositionModel]) -> GroupRank:
             return GroupRank(
                 group_rank=send_group_position(group_rank),
                 group=Group.from_instance(instance=group, user_id=user_id),
@@ -232,14 +233,18 @@ class Query:
             group_id=group.id,
         )
 
-        def send_response(user_id, group_rank):
+        def send_response(
+            user_id: str,
+            group: GroupModel,
+            group_rank: List[GroupPositionModel],
+        ) -> GroupRank:
             return GroupRank(
                 group_rank=send_group_position(group_rank),
                 group=Group.from_instance(instance=group, user_id=user_id),
             )
 
         if not any(group_position.need_recomputation for group_position in group_rank):
-            return send_response(info.user.id, group_rank)
+            return send_response(info.user.id, group, group_rank)
 
         score_bets = info.user.instance.score_bets.filter(MatchModel.group_id == group.id).join(
             ScoreBetModel.match,
@@ -247,4 +252,4 @@ class Query:
         group_rank = compute_group_rank(group_rank, score_bets)
         db.session.commit()
 
-        return send_response(info.user.id, group_rank)
+        return send_response(info.user.id, group, group_rank)

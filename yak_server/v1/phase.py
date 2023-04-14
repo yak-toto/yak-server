@@ -13,13 +13,14 @@ from .utils.flask_utils import success_response
 if TYPE_CHECKING:
     from flask import Response
 
+    from yak_server.database.models import UserModel
 
 phase = Blueprint("phase", __name__)
 
 
 @phase.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/phases")
 @is_authentificated
-def retrieve_all_phases(_) -> Tuple["Response", int]:
+def retrieve_all_phases(_: "UserModel") -> Tuple["Response", int]:
     return success_response(
         HTTPStatus.OK,
         [phase.to_dict() for phase in PhaseModel.query.order_by(PhaseModel.index)],
@@ -28,7 +29,7 @@ def retrieve_all_phases(_) -> Tuple["Response", int]:
 
 @phase.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/phases/<string:phase_id>")
 @is_authentificated
-def retrieve_by_phase_id(_, phase_id) -> Tuple["Response", int]:
+def retrieve_by_phase_id(_: "UserModel", phase_id: str) -> Tuple["Response", int]:
     phase = PhaseModel.query.filter_by(id=phase_id).first()
 
     if not phase:
