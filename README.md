@@ -4,6 +4,7 @@
 [![Python Versions](https://img.shields.io/pypi/pyversions/yak-server)](https://pypi.org/project/yak-server/)
 [![codecov](https://codecov.io/gh/yak-toto/yak-server/branch/master/graph/badge.svg?token=EZZK5SY5BL)](https://codecov.io/gh/yak-toto/yak-server)
 [![🔐 CodeQL](https://github.com/yak-toto/yak-server/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/yak-toto/yak-server/actions/workflows/codeql-analysis.yml)
+[![Testing](https://github.com/yak-toto/yak-server/actions/workflows/test.yml/badge.svg)](https://github.com/yak-toto/yak-server/actions/workflows/test.yml)
 
 ## Requisites
 
