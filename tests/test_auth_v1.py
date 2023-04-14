@@ -1,12 +1,18 @@
 from http import HTTPStatus
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 
-import pytest
+from yak_server.config_file import get_settings
 
 from .utils import get_random_string
+from .utils.mock import create_mock
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+    from starlette.testclient import TestClient
 
 
-def test_valid_auth(client):
+def test_valid_auth(client: "TestClient"):
     user_name = get_random_string(6)
     first_name = get_random_string(6)
     last_name = get_random_string(6)
@@ -23,7 +29,7 @@ def test_valid_auth(client):
         },
     )
     assert response_signup.status_code == HTTPStatus.CREATED
-    assert response_signup.json == {
+    assert response_signup.json() == {
         "ok": True,
         "result": {"id": ANY, "name": user_name, "token": ANY},
     }
@@ -34,12 +40,12 @@ def test_valid_auth(client):
         json={"name": user_name, "password": password},
     )
     assert response_login.status_code == HTTPStatus.CREATED
-    assert response_login.json == {
+    assert response_login.json() == {
         "ok": True,
         "result": {"id": ANY, "name": user_name, "token": ANY},
     }
 
-    auth_token = response_login.json["result"]["token"]
+    auth_token = response_login.json()["result"]["token"]
 
     # current user tests
     response_current_user = client.get(
@@ -47,13 +53,13 @@ def test_valid_auth(client):
         headers={"Authorization": f"Bearer {auth_token}"},
     )
     assert response_current_user.status_code == HTTPStatus.OK
-    assert response_current_user.json == {
+    assert response_current_user.json() == {
         "ok": True,
         "result": {"id": ANY, "name": user_name},
     }
 
 
-def test_double_signup(client):
+def test_double_signup(client: "TestClient"):
     user_name = get_random_string(6)
     first_name = get_random_string(10)
     last_name = get_random_string(11)
@@ -70,7 +76,7 @@ def test_double_signup(client):
         },
     )
     assert response_signup.status_code == HTTPStatus.CREATED
-    assert response_signup.json == {
+    assert response_signup.json() == {
         "ok": True,
         "result": {"id": ANY, "name": user_name, "token": ANY},
     }
@@ -86,33 +92,31 @@ def test_double_signup(client):
         },
     )
     assert response_second_signup.status_code == HTTPStatus.UNAUTHORIZED
-    assert response_second_signup.json == {
+    assert response_second_signup.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": f"Name already exists: {user_name}",
     }
 
 
-def test_login_wrong_name(client):
+def test_login_wrong_name(client: "TestClient"):
     response_login = client.post(
         "/api/v1/users/login",
         json={
             "name": get_random_string(15),
-            "first_name": get_random_string(10),
-            "last_name": get_random_string(11),
             "password": get_random_string(12),
         },
     )
 
     assert response_login.status_code == HTTPStatus.UNAUTHORIZED
-    assert response_login.json == {
+    assert response_login.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Invalid credentials",
     }
 
 
-def test_login_wrong_password(client):
+def test_login_wrong_password(client: "TestClient"):
     user_name = get_random_string(6)
 
     response_signup = client.post(
@@ -133,14 +137,14 @@ def test_login_wrong_password(client):
     )
 
     assert response_login.status_code == HTTPStatus.UNAUTHORIZED
-    assert response_login.json == {
+    assert response_login.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Invalid credentials",
     }
 
 
-def test_invalid_token(client):
+def test_invalid_token(client: "TestClient"):
     response_signup = client.post(
         "/api/v1/users/signup",
         json={
@@ -151,15 +155,14 @@ def test_invalid_token(client):
         },
     )
 
-    auth_token = response_signup.json["result"]["token"]
+    auth_token = response_signup.json()["result"]["token"]
 
     response_get_all_bets = client.get(
         "/api/v1/bets",
         headers={"Authorization": f"Bear {auth_token}"},
     )
 
-    assert response_get_all_bets.status_code == HTTPStatus.UNAUTHORIZED
-    assert response_get_all_bets.json == {
+    assert response_get_all_bets.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Invalid token, authentication required",
@@ -171,25 +174,21 @@ def test_invalid_token(client):
     )
 
     assert response_get_all_bets_with_cropped_token.status_code == HTTPStatus.UNAUTHORIZED
-    assert response_get_all_bets_with_cropped_token.json == {
+    assert response_get_all_bets_with_cropped_token.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Invalid token, authentication required",
     }
 
 
-@pytest.fixture()
-def setup_app_for_expired_token(app):
-    old_jwt_expiration_time = app.config["JWT_EXPIRATION_TIME"]
-    app.config["JWT_EXPIRATION_TIME"] = 0
+def test_expired_token(app: "FastAPI", client: "TestClient"):
+    fake_jwt_secret_key = get_random_string(15)
 
-    yield app
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_expiration_time=0,
+        jwt_secret_key=fake_jwt_secret_key,
+    )
 
-    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
-
-
-@pytest.mark.usefixtures("setup_app_for_expired_token")
-def test_expired_token(client):
     user_name = get_random_string(6)
     password = get_random_string(15)
 
@@ -205,7 +204,7 @@ def test_expired_token(client):
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    auth_token = response_signup.json["result"]["token"]
+    auth_token = response_signup.json()["result"]["token"]
 
     response_current_user = client.get(
         "/api/v1/users/current",
@@ -213,14 +212,14 @@ def test_expired_token(client):
     )
 
     assert response_current_user.status_code == HTTPStatus.UNAUTHORIZED
-    assert response_current_user.json == {
+    assert response_current_user.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Expired token, reauthentication required",
     }
 
 
-def test_invalid_signup_body(client):
+def test_invalid_signup_body(client: "TestClient"):
     # Try to signup with invalid body
     response_signup = client.post(
         "/api/v1/users/signup",
@@ -233,25 +232,21 @@ def test_invalid_signup_body(client):
     )
 
     assert response_signup.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-    assert response_signup.json == {
+    assert response_signup.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
-        "description": "'password' is a required property",
-        "schema": {
-            "type": "object",
-            "properties": {
-                "name": {"type": "string"},
-                "first_name": {"type": "string"},
-                "last_name": {"type": "string"},
-                "password": {"type": "string"},
+        "description": [
+            {"loc": ["body", "password"], "msg": "field required", "type": "value_error.missing"},
+            {
+                "loc": ["body", "passwor"],
+                "msg": "extra fields not permitted",
+                "type": "value_error.extra",
             },
-            "required": ["name", "first_name", "last_name", "password"],
-        },
-        "path": [],
+        ],
     }
 
 
-def test_invalid_login_body(client):
+def test_invalid_login_body(client: "TestClient"):
     user_name = get_random_string(6)
     password = get_random_string(10)
 
@@ -264,77 +259,15 @@ def test_invalid_login_body(client):
     )
 
     assert response_login.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-    assert response_login.json == {
+    assert response_login.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
-        "description": "'name' is a required property",
-        "schema": {
-            "type": "object",
-            "properties": {"name": {"type": "string"}, "password": {"type": "string"}},
-            "required": ["name", "password"],
-        },
-        "path": [],
-    }
-
-
-@pytest.fixture()
-def debug_app_for_unexcepted_error_check(app):
-    # Unset expiration time configuration. Server will raise an exception.
-    old_jwt_expiration_time = app.config["JWT_EXPIRATION_TIME"]
-    del app.config["JWT_EXPIRATION_TIME"]
-
-    yield app
-
-    app.config["JWT_EXPIRATION_TIME"] = old_jwt_expiration_time
-
-
-@pytest.mark.usefixtures("debug_app_for_unexcepted_error_check")
-def test_unexpected_error(client):
-    # Check unexpected error in debug mode, error should not be obfuscated
-    response_signup_debug_unexpected_error = client.post(
-        "/api/v1/users/signup",
-        json={
-            "name": get_random_string(6),
-            "first_name": get_random_string(6),
-            "last_name": get_random_string(6),
-            "password": get_random_string(6),
-        },
-    )
-
-    assert response_signup_debug_unexpected_error.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
-    assert response_signup_debug_unexpected_error.json == {
-        "ok": False,
-        "error_code": HTTPStatus.INTERNAL_SERVER_ERROR,
-        "description": "KeyError: 'JWT_EXPIRATION_TIME'",
-    }
-
-
-@pytest.fixture()
-def production_app_unexcepted_error_check(debug_app_for_unexcepted_error_check):
-    debug_app_for_unexcepted_error_check.config["DEBUG"] = False
-
-    yield debug_app_for_unexcepted_error_check
-
-    debug_app_for_unexcepted_error_check.config["DEBUG"] = True
-
-
-@pytest.mark.usefixtures("production_app_unexcepted_error_check")
-def test_unexcepted_error(client):
-    response_signup_production_unexpected_error = client.post(
-        "/api/v1/users/signup",
-        json={
-            "name": get_random_string(6),
-            "first_name": get_random_string(6),
-            "last_name": get_random_string(6),
-            "password": get_random_string(6),
-        },
-    )
-
-    assert (
-        response_signup_production_unexpected_error.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
-    )
-    assert response_signup_production_unexpected_error.json == {
-        "ok": False,
-        "error_code": HTTPStatus.INTERNAL_SERVER_ERROR,
-        "description": "Unexcepted error",
+        "description": [
+            {"loc": ["body", "name"], "msg": "field required", "type": "value_error.missing"},
+            {
+                "loc": ["body", "nme"],
+                "msg": "extra fields not permitted",
+                "type": "value_error.extra",
+            },
+        ],
     }

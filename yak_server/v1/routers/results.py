@@ -1,11 +1,11 @@
-from http import HTTPStatus
 from itertools import chain
-from typing import TYPE_CHECKING, Tuple
+from typing import List
 
-from flask import Blueprint, current_app
+from fastapi import APIRouter, Depends
 from sqlalchemy import and_
+from sqlalchemy.orm import Session
 
-from yak_server import db
+from yak_server.config_file import Settings, get_settings
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
@@ -14,79 +14,89 @@ from yak_server.database.models import (
     ScoreBetModel,
     UserModel,
 )
+from yak_server.helpers.group_position import get_group_rank_with_code
+from yak_server.v1.helpers.auth import get_admin_user, get_current_user
+from yak_server.v1.helpers.database import get_db
+from yak_server.v1.helpers.errors import NoResultsForAdminUser
+from yak_server.v1.models.generic import GenericOut
+from yak_server.v1.models.results import UserResult
 
-from .bets import get_group_rank_with_code
-from .utils.auth_utils import is_admin_authentificated, is_authentificated
-from .utils.constants import GLOBAL_ENDPOINT, VERSION
-from .utils.errors import NoResultsForAdminUser
-from .utils.flask_utils import success_response
-
-if TYPE_CHECKING:
-    from flask import Response
-
-results = Blueprint("results", __name__)
-
-
-@results.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/score_board")
-@is_authentificated
-def score_board(_: UserModel) -> Tuple["Response", int]:
-    return success_response(
-        HTTPStatus.OK,
-        [
-            user.to_result_dict()
-            for user in UserModel.query.order_by(UserModel.points.desc()).filter(
-                UserModel.name != "admin",
-            )
-        ],
-    )
+router = APIRouter(
+    tags=["results"],
+)
 
 
-@results.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/results")
-@is_authentificated
-def results_get(current_user: UserModel) -> Tuple["Response", int]:
-    if current_user.name == "admin":
+@router.get("/score_board")
+def retrieve_score_board(
+    _: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> GenericOut[List[UserResult]]:
+    user_results = []
+
+    for rank, user in enumerate(
+        db.query(UserModel).order_by(UserModel.points.desc()).where(UserModel.name != "admin"),
+        1,
+    ):
+        user_result = UserResult.from_orm(user)
+        user_result.rank = rank
+        user_results.append(user_result)
+
+    return GenericOut(result=user_results)
+
+
+@router.get("/results")
+def retrieve_user_results(
+    user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> GenericOut[UserResult]:
+    if user.name == "admin":
         raise NoResultsForAdminUser
 
-    results = UserModel.query.order_by(UserModel.points.desc()).filter(
-        UserModel.name != "admin",
-    )
-
-    rank = [
+    user_result = UserResult.from_orm(user)
+    user_result.rank = [
         index
-        for index, user_result in enumerate(results, start=1)
-        if user_result.id == current_user.id
+        for index, user_result in enumerate(
+            db.query(UserModel)
+            .order_by(UserModel.points.desc())
+            .filter(
+                UserModel.name != "admin",
+            ),
+            1,
+        )
+        if user_result.id == user.id
     ][0]
 
-    return success_response(
-        HTTPStatus.OK,
-        {**UserModel.query.filter_by(id=current_user.id).first().to_result_dict(), "rank": rank},
-    )
+    return GenericOut(result=user_result)
 
 
-@results.post(f"/{GLOBAL_ENDPOINT}/{VERSION}/compute_points")
-@is_admin_authentificated
-def compute_points_post(_: UserModel) -> Tuple["Response", int]:
-    compute_points(
-        current_app.config["BASE_CORRECT_RESULT"],
-        current_app.config["MULTIPLYING_FACTOR_CORRECT_RESULT"],
-        current_app.config["BASE_CORRECT_SCORE"],
-        current_app.config["MULTIPLYING_FACTOR_CORRECT_SCORE"],
-        current_app.config["TEAM_QUALIFIED"],
-        current_app.config["FIRST_TEAM_QUALIFIED"],
+@router.post("/compute_points")
+def compute_pointsby_by_admin(
+    _: UserModel = Depends(get_admin_user),
+    db: Session = Depends(get_db),
+    settings: Settings = Depends(get_settings),
+) -> GenericOut[List[UserResult]]:
+    users = compute_points(
+        db,
+        settings.base_correct_result,
+        settings.multiplying_factor_correct_result,
+        settings.base_correct_score,
+        settings.multiplying_factor_correct_score,
+        settings.team_qualified,
+        settings.first_team_qualified,
     )
 
-    return success_response(
-        HTTPStatus.OK,
-        [
-            user.to_result_dict()
-            for user in UserModel.query.order_by(UserModel.points.desc()).filter(
-                UserModel.name != "admin",
-            )
-        ],
-    )
+    user_results = []
+
+    for rank, user in enumerate(users, 1):
+        user_result = UserResult.from_orm(user)
+        user_result.rank = rank
+        user_results.append(user_result)
+
+    return GenericOut(result=user_results)
 
 
 def compute_points(
+    db: Session,
     base_correct_result: int,
     multiplying_factor_correct_result: int,
     base_correct_score: int,
@@ -94,7 +104,7 @@ def compute_points(
     team_qualified: int,
     first_team_qualified: int,
 ) -> None:
-    admin = UserModel.query.filter_by(name="admin").first()
+    admin = db.query(UserModel).filter_by(name="admin").first()
 
     results = []
 
@@ -104,12 +114,16 @@ def compute_points(
         user_ids_found_correct_result = []
         user_ids_found_correct_score = []
 
-        for user_score in ScoreBetModel.query.join(ScoreBetModel.match).filter(
-            and_(
-                ScoreBetModel.user_id != admin.id,
-                MatchModel.index == real_score.match.index,
-                MatchModel.group_id == real_score.match.group_id,
-            ),
+        for user_score in (
+            db.query(ScoreBetModel)
+            .join(ScoreBetModel.match)
+            .filter(
+                and_(
+                    ScoreBetModel.user_id != admin.id,
+                    MatchModel.index == real_score.match.index,
+                    MatchModel.group_id == real_score.match.group_id,
+                ),
+            )
         ):
             if user_score.is_same_results(real_score):
                 number_correct_result += 1
@@ -130,16 +144,20 @@ def compute_points(
 
     result_groups = {}
 
-    users = UserModel.query.filter(UserModel.name != "admin")
+    users = db.query(UserModel).filter(UserModel.name != "admin")
 
-    for group in GroupModel.query.join(GroupModel.phase).filter(
-        PhaseModel.code == "GROUP",
+    for group in (
+        db.query(GroupModel)
+        .join(GroupModel.phase)
+        .filter(
+            PhaseModel.code == "GROUP",
+        )
     ):
-        group_result_admin = get_group_rank_with_code(admin, group.code)["group_rank"]
+        group_result_admin = get_group_rank_with_code(db, admin, group.id)
 
         if all_results_filled_in_group(group_result_admin):
-            admin_first_team_id = group_result_admin[0]["team"]["id"]
-            admin_second_team_id = group_result_admin[1]["team"]["id"]
+            admin_first_team_id = group_result_admin[0].team.id
+            admin_second_team_id = group_result_admin[1].team.id
 
             for user in users:
                 if user.id not in result_groups:
@@ -148,11 +166,11 @@ def compute_points(
                         "number_first_qualified_guess": 0,
                     }
 
-                group_result_user = get_group_rank_with_code(user, group.code)["group_rank"]
+                group_result_user = get_group_rank_with_code(db, user, group.id)
 
                 if all_results_filled_in_group(group_result_user):
-                    user_first_team_id = group_result_user[0]["team"]["id"]
-                    user_second_team_id = group_result_user[1]["team"]["id"]
+                    user_first_team_id = group_result_user[0].team.id
+                    user_second_team_id = group_result_user[1].team.id
 
                     result_groups[user.id]["number_qualified_teams_guess"] += len(
                         {user_first_team_id, user_second_team_id}
@@ -215,11 +233,13 @@ def compute_points(
         user.points += 120 * user.number_final_guess
         user.points += 200 * user.number_winner_guess
 
-    db.session.commit()
+    db.commit()
+
+    return users
 
 
 def all_results_filled_in_group(group_result: list) -> bool:
-    return all(team["played"] == len(group_result) - 1 for team in group_result)
+    return all(team.played == len(group_result) - 1 for team in group_result)
 
 
 def team_from_group_code(user: UserModel, group_code: str) -> set:

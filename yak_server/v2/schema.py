@@ -1,9 +1,10 @@
+from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
 import strawberry
+from sqlalchemy.orm import Session
 
-from yak_server import db
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
@@ -13,8 +14,8 @@ from yak_server.database.models import (
     ScoreBetModel,
     TeamModel,
     UserModel,
-    is_locked,
 )
+from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.group_position import compute_group_rank
 
 
@@ -74,6 +75,8 @@ class UserWithoutSensitiveInfo:
 @strawberry.type
 class User:
     instance: strawberry.Private[UserModel]
+    db: strawberry.Private[Session]
+    lock_datetime: strawberry.Private[datetime]
 
     id: UUID
     pseudo: str
@@ -89,8 +92,13 @@ class User:
     @strawberry.field
     def binary_bets(self) -> List["BinaryBet"]:
         return [
-            BinaryBet.from_instance(instance=binary_bet)
-            for binary_bet in BinaryBetModel.query.filter_by(user_id=self.instance.id)
+            BinaryBet.from_instance(
+                db=self.db,
+                instance=binary_bet,
+                lock_datetime=self.lock_datetime,
+            )
+            for binary_bet in self.db.query(BinaryBetModel)
+            .filter_by(user_id=self.instance.id)
             .join(BinaryBetModel.match)
             .join(MatchModel.group)
             .order_by(GroupModel.index, MatchModel.index)
@@ -99,8 +107,9 @@ class User:
     @strawberry.field
     def score_bets(self) -> List["ScoreBet"]:
         return [
-            ScoreBet.from_instance(instance=score_bet)
-            for score_bet in ScoreBetModel.query.filter_by(user_id=self.instance.id)
+            ScoreBet.from_instance(db=self.db, instance=score_bet, lock_datetime=self.lock_datetime)
+            for score_bet in self.db.query(ScoreBetModel)
+            .filter_by(user_id=self.instance.id)
             .join(ScoreBetModel.match)
             .join(MatchModel.group)
             .order_by(GroupModel.index, MatchModel.index)
@@ -109,21 +118,33 @@ class User:
     @strawberry.field
     def groups(self) -> List["Group"]:
         return [
-            Group.from_instance(instance=group, user_id=self.instance.id)
-            for group in GroupModel.query.order_by(GroupModel.index)
+            Group.from_instance(
+                db=self.db,
+                instance=group,
+                user_id=self.instance.id,
+                lock_datetime=self.lock_datetime,
+            )
+            for group in self.db.query(GroupModel).order_by(GroupModel.index)
         ]
 
     @strawberry.field
     def phases(self) -> List["Phase"]:
         return [
-            Phase.from_instance(instance=phase, user_id=self.instance.id)
-            for phase in PhaseModel.query.order_by(PhaseModel.index)
+            Phase.from_instance(
+                db=self.db,
+                instance=phase,
+                user_id=self.instance.id,
+                lock_datetime=self.lock_datetime,
+            )
+            for phase in self.db.query(PhaseModel).order_by(PhaseModel.index)
         ]
 
     @classmethod
-    def from_instance(cls, instance: UserModel) -> "User":
+    def from_instance(cls, db: Session, instance: UserModel, lock_datetime: datetime) -> "User":
         return cls(
+            db=db,
             instance=instance,
+            lock_datetime=lock_datetime,
             id=instance.id,
             pseudo=instance.name,
             first_name=instance.first_name,
@@ -137,9 +158,17 @@ class UserWithToken(User):
     token: str
 
     @classmethod
-    def from_instance(cls, instance: UserModel, token: str) -> "UserWithToken":
+    def from_instance(
+        cls,
+        db: Session,
+        instance: UserModel,
+        lock_datetime: datetime,
+        token: str,
+    ) -> "UserWithToken":
         return cls(
             instance=instance,
+            db=db,
+            lock_datetime=lock_datetime,
             id=instance.id,
             pseudo=instance.name,
             first_name=instance.first_name,
@@ -254,8 +283,10 @@ def send_group_position(group_rank: List[GroupPositionModel]) -> List[GroupPosit
 
 @strawberry.type
 class Group:
+    db: strawberry.Private[Session]
     instance: strawberry.Private[GroupModel]
     user_id: strawberry.Private[str]
+    lock_datetime: strawberry.Private[datetime]
 
     id: UUID
     code: str
@@ -263,31 +294,40 @@ class Group:
 
     @strawberry.field
     def group_rank(self) -> List[GroupPosition]:
-        group_rank = GroupPositionModel.query.filter_by(user_id=self.user_id, group_id=self.id)
+        group_rank = self.db.query(GroupPositionModel).filter_by(
+            user_id=self.user_id,
+            group_id=self.id,
+        )
 
         if not any(group_position.need_recomputation for group_position in group_rank):
             return send_group_position(group_rank)
 
-        user = UserModel.query.filter_by(id=self.user_id).first()
+        user = self.db.query(UserModel).filter_by(id=self.user_id).first()
 
         score_bets = user.score_bets.filter(MatchModel.group_id == self.id).join(
             ScoreBetModel.match,
         )
         group_rank = compute_group_rank(group_rank, score_bets)
-        db.session.commit()
+        self.db.commit()
 
         return send_group_position(group_rank)
 
     @strawberry.field
     def phase(self) -> "Phase":
-        return Phase.from_instance(instance=self.instance.phase, user_id=self.user_id)
+        return Phase.from_instance(
+            db=self.db,
+            instance=self.instance.phase,
+            user_id=self.user_id,
+            lock_datetime=self.lock_datetime,
+        )
 
     @strawberry.field
     def score_bets(self) -> List["ScoreBet"]:
         return [
-            ScoreBet.from_instance(instance=score_bet)
+            ScoreBet.from_instance(db=self.db, instance=score_bet, lock_datetime=self.lock_datetime)
             for score_bet in (
-                ScoreBetModel.query.filter_by(user_id=self.user_id)
+                self.db.query(ScoreBetModel)
+                .filter_by(user_id=self.user_id)
                 .join(ScoreBetModel.match)
                 .join(MatchModel.group)
                 .filter(
@@ -300,9 +340,14 @@ class Group:
     @strawberry.field
     def binary_bets(self) -> List["BinaryBet"]:
         return [
-            BinaryBet.from_instance(instance=binary_bet)
+            BinaryBet.from_instance(
+                db=self.db,
+                instance=binary_bet,
+                lock_datetime=self.lock_datetime,
+            )
             for binary_bet in (
-                BinaryBetModel.query.filter_by(user_id=self.user_id)
+                self.db.query(BinaryBetModel)
+                .filter_by(user_id=self.user_id)
                 .join(BinaryBetModel.match)
                 .join(MatchModel.group)
                 .filter(
@@ -313,10 +358,18 @@ class Group:
         ]
 
     @classmethod
-    def from_instance(cls, instance: GroupModel, user_id: str) -> "Group":
+    def from_instance(
+        cls,
+        db: Session,
+        instance: GroupModel,
+        user_id: str,
+        lock_datetime: datetime,
+    ) -> "Group":
         return cls(
+            db=db,
             instance=instance,
             user_id=user_id,
+            lock_datetime=lock_datetime,
             id=instance.id,
             code=instance.code,
             description=instance.description,
@@ -325,8 +378,10 @@ class Group:
 
 @strawberry.type
 class Phase:
+    db: strawberry.Private[Session]
     instance: strawberry.Private[PhaseModel]
     user_id: strawberry.Private[str]
+    lock_datetime: strawberry.Private[datetime]
 
     id: UUID
     code: str
@@ -335,8 +390,15 @@ class Phase:
     @strawberry.field
     def groups(self) -> List[Group]:
         return [
-            Group.from_instance(instance=group, user_id=self.user_id)
-            for group in GroupModel.query.filter_by(phase_id=self.instance.id).order_by(
+            Group.from_instance(
+                db=self.db,
+                instance=group,
+                user_id=self.user_id,
+                lock_datetime=self.lock_datetime,
+            )
+            for group in self.db.query(GroupModel)
+            .filter_by(phase_id=self.instance.id)
+            .order_by(
                 GroupModel.index,
             )
         ]
@@ -344,8 +406,13 @@ class Phase:
     @strawberry.field
     def binary_bets(self) -> List["BinaryBet"]:
         return [
-            BinaryBet.from_instance(instance=binary_bet)
-            for binary_bet in BinaryBetModel.query.filter_by(user_id=self.user_id)
+            BinaryBet.from_instance(
+                db=self.db,
+                instance=binary_bet,
+                lock_datetime=self.lock_datetime,
+            )
+            for binary_bet in self.db.query(BinaryBetModel)
+            .filter_by(user_id=self.user_id)
             .join(BinaryBetModel.match)
             .join(MatchModel.group)
             .filter(
@@ -357,8 +424,9 @@ class Phase:
     @strawberry.field
     def score_bets(self) -> List["ScoreBet"]:
         return [
-            ScoreBet.from_instance(instance=score_bet)
-            for score_bet in ScoreBetModel.query.filter_by(user_id=self.user_id)
+            ScoreBet.from_instance(db=self.db, instance=score_bet, lock_datetime=self.lock_datetime)
+            for score_bet in self.db.query(ScoreBetModel)
+            .filter_by(user_id=self.user_id)
             .join(ScoreBetModel.match)
             .join(MatchModel.group)
             .filter(
@@ -368,10 +436,18 @@ class Phase:
         ]
 
     @classmethod
-    def from_instance(cls, instance: PhaseModel, user_id: str) -> "Phase":
+    def from_instance(
+        cls,
+        db: Session,
+        instance: PhaseModel,
+        user_id: str,
+        lock_datetime: datetime,
+    ) -> "Phase":
         return cls(
+            db=db,
             instance=instance,
             user_id=user_id,
+            lock_datetime=lock_datetime,
             id=instance.id,
             code=instance.code,
             description=instance.description,
@@ -390,15 +466,22 @@ class ScoreBet:
     team2: Optional[TeamWithScore]
 
     @classmethod
-    def from_instance(cls, instance: ScoreBetModel) -> "ScoreBet":
+    def from_instance(
+        cls,
+        db: "Session",
+        instance: ScoreBetModel,
+        lock_datetime: datetime,
+    ) -> "ScoreBet":
         return cls(
             instance=instance,
             id=instance.id,
             index=instance.match.index,
-            locked=is_locked(instance.user.name),
+            locked=is_locked(instance.user.name, lock_datetime),
             group=Group.from_instance(
+                db=db,
                 instance=instance.match.group,
                 user_id=instance.user_id,
+                lock_datetime=lock_datetime,
             ),
             team1=TeamWithScore.from_instance(
                 instance=instance.match.team1,
@@ -427,17 +510,24 @@ class BinaryBet:
     team2: Optional[TeamWithVictory]
 
     @classmethod
-    def from_instance(cls, instance: BinaryBetModel) -> "BinaryBet":
+    def from_instance(
+        cls,
+        db: "Session",
+        instance: BinaryBetModel,
+        lock_datetime: datetime,
+    ) -> "BinaryBet":
         bet_results = instance.bet_from_is_one_won()
 
         return cls(
             instance=instance,
             id=instance.id,
             index=instance.match.index,
-            locked=is_locked(instance.user.name),
+            locked=is_locked(instance.user.name, lock_datetime),
             group=Group.from_instance(
+                db=db,
                 instance=instance.match.group,
                 user_id=instance.user_id,
+                lock_datetime=lock_datetime,
             ),
             team1=TeamWithVictory.from_instance(
                 instance=instance.match.team1,

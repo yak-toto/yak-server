@@ -1,6 +1,7 @@
 import sys
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
+from typing import TYPE_CHECKING
 
 if sys.version_info >= (3, 9):
     from importlib import resources
@@ -23,11 +24,22 @@ from yak_server.cli.database import (
     delete_database,
     drop_database,
 )
+from yak_server.config_file import get_settings
 
 from .utils import get_random_string
+from .utils.mock import create_mock
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+    from starlette.testclient import TestClient
 
 
-def test_create_admin(client, app, monkeypatch):
+def test_create_admin(app: "FastAPI", client: "TestClient", monkeypatch):
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_expiration_time=20,
+        jwt_secret_key=get_random_string(10),
+    )
+
     # Error case : password and confirm password does not match
     mock_password_does_not_match = Mock(
         side_effect=[
@@ -84,8 +96,8 @@ def test_drop_all_tables(production_app):
         drop_database(production_app)
 
 
-def test_backup(app):
-    backup_database(app)
+def test_backup(monkeypatch):
+    backup_database()
 
     list_datetime_backup = sorted(
         parser.parse(file.name.replace(".sql", "").replace("yak_toto_backup_", ""))
@@ -96,10 +108,7 @@ def test_backup(app):
     assert datetime.now(tz=timezone.utc) - list_datetime_backup[-1] <= timedelta(seconds=2)
 
     # Check BackupError if password is incorrect
-    old_password = app.config["MYSQL_PASSWORD"]
-    app.config["MYSQL_PASSWORD"] = get_random_string(6)
+    monkeypatch.setattr("yak_server.cli.database.mysql_settings.db", get_random_string(6))
 
     with pytest.raises(BackupError):
-        backup_database(app)
-
-    app.config["MYSQL_PASSWORD"] = old_password
+        backup_database()

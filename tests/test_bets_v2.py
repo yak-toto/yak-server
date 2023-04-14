@@ -1,32 +1,28 @@
-import sys
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pytest
+from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
 
 from .utils import get_random_string
+from .utils.mock import create_mock
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 
-@pytest.fixture(autouse=True)
-def setup_app(app):
-    with resources.as_file(resources.files("tests") / "test_data/test_modify_bet_v2") as path:
-        app.config["DATA_FOLDER"] = path
+def test_bets(app_with_lockdatetime_in_past: "FastAPI", monkeypatch):
+    client = TestClient(app_with_lockdatetime_in_past)
 
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_modify_bet_v2"),
+    )
 
-    return app
+    initialize_database(app_with_lockdatetime_in_past)
 
-
-def test_bets(client):
     user_name = get_random_string(10)
     first_name = get_random_string(5)
     last_name = get_random_string(8)
@@ -68,10 +64,12 @@ def test_bets(client):
         },
     )
 
-    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
-    authentification_token = response_signup.json["data"]["signupResult"]["token"]
+    assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
+    authentification_token = response_signup.json()["data"]["signupResult"]["token"]
 
-    score_bet_ids = [bet["id"] for bet in response_signup.json["data"]["signupResult"]["scoreBets"]]
+    score_bet_ids = [
+        bet["id"] for bet in response_signup.json()["data"]["signupResult"]["scoreBets"]
+    ]
 
     query_score_bet = """
         query getScoreBet($scoreBetId: UUID!) {
@@ -114,7 +112,7 @@ def test_bets(client):
         json={"query": query_score_bet, "variables": {"scoreBetId": score_bet_ids[0]}},
     )
 
-    assert response_score_bet.json == {
+    assert response_score_bet.json() == {
         "data": {
             "scoreBetResult": {
                 "__typename": "ScoreBet",
@@ -137,7 +135,7 @@ def test_bets(client):
         json={"query": query_score_bet, "variables": {"scoreBetId": invalid_bet_id}},
     )
 
-    assert response_score_bet_with_invalid_id.json == {
+    assert response_score_bet_with_invalid_id.json() == {
         "data": {
             "scoreBetResult": {
                 "__typename": "ScoreBetNotFound",

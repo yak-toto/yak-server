@@ -1,34 +1,27 @@
-import sys
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pytest
+from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
 
 from .utils import get_random_string
+from .utils.mock import create_mock
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 
-@pytest.fixture(autouse=True)
-def setup_app(app):
-    # location of test data
-    with resources.as_file(resources.files("tests") / "test_data/test_matches_db") as path:
-        app.config["DATA_FOLDER"] = path
+def test_phase(app_with_lockdatetime_in_past: "FastAPI", monkeypatch):
+    client = TestClient(app_with_lockdatetime_in_past)
 
-    # initialize sql database
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_matches_db"),
+    )
+    initialize_database(app_with_lockdatetime_in_past)
 
-    return app
-
-
-def test_phase(client):
     # Signup one random user
     user_name = get_random_string(6)
     first_name = get_random_string(10)
@@ -66,9 +59,9 @@ def test_phase(client):
         },
     )
 
-    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
+    assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
 
-    token = response_signup.json["data"]["signupResult"]["token"]
+    token = response_signup.json()["data"]["signupResult"]["token"]
 
     # Check retrieve all phases
     response_all_phases = client.post(
@@ -84,6 +77,26 @@ def test_phase(client):
                                 id
                                 code
                                 description
+                                binaryBets {
+                                    team1 {
+                                        description
+                                        won
+                                    }
+                                    team2 {
+                                        description
+                                        won
+                                    }
+                                }
+                                scoreBets {
+                                    team1 {
+                                        description
+                                        score
+                                    }
+                                    team2 {
+                                        description
+                                        score
+                                    }
+                                }
                                 groups {
                                     id
                                     description
@@ -127,7 +140,7 @@ def test_phase(client):
         },
     )
 
-    assert response_all_phases.json == {
+    assert response_all_phases.json() == {
         "data": {
             "allPhasesResult": {
                 "__typename": "Phases",
@@ -136,6 +149,42 @@ def test_phase(client):
                         "id": ANY,
                         "code": "GROUP",
                         "description": "Group stage",
+                        "binaryBets": [],
+                        "scoreBets": [
+                            {
+                                "team1": {"description": "Andorra", "score": None},
+                                "team2": {"description": "Brazil", "score": None},
+                            },
+                            {
+                                "team1": {"description": "Burkina Faso", "score": None},
+                                "team2": {
+                                    "description": "The Republic of Guatemala",
+                                    "score": None,
+                                },
+                            },
+                            {
+                                "team1": {"description": "Andorra", "score": None},
+                                "team2": {"description": "Burkina Faso", "score": None},
+                            },
+                            {
+                                "team1": {"description": "Brazil", "score": None},
+                                "team2": {
+                                    "description": "The Republic of Guatemala",
+                                    "score": None,
+                                },
+                            },
+                            {
+                                "team1": {"description": "Andorra", "score": None},
+                                "team2": {
+                                    "description": "The Republic of Guatemala",
+                                    "score": None,
+                                },
+                            },
+                            {
+                                "team1": {"description": "Brazil", "score": None},
+                                "team2": {"description": "Burkina Faso", "score": None},
+                            },
+                        ],
                         "groups": [
                             {
                                 "binaryBets": [],
@@ -219,7 +268,7 @@ def test_phase(client):
     }
     """
 
-    phase_id = response_all_phases.json["data"]["allPhasesResult"]["phases"][0]["id"]
+    phase_id = response_all_phases.json()["data"]["allPhasesResult"]["phases"][0]["id"]
 
     response_phase_by_id = client.post(
         "/api/v2",
@@ -230,7 +279,7 @@ def test_phase(client):
         },
     )
 
-    assert response_phase_by_id.json == {
+    assert response_phase_by_id.json() == {
         "data": {
             "phaseByIdResult": {
                 "__typename": "Phase",
@@ -253,7 +302,7 @@ def test_phase(client):
         },
     )
 
-    assert response_phase_with_invalid_id.json == {
+    assert response_phase_with_invalid_id.json() == {
         "data": {
             "phaseByIdResult": {
                 "__typename": "PhaseByIdNotFound",
@@ -284,7 +333,7 @@ def test_phase(client):
     }
     """
 
-    phase_code = response_phase_by_id.json["data"]["phaseByIdResult"]["code"]
+    phase_code = response_phase_by_id.json()["data"]["phaseByIdResult"]["code"]
 
     response_phase_by_code = client.post(
         "/api/v2",
@@ -292,7 +341,7 @@ def test_phase(client):
         json={"query": query_phase_by_code, "variables": {"phaseCode": phase_code}},
     )
 
-    assert response_phase_by_code.json == {
+    assert response_phase_by_code.json() == {
         "data": {
             "phaseByCodeResult": {
                 "__typename": "Phase",
@@ -312,7 +361,7 @@ def test_phase(client):
         json={"query": query_phase_by_code, "variables": {"phaseCode": invalid_phase_code}},
     )
 
-    assert response_phase_with_invalid_code.json == {
+    assert response_phase_with_invalid_code.json() == {
         "data": {
             "phaseByCodeResult": {
                 "__typename": "PhaseByCodeNotFound",

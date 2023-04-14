@@ -1,17 +1,4 @@
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
-
-from flask import jsonify
-
-if TYPE_CHECKING:
-    from flask import Response
-
-
-def success_response(
-    status_code: int,
-    result: Union[None, List[Any], Dict[str, Any]],
-) -> Tuple["Response", int]:
-    return jsonify({"ok": True, "result": result}), status_code
 
 
 def is_uuid4(uuid: str) -> bool:

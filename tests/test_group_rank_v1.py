@@ -1,37 +1,35 @@
-import sys
 from datetime import timedelta
 from http import HTTPStatus
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 
-import pytest
-
 from yak_server.cli.database import initialize_database
+from yak_server.config_file import get_settings
 
-from .utils import get_paris_datetime_now, get_random_string
+from .utils import get_random_string
+from .utils.mock import create_mock
 
-
-@pytest.fixture(autouse=True)
-def setup_app(app):
-    with resources.as_file(resources.files("tests") / "test_data/test_compute_points_v1") as path:
-        app.config["DATA_FOLDER"] = path
-    old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
-
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
-
-    yield app
-
-    app.config["LOCK_DATETIME"] = old_lock_datetime
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+    from starlette.testclient import TestClient
 
 
-def test_group_rank(client):
+def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch):
+    fake_jwt_secret_key = get_random_string(100)
+
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_secret_key=fake_jwt_secret_key,
+        jwt_expiration_time=10,
+        lock_datetime_shift=timedelta(minutes=10),
+    )
+
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_compute_points_v1"),
+    )
+
+    initialize_database(app)
+
     response_signup = client.post(
         "/api/v1/users/signup",
         json={
@@ -44,7 +42,7 @@ def test_group_rank(client):
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    token = response_signup.json["result"]["token"]
+    token = response_signup.json()["result"]["token"]
 
     response_all_bets = client.get(
         "/api/v1/bets",
@@ -55,7 +53,7 @@ def test_group_rank(client):
 
     new_scores = [(5, 1), (0, 0), (1, 2)]
 
-    for bet, new_score in zip(response_all_bets.json["result"]["score_bets"], new_scores):
+    for bet, new_score in zip(response_all_bets.json()["result"]["score_bets"], new_scores):
         response_patch_bet = client.patch(
             f"/api/v1/score_bets/{bet['id']}",
             headers={"Authorization": f"Bearer {token}"},
@@ -73,7 +71,7 @@ def test_group_rank(client):
     )
 
     assert response_group_result_response.status_code == HTTPStatus.OK
-    assert response_group_result_response.json["result"]["group_rank"] == [
+    assert response_group_result_response.json()["result"]["group_rank"] == [
         {
             "team": {
                 "id": ANY,
@@ -132,14 +130,14 @@ def test_group_rank(client):
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    assert response_group_rank_with_invalid_code.json == {
+    assert response_group_rank_with_invalid_code.json() == {
         "description": f"Group not found: {invalid_group_code}",
         "error_code": HTTPStatus.NOT_FOUND,
         "ok": False,
     }
 
     response_patch_bet = client.patch(
-        f"/api/v1/score_bets/{response_all_bets.json['result']['score_bets'][0]['id']}",
+        f"/api/v1/score_bets/{response_all_bets.json()['result']['score_bets'][0]['id']}",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "team1": {"score": 6},
@@ -155,7 +153,7 @@ def test_group_rank(client):
     )
 
     assert response_group_rank_response.status_code == HTTPStatus.OK
-    assert response_group_rank_response.json["result"]["group_rank"] == [
+    assert response_group_rank_response.json()["result"]["group_rank"] == [
         {
             "team": {
                 "id": ANY,
@@ -207,7 +205,7 @@ def test_group_rank(client):
     ]
 
     response_patch_bet = client.patch(
-        f"/api/v1/score_bets/{response_all_bets.json['result']['score_bets'][1]['id']}",
+        f"/api/v1/score_bets/{response_all_bets.json()['result']['score_bets'][1]['id']}",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "team1": {"score": None},
@@ -222,7 +220,7 @@ def test_group_rank(client):
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    assert response_group_rank_response.json["result"]["group_rank"] == [
+    assert response_group_rank_response.json()["result"]["group_rank"] == [
         {
             "team": {
                 "id": ANY,
@@ -278,7 +276,7 @@ def test_group_rank(client):
     ]
 
     response_patch_bet = client.patch(
-        f"/api/v1/score_bets/{response_all_bets.json['result']['score_bets'][2]['id']}",
+        f"/api/v1/score_bets/{response_all_bets.json()['result']['score_bets'][2]['id']}",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "team1": {"score": None},
@@ -293,7 +291,7 @@ def test_group_rank(client):
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    assert response_group_rank_response.json["result"]["group_rank"] == [
+    assert response_group_rank_response.json()["result"]["group_rank"] == [
         {
             "team": {
                 "id": ANY,
@@ -345,7 +343,7 @@ def test_group_rank(client):
     ]
 
     response_patch_bet = client.patch(
-        f"/api/v1/score_bets/{response_all_bets.json['result']['score_bets'][0]['id']}",
+        f"/api/v1/score_bets/{response_all_bets.json()['result']['score_bets'][0]['id']}",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "team1": {"score": 1},
@@ -364,7 +362,7 @@ def test_group_rank(client):
         return group_position["team"]["code"]
 
     assert sorted(
-        response_group_rank_response.json["result"]["group_rank"],
+        response_group_rank_response.json()["result"]["group_rank"],
         key=sort_group_position,
     ) == sorted(
         [
@@ -421,7 +419,7 @@ def test_group_rank(client):
     )
 
     response_patch_bet = client.patch(
-        f"/api/v1/score_bets/{response_all_bets.json['result']['score_bets'][0]['id']}",
+        f"/api/v1/score_bets/{response_all_bets.json()['result']['score_bets'][0]['id']}",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "team1": {"score": None},
@@ -436,4 +434,4 @@ def test_group_rank(client):
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    assert response_group_rank_response_1.json == response_group_rank_response.json
+    assert response_group_rank_response_1.json() == response_group_rank_response.json()

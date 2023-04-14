@@ -1,36 +1,34 @@
-import sys
 from datetime import timedelta
 from http import HTTPStatus
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
-import pytest
+from typing import TYPE_CHECKING
 
 from yak_server.cli.database import initialize_database
+from yak_server.config_file import get_settings
 
-from .utils import get_paris_datetime_now, get_random_string
+from .utils import get_random_string
+from .utils.mock import create_mock
 
-
-@pytest.fixture()
-def setup_app(app):
-    # location of test data
-    with resources.as_file(resources.files("tests") / "test_data/test_modify_bet_v2") as path:
-        app.config["DATA_FOLDER"] = path
-    old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
-
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
-
-    yield app
-
-    app.config["LOCK_DATETIME"] = old_lock_datetime
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+    from starlette.testclient import TestClient
 
 
-def test_delete_score_bet(client, setup_app):
+def test_delete_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
+    fake_jwt_secret_key = get_random_string(100)
+
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_secret_key=fake_jwt_secret_key,
+        jwt_expiration_time=10,
+        lock_datetime_shift=timedelta(minutes=10),
+    )
+
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_modify_bet_v2"),
+    )
+
+    initialize_database(app)
+
     # Signup one user
     response_signup = client.post(
         "/api/v1/users/signup",
@@ -45,13 +43,13 @@ def test_delete_score_bet(client, setup_app):
     assert response_signup.status_code == HTTPStatus.CREATED
 
     # Fetch all bets and get the ids
-    token = response_signup.json["result"]["token"]
+    token = response_signup.json()["result"]["token"]
 
     response_all_bets = client.get("/api/v1/bets", headers={"Authorization": f"Bearer {token}"})
 
     assert response_all_bets.status_code == HTTPStatus.OK
 
-    bet_id = response_all_bets.json["result"]["score_bets"][0]["id"]
+    bet_id = response_all_bets.json()["result"]["score_bets"][0]["id"]
 
     # Retrieve one score bet
     response_get_score_bet = client.get(
@@ -68,7 +66,7 @@ def test_delete_score_bet(client, setup_app):
     )
 
     assert response_delete_score_bet.status_code == HTTPStatus.OK
-    assert response_delete_score_bet.json == response_get_score_bet.json
+    assert response_delete_score_bet.json() == response_get_score_bet.json()
 
     # Try to delete a second times and error
     response_delete_score_bet_second_times = client.delete(
@@ -77,17 +75,20 @@ def test_delete_score_bet(client, setup_app):
     )
 
     assert response_delete_score_bet_second_times.status_code == HTTPStatus.NOT_FOUND
-    assert response_delete_score_bet_second_times.json == {
+    assert response_delete_score_bet_second_times.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Bet not found: {bet_id}",
     }
 
     # Check bet locking
-    old_lock_datetime = setup_app.config["LOCK_DATETIME"]
-    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() - timedelta(minutes=10))
+    app.dependency_overrides[get_settings] = create_mock(
+        lock_datetime_shift=-timedelta(minutes=10),
+        jwt_expiration_time=10,
+        jwt_secret_key=fake_jwt_secret_key,
+    )
 
-    bet2_id = response_all_bets.json["result"]["score_bets"][1]["id"]
+    bet2_id = response_all_bets.json()["result"]["score_bets"][1]["id"]
 
     response_delete_locked_score_bet = client.delete(
         f"/api/v1/score_bets/{bet2_id}",
@@ -95,10 +96,8 @@ def test_delete_score_bet(client, setup_app):
     )
 
     assert response_delete_locked_score_bet.status_code == HTTPStatus.UNAUTHORIZED
-    assert response_delete_locked_score_bet.json == {
+    assert response_delete_locked_score_bet.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Cannot modify score bet, lock date is exceeded",
     }
-
-    setup_app.config["LOCK_DATETIME"] = old_lock_datetime

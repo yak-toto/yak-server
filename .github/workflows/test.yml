@@ -55,7 +55,7 @@ jobs:
           MYSQL_DB: yak_toto_test
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
           JWT_EXPIRATION_TIME: 1800
-          FLASK_DEBUG: 1
+          DEBUG: 1
           COMPETITION: world_cup_2022
         run:
           poetry run pytest --cov=yak_server --cov-report=xml -vv

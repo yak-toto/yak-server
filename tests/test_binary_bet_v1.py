@@ -1,39 +1,36 @@
-import sys
 from datetime import timedelta
 from http import HTTPStatus
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pytest
-
 from yak_server.cli.database import initialize_database
+from yak_server.config_file import get_settings
 
-from .utils import get_paris_datetime_now, get_random_string
+from .utils import get_random_string
+from .utils.mock import create_mock
 
-
-@pytest.fixture()
-def setup_app(app):
-    old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(seconds=30))
-
-    with resources.as_file(resources.files("tests") / "test_data/test_binary_bet") as path:
-        app.config["DATA_FOLDER"] = path
-
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
-
-    yield app
-
-    app.config["LOCK_DATETIME"] = old_lock_datetime
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+    from starlette.testclient import TestClient
 
 
-def test_binary_bet(client, setup_app):
+def test_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
+    fake_jwt_secret_key = get_random_string(100)
+
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_secret_key=fake_jwt_secret_key,
+        jwt_expiration_time=10,
+        lock_datetime_shift=timedelta(minutes=10),
+    )
+
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_binary_bet"),
+    )
+
+    initialize_database(app)
+
     response_signup = client.post(
         "/api/v1/users/signup",
         json={
@@ -46,13 +43,13 @@ def test_binary_bet(client, setup_app):
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    token = response_signup.json["result"]["token"]
+    token = response_signup.json()["result"]["token"]
 
     response_bets = client.get("/api/v1/bets", headers={"Authorization": f"Bearer {token}"})
 
     assert response_bets.status_code == HTTPStatus.OK
 
-    bet_id = response_bets.json["result"]["binary_bets"][0]["id"]
+    bet_id = response_bets.json()["result"]["binary_bets"][0]["id"]
 
     response_modify_binary_bet = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
@@ -61,7 +58,7 @@ def test_binary_bet(client, setup_app):
     )
 
     assert response_modify_binary_bet.status_code == HTTPStatus.OK
-    assert response_modify_binary_bet.json == {
+    assert response_modify_binary_bet.json() == {
         "ok": True,
         "result": {
             "phase": {"code": "GROUP", "description": "Group stage", "id": ANY},
@@ -89,7 +86,11 @@ def test_binary_bet(client, setup_app):
     }
 
     # Error case : locked bet
-    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() - timedelta(seconds=10))
+    app.dependency_overrides[get_settings] = create_mock(
+        lock_datetime_shift=-timedelta(minutes=10),
+        jwt_expiration_time=10,
+        jwt_secret_key=fake_jwt_secret_key,
+    )
 
     response_lock_bet = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
@@ -98,13 +99,17 @@ def test_binary_bet(client, setup_app):
     )
 
     assert response_lock_bet.status_code == HTTPStatus.UNAUTHORIZED
-    assert response_lock_bet.json == {
+    assert response_lock_bet.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Cannot modify binary bet, lock date is exceeded",
     }
 
-    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(seconds=30))
+    app.dependency_overrides[get_settings] = create_mock(
+        lock_datetime_shift=timedelta(minutes=10),
+        jwt_expiration_time=10,
+        jwt_secret_key=fake_jwt_secret_key,
+    )
 
     # Error case : Invalid input
     response_invalid_inputs = client.patch(
@@ -125,7 +130,7 @@ def test_binary_bet(client, setup_app):
     )
 
     assert response_with_invalid_bet_id.status_code == HTTPStatus.NOT_FOUND
-    assert response_with_invalid_bet_id.json == {
+    assert response_with_invalid_bet_id.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Bet not found: {invalid_bet_id}",
@@ -138,7 +143,7 @@ def test_binary_bet(client, setup_app):
     )
 
     assert response_binary_bet_by_id.status_code == HTTPStatus.OK
-    assert response_binary_bet_by_id.json == {
+    assert response_binary_bet_by_id.json() == {
         "ok": True,
         "result": {
             "phase": {"code": "GROUP", "description": "Group stage", "id": ANY},
@@ -174,7 +179,7 @@ def test_binary_bet(client, setup_app):
     )
 
     assert response_retrieve_with_invalid_bet_id.status_code == HTTPStatus.NOT_FOUND
-    assert response_retrieve_with_invalid_bet_id.json == {
+    assert response_retrieve_with_invalid_bet_id.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Bet not found: {invalid_bet_id}",
@@ -188,7 +193,7 @@ def test_binary_bet(client, setup_app):
     )
 
     assert response_change_team1_to_none.status_code == HTTPStatus.OK
-    assert response_change_team1_to_none.json["result"]["binary_bet"] == {
+    assert response_change_team1_to_none.json()["result"]["binary_bet"] == {
         "id": bet_id,
         "index": 1,
         "locked": False,
@@ -203,11 +208,9 @@ def test_binary_bet(client, setup_app):
     }
 
     # Success case : Change team2
-    response_all_teams = client.get(
-        "/api/v1/teams",
-    )
+    response_all_teams = client.get("/api/v1/teams")
 
-    for team in response_all_teams.json["result"]["teams"]:
+    for team in response_all_teams.json()["result"]["teams"]:
         if team["code"] == "ES":
             team_id = team["id"]
             break
@@ -219,7 +222,7 @@ def test_binary_bet(client, setup_app):
     )
 
     assert response_change_team2.status_code == HTTPStatus.OK
-    assert response_change_team2.json["result"]["binary_bet"] == {
+    assert response_change_team2.json()["result"]["binary_bet"] == {
         "id": ANY,
         "index": 1,
         "locked": False,
@@ -239,17 +242,19 @@ def test_binary_bet(client, setup_app):
     response_invalid_team1_id = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
         headers={"Authorization": f"Bearer {token}"},
-        json={"team1": {"id": invalid_team_id}},
+        json={"team1": {"id": str(invalid_team_id)}},
     )
 
     assert response_invalid_team1_id.status_code == HTTPStatus.NOT_FOUND
-    assert response_invalid_team1_id.json["description"] == f"Team not found: {invalid_team_id}"
+    assert response_invalid_team1_id.json()["description"] == f"Team not found: {invalid_team_id}"
 
     response_invalid_team2_id = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
         headers={"Authorization": f"Bearer {token}"},
-        json={"team2": {"id": invalid_team_id}},
+        json={"team2": {"id": str(invalid_team_id)}},
     )
 
     assert response_invalid_team2_id.status_code == HTTPStatus.NOT_FOUND
-    assert response_invalid_team2_id.json["description"] == f"Team not found: {invalid_team_id}"
+    assert response_invalid_team2_id.json()["description"] == f"Team not found: {invalid_team_id}"
+
+    app.dependency_overrides = {}

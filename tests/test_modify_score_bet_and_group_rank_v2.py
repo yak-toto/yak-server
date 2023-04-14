@@ -1,39 +1,26 @@
-import sys
-from datetime import timedelta
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
 from random import randint
+from typing import TYPE_CHECKING
 
-import pytest
+from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
 
-from .utils import get_paris_datetime_now, get_random_string
+from .utils import get_random_string
+from .utils.mock import create_mock
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 
-@pytest.fixture(autouse=True)
-def setup_app(app):
-    # location of test data
-    with resources.as_file(
-        resources.files("tests") / "test_data/test_modify_score_bet_and_group_rank",
-    ) as path:
-        app.config["DATA_FOLDER"] = path
-    old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
+def test_modify_score_bet_and_group_rank(app_with_valid_jwt_config: "FastAPI", monkeypatch):
+    client = TestClient(app_with_valid_jwt_config)
 
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_modify_score_bet_and_group_rank"),
+    )
+    initialize_database(app_with_valid_jwt_config)
 
-    yield app
-
-    app.config["LOCK_DATETIME"] = old_lock_datetime
-
-
-def test_modify_score_bet_and_group_rank(client):
     query_signup = """
         mutation Root(
             $userName: String!, $firstName: String!,
@@ -78,8 +65,8 @@ def test_modify_score_bet_and_group_rank(client):
         },
     )
 
-    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
-    token = response_signup.json["data"]["signupResult"]["token"]
+    assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
+    token = response_signup.json()["data"]["signupResult"]["token"]
 
     # Success case : Modify score bet and observe group rank update
     query_modify_score_and_group_rank = """
@@ -132,14 +119,14 @@ def test_modify_score_bet_and_group_rank(client):
             json={
                 "query": query_modify_score_and_group_rank,
                 "variables": {
-                    "id": response_signup.json["data"]["signupResult"]["scoreBets"][0]["id"],
+                    "id": response_signup.json()["data"]["signupResult"]["scoreBets"][0]["id"],
                     "score1": score1,
                     "score2": score2,
                 },
             },
         )
 
-        group_rank = response_modify_score_bet.json["data"]["modifyScoreBetResult"]["group"][
+        group_rank = response_modify_score_bet.json()["data"]["modifyScoreBetResult"]["group"][
             "groupRank"
         ]
 

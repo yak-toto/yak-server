@@ -1,34 +1,35 @@
-import sys
+from datetime import timedelta
 from http import HTTPStatus
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 
-import pytest
-
 from yak_server.cli.database import initialize_database
+from yak_server.config_file import get_settings
 
 from .utils import get_random_string
+from .utils.mock import create_mock
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+    from starlette.testclient import TestClient
 
 
-@pytest.fixture(autouse=True)
-def setup_app(app):
-    # location of test data
-    with resources.as_file(resources.files("tests") / "test_data/test_matches_db") as path:
-        app.config["DATA_FOLDER"] = path
+def test_group(app: "FastAPI", client: "TestClient", monkeypatch):
+    fake_jwt_secret_key = get_random_string(100)
 
-    # initialize sql database
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_secret_key=fake_jwt_secret_key,
+        jwt_expiration_time=10,
+        lock_datetime_shift=timedelta(minutes=10),
+    )
 
-    return app
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_matches_db"),
+    )
 
+    initialize_database(app)
 
-def test_group(client):
     # Signup one random user
     user_name = get_random_string(6)
     first_name = get_random_string(10)
@@ -45,7 +46,7 @@ def test_group(client):
         },
     )
 
-    auth_token = response_signup.json["result"]["token"]
+    auth_token = response_signup.json()["result"]["token"]
 
     # Check all GET matches response
     expected_group = {"id": ANY, "code": "A", "phase": {"id": ANY}, "description": "Groupe A"}
@@ -67,7 +68,7 @@ def test_group(client):
     )
 
     assert group_response.status_code == HTTPStatus.OK
-    assert group_response.json["result"] == {
+    assert group_response.json()["result"] == {
         "phase": expected_phase,
         "groups": [expected_group_without_phase],
     }
@@ -81,7 +82,7 @@ def test_group(client):
     )
 
     assert group_response_invalid_phase_code.status_code == HTTPStatus.NOT_FOUND
-    assert group_response_invalid_phase_code.json == {
+    assert group_response_invalid_phase_code.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Phase not found: {invalid_phase_code}",
@@ -94,7 +95,7 @@ def test_group(client):
     )
 
     assert one_group_response.status_code == HTTPStatus.OK
-    assert one_group_response.json["result"] == {
+    assert one_group_response.json()["result"] == {
         "group": expected_group_without_phase,
         "phase": expected_phase,
     }
@@ -108,7 +109,7 @@ def test_group(client):
     )
 
     assert group_response_with_invalid_code.status_code == HTTPStatus.NOT_FOUND
-    assert group_response_with_invalid_code.json == {
+    assert group_response_with_invalid_code.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Group not found: {invalid_group_code}",
@@ -121,7 +122,7 @@ def test_group(client):
     )
 
     assert all_groups_response.status_code == HTTPStatus.OK
-    assert all_groups_response.json["result"] == {
+    assert all_groups_response.json()["result"] == {
         "phases": [expected_phase],
         "groups": [expected_group],
     }

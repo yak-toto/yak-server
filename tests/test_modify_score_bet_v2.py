@@ -1,39 +1,29 @@
-import sys
 from datetime import timedelta
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
 from random import randint
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
-import pytest
+from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
+from yak_server.config_file import get_settings
 
-from .utils import get_paris_datetime_now, get_random_string
+from .utils import get_random_string
+from .utils.mock import create_mock
 
-
-@pytest.fixture()
-def setup_app(app):
-    old_lock_datetime = app.config["LOCK_DATETIME"]
-    app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(seconds=30))
-
-    # location of test data
-    with resources.as_file(resources.files("tests") / "test_data/test_modify_bet_v2") as path:
-        app.config["DATA_FOLDER"] = path
-
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
-
-    yield app
-
-    app.config["LOCK_DATETIME"] = old_lock_datetime
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 
-def test_modify_score_bet(setup_app, client):
+def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
+    client = TestClient(app_with_valid_jwt_config)
+
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_modify_bet_v2"),
+    )
+    initialize_database(app_with_valid_jwt_config)
+
     user_name = get_random_string(10)
     first_name = get_random_string(5)
     last_name = get_random_string(8)
@@ -76,11 +66,11 @@ def test_modify_score_bet(setup_app, client):
         },
     )
 
-    assert response_signup.json["data"]["signupResult"]["__typename"] == "UserWithToken"
+    assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
     score_bet_ids = [
-        score_bet["id"] for score_bet in response_signup.json["data"]["signupResult"]["scoreBets"]
+        score_bet["id"] for score_bet in response_signup.json()["data"]["signupResult"]["scoreBets"]
     ]
-    authentification_token = response_signup.json["data"]["signupResult"]["token"]
+    authentification_token = response_signup.json()["data"]["signupResult"]["token"]
 
     # Success case : check update is OK
     score1 = 4
@@ -147,14 +137,14 @@ def test_modify_score_bet(setup_app, client):
         },
     )
 
-    assert response_modify_bet.json["data"]["modifyScoreBetResult"]["__typename"] == "ScoreBet"
-    assert response_modify_bet.json["data"]["modifyScoreBetResult"]["team1"]["score"] == score1
-    assert response_modify_bet.json["data"]["modifyScoreBetResult"]["team2"]["score"] == score2
-    assert response_modify_bet.json["data"]["modifyScoreBetResult"]["team1"]["flag"]["url"] == (
+    assert response_modify_bet.json()["data"]["modifyScoreBetResult"]["__typename"] == "ScoreBet"
+    assert response_modify_bet.json()["data"]["modifyScoreBetResult"]["team1"]["score"] == score1
+    assert response_modify_bet.json()["data"]["modifyScoreBetResult"]["team2"]["score"] == score2
+    assert response_modify_bet.json()["data"]["modifyScoreBetResult"]["team1"]["flag"]["url"] == (
         "/api/v1/teams/"
-        f"{response_modify_bet.json['data']['modifyScoreBetResult']['team1']['id']}/flag"
+        f"{response_modify_bet.json()['data']['modifyScoreBetResult']['team1']['id']}/flag"
     )
-    assert response_modify_bet.json["data"]["modifyScoreBetResult"]["team2"]["score"] == score2
+    assert response_modify_bet.json()["data"]["modifyScoreBetResult"]["team2"]["score"] == score2
 
     # Error case : check NewScoreNegative error is send back if one of score is negative
     score1 = 5
@@ -173,7 +163,7 @@ def test_modify_score_bet(setup_app, client):
         },
     )
 
-    assert response_modify_bet_new_score2_negative.json["data"]["modifyScoreBetResult"] == {
+    assert response_modify_bet_new_score2_negative.json()["data"]["modifyScoreBetResult"] == {
         "__typename": "NewScoreNegative",
         "message": f"Variable '$score2' got invalid value {score2}. Score cannot be negative.",
     }
@@ -195,37 +185,10 @@ def test_modify_score_bet(setup_app, client):
         },
     )
 
-    assert response_modify_bet_new_score1_negative.json["data"]["modifyScoreBetResult"] == {
+    assert response_modify_bet_new_score1_negative.json()["data"]["modifyScoreBetResult"] == {
         "__typename": "NewScoreNegative",
         "message": f"Variable '$score1' got invalid value {score1}. Score cannot be negative.",
     }
-
-    # Error case : check locked score bet
-    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() - timedelta(seconds=30))
-
-    response_modify_locked_score_bet = client.post(
-        "/api/v2",
-        headers={"Authorization": f"Bearer {authentification_token}"},
-        json={
-            "query": query_modify_score_bet,
-            "variables": {
-                "id": score_bet_ids[1],
-                "score1": 1,
-                "score2": 1,
-            },
-        },
-    )
-
-    assert response_modify_locked_score_bet.json == {
-        "data": {
-            "modifyScoreBetResult": {
-                "__typename": "LockedScoreBetError",
-                "message": "Cannot modify score bet, lock date is exceeded",
-            },
-        },
-    }
-
-    setup_app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(seconds=30))
 
     # Error case : check ScoreBetNotFoundForUpdate error if score bet does not exist
     score1 = 1
@@ -244,7 +207,38 @@ def test_modify_score_bet(setup_app, client):
         },
     )
 
-    assert response_modify_bet_invalid_id.json["data"]["modifyScoreBetResult"] == {
+    assert response_modify_bet_invalid_id.json()["data"]["modifyScoreBetResult"] == {
         "__typename": "ScoreBetNotFoundForUpdate",
         "message": "Score bet not found. Cannot modify a ressource that does not exist.",
+    }
+
+    # Error case : check locked score bet
+    app_with_valid_jwt_config.dependency_overrides[get_settings] = create_mock(
+        jwt_expiration_time=10,
+        jwt_secret_key=app_with_valid_jwt_config.dependency_overrides[
+            get_settings
+        ]().jwt_secret_key,
+        lock_datetime_shift=timedelta(seconds=-10),
+    )
+
+    response_modify_locked_score_bet = client.post(
+        "/api/v2",
+        headers={"Authorization": f"Bearer {authentification_token}"},
+        json={
+            "query": query_modify_score_bet,
+            "variables": {
+                "id": score_bet_ids[1],
+                "score1": 1,
+                "score2": 1,
+            },
+        },
+    )
+
+    assert response_modify_locked_score_bet.json() == {
+        "data": {
+            "modifyScoreBetResult": {
+                "__typename": "LockedScoreBetError",
+                "message": "Cannot modify score bet, lock date is exceeded",
+            },
+        },
     }

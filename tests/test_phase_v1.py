@@ -1,35 +1,36 @@
-import sys
+from datetime import timedelta
 from http import HTTPStatus
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pytest
-
 from yak_server.cli.database import initialize_database
+from yak_server.config_file import get_settings
 
 from .utils import get_random_string
+from .utils.mock import create_mock
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+    from starlette.testclient import TestClient
 
 
-@pytest.fixture(autouse=True)
-def setup_app(app):
-    # location of test data
-    with resources.as_file(resources.files("tests") / "test_data/test_phase_v1") as path:
-        app.config["DATA_FOLDER"] = path
+def test_phase(app: "FastAPI", client: "TestClient", monkeypatch):
+    fake_jwt_secret_key = get_random_string(100)
 
-    # initialize sql database
-    with app.app_context(), app.test_request_context():
-        initialize_database(app)
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_secret_key=fake_jwt_secret_key,
+        jwt_expiration_time=10,
+        lock_datetime_shift=timedelta(minutes=10),
+    )
 
-    return app
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        create_mock(data_folder="test_phase_v1"),
+    )
 
+    initialize_database(app)
 
-def test_phase(client):
     # Signup one random user
     user_name = get_random_string(6)
     first_name = get_random_string(10)
@@ -48,13 +49,13 @@ def test_phase(client):
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    token = response_signup.json["result"]["token"]
+    token = response_signup.json()["result"]["token"]
 
     # Success case : retrieve all phases
     response_all_phases = client.get("/api/v1/phases", headers={"Authorization": f"Bearer {token}"})
 
     assert response_all_phases.status_code == HTTPStatus.OK
-    assert response_all_phases.json == {
+    assert response_all_phases.json() == {
         "ok": True,
         "result": [
             {"code": "GROUP", "description": "Group stage", "id": ANY},
@@ -63,7 +64,7 @@ def test_phase(client):
     }
 
     # Success case : retrieve phase by id
-    phase_id = response_all_phases.json["result"][0]["id"]
+    phase_id = response_all_phases.json()["result"][0]["id"]
 
     response_phase_by_id = client.get(
         f"/api/v1/phases/{phase_id}",
@@ -71,7 +72,7 @@ def test_phase(client):
     )
 
     assert response_phase_by_id.status_code == HTTPStatus.OK
-    assert response_phase_by_id.json == {
+    assert response_phase_by_id.json() == {
         "ok": True,
         "result": {"code": "GROUP", "description": "Group stage", "id": phase_id},
     }
@@ -85,7 +86,7 @@ def test_phase(client):
     )
 
     assert response_phase_with_invalid_id.status_code == HTTPStatus.NOT_FOUND
-    assert response_phase_with_invalid_id.json == {
+    assert response_phase_with_invalid_id.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"Phase not found: {invalid_phase_id}",

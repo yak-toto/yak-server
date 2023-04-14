@@ -3,19 +3,23 @@ import os
 import subprocess
 from base64 import b64decode
 from http import HTTPStatus
+from typing import TYPE_CHECKING
 
 import pexpect
 
 from .utils import get_random_string
 
+if TYPE_CHECKING:
+    from starlette.testclient import TestClient
 
-def test_cli(client):
+
+def test_cli(client: "TestClient"):
     # Check database drop
     result = subprocess.run(
         "yak db drop",
         shell=True,
         capture_output=True,
-        env={**os.environ, "FLASK_DEBUG": "1"},
+        env={**os.environ, "DEBUG": "1"},
     )
 
     assert result.returncode == 0
@@ -59,14 +63,14 @@ def test_cli(client):
 
     assert response_login.status_code == HTTPStatus.CREATED
 
-    auth_token = response_login.json["result"]["token"]
+    auth_token = response_login.json()["result"]["token"]
 
     # Check records deletion
     result = subprocess.run(
         "yak db delete",
         shell=True,
         capture_output=True,
-        env={**os.environ, "FLASK_DEBUG": "1"},
+        env={**os.environ, "DEBUG": "1"},
     )
 
     assert result.returncode == 0
@@ -80,7 +84,7 @@ def test_cli(client):
     user_id = json.loads(b64decode(auth_token.split(".")[1] + "=="))["sub"]
 
     assert response_login_user_not_found.status_code == HTTPStatus.NOT_FOUND
-    assert response_login_user_not_found.json == {
+    assert response_login_user_not_found.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
         "description": f"User not found: {user_id}",
@@ -110,7 +114,7 @@ def test_cli(client):
         },
     )
 
-    assert response_login_user_not_found_v2.json == {
+    assert response_login_user_not_found_v2.json() == {
         "data": {
             "currentUserResult": {
                 "__typename": "InvalidToken",
