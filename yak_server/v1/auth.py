@@ -119,7 +119,7 @@ def patch_user(_: UserModel, user_id: str) -> Tuple["Response", int]:
     return success_response(HTTPStatus.OK, user.to_user_dict())
 
 
-@auth.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/current_user")
+@auth.get(f"/{GLOBAL_ENDPOINT}/{VERSION}/users/current")
 @is_authentificated
 def current_user(current_user: UserModel) -> Tuple["Response", int]:
     return success_response(HTTPStatus.OK, current_user.to_user_dict())

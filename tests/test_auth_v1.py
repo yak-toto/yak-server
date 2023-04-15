@@ -43,7 +43,7 @@ def test_valid_auth(client):
 
     # current user tests
     response_current_user = client.get(
-        "/api/v1/current_user",
+        "/api/v1/users/current",
         headers={"Authorization": f"Bearer {auth_token}"},
     )
     assert response_current_user.status_code == HTTPStatus.OK
@@ -208,7 +208,7 @@ def test_expired_token(client):
     auth_token = response_signup.json["result"]["token"]
 
     response_current_user = client.get(
-        "/api/v1/current_user",
+        "/api/v1/users/current",
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
