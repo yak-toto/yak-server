@@ -27,6 +27,7 @@ strawberry-graphql = ">=0.168.1,<0.172.0"
 flask-cors = "^3.0.10"
 flask-migrate = "^4.0.4"
 jsonschema = "^4.17.3"
+argon2-cffi = "^21.3.0"
 
 
 [tool.poetry.group.test.dependencies]

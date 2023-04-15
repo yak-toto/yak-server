@@ -3,14 +3,17 @@ from enum import Enum
 from uuid import uuid4
 
 import sqlalchemy as sa
+from argon2 import PasswordHasher
+from argon2.exceptions import VerificationError
 from dateutil import parser
 from flask import current_app, url_for
 from sqlalchemy import CheckConstraint
 from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import relationship
-from werkzeug.security import check_password_hash, generate_password_hash
 
 from yak_server import db
+
+ph = PasswordHasher()
 
 
 class UserModel(db.Model):
@@ -101,18 +104,24 @@ class UserModel(db.Model):
         self.name = name
         self.first_name = first_name
         self.last_name = last_name
-        self.password = generate_password_hash(password, method="sha256")
+        self.password = ph.hash(password)
 
     @classmethod
     def authenticate(cls, name: str, password: str) -> "UserModel":
         user = cls.query.filter_by(name=name).first()
-        if not user or not check_password_hash(user.password, password):
+
+        if not user:
+            return None
+
+        try:
+            ph.verify(user.password, password)
+        except VerificationError:
             return None
 
         return user
 
     def change_password(self, new_password: str) -> None:
-        self.password = generate_password_hash(new_password, method="sha256")
+        self.password = ph.hash(new_password)
 
     def to_user_dict(self) -> dict:
         return {
