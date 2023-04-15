@@ -93,6 +93,25 @@ def test_double_signup(client):
     }
 
 
+def test_login_wrong_name(client):
+    response_login = client.post(
+        "/api/v1/users/login",
+        json={
+            "name": get_random_string(15),
+            "first_name": get_random_string(10),
+            "last_name": get_random_string(11),
+            "password": get_random_string(12),
+        },
+    )
+
+    assert response_login.status_code == HTTPStatus.UNAUTHORIZED
+    assert response_login.json == {
+        "ok": False,
+        "error_code": HTTPStatus.UNAUTHORIZED,
+        "description": "Invalid credentials",
+    }
+
+
 def test_login_wrong_password(client):
     user_name = get_random_string(6)
 
