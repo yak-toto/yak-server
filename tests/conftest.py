@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from yak_server import create_app
@@ -8,9 +6,6 @@ from yak_server.cli.database import create_database, delete_database, drop_datab
 
 @pytest.fixture(scope="session")
 def app_session():
-    # Override MYSQL_DB environment to push data to a different database
-    os.environ["MYSQL_DB"] = "yak_toto_test"
-
     # Create app and set TESTING config
     app = create_app()
     app.config["TESTING"] = True
