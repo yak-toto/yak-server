@@ -24,7 +24,7 @@ def create() -> None:
 def init() -> None:
     """Initialize database."""
     app = create_app()
-    with app.app_context():
+    with app.app_context(), app.test_request_context():
         initialize_database(app)
 
 

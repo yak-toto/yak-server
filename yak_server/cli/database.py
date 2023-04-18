@@ -13,6 +13,8 @@ else:
 
 from pathlib import Path
 
+from flask import url_for
+
 from yak_server import db
 from yak_server.database.models import (
     BinaryBetModel,
@@ -107,8 +109,15 @@ def initialize_database(app: "Flask") -> None:
     with Path(f"{data_folder}/teams.json").open() as file:
         teams = json.loads(file.read())
 
-        db.session.add_all(TeamModel(**team) for team in teams)
-        db.session.flush()
+        for team in teams:
+            team["flag_url"] = ""
+
+            team_instance = TeamModel(**team)
+            db.session.add(team_instance)
+            db.session.flush()
+
+            team_instance.flag_url = url_for("team.retrieve_team_flag", team_id=team_instance.id)
+            db.session.flush()
 
     with Path(f"{data_folder}/matches.json").open() as file:
         matches = json.loads(file.read())

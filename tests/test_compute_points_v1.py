@@ -98,7 +98,7 @@ def setup_app(app):
         ),
     }
 
-    with app.app_context():
+    with app.app_context(), app.test_request_context():
         initialize_database(app)
 
     yield app

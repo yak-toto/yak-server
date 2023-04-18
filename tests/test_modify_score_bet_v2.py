@@ -25,7 +25,7 @@ def setup_app(app):
     with resources.as_file(resources.files("tests") / "test_data/test_modify_bet_v2") as path:
         app.config["DATA_FOLDER"] = path
 
-    with app.app_context():
+    with app.app_context(), app.test_request_context():
         initialize_database(app)
 
     yield app
@@ -93,6 +93,7 @@ def test_modify_score_bet(setup_app, client):
                 ... on ScoreBet {
                     id
                     team1 {
+                        id
                         description
                         score
                         flag {
@@ -149,9 +150,9 @@ def test_modify_score_bet(setup_app, client):
     assert response_modify_bet.json["data"]["modifyScoreBetResult"]["__typename"] == "ScoreBet"
     assert response_modify_bet.json["data"]["modifyScoreBetResult"]["team1"]["score"] == score1
     assert response_modify_bet.json["data"]["modifyScoreBetResult"]["team2"]["score"] == score2
-    assert (
-        response_modify_bet.json["data"]["modifyScoreBetResult"]["team1"]["flag"]["url"]
-        == "https://fake-team-flag_croatia.com"
+    assert response_modify_bet.json["data"]["modifyScoreBetResult"]["team1"]["flag"]["url"] == (
+        "/api/v1/teams/"
+        f"{response_modify_bet.json['data']['modifyScoreBetResult']['team1']['id']}/flag"
     )
     assert response_modify_bet.json["data"]["modifyScoreBetResult"]["team2"]["score"] == score2
 
