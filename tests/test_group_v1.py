@@ -22,7 +22,7 @@ def setup_app(app):
         app.config["DATA_FOLDER"] = path
 
     # initialize sql database
-    with app.app_context():
+    with app.app_context(), app.test_request_context():
         initialize_database(app)
 
     return app

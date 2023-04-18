@@ -6,7 +6,7 @@ import sqlalchemy as sa
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
 from dateutil import parser
-from flask import current_app, url_for
+from flask import current_app
 from sqlalchemy import CheckConstraint
 from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import relationship
@@ -353,13 +353,14 @@ class TeamModel(db.Model):
     code = sa.Column(sa.String(10), unique=True, nullable=False)
     description = sa.Column(sa.String(100), unique=True, nullable=False)
     flag_url = sa.Column(sa.String(100))
+    internal_flag_url = sa.Column(sa.String(300))
 
     def to_dict(self) -> dict:
         return {
             "id": self.id,
             "code": self.code,
             "description": self.description,
-            "flag": {"url": url_for("team.retrieve_team_flag", team_id=self.id)},
+            "flag": {"url": self.flag_url},
         }
 
 

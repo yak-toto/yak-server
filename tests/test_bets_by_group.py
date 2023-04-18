@@ -20,7 +20,7 @@ def setup_app(app):
     with resources.as_file(resources.files("tests") / "test_data/test_compute_points_v1") as path:
         app.config["DATA_FOLDER"] = path
 
-    with app.app_context():
+    with app.app_context(), app.test_request_context():
         initialize_database(app)
 
     return app

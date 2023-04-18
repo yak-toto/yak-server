@@ -25,7 +25,7 @@ def app_setup(app):
     old_lock_datetime = app.config["LOCK_DATETIME"]
     app.config["LOCK_DATETIME"] = str(get_paris_datetime_now() + timedelta(minutes=10))
 
-    with app.app_context():
+    with app.app_context(), app.test_request_context():
         initialize_database(app)
 
     yield app

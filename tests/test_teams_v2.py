@@ -21,7 +21,7 @@ def setup_app(app):
     with resources.as_file(resources.files("tests") / "test_data/test_teams_v1") as path:
         app.config["DATA_FOLDER"] = path
 
-    with app.app_context():
+    with app.app_context(), app.test_request_context():
         initialize_database(app)
 
     return app
@@ -108,51 +108,54 @@ def test_teams(client):
             "id": ANY,
             "code": "GR",
             "description": "Greece",
-            "flag": {"url": "https://fake-team-flag_greece.com"},
+            "flag": {"url": ANY},
         },
         {
             "id": ANY,
             "code": "DE",
             "description": "Germany",
-            "flag": {"url": "https://fake-team-flag_germany.com"},
+            "flag": {"url": ANY},
         },
         {
             "id": ANY,
             "code": "GD",
             "description": "Grenada",
-            "flag": {"url": "https://fake-team-flag_grenada.com"},
+            "flag": {"url": ANY},
         },
         {
             "id": ANY,
             "code": "UA",
             "description": "Ukraine",
-            "flag": {"url": "https://fake-team-flag_ukraine.com"},
+            "flag": {"url": ANY},
         },
         {
             "id": ANY,
             "code": "ML",
             "description": "Mali",
-            "flag": {"url": "https://fake-team-flag_mali.com"},
+            "flag": {"url": ANY},
         },
         {
             "id": ANY,
             "code": "JM",
             "description": "Jamaica",
-            "flag": {"url": "https://fake-team-flag_jamaica.com"},
+            "flag": {"url": ANY},
         },
         {
             "id": ANY,
             "code": "JO",
             "description": "Jordan",
-            "flag": {"url": "https://fake-team-flag_jordan.com"},
+            "flag": {"url": ANY},
         },
         {
             "id": ANY,
             "code": "NO",
             "description": "Norway",
-            "flag": {"url": "https://fake-team-flag_norway.com"},
+            "flag": {"url": ANY},
         },
     ]
+
+    for team in expected_teams:
+        assert f"/api/v1/teams/{team['id']}/flag" == team["flag"]["url"]
 
     assert sorted(
         response_all_teams.json["data"]["allTeamsResult"]["teams"],
@@ -220,7 +223,7 @@ def test_teams(client):
                 "__typename": "Team",
                 "code": "NO",
                 "description": "Norway",
-                "flag": {"url": "https://fake-team-flag_norway.com"},
+                "flag": {"url": f"/api/v1/teams/{team_id}/flag"},
                 "id": team_id,
             },
         },
@@ -290,7 +293,7 @@ def test_teams(client):
                 "__typename": "Team",
                 "code": "NO",
                 "description": "Norway",
-                "flag": {"url": "https://fake-team-flag_norway.com"},
+                "flag": {"url": f"/api/v1/teams/{team_id}/flag"},
                 "id": team_id,
             },
         },
