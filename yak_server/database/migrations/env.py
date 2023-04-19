@@ -3,7 +3,8 @@ from logging.config import fileConfig
 
 from alembic import context
 
-from yak_server.database import Base, engine
+from yak_server.database import engine
+from yak_server.database.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
