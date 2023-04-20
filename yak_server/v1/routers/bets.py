@@ -136,15 +136,8 @@ def retrieve_bets_by_phase_code(
 
     return GenericOut(
         result=BetsByPhaseCodeResponse(
-            phase=PhaseOut(id=phase.id, code=phase.code, description=phase.description),
-            groups=[
-                GroupOut(
-                    id=group.id,
-                    code=group.code,
-                    description=group.description,
-                )
-                for group in groups
-            ],
+            phase=PhaseOut.from_orm(phase),
+            groups=[GroupOut.from_orm(group) for group in groups],
             score_bets=[
                 ScoreBetWithGroupIdOut(
                     id=score_bet.id,
