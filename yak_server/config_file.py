@@ -2,6 +2,7 @@ import json
 import sys
 from configparser import ConfigParser
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 from typing import Callable, Dict
 
@@ -90,6 +91,7 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
 
 
+@lru_cache(maxsize=None)
 def get_settings() -> Settings:
     settings = Settings()
     settings.load_config()
