@@ -131,12 +131,6 @@ src = ["yak_server", "tests"]
 
 [tool.ruff.isort]
 known-first-party = ["yak_server"]
-known-third-party = [
-    "jwt",
-    "strawberry",
-    "werkzeug",
-    "sqlalchemy",
-]
 
 
 [tool.pytest.ini_options]
