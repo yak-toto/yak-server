@@ -400,6 +400,11 @@ def test_db_sync(
     token = response_signup.json()["result"]["token"]
 
     # Synchronize admin bets with official results
+    monkeypatch.setattr(
+        "yak_server.cli.database.sync.get_settings",
+        MockSettings(official_results_url=competition_data.url),
+    )
+
     result = runner.invoke(typer_app, ["db", "sync"])
 
     assert result.exit_code == 0

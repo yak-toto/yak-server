@@ -11,8 +11,8 @@ from .database import (
     drop_database,
     initialize_database,
     setup_migration,
-    synchronize_official_results,
 )
+from .database.sync import synchronize_official_results
 from .env import init_env
 
 app = typer.Typer()
