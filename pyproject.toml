@@ -50,6 +50,7 @@ Repository = "https://github.com/yak-toto/yak-server"
 
 [project.optional-dependencies]
 all = [
+    "beautifulsoup4[lxml] ==4.12.2",
     "yappi >=1.5.1",
     "alembic >=1.10.3,<2.0.0",
 ]
