@@ -1,8 +1,0 @@
-type: object
-properties:
-  name:
-    description: Name of the new user
-    type: string
-  password:
-    type: string
-    description: Password of the new user
