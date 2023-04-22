@@ -77,7 +77,6 @@ def test_bets(app_with_lockdatetime_in_past: "FastAPI", monkeypatch):
                 __typename
                 ... on ScoreBet {
                     id
-                    index
                     locked
                     group {
                         id
@@ -117,7 +116,6 @@ def test_bets(app_with_lockdatetime_in_past: "FastAPI", monkeypatch):
             "scoreBetResult": {
                 "__typename": "ScoreBet",
                 "id": ANY,
-                "index": 1,
                 "locked": True,
                 "group": {"description": "Groupe A", "id": ANY},
                 "team1": {"description": "Crotia", "score": None},

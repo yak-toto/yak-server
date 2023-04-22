@@ -65,7 +65,6 @@ def test_bets_by_groups(app: "FastAPI", client: "TestClient", monkeypatch):
         "score_bets": [
             {
                 "id": ANY,
-                "index": 1,
                 "locked": True,
                 "team1": {
                     "code": "FR",
@@ -84,7 +83,6 @@ def test_bets_by_groups(app: "FastAPI", client: "TestClient", monkeypatch):
             },
             {
                 "id": ANY,
-                "index": 2,
                 "locked": True,
                 "team1": {
                     "code": "FR",
@@ -103,7 +101,6 @@ def test_bets_by_groups(app: "FastAPI", client: "TestClient", monkeypatch):
             },
             {
                 "id": ANY,
-                "index": 3,
                 "locked": True,
                 "team1": {
                     "code": "IE",

@@ -51,7 +51,6 @@ def send_response(
             group=GroupOut.from_orm(binary_bet.match.group),
             binary_bet=BinaryBetOut(
                 id=binary_bet.id,
-                index=binary_bet.match.index,
                 locked=locked,
                 team1=TeamWithWonOut(
                     id=binary_bet.match.team1.id,

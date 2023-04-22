@@ -65,7 +65,6 @@ def test_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
             "group": {"code": "A", "description": "Group A", "id": ANY},
             "binary_bet": {
                 "id": ANY,
-                "index": 1,
                 "locked": False,
                 "team1": {
                     "code": "FR",
@@ -150,7 +149,6 @@ def test_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
             "group": {"code": "A", "description": "Group A", "id": ANY},
             "binary_bet": {
                 "id": ANY,
-                "index": 1,
                 "locked": False,
                 "team1": {
                     "code": "FR",
@@ -195,7 +193,6 @@ def test_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     assert response_change_team1_to_none.status_code == HTTPStatus.OK
     assert response_change_team1_to_none.json()["result"]["binary_bet"] == {
         "id": bet_id,
-        "index": 1,
         "locked": False,
         "team1": None,
         "team2": {
@@ -224,7 +221,6 @@ def test_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     assert response_change_team2.status_code == HTTPStatus.OK
     assert response_change_team2.json()["result"]["binary_bet"] == {
         "id": ANY,
-        "index": 1,
         "locked": False,
         "team1": None,
         "team2": {

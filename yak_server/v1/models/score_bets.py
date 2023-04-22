@@ -14,7 +14,6 @@ class ScoreBetIn(BaseModel):
 
 class ScoreBetOut(BaseModel):
     id: UUID4
-    index: PositiveInt
     locked: bool
     team1: TeamWithScoreOut
     team2: TeamWithScoreOut
@@ -26,7 +25,6 @@ class Group(BaseModel):
 
 class ScoreBetWithGroupIdOut(BaseModel):
     id: UUID4
-    index: PositiveInt
     locked: bool
     group: Group
     team1: TeamWithScoreOut

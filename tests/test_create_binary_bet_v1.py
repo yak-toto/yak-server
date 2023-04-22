@@ -90,7 +90,6 @@ def test_create_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
             },
             "binary_bet": {
                 "id": ANY,
-                "index": 1,
                 "locked": False,
                 "team1": {**team1, "won": True},
                 "team2": {**team2, "won": False},

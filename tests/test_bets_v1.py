@@ -83,7 +83,6 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
             },
             "score_bet": {
                 "id": ANY,
-                "index": 1,
                 "locked": True,
                 "team1": {
                     "code": "HR",
@@ -145,7 +144,6 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                 {
                     "group": {"id": ANY},
                     "id": ANY,
-                    "index": 1,
                     "locked": True,
                     "team1": {
                         "code": "HR",
@@ -165,7 +163,6 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                 {
                     "group": {"id": ANY},
                     "id": ANY,
-                    "index": 2,
                     "locked": True,
                     "team1": {
                         "code": "NA",
@@ -185,7 +182,6 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                 {
                     "group": {"id": ANY},
                     "id": ANY,
-                    "index": 3,
                     "locked": True,
                     "team1": {
                         "code": "HR",
@@ -205,7 +201,6 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                 {
                     "group": {"id": ANY},
                     "id": ANY,
-                    "index": 4,
                     "locked": True,
                     "team1": {
                         "code": "FI",
@@ -225,7 +220,6 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                 {
                     "group": {"id": ANY},
                     "id": ANY,
-                    "index": 5,
                     "locked": True,
                     "team1": {
                         "code": "HR",
@@ -245,7 +239,6 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                 {
                     "group": {"id": ANY},
                     "id": ANY,
-                    "index": 6,
                     "locked": True,
                     "team1": {
                         "code": "FI",
