@@ -67,7 +67,6 @@ def retrieve_all_bets(
             score_bets=[
                 ScoreBetWithGroupIdOut(
                     id=score_bet.id,
-                    index=score_bet.match.index,
                     locked=is_locked(user.name, settings.lock_datetime),
                     group=Group(id=score_bet.match.group_id),
                     team1=TeamWithScoreOut(
@@ -90,7 +89,6 @@ def retrieve_all_bets(
             binary_bets=[
                 BinaryBetWithGroupIdOut(
                     id=binary_bet.id,
-                    index=binary_bet.match.index,
                     locked=is_locked(user.name, settings.lock_datetime),
                     group=Group(id=binary_bet.match.group_id),
                     team1=TeamWithWonOut(
@@ -141,7 +139,6 @@ def retrieve_bets_by_phase_code(
             score_bets=[
                 ScoreBetWithGroupIdOut(
                     id=score_bet.id,
-                    index=score_bet.match.index,
                     locked=is_locked(user.name, settings.lock_datetime),
                     group=Group(id=score_bet.match.group_id),
                     team1=TeamWithScoreOut(
@@ -164,7 +161,6 @@ def retrieve_bets_by_phase_code(
             binary_bets=[
                 BinaryBetWithGroupIdOut(
                     id=binary_bet.id,
-                    index=binary_bet.match.index,
                     locked=is_locked(user.name, settings.lock_datetime),
                     group=Group(id=binary_bet.match.group_id),
                     team1=TeamWithWonOut(
@@ -211,7 +207,6 @@ def retrieve_bets_by_group_code(
             score_bets=[
                 ScoreBetOut(
                     id=score_bet.id,
-                    index=score_bet.match.index,
                     locked=is_locked(user.name, settings.lock_datetime),
                     team1=TeamWithScoreOut(
                         id=score_bet.match.team1.id,
@@ -233,7 +228,6 @@ def retrieve_bets_by_group_code(
             binary_bets=[
                 BinaryBetOut(
                     id=binary_bet.id,
-                    index=binary_bet.match.index,
                     locked=is_locked(user.name, settings.lock_datetime),
                     team1=TeamWithWonOut(
                         id=binary_bet.match.team1.id,

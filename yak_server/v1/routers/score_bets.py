@@ -52,7 +52,6 @@ def send_response(
             group=GroupOut.from_orm(score_bet.match.group),
             score_bet=ScoreBetOut(
                 id=score_bet.id,
-                index=score_bet.match.index,
                 locked=locked,
                 team1=TeamWithScoreOut(
                     id=score_bet.match.team1.id,

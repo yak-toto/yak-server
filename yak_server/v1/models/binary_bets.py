@@ -17,7 +17,6 @@ class BinaryBetIn(BaseModel):
 
 class BinaryBetOut(BaseModel):
     id: UUID4
-    index: PositiveInt
     locked: bool
     team1: Optional[TeamWithWonOut]
     team2: Optional[TeamWithWonOut]
@@ -29,7 +28,6 @@ class Group(BaseModel):
 
 class BinaryBetWithGroupIdOut(BaseModel):
     id: UUID4
-    index: PositiveInt
     locked: bool
     group: Group
     team1: Optional[TeamWithWonOut]

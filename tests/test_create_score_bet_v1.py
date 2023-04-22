@@ -90,7 +90,6 @@ def test_create_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
             },
             "score_bet": {
                 "id": ANY,
-                "index": 1,
                 "locked": False,
                 "team1": {**team1, "score": score1},
                 "team2": {**team2, "score": None},
