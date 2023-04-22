@@ -116,7 +116,7 @@ def app_with_valid_jwt_config(app: "FastAPI") -> Generator["FastAPI", None, None
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=10,
+        jwt_expiration_time=20,
         jwt_secret_key=fake_jwt_secret_key,
         lock_datetime_shift=pendulum.duration(seconds=10),
     )

@@ -11,6 +11,7 @@ from .database import (
     drop_database,
     initialize_database,
     setup_migration,
+    synchronize_official_results,
 )
 from .env import init_env
 
@@ -64,6 +65,12 @@ def make_db_app() -> typer.Typer:
     def score_board() -> None:
         """Compute score board."""
         compute_score_board()
+
+    @db_app.command()
+    def sync() -> None:
+        """Synchronize official results and push them to admin with web
+        scraping the world cup wikipedia page"""
+        synchronize_official_results()
 
     return db_app
 
