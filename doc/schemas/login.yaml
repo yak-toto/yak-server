@@ -1,8 +1,0 @@
-type: object
-properties:
-  name:
-    description: Name of user
-    type: string
-  password:
-    type: string
-    description: Password of the user
