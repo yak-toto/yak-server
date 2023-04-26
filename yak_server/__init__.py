@@ -52,10 +52,14 @@ def create_fast_api_app() -> FastAPI:
     set_exception_handler(app)
 
     # Register graphql endpoint
-    from .v2 import schema
+    from .v2 import get_schema
     from .v2.context import get_context
 
-    graphql_app = GraphQLRouter(schema, graphiql=app.debug, context_getter=get_context)
+    graphql_app = GraphQLRouter(
+        get_schema(app.debug),
+        graphiql=app.debug,
+        context_getter=get_context,
+    )
 
     app.include_router(graphql_app, prefix=f"/{GLOBAL_ENDPOINT}/{VERSION2}")
 

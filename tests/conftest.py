@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from typing import TYPE_CHECKING, Generator
 
@@ -47,13 +48,10 @@ def client(app: "FastAPI") -> TestClient:
 
 
 @pytest.fixture()
-def production_app(app: "FastAPI") -> Generator:
-    debug = app.debug
-    app.debug = False
+def production_app() -> Generator:
+    os.environ["DEBUG"] = "0"
 
-    yield app
-
-    app.debug = debug
+    return create_fast_api_app()
 
 
 @pytest.fixture()
