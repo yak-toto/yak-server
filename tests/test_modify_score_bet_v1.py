@@ -47,11 +47,11 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     )
 
     assert response_signup.status_code == HTTPStatus.CREATED
-    authentification_token = response_signup.json()["result"]["token"]
+    authentication_token = response_signup.json()["result"]["token"]
 
     response_get_all_bets = client.get(
         "/api/v1/bets",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_get_all_bets.status_code == HTTPStatus.OK
@@ -67,7 +67,7 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     response_patch_one_bet = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[0]}",
         json={"team1": {"score": score1}, "team2": {"score": score2}},
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_patch_one_bet.status_code == HTTPStatus.OK
@@ -78,7 +78,7 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     response_patch_no_updates = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[0]}",
         json={"team1": {"score": score1}, "team2": {"score": score2}},
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_patch_no_updates.status_code == HTTPStatus.OK
@@ -89,7 +89,7 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     response_patch_wrong_inputs = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[0]}",
         json={"team2": {"score": score2}},
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_patch_wrong_inputs.json() == {
@@ -110,7 +110,7 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     response_locked_bet = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[0]}",
         json={"team1": {"score": score1}, "team2": {"score": score2}},
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_locked_bet.json() == {
@@ -131,7 +131,7 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     response_bet_not_found = client.patch(
         f"/api/v1/score_bets/{non_existing_bet_id}",
         json={"team1": {"score": score1}, "team2": {"score": score2}},
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_bet_not_found.json() == {
@@ -144,7 +144,7 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     response_new_score_negative = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[0]}",
         json={"team1": {"score": -1}, "team2": {"score": score2}},
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_new_score_negative.json() == {
@@ -164,7 +164,7 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     response_patch_second_bet = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[1]}",
         json={"team1": {"score": randint(0, 5)}, "team2": {"score": randint(1, 3)}},
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_patch_second_bet.status_code == HTTPStatus.OK
@@ -173,7 +173,7 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     response_patch_third_bet = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[2]}",
         json={"team1": {"score": randint(0, 3)}, "team2": {"score": randint(2, 3)}},
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_patch_third_bet.status_code == HTTPStatus.OK

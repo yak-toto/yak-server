@@ -42,7 +42,7 @@ def test_cli(client: "TestClient"):
 
     assert result.returncode == 0
 
-    # Check admin accoumt creation
+    # Check admin account creation
     admin_password = get_random_string(7)
 
     child = pexpect.spawn("yak db admin")

@@ -13,14 +13,14 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_phase(app_with_lockdatetime_in_past: "FastAPI", monkeypatch):
-    client = TestClient(app_with_lockdatetime_in_past)
+def test_phase(app_with_lock_datetime_in_past: "FastAPI", monkeypatch):
+    client = TestClient(app_with_lock_datetime_in_past)
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         create_mock(data_folder="test_matches_db"),
     )
-    initialize_database(app_with_lockdatetime_in_past)
+    initialize_database(app_with_lock_datetime_in_past)
 
     # Signup one random user
     user_name = get_random_string(6)

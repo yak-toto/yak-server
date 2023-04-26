@@ -91,7 +91,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI"):
     )
 
     assert response_signup_admin.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
-    authentification_token = response_signup_admin.json()["data"]["signupResult"]["token"]
+    authentication_token = response_signup_admin.json()["data"]["signupResult"]["token"]
 
     # Create non admin user account
     other_user_name = get_random_string(6)
@@ -114,14 +114,14 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI"):
 
     assert response_signup_glepape.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
     user_id = response_signup_glepape.json()["data"]["signupResult"]["id"]
-    authentification_token_glepape = response_signup_glepape.json()["data"]["signupResult"]["token"]
+    authentication_token_glepape = response_signup_glepape.json()["data"]["signupResult"]["token"]
 
     # Check update is properly process
     new_password_other_user = "new_password"
 
     response_modify_password = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
         json={
             "query": QUERY_MODIFY_USER,
             "variables": {"id": user_id, "password": new_password_other_user},
@@ -156,7 +156,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI"):
     # Check glepape user cannot update any password
     response_modify_password_with_glepape_user = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {authentification_token_glepape}"},
+        headers={"Authorization": f"Bearer {authentication_token_glepape}"},
         json={
             "query": QUERY_MODIFY_USER,
             "variables": {"id": user_id, "password": "new_new_password"},
@@ -173,7 +173,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI"):
 
     response_wrong_input = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
         json={
             "query": QUERY_MODIFY_USER,
             "variables": {"id": str(invalid_user_id), "password": "new_password_for_unknown_user"},

@@ -70,7 +70,7 @@ def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
     score_bet_ids = [
         score_bet["id"] for score_bet in response_signup.json()["data"]["signupResult"]["scoreBets"]
     ]
-    authentification_token = response_signup.json()["data"]["signupResult"]["token"]
+    authentication_token = response_signup.json()["data"]["signupResult"]["token"]
 
     # Success case : check update is OK
     score1 = 4
@@ -126,7 +126,7 @@ def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
 
     response_modify_bet = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
         json={
             "query": query_modify_score_bet,
             "variables": {
@@ -152,7 +152,7 @@ def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
 
     response_modify_bet_new_score2_negative = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
         json={
             "query": query_modify_score_bet,
             "variables": {
@@ -174,7 +174,7 @@ def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
 
     response_modify_bet_new_score1_negative = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
         json={
             "query": query_modify_score_bet,
             "variables": {
@@ -196,7 +196,7 @@ def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
 
     response_modify_bet_invalid_id = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
         json={
             "query": query_modify_score_bet,
             "variables": {
@@ -209,7 +209,7 @@ def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
 
     assert response_modify_bet_invalid_id.json()["data"]["modifyScoreBetResult"] == {
         "__typename": "ScoreBetNotFoundForUpdate",
-        "message": "Score bet not found. Cannot modify a ressource that does not exist.",
+        "message": "Score bet not found. Cannot modify a resource that does not exist.",
     }
 
     # Error case : check locked score bet
@@ -223,7 +223,7 @@ def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
 
     response_modify_locked_score_bet = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
         json={
             "query": query_modify_score_bet,
             "variables": {

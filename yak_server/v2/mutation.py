@@ -15,7 +15,7 @@ from yak_server.database.models import (
     ScoreBetModel,
     UserModel,
 )
-from yak_server.helpers.authentification import encode_bearer_token
+from yak_server.helpers.authentication import encode_bearer_token
 from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.group_position import create_group_position
 from yak_server.helpers.logging import (
@@ -25,9 +25,9 @@ from yak_server.helpers.logging import (
     signed_up_successfully,
 )
 
-from .bearer_authenfication import (
-    is_admin_authentificated,
-    is_authentificated,
+from .bearer_authentication import (
+    is_admin_authenticated,
+    is_authenticated,
 )
 from .result import (
     BinaryBetNotFoundForUpdate,
@@ -149,7 +149,7 @@ class Mutation:
         )
 
     @strawberry.mutation
-    @is_authentificated
+    @is_authenticated
     def modify_binary_bet_result(
         self,
         id: UUID,
@@ -176,7 +176,7 @@ class Mutation:
         return BinaryBet.from_instance(db=db, instance=bet, lock_datetime=settings.lock_datetime)
 
     @strawberry.mutation
-    @is_authentificated
+    @is_authenticated
     def modify_score_bet_result(
         self,
         id: UUID,
@@ -230,8 +230,8 @@ class Mutation:
         return ScoreBet.from_instance(db=db, instance=bet, lock_datetime=settings.lock_datetime)
 
     @strawberry.mutation
-    @is_authentificated
-    @is_admin_authentificated
+    @is_authenticated
+    @is_admin_authenticated
     def modify_user_result(
         self,
         id: UUID,
