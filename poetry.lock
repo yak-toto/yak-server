@@ -1415,14 +1415,14 @@ full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart", "pyyam
 
 [[package]]
 name = "strawberry-graphql"
-version = "0.171.3"
+version = "0.174.0"
 description = "A library for creating GraphQL APIs"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "strawberry_graphql-0.171.3-py3-none-any.whl", hash = "sha256:c45169384343328e3143f376b3349dc5ec34f55ce3bb11cf18e5d8e1a43cbd41"},
-    {file = "strawberry_graphql-0.171.3.tar.gz", hash = "sha256:87bf921726018c75789fe2b71dadcc40a3a12f851a56b51afaac4d982be18aab"},
+    {file = "strawberry_graphql-0.174.0-py3-none-any.whl", hash = "sha256:41e330d416558659efbdcecb664f52c34525f77f16b1d9f2b977afaee2aa927b"},
+    {file = "strawberry_graphql-0.174.0.tar.gz", hash = "sha256:fc64d83b0290f32aec6f880622c38c3249b49e10378642f89c31beaf5e0d5632"},
 ]
 
 [package.dependencies]
@@ -1430,7 +1430,7 @@ astunparse = {version = ">=1.6.3,<2.0.0", markers = "python_version < \"3.9\""}
 "backports.cached-property" = {version = ">=1.0.2,<2.0.0", markers = "python_version < \"3.8\""}
 graphql-core = ">=3.2.0,<3.3.0"
 python-dateutil = ">=2.7.0,<3.0.0"
-typing_extensions = ">=3.7.4,<5.0.0"
+typing_extensions = ">=4.0.0,<5.0.0"
 
 [package.extras]
 aiohttp = ["aiohttp (>=3.7.4.post0,<4.0.0)"]
@@ -1445,6 +1445,7 @@ fastapi = ["fastapi (>=0.65.2)", "python-multipart (>=0.0.5,<0.0.7)"]
 flask = ["flask (>=1.1)"]
 opentelemetry = ["opentelemetry-api (<2)", "opentelemetry-sdk (<2)"]
 pydantic = ["pydantic (<2)"]
+pyinstrument = ["pyinstrument (>=4.0.0)"]
 sanic = ["sanic (>=20.12.2)"]
 starlite = ["starlite (>=1.48.0)"]
 
@@ -1749,4 +1750,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "290e5b19dd28a64e1b1f5ee36f33b0daab58a215d7fb741a83f0f260a4e737af"
+content-hash = "cd4abeef37f88f7af9f375867f5aba797b566db0df08fc44302c4f5d48067f8c"
