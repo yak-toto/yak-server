@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "yak-server"
 packages = [ { include = "yak_server" } ]
-version = "0.16.0"
+version = "0.17.0"
 description = "Football bet rest/graphql server"
 authors = ["Guillaume Le Pape <gui.lepape25@gmail.com>"]
 license = "MIT"
