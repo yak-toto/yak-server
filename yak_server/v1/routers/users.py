@@ -13,7 +13,7 @@ from yak_server.database.models import (
     ScoreBetModel,
     UserModel,
 )
-from yak_server.helpers.authentification import encode_bearer_token
+from yak_server.helpers.authentication import encode_bearer_token
 from yak_server.helpers.group_position import create_group_position
 from yak_server.helpers.logging import (
     logged_in_successfully,

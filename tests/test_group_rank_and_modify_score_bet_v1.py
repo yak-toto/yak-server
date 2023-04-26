@@ -44,12 +44,12 @@ def test_group_rank_and_modify_score_bet(app: "FastAPI", client: "TestClient", m
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    authentification_token = response_signup.json()["result"]["token"]
+    authentication_token = response_signup.json()["result"]["token"]
 
     # Retrieve all the bets
     response_all_bets = client.get(
         "/api/v1/bets",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_all_bets.status_code == HTTPStatus.OK
@@ -65,7 +65,7 @@ def test_group_rank_and_modify_score_bet(app: "FastAPI", client: "TestClient", m
         response = client.patch(
             f"/api/v1/score_bets/{bet_id}",
             json={"team1": {"score": score1}, "team2": {"score": score2}},
-            headers={"Authorization": f"Bearer {authentification_token}"},
+            headers={"Authorization": f"Bearer {authentication_token}"},
             follow_redirects=True,
         )
         assert response.status_code == HTTPStatus.OK
@@ -76,7 +76,7 @@ def test_group_rank_and_modify_score_bet(app: "FastAPI", client: "TestClient", m
     # Retrieve group rank
     response_group_rank = client.get(
         "/api/v1/bets/groups/rank/A",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_group_rank.status_code == HTTPStatus.OK
@@ -85,7 +85,7 @@ def test_group_rank_and_modify_score_bet(app: "FastAPI", client: "TestClient", m
 
     response_group_by_bet = client.get(
         "/api/v1/bets/groups/A",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     score_bets = response_group_by_bet.json()["result"]["score_bets"]

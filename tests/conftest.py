@@ -87,7 +87,7 @@ def app_with_null_jwt_expiration_time(app: "FastAPI"):
 
 
 @pytest.fixture()
-def app_with_lockdatetime_in_past(app: "FastAPI"):
+def app_with_lock_datetime_in_past(app: "FastAPI"):
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = create_mock(

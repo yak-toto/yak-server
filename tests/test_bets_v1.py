@@ -47,12 +47,12 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
     )
 
     assert response_signup.status_code == HTTPStatus.CREATED
-    authentification_token = response_signup.json()["result"]["token"]
+    authentication_token = response_signup.json()["result"]["token"]
 
     # Get all bets to retrieve ids
     response_get_all_bets = client.get(
         "/api/v1/bets",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_get_all_bets.status_code == HTTPStatus.OK
@@ -64,7 +64,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
     # Success case : check get one bet
     response_bet_by_id = client.get(
         f"/api/v1/score_bets/{score_bet_ids[0]}",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_bet_by_id.status_code == HTTPStatus.OK
@@ -86,7 +86,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                 "locked": True,
                 "team1": {
                     "code": "HR",
-                    "description": "Crotia",
+                    "description": "Croatia",
                     "flag": {"url": ANY},
                     "id": ANY,
                     "score": None,
@@ -107,7 +107,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
 
     response_bet_with_invalid_id = client.get(
         f"/api/v1/score_bets/{invalid_bet_id}",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_bet_with_invalid_id.status_code == HTTPStatus.NOT_FOUND
@@ -120,7 +120,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
     # Success case : bet by phase
     response_by_phase = client.get(
         "/api/v1/bets/phases/GROUP",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_by_phase.status_code == HTTPStatus.OK
@@ -147,7 +147,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                     "locked": True,
                     "team1": {
                         "code": "HR",
-                        "description": "Crotia",
+                        "description": "Croatia",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
@@ -185,7 +185,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                     "locked": True,
                     "team1": {
                         "code": "HR",
-                        "description": "Crotia",
+                        "description": "Croatia",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
@@ -223,7 +223,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                     "locked": True,
                     "team1": {
                         "code": "HR",
-                        "description": "Crotia",
+                        "description": "Croatia",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
@@ -264,7 +264,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
 
     response_by_phase_with_invalid_code = client.get(
         f"/api/v1/bets/phases/{invalid_phase_code}",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
     assert response_by_phase_with_invalid_code.json() == {

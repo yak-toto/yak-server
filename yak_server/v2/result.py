@@ -54,7 +54,7 @@ class LockedScoreBetError:
 
 @strawberry.type
 class ScoreBetNotFoundForUpdate:
-    message: str = "Score bet not found. Cannot modify a ressource that does not exist."
+    message: str = "Score bet not found. Cannot modify a resource that does not exist."
 
 
 @strawberry.type
@@ -90,7 +90,7 @@ class LockedBinaryBetError:
 
 @strawberry.type
 class BinaryBetNotFoundForUpdate:
-    message: str = "Binary bet not found. Cannot modify a ressource that does not exist."
+    message: str = "Binary bet not found. Cannot modify a resource that does not exist."
 
 
 ModifyBinaryBetResult = strawberry.union(

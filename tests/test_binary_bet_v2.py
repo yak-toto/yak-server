@@ -175,7 +175,7 @@ def test_binary_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
         "data": {
             "modifyBinaryBetResult": {
                 "__typename": "BinaryBetNotFoundForUpdate",
-                "message": "Binary bet not found. Cannot modify a ressource that does not exist.",
+                "message": "Binary bet not found. Cannot modify a resource that does not exist.",
             },
         },
     }
@@ -211,7 +211,7 @@ def test_binary_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
         lock_datetime_shift=timedelta(seconds=10),
     )
 
-    # Success case : Retrive one binary bet
+    # Success case : Retrieve one binary bet
     query_binary_bet = """
         query getBinaryBet($id: UUID!) {
             binaryBetResult(id: $id) {

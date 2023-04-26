@@ -156,19 +156,19 @@ def set_exception_handler(app: "FastAPI") -> None:
         )
 
     @app.exception_handler(Exception)
-    def handle_exception(_: Request, expection: Exception) -> JSONResponse:
+    def handle_exception(_: Request, exception: Exception) -> JSONResponse:
         # Return JSON instead of HTML for generic errors.
         logger.error(traceback.format_exc())
-        logger.error(f"An unexcepted expection occurs: {type(expection).__name__} {expection}")
+        logger.error(f"An unexpected exception occurs: {type(exception).__name__} {exception}")
 
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
                 "ok": False,
                 "error_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "description": f"{type(expection).__name__}: {str(expection)}"
+                "description": f"{type(exception).__name__}: {str(exception)}"
                 if app.debug
-                else "Unexcepted error",
+                else "Unexpected error",
             },
         )
 

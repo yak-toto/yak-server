@@ -215,7 +215,7 @@ def test_expired_token(app: "FastAPI", client: "TestClient"):
     assert response_current_user.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Expired token, reauthentication required",
+        "description": "Expired token, re-authentication required",
     }
 
 

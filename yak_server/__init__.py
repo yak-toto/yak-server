@@ -51,7 +51,7 @@ def create_fast_api_app() -> FastAPI:
 
     set_exception_handler(app)
 
-    # Registrer graphql endpoint
+    # Register graphql endpoint
     from .v2 import schema
     from .v2.context import get_context
 

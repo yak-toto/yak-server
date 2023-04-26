@@ -157,7 +157,7 @@ def test_signup_and_invalid_token(app_with_valid_jwt_config: "FastAPI"):
         "token": ANY,
     }
 
-    authentification_token = response_signup.json()["data"]["signupResult"]["token"]
+    authentication_token = response_signup.json()["data"]["signupResult"]["token"]
 
     query_current_user = {
         "query": """
@@ -210,7 +210,7 @@ def test_signup_and_invalid_token(app_with_valid_jwt_config: "FastAPI"):
 
     response_current_user = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
         json=query_current_user,
     )
 
@@ -218,11 +218,11 @@ def test_signup_and_invalid_token(app_with_valid_jwt_config: "FastAPI"):
     assert response_current_user.json()["data"]["currentUserResult"]["groups"] == []
     assert response_current_user.json()["data"]["currentUserResult"]["phases"] == []
 
-    # invalidate authentification token and check currentUser query
+    # invalidate authentication token and check currentUser query
     # send InvalidToken response
     response_current_user = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {authentification_token[:-1]}"},
+        headers={"Authorization": f"Bearer {authentication_token[:-1]}"},
         json=query_current_user,
     )
 
@@ -233,7 +233,7 @@ def test_signup_and_invalid_token(app_with_valid_jwt_config: "FastAPI"):
 
     response_current_user_invalid_key = client.post(
         "/api/v2",
-        headers={"Authorization": f"InvalidKey {authentification_token[:-1]}"},
+        headers={"Authorization": f"InvalidKey {authentication_token[:-1]}"},
         json=query_current_user,
     )
 
@@ -315,7 +315,7 @@ def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI"):
         "data": {
             "currentUserResult": {
                 "__typename": "ExpiredToken",
-                "message": "Expired token, reauthentication required",
+                "message": "Expired token, re-authentication required",
             },
         },
     }

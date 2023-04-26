@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from yak_server.config_file import Settings, get_settings
 from yak_server.database.models import UserModel
-from yak_server.helpers.authentification import decode_bearer_token
+from yak_server.helpers.authentication import decode_bearer_token
 from yak_server.v1.helpers.database import get_db
 from yak_server.v1.helpers.errors import (
     ExpiredToken,

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from jwt import ExpiredSignatureError, PyJWTError
 
 from yak_server.database.models import UserModel
-from yak_server.helpers.authentification import decode_bearer_token
+from yak_server.helpers.authentication import decode_bearer_token
 
 from .result import ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from yak_server.config_file import Settings
 
 
-def is_authentificated(f):  # noqa: ANN001, ANN201
+def is_authenticated(f):  # noqa: ANN001, ANN201
     @wraps(f)
     def _verify(*args, **kwargs):
         auth_headers = kwargs["info"].context.request.headers.get("Authorization", "").split()
@@ -45,7 +45,7 @@ def is_authentificated(f):  # noqa: ANN001, ANN201
     return _verify
 
 
-def is_admin_authentificated(f):  # noqa: ANN001, ANN201
+def is_admin_authenticated(f):  # noqa: ANN001, ANN201
     @wraps(f)
     def _verify(*args, **kwargs):
         user: UserModel = kwargs["info"].context.user

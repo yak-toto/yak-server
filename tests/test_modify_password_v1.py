@@ -23,7 +23,7 @@ def test_modify_password(client: "TestClient"):
         },
     )
 
-    authentification_token = response_signup_admin.json()["result"]["token"]
+    authentication_token = response_signup_admin.json()["result"]["token"]
 
     # Create non admin user account
     response_signup_glepape = client.post(
@@ -37,14 +37,14 @@ def test_modify_password(client: "TestClient"):
     )
 
     user_id = response_signup_glepape.json()["result"]["id"]
-    authentification_token_glepape = response_signup_glepape.json()["result"]["token"]
+    authentication_token_glepape = response_signup_glepape.json()["result"]["token"]
 
     # Check update is properly process
     new_password_other_user = "new_password"
 
     response_modify_password = client.patch(
         f"/api/v1/users/{user_id}",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
         json={"password": new_password_other_user},
     )
 
@@ -63,7 +63,7 @@ def test_modify_password(client: "TestClient"):
     # Check glepape user cannot update any password
     response_modify_password_with_glepape_user = client.patch(
         f"/api/v1/users/{user_id}",
-        headers={"Authorization": f"Bearer {authentification_token_glepape}"},
+        headers={"Authorization": f"Bearer {authentication_token_glepape}"},
         json={"password": "new_new_password"},
     )
 
@@ -76,7 +76,7 @@ def test_modify_password(client: "TestClient"):
     # Check update is rejected if body does not contain any password
     response_wrong_input = client.patch(
         f"/api/v1/users/{user_id}",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
         json={"name": other_user_name},
     )
 
@@ -99,7 +99,7 @@ def test_modify_password(client: "TestClient"):
 
     response_wrong_input = client.patch(
         f"/api/v1/users/{invalid_user_id}",
-        headers={"Authorization": f"Bearer {authentification_token}"},
+        headers={"Authorization": f"Bearer {authentication_token}"},
         json={"password": "new_password_for_unknown_user"},
     )
 
