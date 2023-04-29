@@ -54,22 +54,7 @@ yak = "yak_server.cli:main"
 
 [tool.black]
 line-length = 100
-include = '\.pyi?$'
 target-version = ['py37']
-exclude = '''
-(
-  /(
-      \.git          # root of the project
-    | \.mypy_cache
-    | \.venv
-    | env
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-)
-'''
 
 
 [tool.coverage.run]
@@ -108,15 +93,6 @@ ignore = [
     "S607",
 ]
 fix = true
-exclude = [
-    ".git",
-    ".ruff_cache",
-    "__pypackages__",
-    "_build",
-    "build",
-    "dist",
-    "env",
-]
 src = ["yak_server", "tests"]
 
 
