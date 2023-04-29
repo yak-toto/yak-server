@@ -104,7 +104,7 @@ def test_backup(monkeypatch):
         for file in (resources.files("yak_server") / "cli/backup_files").iterdir()
     )
 
-    # Check that most recent backup has been done 1 second ago
+    # Check that most recent backup file has been created less than 2 seconds ago
     assert datetime.now(tz=timezone.utc) - list_datetime_backup[-1] <= timedelta(seconds=2)
 
     # Check BackupError if password is incorrect
