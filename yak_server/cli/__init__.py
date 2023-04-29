@@ -9,6 +9,7 @@ from .database import (
     delete_database,
     drop_database,
     initialize_database,
+    setup_migration,
 )
 
 
@@ -52,6 +53,12 @@ def backup() -> None:
     backup_database()
 
 
+@click.command()
+def migration() -> None:
+    """Help to run database migration scripts"""
+    setup_migration()
+
+
 @click.group()
 def db() -> None:
     pass
@@ -63,6 +70,7 @@ db.add_command(drop)
 db.add_command(delete)
 db.add_command(admin)
 db.add_command(backup)
+db.add_command(migration)
 
 
 @click.group()

@@ -147,3 +147,12 @@ def test_cli(client: "TestClient"):
             },
         },
     }
+
+    # Test the migration helper command line
+    result = subprocess.run(
+        "yak db migration",
+        shell=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 0
