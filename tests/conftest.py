@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Generator
 import pytest
 from starlette.testclient import TestClient
 
-from yak_server import create_fast_api_app
+from yak_server import create_app
 from yak_server.cli.database import create_database, delete_database, drop_database
 from yak_server.config_file import get_settings
 
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 @pytest.fixture(scope="session")
 def app_session() -> Generator:
     # Create app and set TESTING config
-    app = create_fast_api_app()
+    app = create_app()
     app.debug = True
 
     # Clean database before running test
@@ -51,7 +51,7 @@ def client(app: "FastAPI") -> TestClient:
 def production_app() -> Generator:
     os.environ["DEBUG"] = "0"
 
-    return create_fast_api_app()
+    return create_app()
 
 
 @pytest.fixture()

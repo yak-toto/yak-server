@@ -65,7 +65,7 @@ DEBUG=1
 And then start backend with:
 
 ```bash
-uvicorn --reload yak_server:create_fast_api_app --factory
+uvicorn --reload yak_server:create_app --factory
 ```
 
 ### Data initialization

@@ -12,17 +12,15 @@ VERSION1 = "v1"
 VERSION2 = "v2"
 
 
-def create_fast_api_app() -> FastAPI:
+def create_app() -> FastAPI:
     # Initialize fastapi application
-    prefix = f"/{GLOBAL_ENDPOINT}/{VERSION1}"
-
     config = Config(".env")
 
     app = FastAPI(
         debug=config("DEBUG", cast=bool, default=False),
-        docs_url=f"{prefix}/docs",
-        redoc_url=f"{prefix}/redoc",
-        openapi_url=f"{prefix}/openapi.json",
+        docs_url=f"/{GLOBAL_ENDPOINT}/docs",
+        redoc_url=f"/{GLOBAL_ENDPOINT}/redoc",
+        openapi_url=f"/{GLOBAL_ENDPOINT}/openapi.json",
     )
 
     # Include all routers
@@ -36,15 +34,17 @@ def create_fast_api_app() -> FastAPI:
     from .v1.routers import teams as teams_router
     from .v1.routers import users as users_router
 
-    app.include_router(bets_router.router, prefix=prefix)
-    app.include_router(binary_bets_router.router, prefix=prefix)
-    app.include_router(groups_router.router, prefix=prefix)
-    app.include_router(phases_router.router, prefix=prefix)
-    app.include_router(results_router.router, prefix=prefix)
-    app.include_router(rules_router.router, prefix=prefix)
-    app.include_router(score_bets_router.router, prefix=prefix)
-    app.include_router(teams_router.router, prefix=prefix)
-    app.include_router(users_router.router, prefix=prefix)
+    v1_prefix = f"/{GLOBAL_ENDPOINT}/{VERSION1}"
+
+    app.include_router(bets_router.router, prefix=v1_prefix)
+    app.include_router(binary_bets_router.router, prefix=v1_prefix)
+    app.include_router(groups_router.router, prefix=v1_prefix)
+    app.include_router(phases_router.router, prefix=v1_prefix)
+    app.include_router(results_router.router, prefix=v1_prefix)
+    app.include_router(rules_router.router, prefix=v1_prefix)
+    app.include_router(score_bets_router.router, prefix=v1_prefix)
+    app.include_router(teams_router.router, prefix=v1_prefix)
+    app.include_router(users_router.router, prefix=v1_prefix)
 
     # Set error handler
     from .v1.helpers.errors import set_exception_handler
@@ -61,7 +61,7 @@ def create_fast_api_app() -> FastAPI:
         context_getter=get_context,
     )
 
-    app.include_router(graphql_app, prefix=f"/{GLOBAL_ENDPOINT}/{VERSION2}")
+    app.include_router(graphql_app, prefix=f"/{GLOBAL_ENDPOINT}/{VERSION2}", tags=["graphql"])
 
     # Set CORS
     app.add_middleware(
