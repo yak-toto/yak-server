@@ -1,11 +1,19 @@
 import json
 import os
 import subprocess
+import sys
 from base64 import b64decode
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
+if sys.version_info >= (3, 9):
+    from importlib import resources
+else:
+    import importlib_resources as resources
+
 import pexpect
+from dateutil import parser
 
 from .utils import get_random_string
 
@@ -64,6 +72,23 @@ def test_cli(client: "TestClient"):
     assert response_login.status_code == HTTPStatus.CREATED
 
     auth_token = response_login.json()["result"]["token"]
+
+    # Check backup command
+    result = subprocess.run(
+        "yak db backup",
+        shell=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 0
+
+    list_datetime_backup = sorted(
+        parser.parse(file.name.replace(".sql", "").replace("yak_toto_backup_", ""))
+        for file in (resources.files("yak_server") / "cli/backup_files").iterdir()
+    )
+
+    # Check that most recent backup file has been created less than 2 seconds ago
+    assert datetime.now(tz=timezone.utc) - list_datetime_backup[-1] <= timedelta(seconds=2)
 
     # Check records deletion
     result = subprocess.run(
