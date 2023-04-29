@@ -215,3 +215,17 @@ def drop_database(app: "FastAPI") -> None:
         raise TableDropInProduction
 
     Base.metadata.drop_all(bind=engine)
+
+
+def setup_migration() -> None:
+    with resources.as_file(resources.files("yak_server") / ".." / "alembic.ini") as path:
+        print(
+            "To be able to run the database migration "
+            "scripts, you need to run the following command:",
+        )
+        print(f"export ALEMBIC_CONFIG='{path.resolve()}'")
+        print()
+        print(
+            "Follow this link for more informations: "
+            "https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file",
+        )

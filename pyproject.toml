@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "yak-server"
-packages = [ { include = "yak_server" } ]
+packages = [ { include = "yak_server" }, { include = "alembic.ini" } ]
 version = "0.17.0"
 description = "Football bet rest/graphql server"
 authors = ["Guillaume Le Pape <gui.lepape25@gmail.com>"]
