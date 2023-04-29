@@ -1,6 +1,6 @@
 import click
 
-from yak_server import create_fast_api_app
+from yak_server import create_app
 
 from .database import (
     backup_database,
@@ -21,28 +21,28 @@ def create() -> None:
 @click.command()
 def init() -> None:
     """Initialize database."""
-    app = create_fast_api_app()
+    app = create_app()
     initialize_database(app)
 
 
 @click.command()
 def drop() -> None:
     """Drop all tables."""
-    app = create_fast_api_app()
+    app = create_app()
     drop_database(app)
 
 
 @click.command()
 def delete() -> None:
     """Delete all records."""
-    app = create_fast_api_app()
+    app = create_app()
     delete_database(app)
 
 
 @click.command()
 def admin() -> None:
     """Create admin account in database."""
-    app = create_fast_api_app()
+    app = create_app()
     create_admin(app)
 
 
