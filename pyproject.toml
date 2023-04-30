@@ -44,6 +44,10 @@ pre-commit = [
 ruff = ">=0.0.257,<0.0.273"
 
 
+[tool.poetry.group.profiling.dependencies]
+yappi = "^1.4.0"
+
+
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
 
@@ -114,4 +118,5 @@ known-first-party = ["yak_server"]
 [tool.pytest.ini_options]
 env = [
     "MYSQL_DB=yak_toto_test",
+    "PROFILING=0",
 ]

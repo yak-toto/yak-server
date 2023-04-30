@@ -79,4 +79,12 @@ def create_app() -> FastAPI:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
+    # Set yappi profiler
+    profiling = config("PROFILING", cast=bool, default=False)
+
+    if app.debug and profiling:
+        from .helpers.profiling import set_yappi_profiler
+
+        set_yappi_profiler(app)
+
     return app

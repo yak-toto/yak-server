@@ -55,6 +55,30 @@ def production_app() -> Generator:
 
 
 @pytest.fixture()
+def debug_app_with_profiler() -> Generator:
+    os.environ["PROFILING"] = "1"
+    os.environ["DEBUG"] = "1"
+    app = create_app()
+
+    # Clean database before running test
+    create_database()
+
+    return app
+
+
+@pytest.fixture()
+def production_app_with_profiler() -> Generator:
+    os.environ["PROFILING"] = "1"
+    os.environ["DEBUG"] = "0"
+    app = create_app()
+
+    # Clean database before running test
+    create_database()
+
+    return app
+
+
+@pytest.fixture()
 def app_with_valid_jwt_config(app: "FastAPI"):
     fake_jwt_secret_key = get_random_string(15)
 
