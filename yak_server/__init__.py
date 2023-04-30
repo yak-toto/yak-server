@@ -1,9 +1,14 @@
 import logging
+from typing import TYPE_CHECKING, Callable
 
+import yappi
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.config import Config
 from strawberry.fastapi import GraphQLRouter
+
+if TYPE_CHECKING:
+    from fastapi import Request, Response
 
 logger = logging.getLogger(__name__)
 
@@ -78,5 +83,31 @@ def create_app() -> FastAPI:
         level=logging.DEBUG if app.debug else logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
+
+    # Add yappi middleware in debug mode
+    if app.debug:
+
+        @app.middleware("http")
+        async def add_process_time_header(
+            request: "Request",
+            call_next: Callable[["Request"], "Response"],
+        ) -> "Response":
+            yappi.set_clock_type("cpu")  # Use set_clock_type("wall") for wall time
+            yappi.start()
+
+            response = await call_next(request)
+
+            yappi.get_func_stats().print_all(
+                columns={
+                    0: ("name", 120),
+                    1: ("ncall", 5),
+                    2: ("tsub", 8),
+                    3: ("ttot", 8),
+                    4: ("tavg", 8),
+                },
+            )
+            yappi.get_thread_stats().print_all()
+
+            return response
 
     return app
