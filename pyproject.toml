@@ -21,7 +21,7 @@ python = "^3.7"
 
 PyJWT = "^2.6.0"
 PyMySQL = {extras = ["rsa"], version = "^1.0.2"}
-strawberry-graphql = ">=0.168.1,<0.176.0"
+strawberry-graphql = ">=0.168.1,<0.177.0"
 alembic = "^1.10.3"
 argon2-cffi = "^21.3.0"
 fastapi = "^0.95.1"

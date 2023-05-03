@@ -1415,14 +1415,14 @@ full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart", "pyyam
 
 [[package]]
 name = "strawberry-graphql"
-version = "0.175.1"
+version = "0.176.2"
 description = "A library for creating GraphQL APIs"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "strawberry_graphql-0.175.1-py3-none-any.whl", hash = "sha256:2f324068360879b37fc7940ab585f4f52697beab344ab5cbc27a4b505c295487"},
-    {file = "strawberry_graphql-0.175.1.tar.gz", hash = "sha256:b4073e1a17d13b82e050891e0a3fefa302b44f6d40b5583804597e9af1cb23ae"},
+    {file = "strawberry_graphql-0.176.2-py3-none-any.whl", hash = "sha256:c64d8174ea34dda6acf65ea216bbda3ee1d93718697e0c38aae664449cdd5c3e"},
+    {file = "strawberry_graphql-0.176.2.tar.gz", hash = "sha256:368fd517a29f746b316c6dfc400efb2ea07f42ca8f05f1a3e7223d77155a034f"},
 ]
 
 [package.dependencies]
@@ -1750,4 +1750,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "f23b4543e6b5c5a0ca8fb2e8b1d37278499894c915f044c04f9bf4bae4fb294f"
+content-hash = "bc64a30af9381dbeeeb044143be9cbec49a9729e379cea4a20ec6d02758724ac"
