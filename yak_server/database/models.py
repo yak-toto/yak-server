@@ -118,15 +118,19 @@ class UserModel(Base):
     def authenticate(cls, db: "Session", name: str, password: str) -> "UserModel":
         user = db.query(cls).filter_by(name=name).first()
 
-        if not user:
-            return None
+        is_correct_username = bool(user)
 
         try:
-            ph.verify(user.password, password)
+            if is_correct_username:
+                ph.verify(user.password, password)
+            else:
+                # verify password with itself to avoid timing attack
+                ph.verify(ph.hash(password), password)
+            is_correct_password = True
         except VerificationError:
-            return None
+            is_correct_password = False
 
-        return user
+        return user if is_correct_username and is_correct_password else None
 
     def change_password(self, new_password: str) -> None:
         self.password = ph.hash(new_password)
