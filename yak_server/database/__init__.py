@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+import pymysql
 from pydantic import BaseSettings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
@@ -23,18 +24,20 @@ def get_mysql_settings() -> MySQLSettings:
 
 
 def compute_database_uri(
+    mysql_client: str,
     mysql_user_name: str,
     mysql_password: str,
     mysql_port: int,
     mysql_db: str,
 ) -> str:
-    return f"mysql+pymysql://{mysql_user_name}:{mysql_password}@localhost:{mysql_port}/{mysql_db}"
+    return f"mysql+{mysql_client}://{mysql_user_name}:{mysql_password}@localhost:{mysql_port}/{mysql_db}"
 
 
 mysql_settings = get_mysql_settings()
 
 
 SQLALCHEMY_DATABASE_URL = compute_database_uri(
+    pymysql.__name__,
     mysql_settings.user_name,
     mysql_settings.password,
     mysql_settings.port,
