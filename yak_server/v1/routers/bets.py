@@ -30,8 +30,7 @@ from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.group_rank import GroupPositionOut
 from yak_server.v1.models.groups import GroupOut, GroupWithPhaseIdOut
 from yak_server.v1.models.phases import PhaseOut
-from yak_server.v1.models.score_bets import Group, ScoreBetOut, ScoreBetWithGroupIdOut
-from yak_server.v1.models.teams import FlagOut, TeamWithScoreOut, TeamWithWonOut
+from yak_server.v1.models.score_bets import ScoreBetOut, ScoreBetWithGroupIdOut
 
 router = APIRouter(
     prefix="/bets",
@@ -65,50 +64,16 @@ def retrieve_all_bets(
             phases=[PhaseOut.from_orm(phase) for phase in phases],
             groups=[GroupWithPhaseIdOut.from_orm(group) for group in groups],
             score_bets=[
-                ScoreBetWithGroupIdOut(
-                    id=score_bet.id,
-                    locked=is_locked(user.name, settings.lock_datetime),
-                    group=Group(id=score_bet.match.group_id),
-                    team1=TeamWithScoreOut(
-                        id=score_bet.match.team1.id,
-                        code=score_bet.match.team1.code,
-                        description=score_bet.match.team1.description,
-                        score=score_bet.score1,
-                        flag=FlagOut(url=score_bet.match.team1.flag_url),
-                    ),
-                    team2=TeamWithScoreOut(
-                        id=score_bet.match.team2.id,
-                        code=score_bet.match.team2.code,
-                        description=score_bet.match.team2.description,
-                        score=score_bet.score2,
-                        flag=FlagOut(url=score_bet.match.team2.flag_url),
-                    ),
+                ScoreBetWithGroupIdOut.from_instance(
+                    score_bet,
+                    is_locked(user.name, settings.lock_datetime),
                 )
                 for score_bet in score_bets
             ],
             binary_bets=[
-                BinaryBetWithGroupIdOut(
-                    id=binary_bet.id,
-                    locked=is_locked(user.name, settings.lock_datetime),
-                    group=Group(id=binary_bet.match.group_id),
-                    team1=TeamWithWonOut(
-                        id=binary_bet.match.team1.id,
-                        code=binary_bet.match.team1.code,
-                        description=binary_bet.match.team1.description,
-                        won=binary_bet.bet_from_is_one_won()[0],
-                        flag=FlagOut(url=binary_bet.match.team1.flag_url),
-                    )
-                    if binary_bet.match.team1
-                    else None,
-                    team2=TeamWithWonOut(
-                        id=binary_bet.match.team2.id,
-                        code=binary_bet.match.team2.code,
-                        description=binary_bet.match.team2.description,
-                        won=binary_bet.bet_from_is_one_won()[1],
-                        flag=FlagOut(url=binary_bet.match.team2.flag_url),
-                    )
-                    if binary_bet.match.team2
-                    else None,
+                BinaryBetWithGroupIdOut.from_instance(
+                    binary_bet,
+                    is_locked(user.name, settings.lock_datetime),
                 )
                 for binary_bet in binary_bets
             ],
@@ -137,50 +102,16 @@ def retrieve_bets_by_phase_code(
             phase=PhaseOut.from_orm(phase),
             groups=[GroupOut.from_orm(group) for group in groups],
             score_bets=[
-                ScoreBetWithGroupIdOut(
-                    id=score_bet.id,
-                    locked=is_locked(user.name, settings.lock_datetime),
-                    group=Group(id=score_bet.match.group_id),
-                    team1=TeamWithScoreOut(
-                        id=score_bet.match.team1.id,
-                        code=score_bet.match.team1.code,
-                        description=score_bet.match.team1.description,
-                        score=score_bet.score1,
-                        flag=FlagOut(url=score_bet.match.team1.flag_url),
-                    ),
-                    team2=TeamWithScoreOut(
-                        id=score_bet.match.team2.id,
-                        code=score_bet.match.team2.code,
-                        description=score_bet.match.team2.description,
-                        score=score_bet.score2,
-                        flag=FlagOut(url=score_bet.match.team2.flag_url),
-                    ),
+                ScoreBetWithGroupIdOut.from_instance(
+                    score_bet,
+                    is_locked(user.name, settings.lock_datetime),
                 )
                 for score_bet in score_bets
             ],
             binary_bets=[
-                BinaryBetWithGroupIdOut(
-                    id=binary_bet.id,
-                    locked=is_locked(user.name, settings.lock_datetime),
-                    group=Group(id=binary_bet.match.group_id),
-                    team1=TeamWithWonOut(
-                        id=binary_bet.match.team1.id,
-                        code=binary_bet.match.team1.code,
-                        description=binary_bet.match.team1.description,
-                        won=binary_bet.bet_from_is_one_won()[0],
-                        flag=FlagOut(url=binary_bet.match.team1.flag_url),
-                    )
-                    if binary_bet.match.team1
-                    else None,
-                    team2=TeamWithWonOut(
-                        id=binary_bet.match.team2.id,
-                        code=binary_bet.match.team2.code,
-                        description=binary_bet.match.team2.description,
-                        won=binary_bet.bet_from_is_one_won()[1],
-                        flag=FlagOut(url=binary_bet.match.team2.flag_url),
-                    )
-                    if binary_bet.match.team2
-                    else None,
+                BinaryBetWithGroupIdOut.from_instance(
+                    binary_bet,
+                    is_locked(user.name, settings.lock_datetime),
                 )
                 for binary_bet in binary_bets
             ],
@@ -205,49 +136,11 @@ def retrieve_bets_by_group_code(
             phase=PhaseOut.from_orm(group.phase),
             group=GroupOut.from_orm(group),
             score_bets=[
-                ScoreBetOut(
-                    id=score_bet.id,
-                    locked=is_locked(user.name, settings.lock_datetime),
-                    team1=TeamWithScoreOut(
-                        id=score_bet.match.team1.id,
-                        code=score_bet.match.team1.code,
-                        description=score_bet.match.team1.description,
-                        score=score_bet.score1,
-                        flag=FlagOut(url=score_bet.match.team1.flag_url),
-                    ),
-                    team2=TeamWithScoreOut(
-                        id=score_bet.match.team2.id,
-                        code=score_bet.match.team2.code,
-                        description=score_bet.match.team2.description,
-                        score=score_bet.score2,
-                        flag=FlagOut(url=score_bet.match.team2.flag_url),
-                    ),
-                )
+                ScoreBetOut.from_instance(score_bet, is_locked(user.name, settings.lock_datetime))
                 for score_bet in score_bets
             ],
             binary_bets=[
-                BinaryBetOut(
-                    id=binary_bet.id,
-                    locked=is_locked(user.name, settings.lock_datetime),
-                    team1=TeamWithWonOut(
-                        id=binary_bet.match.team1.id,
-                        code=binary_bet.match.team1.code,
-                        description=binary_bet.match.team1.description,
-                        won=binary_bet.bet_from_is_one_won()[0],
-                        flag=FlagOut(url=binary_bet.match.team1.flag_url),
-                    )
-                    if binary_bet.match.team1
-                    else None,
-                    team2=TeamWithWonOut(
-                        id=binary_bet.match.team2.id,
-                        code=binary_bet.match.team2.code,
-                        description=binary_bet.match.team2.description,
-                        won=binary_bet.bet_from_is_one_won()[1],
-                        flag=FlagOut(url=binary_bet.match.team2.flag_url),
-                    )
-                    if binary_bet.match.team2
-                    else None,
-                )
+                BinaryBetOut.from_instance(binary_bet, is_locked(user.name, settings.lock_datetime))
                 for binary_bet in binary_bets
             ],
         ),

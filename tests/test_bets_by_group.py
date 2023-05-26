@@ -51,7 +51,14 @@ def test_bets_by_groups(app: "FastAPI", client: "TestClient", monkeypatch):
     )
 
     assert bets_by_valid_group.json()["result"] == {
-        "binary_bets": [],
+        "binary_bets": [
+            {
+                "id": ANY,
+                "locked": True,
+                "team1": None,
+                "team2": None,
+            },
+        ],
         "group": {
             "code": "A",
             "description": "Groupe A",
