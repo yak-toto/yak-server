@@ -148,40 +148,40 @@ def test_phase(app_with_lock_datetime_in_past: "FastAPI", monkeypatch):
                     {
                         "id": ANY,
                         "code": "GROUP",
-                        "description": "Group stage",
+                        "description": "Phase de groupes",
                         "binaryBets": [],
                         "scoreBets": [
                             {
-                                "team1": {"description": "Andorra", "score": None},
-                                "team2": {"description": "Brazil", "score": None},
+                                "team1": {"description": "Andorre", "score": None},
+                                "team2": {"description": "Brésil", "score": None},
                             },
                             {
                                 "team1": {"description": "Burkina Faso", "score": None},
                                 "team2": {
-                                    "description": "The Republic of Guatemala",
+                                    "description": "Guatemala",
                                     "score": None,
                                 },
                             },
                             {
-                                "team1": {"description": "Andorra", "score": None},
+                                "team1": {"description": "Andorre", "score": None},
                                 "team2": {"description": "Burkina Faso", "score": None},
                             },
                             {
-                                "team1": {"description": "Brazil", "score": None},
+                                "team1": {"description": "Brésil", "score": None},
                                 "team2": {
-                                    "description": "The Republic of Guatemala",
+                                    "description": "Guatemala",
                                     "score": None,
                                 },
                             },
                             {
-                                "team1": {"description": "Andorra", "score": None},
+                                "team1": {"description": "Andorre", "score": None},
                                 "team2": {
-                                    "description": "The Republic of Guatemala",
+                                    "description": "Guatemala",
                                     "score": None,
                                 },
                             },
                             {
-                                "team1": {"description": "Brazil", "score": None},
+                                "team1": {"description": "Brésil", "score": None},
                                 "team2": {"description": "Burkina Faso", "score": None},
                             },
                         ],
@@ -195,46 +195,46 @@ def test_phase(app_with_lock_datetime_in_past: "FastAPI", monkeypatch):
                                     {
                                         "id": ANY,
                                         "locked": True,
-                                        "team1": {"description": "Andorra", "score": None},
-                                        "team2": {"description": "Brazil", "score": None},
+                                        "team1": {"description": "Andorre", "score": None},
+                                        "team2": {"description": "Brésil", "score": None},
                                     },
                                     {
                                         "id": ANY,
                                         "locked": True,
                                         "team1": {"description": "Burkina Faso", "score": None},
                                         "team2": {
-                                            "description": "The Republic of Guatemala",
+                                            "description": "Guatemala",
                                             "score": None,
                                         },
                                     },
                                     {
                                         "id": ANY,
                                         "locked": True,
-                                        "team1": {"description": "Andorra", "score": None},
+                                        "team1": {"description": "Andorre", "score": None},
                                         "team2": {"description": "Burkina Faso", "score": None},
                                     },
                                     {
                                         "id": ANY,
                                         "locked": True,
-                                        "team1": {"description": "Brazil", "score": None},
+                                        "team1": {"description": "Brésil", "score": None},
                                         "team2": {
-                                            "description": "The Republic of Guatemala",
+                                            "description": "Guatemala",
                                             "score": None,
                                         },
                                     },
                                     {
                                         "id": ANY,
                                         "locked": True,
-                                        "team1": {"description": "Andorra", "score": None},
+                                        "team1": {"description": "Andorre", "score": None},
                                         "team2": {
-                                            "description": "The Republic of Guatemala",
+                                            "description": "Guatemala",
                                             "score": None,
                                         },
                                     },
                                     {
                                         "id": ANY,
                                         "locked": True,
-                                        "team1": {"description": "Brazil", "score": None},
+                                        "team1": {"description": "Brésil", "score": None},
                                         "team2": {"description": "Burkina Faso", "score": None},
                                     },
                                 ],
@@ -285,7 +285,7 @@ def test_phase(app_with_lock_datetime_in_past: "FastAPI", monkeypatch):
                 "__typename": "Phase",
                 "id": phase_id,
                 "code": "GROUP",
-                "description": "Group stage",
+                "description": "Phase de groupes",
             },
         },
     }
@@ -347,7 +347,7 @@ def test_phase(app_with_lock_datetime_in_past: "FastAPI", monkeypatch):
                 "__typename": "Phase",
                 "id": phase_id,
                 "code": phase_code,
-                "description": "Group stage",
+                "description": "Phase de groupes",
             },
         },
     }

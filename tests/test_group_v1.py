@@ -57,7 +57,7 @@ def test_group(app: "FastAPI", client: "TestClient", monkeypatch):
 
     expected_phase = {
         "code": "GROUP",
-        "description": "Group stage",
+        "description": "Phase de groupes",
         "id": ANY,
     }
 

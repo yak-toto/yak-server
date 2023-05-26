@@ -2,11 +2,13 @@
     {
         "index": 1,
         "code": "GROUP",
-        "description": "Group stage"
+        "description": "Phase de groupes",
+        "description_en": "Group stage"
     },
     {
         "index": 1,
         "code": "FINAL",
-        "description": "Final stage"
+        "description": "Phase finale",
+        "description_en": "Final stage"
     }
 ]

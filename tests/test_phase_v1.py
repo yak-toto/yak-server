@@ -58,8 +58,8 @@ def test_phase(app: "FastAPI", client: "TestClient", monkeypatch):
     assert response_all_phases.json() == {
         "ok": True,
         "result": [
-            {"code": "GROUP", "description": "Group stage", "id": ANY},
-            {"code": "FINAL", "description": "Final stage", "id": ANY},
+            {"code": "GROUP", "description": "Phase de groupes", "id": ANY},
+            {"code": "FINAL", "description": "Phase finale", "id": ANY},
         ],
     }
 
@@ -74,7 +74,7 @@ def test_phase(app: "FastAPI", client: "TestClient", monkeypatch):
     assert response_phase_by_id.status_code == HTTPStatus.OK
     assert response_phase_by_id.json() == {
         "ok": True,
-        "result": {"code": "GROUP", "description": "Group stage", "id": phase_id},
+        "result": {"code": "GROUP", "description": "Phase de groupes", "id": phase_id},
     }
 
     # Error case : retrieve phase by invalid id

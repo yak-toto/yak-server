@@ -182,7 +182,7 @@ def test_group_rank(app_with_valid_jwt_config: "FastAPI", monkeypatch):
                 "played": 2,
                 "points": 4,
                 "team": {
-                    "description": "Isle of Man",
+                    "description": "Île de Man",
                     "code": "IM",
                     "id": ANY,
                     "flag": {"url": ANY},
@@ -198,7 +198,7 @@ def test_group_rank(app_with_valid_jwt_config: "FastAPI", monkeypatch):
                 "played": 2,
                 "points": 0,
                 "team": {
-                    "description": "Ireland",
+                    "description": "Irlande",
                     "code": "IE",
                     "id": ANY,
                     "flag": {"url": ANY},

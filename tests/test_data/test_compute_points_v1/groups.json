@@ -3,12 +3,14 @@
         "index": 1,
         "code": "A",
         "phase_code": "GROUP",
-        "description": "Groupe A"
+        "description": "Groupe A",
+        "description_en": "Group A"
     },
     {
         "index": 2,
         "code": "1",
         "phase_code": "FINAL",
+        "description_en": "Finale",
         "description": "Final"
     }
 ]

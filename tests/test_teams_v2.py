@@ -102,19 +102,19 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch):
         {
             "id": ANY,
             "code": "GR",
-            "description": "Greece",
+            "description": "Grèce",
             "flag": {"url": ANY},
         },
         {
             "id": ANY,
             "code": "DE",
-            "description": "Germany",
+            "description": "Allemagne",
             "flag": {"url": ANY},
         },
         {
             "id": ANY,
             "code": "GD",
-            "description": "Grenada",
+            "description": "Grenade",
             "flag": {"url": ANY},
         },
         {
@@ -132,19 +132,19 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch):
         {
             "id": ANY,
             "code": "JM",
-            "description": "Jamaica",
+            "description": "Jamaïque",
             "flag": {"url": ANY},
         },
         {
             "id": ANY,
             "code": "JO",
-            "description": "Jordan",
+            "description": "Jordanie",
             "flag": {"url": ANY},
         },
         {
             "id": ANY,
             "code": "NO",
-            "description": "Norway",
+            "description": "Norvège",
             "flag": {"url": ANY},
         },
     ]
@@ -160,7 +160,7 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch):
     team_id = [
         team["id"]
         for team in response_all_teams.json()["data"]["allTeamsResult"]["teams"]
-        if team["description"] == "Norway"
+        if team["description"] == "Norvège"
     ][0]
 
     response_all_teams_invalid_token = client.post(
@@ -217,7 +217,7 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch):
             "teamByIdResult": {
                 "__typename": "Team",
                 "code": "NO",
-                "description": "Norway",
+                "description": "Norvège",
                 "flag": {"url": f"/api/v1/teams/{team_id}/flag"},
                 "id": team_id,
             },
@@ -287,7 +287,7 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch):
             "teamByCodeResult": {
                 "__typename": "Team",
                 "code": "NO",
-                "description": "Norway",
+                "description": "Norvège",
                 "flag": {"url": f"/api/v1/teams/{team_id}/flag"},
                 "id": team_id,
             },

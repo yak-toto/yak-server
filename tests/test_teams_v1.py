@@ -30,20 +30,20 @@ def test_teams(app: "FastAPI", client: "TestClient", monkeypatch):
         {
             "id": ANY,
             "code": "DE",
-            "description": "Germany",
+            "description": "Allemagne",
             "flag": {"url": ANY},
         },
-        {"id": ANY, "code": "GR", "description": "Greece", "flag": {"url": ANY}},
-        {"id": ANY, "code": "GD", "description": "Grenada", "flag": {"url": ANY}},
-        {"id": ANY, "code": "JM", "description": "Jamaica", "flag": {"url": ANY}},
-        {"id": ANY, "code": "JO", "description": "Jordan", "flag": {"url": ANY}},
+        {"id": ANY, "code": "GR", "description": "Grèce", "flag": {"url": ANY}},
+        {"id": ANY, "code": "GD", "description": "Grenade", "flag": {"url": ANY}},
+        {"id": ANY, "code": "JM", "description": "Jamaïque", "flag": {"url": ANY}},
+        {"id": ANY, "code": "JO", "description": "Jordanie", "flag": {"url": ANY}},
         {
             "id": ANY,
             "code": "ML",
             "description": "Mali",
             "flag": {"url": ANY},
         },
-        {"id": ANY, "code": "NO", "description": "Norway", "flag": {"url": ANY}},
+        {"id": ANY, "code": "NO", "description": "Norvège", "flag": {"url": ANY}},
         {"id": ANY, "code": "UA", "description": "Ukraine", "flag": {"url": ANY}},
     ]
 
@@ -60,7 +60,7 @@ def test_teams(app: "FastAPI", client: "TestClient", monkeypatch):
     assert response_one_team_by_code.json()["result"]["team"] == {
         "id": ANY,
         "code": "DE",
-        "description": "Germany",
+        "description": "Allemagne",
         "flag": {"url": ANY},
     }
 
@@ -74,7 +74,7 @@ def test_teams(app: "FastAPI", client: "TestClient", monkeypatch):
     assert response_one_team_by_id.json()["result"]["team"] == {
         "id": team_id,
         "code": "DE",
-        "description": "Germany",
+        "description": "Allemagne",
         "flag": {"url": ANY},
     }
 

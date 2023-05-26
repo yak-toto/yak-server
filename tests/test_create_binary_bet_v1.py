@@ -85,7 +85,7 @@ def test_create_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
             },
             "phase": {
                 "code": "GROUP",
-                "description": "Group stage",
+                "description": "Phase de groupes",
                 "id": ANY,
             },
             "binary_bet": {

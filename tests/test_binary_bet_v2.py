@@ -145,14 +145,14 @@ def test_binary_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
         "data": {
             "modifyBinaryBetResult": {
                 "__typename": "BinaryBet",
-                "group": {"description": "Group A", "phase": {"description": "Group stage"}},
+                "group": {"description": "Groupe A", "phase": {"description": "Phase de groupes"}},
                 "id": bet_id,
                 "team1": {
                     "description": "France",
                     "won": None if is_one_won is None else is_one_won,
                 },
                 "team2": {
-                    "description": "Germany",
+                    "description": "Allemagne",
                     "won": None if is_one_won is None else not is_one_won,
                 },
             },
@@ -256,14 +256,14 @@ def test_binary_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
         "data": {
             "binaryBetResult": {
                 "__typename": "BinaryBet",
-                "group": {"description": "Group A", "phase": {"description": "Group stage"}},
+                "group": {"description": "Groupe A", "phase": {"description": "Phase de groupes"}},
                 "id": bet_id,
                 "team1": {
                     "description": "France",
                     "won": None if is_one_won is None else is_one_won,
                 },
                 "team2": {
-                    "description": "Germany",
+                    "description": "Allemagne",
                     "won": None if is_one_won is None else not is_one_won,
                 },
             },

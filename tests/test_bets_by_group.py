@@ -66,7 +66,7 @@ def test_bets_by_groups(app: "FastAPI", client: "TestClient", monkeypatch):
         },
         "phase": {
             "code": "GROUP",
-            "description": "Group stage",
+            "description": "Phase de groupes",
             "id": ANY,
         },
         "score_bets": [
@@ -82,7 +82,7 @@ def test_bets_by_groups(app: "FastAPI", client: "TestClient", monkeypatch):
                 },
                 "team2": {
                     "code": "IE",
-                    "description": "Ireland",
+                    "description": "Irlande",
                     "flag": {"url": ANY},
                     "id": ANY,
                     "score": None,
@@ -100,7 +100,7 @@ def test_bets_by_groups(app: "FastAPI", client: "TestClient", monkeypatch):
                 },
                 "team2": {
                     "code": "IM",
-                    "description": "Isle of Man",
+                    "description": "Île de Man",
                     "flag": {"url": ANY},
                     "id": ANY,
                     "score": None,
@@ -111,14 +111,14 @@ def test_bets_by_groups(app: "FastAPI", client: "TestClient", monkeypatch):
                 "locked": True,
                 "team1": {
                     "code": "IE",
-                    "description": "Ireland",
+                    "description": "Irlande",
                     "flag": {"url": ANY},
                     "id": ANY,
                     "score": None,
                 },
                 "team2": {
                     "code": "IM",
-                    "description": "Isle of Man",
+                    "description": "Île de Man",
                     "flag": {"url": ANY},
                     "id": ANY,
                     "score": None,
