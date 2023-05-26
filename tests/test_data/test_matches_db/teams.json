@@ -1,22 +1,26 @@
 [
     {
         "code": "AD",
-        "description": "Andorra",
+        "description": "Andorre",
+        "description_en": "Andorra",
         "flag_url": "https://fake-team-flag_andorra.com"
     },
     {
         "code": "BR",
-        "description": "Brazil",
+        "description": "Br\u00e9sil",
+        "description_en": "Brazil",
         "flag_url": "https://fake-team-flag_brazil.com"
     },
     {
         "code": "BF",
         "description": "Burkina Faso",
+        "description_en": "Burkina Faso",
         "flag_url": "https://fake-team-flag_burkina.com"
     },
     {
         "code": "GT",
-        "description": "The Republic of Guatemala",
+        "description": "Guatemala",
+        "description_en": "Guatemala",
         "flag_url": "https://fake-team-flag_guatemala.com"
     }
 ]

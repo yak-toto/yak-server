@@ -118,8 +118,8 @@ def test_bets(app_with_lock_datetime_in_past: "FastAPI", monkeypatch):
                 "id": ANY,
                 "locked": True,
                 "group": {"description": "Groupe A", "id": ANY},
-                "team1": {"description": "Croatia", "score": None},
-                "team2": {"description": "Finland", "score": None},
+                "team1": {"description": "Croatie", "score": None},
+                "team2": {"description": "Finlande", "score": None},
             },
         },
     }

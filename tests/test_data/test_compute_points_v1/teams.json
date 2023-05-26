@@ -2,16 +2,19 @@
     {
         "code": "FR",
         "description": "France",
+        "description_en": "France",
         "flag_url": "https://fake-team-flag_france.com"
     },
     {
         "code": "IE",
-        "description": "Ireland",
+        "description": "Irlande",
+        "description_en": "Ireland",
         "flag_url": "https://fake-team-flag_brazil.com"
     },
     {
         "code": "IM",
-        "description": "Isle of Man",
+        "description": "\u00cele de Man",
+        "description_en": "Isle of Man",
         "flag_url": "https://fake-team-flag_isle_of_man.com"
     }
 ]

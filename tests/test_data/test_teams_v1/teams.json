@@ -1,42 +1,50 @@
 [
     {
         "code": "DE",
-        "description": "Germany",
+        "description": "Allemagne",
+        "description_en": "Germany",
         "flag_url": "https://fake-team-flag_germany.com"
     },
     {
         "code": "GR",
-        "description": "Greece",
+        "description": "Gr\u00e8ce",
+        "description_en": "Greece",
         "flag_url": "https://fake-team-flag_greece.com"
     },
     {
         "code": "GD",
-        "description": "Grenada",
+        "description": "Grenade",
+        "description_en": "Grenada",
         "flag_url": "https://fake-team-flag_grenada.com"
     },
     {
         "code": "JM",
-        "description": "Jamaica",
+        "description": "Jama\u00efque",
+        "description_en": "Jamaica",
         "flag_url": "https://fake-team-flag_jamaica.com"
     },
     {
         "code": "JO",
-        "description": "Jordan",
+        "description": "Jordanie",
+        "description_en": "Jordan",
         "flag_url": "https://fake-team-flag_jordan.com"
     },
     {
         "code": "ML",
         "description": "Mali",
+        "description_en": "Mali",
         "flag_url": "https://fake-team-flag_mali.com"
     },
     {
         "code": "NO",
-        "description": "Norway",
+        "description": "Norv\u00e8ge",
+        "description_en": "Norway",
         "flag_url": "https://fake-team-flag_norway.com"
     },
     {
         "code": "UA",
         "description": "Ukraine",
+        "description_en": "Ukraine",
         "flag_url": "https://fake-team-flag_ukraine.com"
     }
 ]

@@ -106,7 +106,7 @@ def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch):
                 "phase": {
                     "id": ANY,
                     "code": "GROUP",
-                    "description": "Group stage",
+                    "description": "Phase de groupes",
                 },
             },
         ],
@@ -158,12 +158,12 @@ def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch):
         "__typename": "Group",
         "id": ANY,
         "description": "Groupe A",
-        "phase": {"description": "Group stage"},
+        "phase": {"description": "Phase de groupes"},
         "scoreBets": [
             {
                 "id": ANY,
-                "team1": {"score": None, "description": "Andorra"},
-                "team2": {"score": None, "description": "Brazil"},
+                "team1": {"score": None, "description": "Andorre"},
+                "team2": {"score": None, "description": "Brésil"},
             },
             {
                 "id": ANY,
@@ -171,13 +171,13 @@ def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch):
                     "score": None,
                     "description": "Burkina Faso",
                 },
-                "team2": {"score": None, "description": "The Republic of Guatemala"},
+                "team2": {"score": None, "description": "Guatemala"},
             },
             {
                 "id": ANY,
                 "team1": {
                     "score": None,
-                    "description": "Andorra",
+                    "description": "Andorre",
                 },
                 "team2": {
                     "score": None,
@@ -188,29 +188,29 @@ def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch):
                 "id": ANY,
                 "team1": {
                     "score": None,
-                    "description": "Brazil",
+                    "description": "Brésil",
                 },
                 "team2": {
                     "score": None,
-                    "description": "The Republic of Guatemala",
+                    "description": "Guatemala",
                 },
             },
             {
                 "id": ANY,
                 "team1": {
                     "score": None,
-                    "description": "Andorra",
+                    "description": "Andorre",
                 },
                 "team2": {
                     "score": None,
-                    "description": "The Republic of Guatemala",
+                    "description": "Guatemala",
                 },
             },
             {
                 "id": ANY,
                 "team1": {
                     "score": None,
-                    "description": "Brazil",
+                    "description": "Brésil",
                 },
                 "team2": {
                     "score": None,
@@ -275,7 +275,7 @@ def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch):
             "groupByIdResult": {
                 "__typename": "Group",
                 "description": "Groupe A",
-                "phase": {"description": "Group stage"},
+                "phase": {"description": "Phase de groupes"},
             },
         },
     }

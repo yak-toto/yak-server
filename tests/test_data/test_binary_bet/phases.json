@@ -2,6 +2,7 @@
     {
         "index": 1,
         "code": "GROUP",
-        "description": "Group stage"
+        "description": "Phase de groupes",
+        "description_en": "Group stage"
     }
 ]

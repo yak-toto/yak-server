@@ -92,7 +92,7 @@ def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch):
             "team": {
                 "id": ANY,
                 "code": "IM",
-                "description": "Isle of Man",
+                "description": "Île de Man",
                 "flag": {"url": ANY},
             },
             "drawn": 1,
@@ -107,7 +107,7 @@ def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch):
         {
             "team": {
                 "code": "IE",
-                "description": "Ireland",
+                "description": "Irlande",
                 "id": ANY,
                 "flag": {"url": ANY},
             },
@@ -174,7 +174,7 @@ def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch):
             "team": {
                 "id": ANY,
                 "code": ANY,
-                "description": "Isle of Man",
+                "description": "Île de Man",
                 "flag": ANY,
             },
             "played": 2,
@@ -190,7 +190,7 @@ def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch):
             "team": {
                 "id": ANY,
                 "code": ANY,
-                "description": "Ireland",
+                "description": "Irlande",
                 "flag": ANY,
             },
             "played": 2,
@@ -241,7 +241,7 @@ def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch):
             "team": {
                 "id": ANY,
                 "code": "IM",
-                "description": "Isle of Man",
+                "description": "Île de Man",
                 "flag": {
                     "url": ANY,
                 },
@@ -259,7 +259,7 @@ def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch):
             "team": {
                 "id": ANY,
                 "code": "IE",
-                "description": "Ireland",
+                "description": "Irlande",
                 "flag": {
                     "url": ANY,
                 },
@@ -312,7 +312,7 @@ def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch):
             "team": {
                 "id": ANY,
                 "code": "IM",
-                "description": "Isle of Man",
+                "description": "Île de Man",
                 "flag": {"url": ANY},
             },
             "played": 0,
@@ -328,7 +328,7 @@ def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch):
             "team": {
                 "id": ANY,
                 "code": "IE",
-                "description": "Ireland",
+                "description": "Irlande",
                 "flag": {"url": ANY},
             },
             "played": 1,
@@ -370,7 +370,7 @@ def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch):
                 "team": {
                     "id": ANY,
                     "code": "IM",
-                    "description": "Isle of Man",
+                    "description": "Île de Man",
                     "flag": {"url": ANY},
                 },
                 "won": 0,
@@ -402,7 +402,7 @@ def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch):
                 "team": {
                     "id": ANY,
                     "code": "IE",
-                    "description": "Ireland",
+                    "description": "Irlande",
                     "flag": {"url": ANY},
                 },
                 "won": 0,

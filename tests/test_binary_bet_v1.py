@@ -61,8 +61,8 @@ def test_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     assert response_modify_binary_bet.json() == {
         "ok": True,
         "result": {
-            "phase": {"code": "GROUP", "description": "Group stage", "id": ANY},
-            "group": {"code": "A", "description": "Group A", "id": ANY},
+            "phase": {"code": "GROUP", "description": "Phase de groupes", "id": ANY},
+            "group": {"code": "A", "description": "Groupe A", "id": ANY},
             "binary_bet": {
                 "id": ANY,
                 "locked": False,
@@ -75,7 +75,7 @@ def test_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
                 },
                 "team2": {
                     "code": "GR",
-                    "description": "Germany",
+                    "description": "Allemagne",
                     "flag": {"url": ANY},
                     "id": ANY,
                     "won": False,
@@ -145,8 +145,8 @@ def test_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     assert response_binary_bet_by_id.json() == {
         "ok": True,
         "result": {
-            "phase": {"code": "GROUP", "description": "Group stage", "id": ANY},
-            "group": {"code": "A", "description": "Group A", "id": ANY},
+            "phase": {"code": "GROUP", "description": "Phase de groupes", "id": ANY},
+            "group": {"code": "A", "description": "Groupe A", "id": ANY},
             "binary_bet": {
                 "id": ANY,
                 "locked": False,
@@ -159,7 +159,7 @@ def test_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
                 },
                 "team2": {
                     "code": "GR",
-                    "description": "Germany",
+                    "description": "Allemagne",
                     "flag": {"url": ANY},
                     "id": ANY,
                     "won": False,
@@ -198,7 +198,7 @@ def test_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
         "team2": {
             "id": ANY,
             "code": "GR",
-            "description": "Germany",
+            "description": "Allemagne",
             "flag": ANY,
             "won": False,
         },
@@ -226,7 +226,7 @@ def test_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
         "team2": {
             "id": team_id,
             "code": "ES",
-            "description": "Spain",
+            "description": "Espagne",
             "flag": ANY,
             "won": False,
         },

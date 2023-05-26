@@ -278,6 +278,7 @@ class TeamModel(Base):
     )
     code = sa.Column(sa.String(10), unique=True, nullable=False)
     description = sa.Column(sa.String(100), unique=True, nullable=False)
+    description_en = sa.Column(sa.String(100), unique=True, nullable=False)
     flag_url = sa.Column(sa.String(100))
     internal_flag_url = sa.Column(sa.String(300))
 
@@ -296,6 +297,7 @@ class GroupModel(Base):
     )
     code = sa.Column(sa.String(1), primary_key=True, unique=True, nullable=False)
     description = sa.Column(sa.String(100), unique=True, nullable=False)
+    description_en = sa.Column(sa.String(100), unique=True, nullable=False)
     index = sa.Column(sa.Integer, nullable=False)
 
     phase_id = sa.Column(sa.String(100), sa.ForeignKey("phase.id"), nullable=False)
@@ -312,6 +314,7 @@ class PhaseModel(Base):
     )
     code = sa.Column(sa.String(10), primary_key=True, unique=True, nullable=False)
     description = sa.Column(sa.String(100), nullable=False)
+    description_en = sa.Column(sa.String(100), nullable=False)
     index = sa.Column(sa.Integer, nullable=False)
 
 

@@ -1,22 +1,26 @@
 [
     {
         "code": "HR",
-        "description": "Croatia",
+        "description": "Croatie",
+        "description_en": "Croatia",
         "flag_url": "https://fake-team-flag_croatia.com"
     },
     {
         "code": "FI",
-        "description": "Finland",
+        "description": "Finlande",
+        "description_en": "Finland",
         "flag_url": "https://fake-team-flag_finland.com"
     },
     {
         "code": "IQ",
-        "description": "Iraq",
+        "description": "Irak",
+        "description_en": "Iraq",
         "flag_url": "https://fake-team-flag_iraq.com"
     },
     {
         "code": "NA",
-        "description": "Namibia",
+        "description": "Namibie",
+        "description_en": "Namibia",
         "flag_url": "https://fake-team-flag_namibia.com"
     }
 ]

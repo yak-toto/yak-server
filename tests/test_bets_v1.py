@@ -78,7 +78,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
             },
             "phase": {
                 "code": "GROUP",
-                "description": "Group stage",
+                "description": "Phase de groupes",
                 "id": ANY,
             },
             "score_bet": {
@@ -86,14 +86,14 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                 "locked": True,
                 "team1": {
                     "code": "HR",
-                    "description": "Croatia",
+                    "description": "Croatie",
                     "flag": {"url": ANY},
                     "id": ANY,
                     "score": None,
                 },
                 "team2": {
                     "code": "FI",
-                    "description": "Finland",
+                    "description": "Finlande",
                     "flag": {"url": ANY},
                     "id": ANY,
                     "score": None,
@@ -137,7 +137,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
             ],
             "phase": {
                 "code": "GROUP",
-                "description": "Group stage",
+                "description": "Phase de groupes",
                 "id": ANY,
             },
             "score_bets": [
@@ -147,14 +147,14 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                     "locked": True,
                     "team1": {
                         "code": "HR",
-                        "description": "Croatia",
+                        "description": "Croatie",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
                     },
                     "team2": {
                         "code": "FI",
-                        "description": "Finland",
+                        "description": "Finlande",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
@@ -166,14 +166,14 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                     "locked": True,
                     "team1": {
                         "code": "NA",
-                        "description": "Namibia",
+                        "description": "Namibie",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
                     },
                     "team2": {
                         "code": "IQ",
-                        "description": "Iraq",
+                        "description": "Irak",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
@@ -185,14 +185,14 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                     "locked": True,
                     "team1": {
                         "code": "HR",
-                        "description": "Croatia",
+                        "description": "Croatie",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
                     },
                     "team2": {
                         "code": "NA",
-                        "description": "Namibia",
+                        "description": "Namibie",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
@@ -204,14 +204,14 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                     "locked": True,
                     "team1": {
                         "code": "FI",
-                        "description": "Finland",
+                        "description": "Finlande",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
                     },
                     "team2": {
                         "code": "IQ",
-                        "description": "Iraq",
+                        "description": "Irak",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
@@ -223,14 +223,14 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                     "locked": True,
                     "team1": {
                         "code": "HR",
-                        "description": "Croatia",
+                        "description": "Croatie",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
                     },
                     "team2": {
                         "code": "IQ",
-                        "description": "Iraq",
+                        "description": "Irak",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
@@ -242,14 +242,14 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch):
                     "locked": True,
                     "team1": {
                         "code": "FI",
-                        "description": "Finland",
+                        "description": "Finlande",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
                     },
                     "team2": {
                         "code": "NA",
-                        "description": "Namibia",
+                        "description": "Namibie",
                         "flag": {"url": ANY},
                         "id": ANY,
                         "score": None,
