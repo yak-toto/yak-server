@@ -43,7 +43,7 @@ router = APIRouter(
 
 def send_response(
     binary_bet: BinaryBetModel,
-    locked: bool,  # noqa: FBT001
+    locked: bool,
 ) -> GenericOut[BinaryBetResponse]:
     return GenericOut(
         result=BinaryBetResponse(

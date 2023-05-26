@@ -21,6 +21,13 @@
         "bet_type_from_match": "SCORE_BET"
     },
     {
+        "group_code": "A",
+        "index": 4,
+        "team1_code": null,
+        "team2_code": null,
+        "bet_type_from_match": "BINARY_BET"
+    },
+    {
         "group_code": "1",
         "index": 1,
         "team1_code": null,

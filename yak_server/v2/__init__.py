@@ -13,7 +13,7 @@ from .mutation import Mutation
 from .query import Query
 
 
-def get_schema(debug: bool) -> strawberry.Schema:  # noqa: FBT001
+def get_schema(debug: bool) -> strawberry.Schema:
     extensions = [
         QueryDepthLimiter(max_depth=6),
         MaxAliasesLimiter(max_alias_count=30),

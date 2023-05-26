@@ -44,7 +44,7 @@ router = APIRouter(
 
 def send_response(
     score_bet: ScoreBetModel,
-    locked: bool,  # noqa: FBT001
+    locked: bool,
 ) -> GenericOut[ScoreBetResponse]:
     return GenericOut(
         result=ScoreBetResponse(
