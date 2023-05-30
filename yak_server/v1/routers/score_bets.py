@@ -48,22 +48,22 @@ def send_response(
 ) -> GenericOut[ScoreBetResponse]:
     return GenericOut(
         result=ScoreBetResponse(
-            phase=PhaseOut.from_orm(score_bet.match.group.phase),
-            group=GroupOut.from_orm(score_bet.match.group),
+            phase=PhaseOut.from_instance(score_bet.match.group.phase),
+            group=GroupOut.from_instance(score_bet.match.group),
             score_bet=ScoreBetOut(
                 id=score_bet.id,
                 locked=locked,
                 team1=TeamWithScoreOut(
                     id=score_bet.match.team1.id,
                     code=score_bet.match.team1.code,
-                    description=score_bet.match.team1.description,
+                    description=score_bet.match.team1.description_fr,
                     flag=FlagOut(url=score_bet.match.team1.flag_url),
                     score=score_bet.score1,
                 ),
                 team2=TeamWithScoreOut(
                     id=score_bet.match.team2.id,
                     code=score_bet.match.team2.code,
-                    description=score_bet.match.team2.description,
+                    description=score_bet.match.team2.description_fr,
                     flag=FlagOut(url=score_bet.match.team2.flag_url),
                     score=score_bet.score2,
                 ),

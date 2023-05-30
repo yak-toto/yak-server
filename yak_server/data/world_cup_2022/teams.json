@@ -1,193 +1,193 @@
 [
     {
         "code": "GB-WLS",
-        "description": "Pays de Galles",
+        "description_fr": "Pays de Galles",
         "description_en": "Wales",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Wales-64x38.png"
     },
     {
         "code": "CM",
-        "description": "Cameroun",
+        "description_fr": "Cameroun",
         "description_en": "Cameroon",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Cameroon-64x43.png"
     },
     {
         "code": "JP",
-        "description": "Japon",
+        "description_fr": "Japon",
         "description_en": "Japan",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Japan-64x43.png"
     },
     {
         "code": "AU",
-        "description": "Australie",
+        "description_fr": "Australie",
         "description_en": "Australia",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Australia-64x32.png"
     },
     {
         "code": "CR",
-        "description": "Costa Rica",
+        "description_fr": "Costa Rica",
         "description_en": "Costa Rica",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Costa_Rica-64x38.png"
     },
     {
         "code": "QA",
-        "description": "Qatar",
+        "description_fr": "Qatar",
         "description_en": "Qatar",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Qatar-64x25.png"
     },
     {
         "code": "BE",
-        "description": "Belgique",
+        "description_fr": "Belgique",
         "description_en": "Belgium",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Belgium-64x56.png"
     },
     {
         "code": "GH",
-        "description": "Ghana",
+        "description_fr": "Ghana",
         "description_en": "Ghana",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Ghana-64x43.png"
     },
     {
         "code": "US",
-        "description": "\u00c9tats-Unis",
+        "description_fr": "\u00c9tats-Unis",
         "description_en": "United States",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_United_States-64x34.png"
     },
     {
         "code": "RS",
-        "description": "Serbie",
+        "description_fr": "Serbie",
         "description_en": "Serbia",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Serbia-64x43.png"
     },
     {
         "code": "DE",
-        "description": "Allemagne",
+        "description_fr": "Allemagne",
         "description_en": "Germany",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Germany-64x38.png"
     },
     {
         "code": "PL",
-        "description": "Pologne",
+        "description_fr": "Pologne",
         "description_en": "Poland",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Poland-64x40.png"
     },
     {
         "code": "UY",
-        "description": "Uruguay",
+        "description_fr": "Uruguay",
         "description_en": "Uruguay",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Uruguay-64x43.png"
     },
     {
         "code": "MX",
-        "description": "Mexique",
+        "description_fr": "Mexique",
         "description_en": "Mexico",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Mexico-64x37.png"
     },
     {
         "code": "CA",
-        "description": "Canada",
+        "description_fr": "Canada",
         "description_en": "Canada",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Canada-64x32.png"
     },
     {
         "code": "SA",
-        "description": "Arabie Saoudite",
+        "description_fr": "Arabie Saoudite",
         "description_en": "Saudi Arabia",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Saudi_Arabia-64x43.png"
     },
     {
         "code": "KR",
-        "description": "Cor\u00e9e du Sud",
+        "description_fr": "Cor\u00e9e du Sud",
         "description_en": "South Korea",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_South_Korea-64x43.png"
     },
     {
         "code": "FR",
-        "description": "France",
+        "description_fr": "France",
         "description_en": "France",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_France-64x43.png"
     },
     {
         "code": "EC",
-        "description": "\u00c9quateur",
+        "description_fr": "\u00c9quateur",
         "description_en": "Ecuador",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Ecuador-64x43.png"
     },
     {
         "code": "NL",
-        "description": "Pays-Bas",
+        "description_fr": "Pays-Bas",
         "description_en": "Netherlands",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Netherlands-64x43.png"
     },
     {
         "code": "GB-ENG",
-        "description": "Angleterre",
+        "description_fr": "Angleterre",
         "description_en": "England",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_England-64x38.png"
     },
     {
         "code": "IR",
-        "description": "Iran",
+        "description_fr": "Iran",
         "description_en": "Iran",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Iran-64x37.png"
     },
     {
         "code": "AR",
-        "description": "Argentine",
+        "description_fr": "Argentine",
         "description_en": "Argentina",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Argentina-64x40.png"
     },
     {
         "code": "SN",
-        "description": "S\u00e9n\u00e9gal",
+        "description_fr": "S\u00e9n\u00e9gal",
         "description_en": "Senegal",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Senegal-64x43.png"
     },
     {
         "code": "HR",
-        "description": "Croatie",
+        "description_fr": "Croatie",
         "description_en": "Croatia",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Croatia-64x32.png"
     },
     {
         "code": "BR",
-        "description": "Br\u00e9sil",
+        "description_fr": "Br\u00e9sil",
         "description_en": "Brazil",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Brazil-64x45.png"
     },
     {
         "code": "MA",
-        "description": "Maroc",
+        "description_fr": "Maroc",
         "description_en": "Morocco",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Morocco-64x43.png"
     },
     {
         "code": "ES",
-        "description": "Espagne",
+        "description_fr": "Espagne",
         "description_en": "Spain",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Spain-64x43.png"
     },
     {
         "code": "PT",
-        "description": "Portugal",
+        "description_fr": "Portugal",
         "description_en": "Portugal",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Portugal-64x43.png"
     },
     {
         "code": "CH",
-        "description": "Suisse",
+        "description_fr": "Suisse",
         "description_en": "Switzerland",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Switzerland-64x64.png"
     },
     {
         "code": "DK",
-        "description": "Danemark",
+        "description_fr": "Danemark",
         "description_en": "Denmark",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Denmark-64x48.png"
     },
     {
         "code": "TN",
-        "description": "Tunisie",
+        "description_fr": "Tunisie",
         "description_en": "Tunisia",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Tunisia-64x43.png"
     }

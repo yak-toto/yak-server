@@ -1,19 +1,19 @@
 [
     {
         "code": "FR",
-        "description": "France",
+        "description_fr": "France",
         "description_en": "France",
         "flag_url": null
     },
     {
         "code": "GR",
-        "description": "Allemagne",
+        "description_fr": "Allemagne",
         "description_en": "Germany",
         "flag_url": null
     },
     {
         "code": "ES",
-        "description": "Espagne",
+        "description_fr": "Espagne",
         "description_en": "Spain",
         "flag_url": null
     }

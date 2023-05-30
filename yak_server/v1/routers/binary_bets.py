@@ -47,15 +47,15 @@ def send_response(
 ) -> GenericOut[BinaryBetResponse]:
     return GenericOut(
         result=BinaryBetResponse(
-            phase=PhaseOut.from_orm(binary_bet.match.group.phase),
-            group=GroupOut.from_orm(binary_bet.match.group),
+            phase=PhaseOut.from_instance(binary_bet.match.group.phase),
+            group=GroupOut.from_instance(binary_bet.match.group),
             binary_bet=BinaryBetOut(
                 id=binary_bet.id,
                 locked=locked,
                 team1=TeamWithWonOut(
                     id=binary_bet.match.team1.id,
                     code=binary_bet.match.team1.code,
-                    description=binary_bet.match.team1.description,
+                    description=binary_bet.match.team1.description_fr,
                     flag=FlagOut(url=binary_bet.match.team1.flag_url),
                     won=binary_bet.bet_from_is_one_won()[0],
                 )
@@ -64,7 +64,7 @@ def send_response(
                 team2=TeamWithWonOut(
                     id=binary_bet.match.team2.id,
                     code=binary_bet.match.team2.code,
-                    description=binary_bet.match.team2.description,
+                    description=binary_bet.match.team2.description_fr,
                     flag=FlagOut(url=binary_bet.match.team2.flag_url),
                     won=binary_bet.bet_from_is_one_won()[1],
                 )

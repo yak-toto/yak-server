@@ -31,14 +31,14 @@ class ScoreBetOut(BaseModel):
             team1=TeamWithScoreOut(
                 id=score_bet.match.team1.id,
                 code=score_bet.match.team1.code,
-                description=score_bet.match.team1.description,
+                description=score_bet.match.team1.description_fr,
                 score=score_bet.score1,
                 flag=FlagOut(url=score_bet.match.team1.flag_url),
             ),
             team2=TeamWithScoreOut(
                 id=score_bet.match.team2.id,
                 code=score_bet.match.team2.code,
-                description=score_bet.match.team2.description,
+                description=score_bet.match.team2.description_fr,
                 score=score_bet.score2,
                 flag=FlagOut(url=score_bet.match.team2.flag_url),
             ),
@@ -65,14 +65,14 @@ class ScoreBetWithGroupIdOut(BaseModel):
             team1=TeamWithScoreOut(
                 id=score_bet.match.team1.id,
                 code=score_bet.match.team1.code,
-                description=score_bet.match.team1.description,
+                description=score_bet.match.team1.description_fr,
                 score=score_bet.score1,
                 flag=FlagOut(url=score_bet.match.team1.flag_url),
             ),
             team2=TeamWithScoreOut(
                 id=score_bet.match.team2.id,
                 code=score_bet.match.team2.code,
-                description=score_bet.match.team2.description,
+                description=score_bet.match.team2.description_fr,
                 score=score_bet.score2,
                 flag=FlagOut(url=score_bet.match.team2.flag_url),
             ),

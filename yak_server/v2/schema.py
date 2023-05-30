@@ -198,7 +198,7 @@ class Team:
             instance=instance,
             id=instance.id,
             code=instance.code,
-            description=instance.description,
+            description=instance.description_fr,
             flag=Flag(url=instance.flag_url),
         )
 
@@ -213,7 +213,7 @@ class TeamWithScore(Team):
             instance=instance,
             id=instance.id,
             code=instance.code,
-            description=instance.description,
+            description=instance.description_fr,
             flag=Flag(url=instance.flag_url),
             score=score,
         )
@@ -229,7 +229,7 @@ class TeamWithVictory(Team):
             instance=instance,
             id=instance.id,
             code=instance.code,
-            description=instance.description,
+            description=instance.description_fr,
             flag=Flag(url=instance.flag_url),
             won=won,
         )
@@ -372,7 +372,7 @@ class Group:
             lock_datetime=lock_datetime,
             id=instance.id,
             code=instance.code,
-            description=instance.description,
+            description=instance.description_fr,
         )
 
 
@@ -450,7 +450,7 @@ class Phase:
             lock_datetime=lock_datetime,
             id=instance.id,
             code=instance.code,
-            description=instance.description,
+            description=instance.description_fr,
         )
 
 
