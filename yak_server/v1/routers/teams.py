@@ -19,7 +19,7 @@ def retrieve_all_teams(
 ) -> GenericOut[AllTeamsResponse]:
     return GenericOut(
         result=AllTeamsResponse(
-            teams=[TeamOut.from_orm(team) for team in db.query(TeamModel).all()],
+            teams=[TeamOut.from_instance(team) for team in db.query(TeamModel).all()],
         ),
     )
 
@@ -39,7 +39,7 @@ def retrieve_team_by_id(
     if not team:
         raise TeamNotFound(team_id)
 
-    return GenericOut(result=OneTeamResponse(team=TeamOut.from_orm(team)))
+    return GenericOut(result=OneTeamResponse(team=TeamOut.from_instance(team)))
 
 
 @router.get("/{team_id}/flag")

@@ -32,7 +32,7 @@ class BinaryBetOut(BaseModel):
             team1=TeamWithWonOut(
                 id=binary_bet.match.team1.id,
                 code=binary_bet.match.team1.code,
-                description=binary_bet.match.team1.description,
+                description=binary_bet.match.team1.description_fr,
                 won=binary_bet.bet_from_is_one_won()[0],
                 flag=FlagOut(url=binary_bet.match.team1.flag_url),
             )
@@ -41,7 +41,7 @@ class BinaryBetOut(BaseModel):
             team2=TeamWithWonOut(
                 id=binary_bet.match.team2.id,
                 code=binary_bet.match.team2.code,
-                description=binary_bet.match.team2.description,
+                description=binary_bet.match.team2.description_fr,
                 won=binary_bet.bet_from_is_one_won()[1],
                 flag=FlagOut(url=binary_bet.match.team2.flag_url),
             )
@@ -70,7 +70,7 @@ class BinaryBetWithGroupIdOut(BaseModel):
             team1=TeamWithWonOut(
                 id=binary_bet.match.team1.id,
                 code=binary_bet.match.team1.code,
-                description=binary_bet.match.team1.description,
+                description=binary_bet.match.team1.description_fr,
                 won=binary_bet.bet_from_is_one_won()[0],
                 flag=FlagOut(url=binary_bet.match.team1.flag_url),
             )
@@ -79,7 +79,7 @@ class BinaryBetWithGroupIdOut(BaseModel):
             team2=TeamWithWonOut(
                 id=binary_bet.match.team2.id,
                 code=binary_bet.match.team2.code,
-                description=binary_bet.match.team2.description,
+                description=binary_bet.match.team2.description_fr,
                 won=binary_bet.bet_from_is_one_won()[1],
                 flag=FlagOut(url=binary_bet.match.team2.flag_url),
             )

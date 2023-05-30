@@ -1,13 +1,13 @@
 [
     {
         "code": "FR",
-        "description": "France",
+        "description_fr": "France",
         "description_en": "France",
         "flag_url": "https://fake-team-flag_france.com"
     },
     {
         "code": "BR",
-        "description": "Br\u00e9sil",
+        "description_fr": "Br\u00e9sil",
         "description_en": "Brazil",
         "flag_url": "https://fake-team-flag_brazil.com"
     }

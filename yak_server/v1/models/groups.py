@@ -1,8 +1,11 @@
-from typing import List
+from typing import TYPE_CHECKING, List
 
 from pydantic import UUID4, BaseModel
 
 from .phases import PhaseOut
+
+if TYPE_CHECKING:
+    from yak_server.database.models import GroupModel
 
 
 class GroupIn(BaseModel):
@@ -14,15 +17,13 @@ class GroupOut(BaseModel):
     code: str
     description: str
 
-    class Config:
-        orm_mode = True
+    @classmethod
+    def from_instance(cls, group: "GroupModel") -> "GroupOut":
+        return cls(id=group.id, code=group.code, description=group.description_fr)
 
 
 class Phase(BaseModel):
     id: UUID4
-
-    class Config:
-        orm_mode = True
 
 
 class GroupWithPhaseIdOut(BaseModel):
@@ -31,8 +32,14 @@ class GroupWithPhaseIdOut(BaseModel):
     phase: Phase
     description: str
 
-    class Config:
-        orm_mode = True
+    @classmethod
+    def from_instance(cls, group: "GroupModel") -> "GroupWithPhaseIdOut":
+        return cls(
+            id=group.id,
+            code=group.code,
+            phase=Phase(id=group.phase_id),
+            description=group.description_fr,
+        )
 
 
 class AllGroupsResponse(BaseModel):

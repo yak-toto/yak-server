@@ -21,7 +21,8 @@ def retrieve_all_phases(
 ) -> GenericOut[List[PhaseOut]]:
     return GenericOut(
         result=[
-            PhaseOut.from_orm(phase) for phase in db.query(PhaseModel).order_by(PhaseModel.index)
+            PhaseOut.from_instance(phase)
+            for phase in db.query(PhaseModel).order_by(PhaseModel.index)
         ],
     )
 
@@ -38,5 +39,5 @@ def retrieve_phase(
         raise PhaseNotFound(phase_id)
 
     return GenericOut(
-        result=PhaseOut.from_orm(phase),
+        result=PhaseOut.from_instance(phase),
     )

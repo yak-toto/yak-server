@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
 from uuid import uuid4
@@ -263,11 +262,6 @@ class MatchModel(Base):
     binary_bets = relationship("BinaryBetModel", back_populates="match")
 
 
-@dataclass
-class Flag:
-    url: str
-
-
 class TeamModel(Base):
     __tablename__ = "team"
     id = sa.Column(
@@ -277,14 +271,10 @@ class TeamModel(Base):
         default=lambda: str(uuid4()),
     )
     code = sa.Column(sa.String(10), unique=True, nullable=False)
-    description = sa.Column(sa.String(100), unique=True, nullable=False)
+    description_fr = sa.Column(sa.String(100), unique=True, nullable=False)
     description_en = sa.Column(sa.String(100), unique=True, nullable=False)
     flag_url = sa.Column(sa.String(100))
     internal_flag_url = sa.Column(sa.String(300))
-
-    @hybrid_property
-    def flag(self) -> Flag:
-        return Flag(url=self.flag_url)
 
 
 class GroupModel(Base):
@@ -296,7 +286,7 @@ class GroupModel(Base):
         default=lambda: str(uuid4()),
     )
     code = sa.Column(sa.String(1), primary_key=True, unique=True, nullable=False)
-    description = sa.Column(sa.String(100), unique=True, nullable=False)
+    description_fr = sa.Column(sa.String(100), unique=True, nullable=False)
     description_en = sa.Column(sa.String(100), unique=True, nullable=False)
     index = sa.Column(sa.Integer, nullable=False)
 
@@ -313,7 +303,7 @@ class PhaseModel(Base):
         default=lambda: str(uuid4()),
     )
     code = sa.Column(sa.String(10), primary_key=True, unique=True, nullable=False)
-    description = sa.Column(sa.String(100), nullable=False)
+    description_fr = sa.Column(sa.String(100), nullable=False)
     description_en = sa.Column(sa.String(100), nullable=False)
     index = sa.Column(sa.Integer, nullable=False)
 

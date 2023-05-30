@@ -61,8 +61,8 @@ def retrieve_all_bets(
 
     return GenericOut(
         result=AllBetsResponse(
-            phases=[PhaseOut.from_orm(phase) for phase in phases],
-            groups=[GroupWithPhaseIdOut.from_orm(group) for group in groups],
+            phases=[PhaseOut.from_instance(phase) for phase in phases],
+            groups=[GroupWithPhaseIdOut.from_instance(group) for group in groups],
             score_bets=[
                 ScoreBetWithGroupIdOut.from_instance(
                     score_bet,
@@ -99,8 +99,8 @@ def retrieve_bets_by_phase_code(
 
     return GenericOut(
         result=BetsByPhaseCodeResponse(
-            phase=PhaseOut.from_orm(phase),
-            groups=[GroupOut.from_orm(group) for group in groups],
+            phase=PhaseOut.from_instance(phase),
+            groups=[GroupOut.from_instance(group) for group in groups],
             score_bets=[
                 ScoreBetWithGroupIdOut.from_instance(
                     score_bet,
@@ -133,8 +133,8 @@ def retrieve_bets_by_group_code(
 
     return GenericOut(
         result=BetsByGroupCodeResponse(
-            phase=PhaseOut.from_orm(group.phase),
-            group=GroupOut.from_orm(group),
+            phase=PhaseOut.from_instance(group.phase),
+            group=GroupOut.from_instance(group),
             score_bets=[
                 ScoreBetOut.from_instance(score_bet, is_locked(user.name, settings.lock_datetime))
                 for score_bet in score_bets
@@ -162,8 +162,10 @@ def retrieve_group_rank_by_code(
 
     return GenericOut(
         result=GroupRankResponse(
-            phase=PhaseOut.from_orm(group.phase),
-            group=GroupOut.from_orm(group),
-            group_rank=[GroupPositionOut.from_orm(group_position) for group_position in group_rank],
+            phase=PhaseOut.from_instance(group.phase),
+            group=GroupOut.from_instance(group),
+            group_rank=[
+                GroupPositionOut.from_instance(group_position) for group_position in group_rank
+            ],
         ),
     )
