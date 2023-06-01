@@ -12,6 +12,7 @@ from yak_server.database.models import (
     UserModel,
 )
 from yak_server.helpers.bet_locking import is_locked
+from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
 from yak_server.helpers.logging import modify_binary_bet_successfully
 from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.database import get_db
@@ -44,18 +45,19 @@ router = APIRouter(
 def send_response(
     binary_bet: BinaryBetModel,
     locked: bool,
+    lang: Lang,
 ) -> GenericOut[BinaryBetResponse]:
     return GenericOut(
         result=BinaryBetResponse(
-            phase=PhaseOut.from_instance(binary_bet.match.group.phase),
-            group=GroupOut.from_instance(binary_bet.match.group),
+            phase=PhaseOut.from_instance(binary_bet.match.group.phase, lang),
+            group=GroupOut.from_instance(binary_bet.match.group, lang),
             binary_bet=BinaryBetOut(
                 id=binary_bet.id,
                 locked=locked,
                 team1=TeamWithWonOut(
                     id=binary_bet.match.team1.id,
                     code=binary_bet.match.team1.code,
-                    description=binary_bet.match.team1.description_fr,
+                    description=get_language_description(binary_bet.match.team1, lang),
                     flag=FlagOut(url=binary_bet.match.team1.flag_url),
                     won=binary_bet.bet_from_is_one_won()[0],
                 )
@@ -64,7 +66,7 @@ def send_response(
                 team2=TeamWithWonOut(
                     id=binary_bet.match.team2.id,
                     code=binary_bet.match.team2.code,
-                    description=binary_bet.match.team2.description_fr,
+                    description=get_language_description(binary_bet.match.team2, lang),
                     flag=FlagOut(url=binary_bet.match.team2.flag_url),
                     won=binary_bet.bet_from_is_one_won()[1],
                 )
@@ -78,6 +80,7 @@ def send_response(
 @router.post("/")
 def create_binary_bet(
     binary_bet_in: BinaryBetIn,
+    lang: Lang = DEFAULT_LANGUAGE,
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
@@ -115,12 +118,13 @@ def create_binary_bet(
     db.commit()
     db.refresh(binary_bet)
 
-    return send_response(binary_bet, is_locked(user.name, settings.lock_datetime))
+    return send_response(binary_bet, is_locked(user.name, settings.lock_datetime), lang)
 
 
 @router.get("/{bet_id}")
 def retrieve_binary_bet_by_id(
     bet_id: UUID4,
+    lang: Lang = DEFAULT_LANGUAGE,
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
@@ -130,13 +134,14 @@ def retrieve_binary_bet_by_id(
     if not binary_bet:
         raise BetNotFound(bet_id)
 
-    return send_response(binary_bet, is_locked(user.name, settings.lock_datetime))
+    return send_response(binary_bet, is_locked(user.name, settings.lock_datetime), lang)
 
 
 @router.patch("/{bet_id}")
 def modify_binary_bet_by_id(
     bet_id: UUID4,
     modify_binary_bet_in: ModifyBinaryBetIn,
+    lang: Lang = DEFAULT_LANGUAGE,
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
@@ -176,12 +181,13 @@ def modify_binary_bet_by_id(
 
     db.commit()
 
-    return send_response(binary_bet, is_locked(user.name, settings.lock_datetime))
+    return send_response(binary_bet, is_locked(user.name, settings.lock_datetime), lang)
 
 
 @router.delete("/{bet_id}")
 def delete_binary_bet_by_id(
     bet_id: UUID4,
+    lang: Lang = DEFAULT_LANGUAGE,
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
@@ -194,7 +200,7 @@ def delete_binary_bet_by_id(
     if not binary_bet:
         raise BetNotFound(bet_id)
 
-    response = send_response(binary_bet, is_locked(user.name, settings.lock_datetime))
+    response = send_response(binary_bet, is_locked(user.name, settings.lock_datetime), lang)
 
     db.delete(binary_bet)
     db.commit()

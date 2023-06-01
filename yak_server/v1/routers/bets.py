@@ -16,6 +16,7 @@ from yak_server.database.query import (
 )
 from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.group_position import get_group_rank_with_code
+from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang
 from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.database import get_db
 from yak_server.v1.helpers.errors import GroupNotFound, PhaseNotFound
@@ -40,6 +41,7 @@ router = APIRouter(
 
 @router.get("/")
 def retrieve_all_bets(
+    lang: Lang = DEFAULT_LANGUAGE,
     user: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
@@ -61,12 +63,13 @@ def retrieve_all_bets(
 
     return GenericOut(
         result=AllBetsResponse(
-            phases=[PhaseOut.from_instance(phase) for phase in phases],
-            groups=[GroupWithPhaseIdOut.from_instance(group) for group in groups],
+            phases=[PhaseOut.from_instance(phase, lang) for phase in phases],
+            groups=[GroupWithPhaseIdOut.from_instance(group, lang) for group in groups],
             score_bets=[
                 ScoreBetWithGroupIdOut.from_instance(
                     score_bet,
                     is_locked(user.name, settings.lock_datetime),
+                    lang,
                 )
                 for score_bet in score_bets
             ],
@@ -74,6 +77,7 @@ def retrieve_all_bets(
                 BinaryBetWithGroupIdOut.from_instance(
                     binary_bet,
                     is_locked(user.name, settings.lock_datetime),
+                    lang,
                 )
                 for binary_bet in binary_bets
             ],
@@ -84,27 +88,25 @@ def retrieve_all_bets(
 @router.get("/phases/{phase_code}")
 def retrieve_bets_by_phase_code(
     phase_code: str,
+    lang: Lang = DEFAULT_LANGUAGE,
     user: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ) -> GenericOut[BetsByPhaseCodeResponse]:
-    phase, groups, score_bets, binary_bets = bets_from_phase_code(
-        db,
-        user,
-        phase_code,
-    )
+    phase, groups, score_bets, binary_bets = bets_from_phase_code(db, user, phase_code)
 
     if not phase:
         raise PhaseNotFound(phase_code)
 
     return GenericOut(
         result=BetsByPhaseCodeResponse(
-            phase=PhaseOut.from_instance(phase),
-            groups=[GroupOut.from_instance(group) for group in groups],
+            phase=PhaseOut.from_instance(phase, lang),
+            groups=[GroupOut.from_instance(group, lang) for group in groups],
             score_bets=[
                 ScoreBetWithGroupIdOut.from_instance(
                     score_bet,
                     is_locked(user.name, settings.lock_datetime),
+                    lang,
                 )
                 for score_bet in score_bets
             ],
@@ -112,6 +114,7 @@ def retrieve_bets_by_phase_code(
                 BinaryBetWithGroupIdOut.from_instance(
                     binary_bet,
                     is_locked(user.name, settings.lock_datetime),
+                    lang,
                 )
                 for binary_bet in binary_bets
             ],
@@ -122,6 +125,7 @@ def retrieve_bets_by_phase_code(
 @router.get("/groups/{group_code}")
 def retrieve_bets_by_group_code(
     group_code: str,
+    lang: Lang = DEFAULT_LANGUAGE,
     user: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
@@ -133,14 +137,22 @@ def retrieve_bets_by_group_code(
 
     return GenericOut(
         result=BetsByGroupCodeResponse(
-            phase=PhaseOut.from_instance(group.phase),
-            group=GroupOut.from_instance(group),
+            phase=PhaseOut.from_instance(group.phase, lang),
+            group=GroupOut.from_instance(group, lang),
             score_bets=[
-                ScoreBetOut.from_instance(score_bet, is_locked(user.name, settings.lock_datetime))
+                ScoreBetOut.from_instance(
+                    score_bet,
+                    is_locked(user.name, settings.lock_datetime),
+                    lang,
+                )
                 for score_bet in score_bets
             ],
             binary_bets=[
-                BinaryBetOut.from_instance(binary_bet, is_locked(user.name, settings.lock_datetime))
+                BinaryBetOut.from_instance(
+                    binary_bet,
+                    is_locked(user.name, settings.lock_datetime),
+                    lang,
+                )
                 for binary_bet in binary_bets
             ],
         ),
@@ -150,6 +162,7 @@ def retrieve_bets_by_group_code(
 @router.get("/groups/rank/{group_code}")
 def retrieve_group_rank_by_code(
     group_code: str,
+    lang: Lang = DEFAULT_LANGUAGE,
     user: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> GenericOut[GroupRankResponse]:
@@ -162,10 +175,11 @@ def retrieve_group_rank_by_code(
 
     return GenericOut(
         result=GroupRankResponse(
-            phase=PhaseOut.from_instance(group.phase),
-            group=GroupOut.from_instance(group),
+            phase=PhaseOut.from_instance(group.phase, lang),
+            group=GroupOut.from_instance(group, lang),
             group_rank=[
-                GroupPositionOut.from_instance(group_position) for group_position in group_rank
+                GroupPositionOut.from_instance(group_position, lang)
+                for group_position in group_rank
             ],
         ),
     )

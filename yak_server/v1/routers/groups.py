@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from yak_server.database.models import GroupModel, PhaseModel, UserModel
+from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang
 from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.database import get_db
 from yak_server.v1.helpers.errors import GroupNotFound, PhaseNotFound
@@ -20,6 +21,7 @@ router = APIRouter(prefix="/groups", tags=["groups"])
 
 @router.get("/")
 def retrieve_all_groups(
+    lang: Lang = DEFAULT_LANGUAGE,
     _: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> GenericOut[AllGroupsResponse]:
@@ -28,8 +30,8 @@ def retrieve_all_groups(
 
     return GenericOut(
         result=AllGroupsResponse(
-            phases=[PhaseOut.from_instance(phase) for phase in phases],
-            groups=[GroupWithPhaseIdOut.from_instance(group) for group in groups],
+            phases=[PhaseOut.from_instance(phase, lang) for phase in phases],
+            groups=[GroupWithPhaseIdOut.from_instance(group, lang) for group in groups],
         ),
     )
 
@@ -37,6 +39,7 @@ def retrieve_all_groups(
 @router.get("/{group_code}")
 def retrieve_group_by_id(
     group_code: str,
+    lang: Lang = DEFAULT_LANGUAGE,
     _: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> GenericOut[GroupResponse]:
@@ -47,8 +50,8 @@ def retrieve_group_by_id(
 
     return GenericOut(
         result=GroupResponse(
-            phase=PhaseOut.from_instance(group.phase),
-            group=GroupOut.from_instance(group),
+            phase=PhaseOut.from_instance(group.phase, lang),
+            group=GroupOut.from_instance(group, lang),
         ),
     )
 
@@ -56,6 +59,7 @@ def retrieve_group_by_id(
 @router.get("/phases/{phase_code}")
 def retrieve_groups_by_phase_code(
     phase_code: str,
+    lang: Lang = DEFAULT_LANGUAGE,
     _: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> GenericOut[GroupsByPhaseCodeResponse]:
@@ -68,7 +72,7 @@ def retrieve_groups_by_phase_code(
 
     return GenericOut(
         result=GroupsByPhaseCodeResponse(
-            phase=PhaseOut.from_instance(phase),
-            groups=[GroupOut.from_instance(group) for group in groups],
+            phase=PhaseOut.from_instance(phase, lang),
+            groups=[GroupOut.from_instance(group, lang) for group in groups],
         ),
     )

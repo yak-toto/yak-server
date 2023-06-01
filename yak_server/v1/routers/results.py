@@ -31,17 +31,17 @@ def retrieve_score_board(
     _: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> GenericOut[List[UserResult]]:
-    user_results = []
-
-    for rank, user in enumerate(
-        db.query(UserModel).order_by(UserModel.points.desc()).where(UserModel.name != "admin"),
-        1,
-    ):
-        user_result = UserResult.from_orm(user)
-        user_result.rank = rank
-        user_results.append(user_result)
-
-    return GenericOut(result=user_results)
+    return GenericOut(
+        result=[
+            UserResult.from_instance(user, rank)
+            for rank, user in enumerate(
+                db.query(UserModel)
+                .order_by(UserModel.points.desc())
+                .where(UserModel.name != "admin"),
+                1,
+            )
+        ],
+    )
 
 
 @router.get("/results")
@@ -52,19 +52,21 @@ def retrieve_user_results(
     if user.name == "admin":
         raise NoResultsForAdminUser
 
-    user_result = UserResult.from_orm(user)
-    user_result.rank = [
-        index
-        for index, user_result in enumerate(
-            db.query(UserModel)
-            .order_by(UserModel.points.desc())
-            .filter(
-                UserModel.name != "admin",
-            ),
-            1,
-        )
-        if user_result.id == user.id
-    ][0]
+    user_result = UserResult.from_instance(
+        user,
+        [
+            index
+            for index, user_result in enumerate(
+                db.query(UserModel)
+                .order_by(UserModel.points.desc())
+                .filter(
+                    UserModel.name != "admin",
+                ),
+                1,
+            )
+            if user_result.id == user.id
+        ][0],
+    )
 
     return GenericOut(result=user_result)
 
@@ -85,14 +87,9 @@ def compute_pointsby_by_admin(
         settings.first_team_qualified,
     )
 
-    user_results = []
-
-    for rank, user in enumerate(users, 1):
-        user_result = UserResult.from_orm(user)
-        user_result.rank = rank
-        user_results.append(user_result)
-
-    return GenericOut(result=user_results)
+    return GenericOut(
+        result=[UserResult.from_instance(user, rank) for rank, user in enumerate(users, 1)],
+    )
 
 
 def compute_points(

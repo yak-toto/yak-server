@@ -7,6 +7,7 @@ from .teams import TeamOut
 
 if TYPE_CHECKING:
     from yak_server.database.models import GroupPositionModel
+    from yak_server.helpers.language import Lang
 
 
 class GroupPositionOut(BaseModel):
@@ -21,9 +22,13 @@ class GroupPositionOut(BaseModel):
     points: PositiveOrZeroInt
 
     @classmethod
-    def from_instance(cls, group_position: "GroupPositionModel") -> "GroupPositionOut":
+    def from_instance(
+        cls,
+        group_position: "GroupPositionModel",
+        lang: "Lang",
+    ) -> "GroupPositionOut":
         return cls(
-            team=TeamOut.from_instance(group_position.team),
+            team=TeamOut.from_instance(group_position.team, lang),
             played=group_position.played,
             won=group_position.won,
             drawn=group_position.drawn,
