@@ -2,6 +2,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import UUID4, BaseModel, PositiveInt
 
+from yak_server.helpers.language import Lang, get_language_description
+
 from .groups import GroupIn, GroupOut
 from .phases import PhaseOut
 from .teams import FlagOut, TeamIn, TeamModifyScoreBetIn, TeamWithScoreOut
@@ -24,21 +26,21 @@ class ScoreBetOut(BaseModel):
     team2: TeamWithScoreOut
 
     @classmethod
-    def from_instance(cls, score_bet: "ScoreBetModel", locked: bool) -> "ScoreBetOut":
+    def from_instance(cls, score_bet: "ScoreBetModel", locked: bool, lang: Lang) -> "ScoreBetOut":
         return cls(
             id=score_bet.id,
             locked=locked,
             team1=TeamWithScoreOut(
                 id=score_bet.match.team1.id,
                 code=score_bet.match.team1.code,
-                description=score_bet.match.team1.description_fr,
+                description=get_language_description(score_bet.match.team1, lang),
                 score=score_bet.score1,
                 flag=FlagOut(url=score_bet.match.team1.flag_url),
             ),
             team2=TeamWithScoreOut(
                 id=score_bet.match.team2.id,
                 code=score_bet.match.team2.code,
-                description=score_bet.match.team2.description_fr,
+                description=get_language_description(score_bet.match.team2, lang),
                 score=score_bet.score2,
                 flag=FlagOut(url=score_bet.match.team2.flag_url),
             ),
@@ -57,7 +59,15 @@ class ScoreBetWithGroupIdOut(BaseModel):
     team2: TeamWithScoreOut
 
     @classmethod
-    def from_instance(cls, score_bet: "ScoreBetModel", locked: bool) -> "ScoreBetWithGroupIdOut":
+    def from_instance(
+        cls,
+        score_bet: "ScoreBetModel",
+        locked: bool,
+        lang: Lang,
+    ) -> "ScoreBetWithGroupIdOut":
+        description_team1 = get_language_description(score_bet.match.team1, lang)
+        description_team2 = get_language_description(score_bet.match.team2, lang)
+
         return cls(
             id=score_bet.id,
             locked=locked,
@@ -65,14 +75,14 @@ class ScoreBetWithGroupIdOut(BaseModel):
             team1=TeamWithScoreOut(
                 id=score_bet.match.team1.id,
                 code=score_bet.match.team1.code,
-                description=score_bet.match.team1.description_fr,
+                description=description_team1,
                 score=score_bet.score1,
                 flag=FlagOut(url=score_bet.match.team1.flag_url),
             ),
             team2=TeamWithScoreOut(
                 id=score_bet.match.team2.id,
                 code=score_bet.match.team2.code,
-                description=score_bet.match.team2.description_fr,
+                description=description_team2,
                 score=score_bet.score2,
                 flag=FlagOut(url=score_bet.match.team2.flag_url),
             ),

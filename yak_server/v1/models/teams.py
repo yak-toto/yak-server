@@ -2,6 +2,8 @@ from typing import TYPE_CHECKING, List, Optional
 
 from pydantic import UUID4, BaseModel
 
+from yak_server.helpers.language import Lang, get_language_description
+
 from .generic import PositiveOrZeroInt
 
 if TYPE_CHECKING:
@@ -24,11 +26,11 @@ class TeamOut(BaseModel):
     flag: FlagOut
 
     @classmethod
-    def from_instance(cls, team: "TeamModel") -> "TeamOut":
+    def from_instance(cls, team: "TeamModel", lang: Lang) -> "TeamOut":
         return cls(
             id=team.id,
             code=team.code,
-            description=team.description_fr,
+            description=get_language_description(team, lang),
             flag=FlagOut(url=team.flag_url),
         )
 

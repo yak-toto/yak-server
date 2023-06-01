@@ -5,6 +5,7 @@ from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from yak_server.database.models import PhaseModel, UserModel
+from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang
 from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.database import get_db
 from yak_server.v1.helpers.errors import PhaseNotFound
@@ -16,12 +17,13 @@ router = APIRouter(prefix="/phases", tags=["phases"])
 
 @router.get("/")
 def retrieve_all_phases(
+    lang: Lang = DEFAULT_LANGUAGE,
     _: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> GenericOut[List[PhaseOut]]:
     return GenericOut(
         result=[
-            PhaseOut.from_instance(phase)
+            PhaseOut.from_instance(phase, lang)
             for phase in db.query(PhaseModel).order_by(PhaseModel.index)
         ],
     )
@@ -30,6 +32,7 @@ def retrieve_all_phases(
 @router.get("/{phase_id}")
 def retrieve_phase(
     phase_id: UUID4,
+    lang: Lang = DEFAULT_LANGUAGE,
     _: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> GenericOut[PhaseOut]:
@@ -39,5 +42,5 @@ def retrieve_phase(
         raise PhaseNotFound(phase_id)
 
     return GenericOut(
-        result=PhaseOut.from_instance(phase),
+        result=PhaseOut.from_instance(phase, lang),
     )

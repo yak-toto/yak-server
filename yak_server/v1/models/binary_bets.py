@@ -2,6 +2,8 @@ from typing import TYPE_CHECKING, Optional
 
 from pydantic import UUID4, BaseModel, PositiveInt
 
+from yak_server.helpers.language import Lang, get_language_description
+
 from .groups import GroupIn, GroupOut
 from .phases import PhaseOut
 from .teams import FlagOut, TeamIn, TeamModifyBinaryBetIn, TeamWithWonOut
@@ -25,14 +27,19 @@ class BinaryBetOut(BaseModel):
     team2: Optional[TeamWithWonOut]
 
     @classmethod
-    def from_instance(cls, binary_bet: "BinaryBetModel", locked: bool) -> "BinaryBetOut":
+    def from_instance(
+        cls,
+        binary_bet: "BinaryBetModel",
+        locked: bool,
+        lang: "Lang",
+    ) -> "BinaryBetOut":
         return cls(
             id=binary_bet.id,
             locked=locked,
             team1=TeamWithWonOut(
                 id=binary_bet.match.team1.id,
                 code=binary_bet.match.team1.code,
-                description=binary_bet.match.team1.description_fr,
+                description=get_language_description(binary_bet.match.team1, lang),
                 won=binary_bet.bet_from_is_one_won()[0],
                 flag=FlagOut(url=binary_bet.match.team1.flag_url),
             )
@@ -41,7 +48,7 @@ class BinaryBetOut(BaseModel):
             team2=TeamWithWonOut(
                 id=binary_bet.match.team2.id,
                 code=binary_bet.match.team2.code,
-                description=binary_bet.match.team2.description_fr,
+                description=get_language_description(binary_bet.match.team2, lang),
                 won=binary_bet.bet_from_is_one_won()[1],
                 flag=FlagOut(url=binary_bet.match.team2.flag_url),
             )
@@ -62,7 +69,12 @@ class BinaryBetWithGroupIdOut(BaseModel):
     team2: Optional[TeamWithWonOut]
 
     @classmethod
-    def from_instance(cls, binary_bet: "BinaryBetModel", locked: bool) -> "BinaryBetWithGroupIdOut":
+    def from_instance(
+        cls,
+        binary_bet: "BinaryBetModel",
+        locked: bool,
+        lang: Lang,
+    ) -> "BinaryBetWithGroupIdOut":
         return cls(
             id=binary_bet.id,
             locked=locked,
@@ -70,7 +82,7 @@ class BinaryBetWithGroupIdOut(BaseModel):
             team1=TeamWithWonOut(
                 id=binary_bet.match.team1.id,
                 code=binary_bet.match.team1.code,
-                description=binary_bet.match.team1.description_fr,
+                description=get_language_description(binary_bet.match.team1, lang),
                 won=binary_bet.bet_from_is_one_won()[0],
                 flag=FlagOut(url=binary_bet.match.team1.flag_url),
             )
@@ -79,7 +91,7 @@ class BinaryBetWithGroupIdOut(BaseModel):
             team2=TeamWithWonOut(
                 id=binary_bet.match.team2.id,
                 code=binary_bet.match.team2.code,
-                description=binary_bet.match.team2.description_fr,
+                description=get_language_description(binary_bet.match.team2, lang),
                 won=binary_bet.bet_from_is_one_won()[1],
                 flag=FlagOut(url=binary_bet.match.team2.flag_url),
             )

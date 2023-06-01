@@ -14,6 +14,7 @@ from yak_server.database.models import (
     UserModel,
 )
 from yak_server.helpers.bet_locking import is_locked
+from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
 from yak_server.helpers.logging import modify_score_bet_successfully
 from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.database import get_db
@@ -45,25 +46,26 @@ router = APIRouter(
 def send_response(
     score_bet: ScoreBetModel,
     locked: bool,
+    lang: Lang,
 ) -> GenericOut[ScoreBetResponse]:
     return GenericOut(
         result=ScoreBetResponse(
-            phase=PhaseOut.from_instance(score_bet.match.group.phase),
-            group=GroupOut.from_instance(score_bet.match.group),
+            phase=PhaseOut.from_instance(score_bet.match.group.phase, lang),
+            group=GroupOut.from_instance(score_bet.match.group, lang),
             score_bet=ScoreBetOut(
                 id=score_bet.id,
                 locked=locked,
                 team1=TeamWithScoreOut(
                     id=score_bet.match.team1.id,
                     code=score_bet.match.team1.code,
-                    description=score_bet.match.team1.description_fr,
+                    description=get_language_description(score_bet.match.team1, lang),
                     flag=FlagOut(url=score_bet.match.team1.flag_url),
                     score=score_bet.score1,
                 ),
                 team2=TeamWithScoreOut(
                     id=score_bet.match.team2.id,
                     code=score_bet.match.team2.code,
-                    description=score_bet.match.team2.description_fr,
+                    description=get_language_description(score_bet.match.team2, lang),
                     flag=FlagOut(url=score_bet.match.team2.flag_url),
                     score=score_bet.score2,
                 ),
@@ -75,6 +77,7 @@ def send_response(
 @router.post("/")
 def create_score_bet(
     score_bet_in: ScoreBetIn,
+    lang: Lang = DEFAULT_LANGUAGE,
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
@@ -129,12 +132,13 @@ def create_score_bet(
     db.commit()
     db.refresh(score_bet)
 
-    return send_response(score_bet, is_locked(user.name, settings.lock_datetime))
+    return send_response(score_bet, is_locked(user.name, settings.lock_datetime), lang)
 
 
 @router.get("/{bet_id}")
 def retrieve_score_bet_by_id(
     bet_id: UUID4,
+    lang: Lang = DEFAULT_LANGUAGE,
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
@@ -144,13 +148,14 @@ def retrieve_score_bet_by_id(
     if not score_bet:
         raise BetNotFound(bet_id)
 
-    return send_response(score_bet, is_locked(user.name, settings.lock_datetime))
+    return send_response(score_bet, is_locked(user.name, settings.lock_datetime), lang)
 
 
 @router.patch("/{bet_id}")
 def modify_score_bet(
     bet_id: UUID4,
     modify_score_bet_in: ModifyScoreBetIn,
+    lang: Lang = DEFAULT_LANGUAGE,
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
@@ -169,7 +174,7 @@ def modify_score_bet(
         score_bet.score1 == modify_score_bet_in.team1.score
         and score_bet.score2 == modify_score_bet_in.team2.score
     ):
-        return send_response(score_bet, is_locked(user.name, settings.lock_datetime))
+        return send_response(score_bet, is_locked(user.name, settings.lock_datetime), lang)
 
     logger.info(
         modify_score_bet_successfully(
@@ -201,12 +206,13 @@ def modify_score_bet(
     score_bet.score2 = modify_score_bet_in.team2.score
     db.commit()
 
-    return send_response(score_bet, is_locked(user.name, settings.lock_datetime))
+    return send_response(score_bet, is_locked(user.name, settings.lock_datetime), lang)
 
 
 @router.delete("/{bet_id}")
 def delete_score_bet_by_id(
     bet_id: UUID4,
+    lang: Lang = DEFAULT_LANGUAGE,
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
@@ -219,7 +225,7 @@ def delete_score_bet_by_id(
     if not score_bet:
         raise BetNotFound(bet_id)
 
-    response = send_response(score_bet, is_locked(user.name, settings.lock_datetime))
+    response = send_response(score_bet, is_locked(user.name, settings.lock_datetime), lang)
 
     db.execute(
         update(GroupPositionModel)
