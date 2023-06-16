@@ -6,6 +6,7 @@ from fastapi import HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from yak_server.helpers.errors import (
     EXPIRED_TOKEN_MESSAGE,
@@ -144,8 +145,8 @@ class RuleNotFound(HTTPException):
 
 
 def set_exception_handler(app: "FastAPI") -> None:
-    @app.exception_handler(HTTPException)
-    def http_exception_handler(_: Request, http_exception: HTTPException) -> JSONResponse:
+    @app.exception_handler(StarletteHTTPException)
+    def http_exception_handler(_: Request, http_exception: StarletteHTTPException) -> JSONResponse:
         return JSONResponse(
             status_code=http_exception.status_code,
             content={
