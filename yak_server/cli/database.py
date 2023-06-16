@@ -170,7 +170,7 @@ def backup_database() -> None:
             f"-u {mysql_settings.user_name} "
             f"-P {mysql_settings.port} "
             "--protocol=tcp "
-            f"--password={mysql_settings.password}"
+            f"--password='{mysql_settings.password}'"
         ),
         shell=True,
         capture_output=True,
