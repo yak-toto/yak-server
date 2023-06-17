@@ -157,8 +157,7 @@ def backup_database() -> None:
     with resources.as_file(resources.files("yak_server") / "cli/backup_files") as path:
         backup_location = path
 
-    if not Path(backup_location).exists():
-        Path(backup_location).mkdir()
+    Path(backup_location).mkdir(exist_ok=True)
 
     backup_datetime = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%z")
 
