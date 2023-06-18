@@ -14,14 +14,15 @@ else:
 
 import pexpect
 from dateutil import parser
+from starlette.testclient import TestClient
 
 from .utils import get_random_string
 
 if TYPE_CHECKING:
-    from starlette.testclient import TestClient
+    from fastapi import FastAPI
 
 
-def test_cli(client: "TestClient"):
+def test_cli(app_with_valid_jwt_config: "FastAPI"):
     # Check database drop
     result = subprocess.run(
         "yak db drop",
@@ -46,6 +47,12 @@ def test_cli(client: "TestClient"):
         "yak db init",
         shell=True,
         capture_output=True,
+        env={
+            **os.environ,
+            "JWT_EXPIRATION_TIME": "1800",
+            "JWT_SECRET_KEY": get_random_string(128),
+            "COMPETITION": "world_cup_2022",
+        },
     )
 
     assert result.returncode == 0
@@ -53,13 +60,23 @@ def test_cli(client: "TestClient"):
     # Check admin account creation
     admin_password = get_random_string(7)
 
-    child = pexpect.spawn("yak db admin")
+    child = pexpect.spawn(
+        "yak db admin",
+        env={
+            **os.environ,
+            "JWT_EXPIRATION_TIME": "1800",
+            "JWT_SECRET_KEY": get_random_string(128),
+            "COMPETITION": "world_cup_2022",
+        },
+    )
 
     child.expect("Admin user password: ", timeout=100)
     child.sendline(f"{admin_password}\n")
     child.expect("Confirm admin password: ", timeout=100)
     child.sendline(f"{admin_password}\n")
-    child.read()
+    assert child.read() == b"\r\n"
+
+    client = TestClient(app_with_valid_jwt_config)
 
     response_login = client.post(
         "/api/v1/users/login",

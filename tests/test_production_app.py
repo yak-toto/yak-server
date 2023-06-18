@@ -2,12 +2,18 @@ from typing import TYPE_CHECKING
 
 from fastapi.testclient import TestClient
 
+from yak_server.config_file import get_settings
+
+from .utils.mock import create_mock
+
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
 def test_no_schema_introspection_in_production(production_app: "FastAPI") -> None:
     client = TestClient(production_app)
+
+    production_app.dependency_overrides[get_settings] = create_mock()
 
     response = client.post(
         "/api/v2",

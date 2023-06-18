@@ -1,14 +1,14 @@
 from http import HTTPStatus
-from typing import TYPE_CHECKING
 from uuid import uuid4
+
+from starlette.testclient import TestClient
 
 from .utils import get_random_string
 
-if TYPE_CHECKING:
-    from starlette.testclient import TestClient
 
+def test_modify_password(app_with_valid_jwt_config: "TestClient"):
+    client = TestClient(app_with_valid_jwt_config)
 
-def test_modify_password(client: "TestClient"):
     admin_name = "admin"
     other_user_name = get_random_string(6)
 
