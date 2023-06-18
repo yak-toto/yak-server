@@ -121,6 +121,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.mysql
 .venv
 env/
 venv/
@@ -183,6 +184,5 @@ yarn-error.log*
 *.sln
 *.sw*
 
-.flaskenv
 yak_server/cli/backup_files
 .ruff_cache

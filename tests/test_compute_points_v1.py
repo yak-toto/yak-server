@@ -6,8 +6,7 @@ from unittest.mock import ANY
 from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
-from yak_server.config_file import RuleContainer, get_settings
-from yak_server.helpers.rules import compute_finale_phase_from_group_rank
+from yak_server.config_file import RuleContainer, Rules, get_settings
 
 from .utils import get_random_string
 from .utils.mock import create_mock
@@ -88,18 +87,23 @@ def test_compute_points(app: "FastAPI", monkeypatch):
         jwt_expiration_time=10,
         jwt_secret_key=get_random_string(100),
         lock_datetime_shift=timedelta(seconds=10),
-        rules={
-            "492345de-8d4a-45b6-8b94-d219f2b0c3e9": RuleContainer(
-                config={
-                    "to_group": "1",
-                    "from_phase": "GROUP",
-                    "versus": [
-                        {"team1": {"rank": 1, "group": "A"}, "team2": {"rank": 2, "group": "A"}},
-                    ],
-                },
-                function=compute_finale_phase_from_group_rank,
-            ),
-        },
+        rules=Rules(
+            __root__=[
+                RuleContainer(
+                    id="492345de-8d4a-45b6-8b94-d219f2b0c3e9",
+                    config={
+                        "to_group": "1",
+                        "from_phase": "GROUP",
+                        "versus": [
+                            {
+                                "team1": {"rank": 1, "group": "A"},
+                                "team2": {"rank": 2, "group": "A"},
+                            },
+                        ],
+                    },
+                ),
+            ],
+        ),
         base_correct_result=1,
         multiplying_factor_correct_result=2,
         base_correct_score=3,

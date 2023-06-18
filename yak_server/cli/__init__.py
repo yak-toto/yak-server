@@ -11,6 +11,7 @@ from .database import (
     initialize_database,
     setup_migration,
 )
+from .env import init_env
 
 
 @click.command()
@@ -73,9 +74,24 @@ db.add_command(backup)
 db.add_command(migration)
 
 
+@click.command()
+def init() -> None:
+    """Build the env files you need to start the server"""
+    init_env()
+
+
+@click.group()
+def env() -> None:
+    pass
+
+
+env.add_command(init)
+
+
 @click.group()
 def main() -> None:
     pass
 
 
 main.add_command(db)
+main.add_command(env)

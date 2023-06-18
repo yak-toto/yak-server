@@ -7,13 +7,13 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 
 class MySQLSettings(BaseSettings):
-    user_name: str
-    password: str
+    user_name: str = ""
+    password: str = ""
     port: int = 3306
-    db: str
+    db: str = ""
 
     class Config:
-        env_file = ".env"
+        env_file = ".env.mysql"
         env_file_encoding = "utf-8"
         env_prefix = "mysql_"
 

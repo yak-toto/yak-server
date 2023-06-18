@@ -1,6 +1,6 @@
 import sys
 from datetime import timedelta
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
 
 if sys.version_info >= (3, 9):
     from importlib import resources
@@ -10,7 +10,7 @@ else:
 from . import get_paris_datetime_now
 
 if TYPE_CHECKING:
-    from yak_server.config_file import RuleContainer
+    from yak_server.config_file import Rules
 
 
 def create_mock(
@@ -18,7 +18,7 @@ def create_mock(
     jwt_expiration_time: int = None,
     data_folder: str = None,
     lock_datetime_shift: timedelta = None,
-    rules: Dict[str, "RuleContainer"] = None,
+    rules: "Rules" = None,
     base_correct_result: int = None,
     multiplying_factor_correct_result: int = None,
     base_correct_score: int = None,

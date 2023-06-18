@@ -43,6 +43,9 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
     assert result.returncode == 0
 
     # Check database initialization
+    with resources.as_file(resources.files("yak_server") / "data" / "world_cup_2022") as path:
+        data_folder = path
+
     result = subprocess.run(
         "yak db init",
         shell=True,
@@ -52,6 +55,15 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
             "JWT_EXPIRATION_TIME": "1800",
             "JWT_SECRET_KEY": get_random_string(128),
             "COMPETITION": "world_cup_2022",
+            "DATA_FOLDER": str(data_folder.resolve()),
+            "LOCK_DATETIME": str(datetime.now(tz=timezone.utc)),
+            "BASE_CORRECT_RESULT": "1",
+            "MULTIPLYING_FACTOR_CORRECT_RESULT": "1",
+            "BASE_CORRECT_SCORE": "1",
+            "MULTIPLYING_FACTOR_CORRECT_SCORE": "1",
+            "TEAM_QUALIFIED": "10",
+            "FIRST_TEAM_QUALIFIED": "20",
+            "RULES": "[]",
         },
     )
 
@@ -67,14 +79,28 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
             "JWT_EXPIRATION_TIME": "1800",
             "JWT_SECRET_KEY": get_random_string(128),
             "COMPETITION": "world_cup_2022",
+            "DATA_FOLDER": str(data_folder.resolve()),
+            "LOCK_DATETIME": str(datetime.now(tz=timezone.utc)),
+            "BASE_CORRECT_RESULT": "1",
+            "MULTIPLYING_FACTOR_CORRECT_RESULT": "1",
+            "BASE_CORRECT_SCORE": "1",
+            "MULTIPLYING_FACTOR_CORRECT_SCORE": "1",
+            "TEAM_QUALIFIED": "10",
+            "FIRST_TEAM_QUALIFIED": "20",
+            "RULES": "[]",
         },
     )
 
     child.expect("Admin user password: ", timeout=100)
-    child.sendline(f"{admin_password}\n")
+    child.sendline(admin_password)
     child.expect("Confirm admin password: ", timeout=100)
-    child.sendline(f"{admin_password}\n")
-    assert child.read() == b"\r\n"
+    child.sendline(admin_password)
+    child.expect(pexpect.EOF)
+
+    child.close()
+
+    assert child.exitstatus == 0
+    assert child.signalstatus is None
 
     client = TestClient(app_with_valid_jwt_config)
 
