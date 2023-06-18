@@ -60,10 +60,18 @@ def debug_app_with_profiler() -> Generator:
     os.environ["DEBUG"] = "1"
     app = create_app()
 
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_expiration_time=10,
+        jwt_secret_key=get_random_string(15),
+        lock_datetime_shift=timedelta(seconds=10),
+    )
+
     # Clean database before running test
     create_database()
 
-    return app
+    yield app
+
+    app.dependency_overrides = {}
 
 
 @pytest.fixture()
@@ -72,10 +80,18 @@ def production_app_with_profiler() -> Generator:
     os.environ["DEBUG"] = "0"
     app = create_app()
 
+    app.dependency_overrides[get_settings] = create_mock(
+        jwt_expiration_time=10,
+        jwt_secret_key=get_random_string(15),
+        lock_datetime_shift=timedelta(seconds=10),
+    )
+
     # Clean database before running test
     create_database()
 
-    return app
+    yield app
+
+    app.dependency_overrides = {}
 
 
 @pytest.fixture()

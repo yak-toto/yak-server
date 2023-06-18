@@ -2,6 +2,8 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
 
+from starlette.testclient import TestClient
+
 from yak_server.config_file import get_settings
 
 from .utils import get_random_string
@@ -9,10 +11,11 @@ from .utils.mock import create_mock
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
-    from starlette.testclient import TestClient
 
 
-def test_valid_auth(client: "TestClient"):
+def test_valid_auth(app_with_valid_jwt_config: "FastAPI"):
+    client = TestClient(app_with_valid_jwt_config)
+
     user_name = get_random_string(6)
     first_name = get_random_string(6)
     last_name = get_random_string(6)
@@ -59,7 +62,9 @@ def test_valid_auth(client: "TestClient"):
     }
 
 
-def test_double_signup(client: "TestClient"):
+def test_double_signup(app_with_valid_jwt_config: "FastAPI"):
+    client = TestClient(app_with_valid_jwt_config)
+
     user_name = get_random_string(6)
     first_name = get_random_string(10)
     last_name = get_random_string(11)
@@ -99,7 +104,9 @@ def test_double_signup(client: "TestClient"):
     }
 
 
-def test_login_wrong_name(client: "TestClient"):
+def test_login_wrong_name(app_with_valid_jwt_config: "FastAPI"):
+    client = TestClient(app_with_valid_jwt_config)
+
     response_login = client.post(
         "/api/v1/users/login",
         json={
@@ -116,7 +123,9 @@ def test_login_wrong_name(client: "TestClient"):
     }
 
 
-def test_login_wrong_password(client: "TestClient"):
+def test_login_wrong_password(app_with_valid_jwt_config: "FastAPI"):
+    client = TestClient(app_with_valid_jwt_config)
+
     user_name = get_random_string(6)
 
     response_signup = client.post(
@@ -144,7 +153,9 @@ def test_login_wrong_password(client: "TestClient"):
     }
 
 
-def test_invalid_token(client: "TestClient"):
+def test_invalid_token(app_with_valid_jwt_config: "FastAPI"):
+    client = TestClient(app_with_valid_jwt_config)
+
     response_signup = client.post(
         "/api/v1/users/signup",
         json={
