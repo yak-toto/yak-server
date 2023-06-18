@@ -53,7 +53,7 @@ jobs:
           MYSQL_USER_NAME: ${{ secrets.MYSQL_USER_NAME }}
           MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run:
-          poetry run pytest --cov=yak_server --cov-report=xml -vv
+          poetry run pytest --cov=yak_server --cov-report=xml --cov-config=pyproject.toml -vv
         if: ${{ always() }}
 
       - name: Upload coverage reports to Codecov
