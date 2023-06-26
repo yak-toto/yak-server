@@ -24,9 +24,10 @@ PyMySQL = {extras = ["rsa"], version = "^1.0.2"}
 strawberry-graphql = ">=0.168.1,<0.187.0"
 alembic = "^1.10.3"
 argon2-cffi = "^21.3.0"
-fastapi = ">=0.95.1,<0.98.0"
+fastapi = ">=0.95.1,<0.99.0"
 uvicorn = {extras = ["standard"], version = ">=0.21.1,<0.23.0"}
 httpx = "^0.24.0"
+StrEnum = {version = "^0.4.10", python = "<3.11"}
 
 
 [tool.poetry.group.test.dependencies]
@@ -41,7 +42,7 @@ pre-commit = [
     {version = "^2.21.0", python = "3.7"},
     {version = "^3.2.0", python = ">=3.8"}
 ]
-ruff = ">=0.0.257,<0.0.273"
+ruff = ">=0.0.257,<0.0.276"
 
 
 [tool.poetry.group.profiling.dependencies]

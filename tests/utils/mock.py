@@ -1,6 +1,6 @@
 import sys
 from datetime import timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if sys.version_info >= (3, 9):
     from importlib import resources
@@ -14,17 +14,17 @@ if TYPE_CHECKING:
 
 
 def create_mock(
-    jwt_secret_key: str = None,
-    jwt_expiration_time: int = None,
-    data_folder: str = None,
-    lock_datetime_shift: timedelta = None,
-    rules: "Rules" = None,
-    base_correct_result: int = None,
-    multiplying_factor_correct_result: int = None,
-    base_correct_score: int = None,
-    multiplying_factor_correct_score: int = None,
-    team_qualified: int = None,
-    first_team_qualified: int = None,
+    jwt_secret_key: Optional[str] = None,
+    jwt_expiration_time: Optional[int] = None,
+    data_folder: Optional[str] = None,
+    lock_datetime_shift: Optional[timedelta] = None,
+    rules: "Optional[Rules]" = None,
+    base_correct_result: Optional[int] = None,
+    multiplying_factor_correct_result: Optional[int] = None,
+    base_correct_score: Optional[int] = None,
+    multiplying_factor_correct_score: Optional[int] = None,
+    team_qualified: Optional[int] = None,
+    first_team_qualified: Optional[int] = None,
 ):
     def mock_function():
         class Mock:

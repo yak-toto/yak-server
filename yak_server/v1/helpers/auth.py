@@ -23,8 +23,6 @@ from yak_server.v1.helpers.errors import (
 
 security = HTTPBearer(auto_error=False)
 
-NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
-
 
 def user_from_token(db: Session, secret_key: str, token: str) -> UserModel:
     try:

@@ -14,7 +14,7 @@ class YakContext(BaseContext):
     settings: Settings
     user: Optional[UserModel]
 
-    def __init__(self, db: Session, settings: Settings, user: UserModel = None) -> None:
+    def __init__(self, db: Session, settings: Settings, user: Optional[UserModel] = None) -> None:
         super().__init__()
         self.db = db
         self.settings = settings
