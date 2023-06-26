@@ -1,11 +1,16 @@
-from enum import Enum
+import sys
 from typing import TYPE_CHECKING, Union
+
+if sys.version_info >= (3, 11):
+    from enum import StrEnum
+else:
+    from strenum import StrEnum
 
 if TYPE_CHECKING:
     from yak_server.database.models import GroupModel, PhaseModel, TeamModel
 
 
-class Lang(str, Enum):
+class Lang(StrEnum):
     fr = "fr"
     en = "en"
 
