@@ -50,14 +50,8 @@ def retrieve_group_by_id(
 
     return GenericOut(
         result=GroupResponse(
-            phase=
-            
-            PhaseOut.from_instance(group.phase, lang),
-            group=GroupOut.from_instance(
-        group,
-        
-        
-lang),
+            phase=PhaseOut.from_instance(group.phase, lang),
+            group=GroupOut.from_instance(group, lang),
         ),
     )
 
