@@ -1,4 +1,11 @@
-from typing import List
+import sys
+from typing import List, Union
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
 from uuid import UUID
 
 import strawberry
@@ -70,17 +77,17 @@ class NewScoreNegative:
         )
 
 
-ModifyScoreBetResult = strawberry.union(
-    "ModifyScoreBetResult",
-    types=(
+ModifyScoreBetResult = Annotated[
+    Union[
         ScoreBet,
         ScoreBetNotFoundForUpdate,
         LockedScoreBetError,
         NewScoreNegative,
         InvalidToken,
         ExpiredToken,
-    ),
-)
+    ],
+    strawberry.union("ModifyScoreBetResult"),
+]
 
 
 @strawberry.type
@@ -93,19 +100,22 @@ class BinaryBetNotFoundForUpdate:
     message: str = "Binary bet not found. Cannot modify a resource that does not exist."
 
 
-ModifyBinaryBetResult = strawberry.union(
-    "ModifyBinaryBetResult",
-    types=(
+ModifyBinaryBetResult = Annotated[
+    Union[
         BinaryBet,
         BinaryBetNotFoundForUpdate,
         LockedBinaryBetError,
         InvalidToken,
         ExpiredToken,
-    ),
-)
+    ],
+    strawberry.union("ModifyBinaryBetResult"),
+]
 
 
-CurrentUserResult = strawberry.union("CurrentUserResult", types=(User, InvalidToken, ExpiredToken))
+CurrentUserResult = Annotated[
+    Union[User, InvalidToken, ExpiredToken],
+    strawberry.union("CurrentUserResult"),
+]
 
 
 @strawberry.type
@@ -113,10 +123,10 @@ class AllTeamsSuccessful:
     teams: List[Team]
 
 
-AllTeamsResult = strawberry.union(
-    "AllTeamsResult",
-    types=(AllTeamsSuccessful, InvalidToken, ExpiredToken),
-)
+AllTeamsResult = Annotated[
+    Union[AllTeamsSuccessful, InvalidToken, ExpiredToken],
+    strawberry.union("AllTeamsResult"),
+]
 
 
 @strawberry.type
@@ -137,14 +147,15 @@ class TeamByCodeNotFound:
         return team_not_found_message(self.code)
 
 
-TeamByIdResult = strawberry.union(
-    "TeamByIdResult",
-    types=(Team, TeamByIdNotFound, InvalidToken, ExpiredToken),
-)
-TeamByCodeResult = strawberry.union(
-    "TeamByCodeResult",
-    types=(Team, TeamByCodeNotFound, InvalidToken, ExpiredToken),
-)
+TeamByIdResult = Annotated[
+    Union[Team, TeamByIdNotFound, InvalidToken, ExpiredToken],
+    strawberry.union("TeamByIdResult"),
+]
+
+TeamByCodeResult = Annotated[
+    Union[Team, TeamByCodeNotFound, InvalidToken, ExpiredToken],
+    strawberry.union("TeamByCodeResult"),
+]
 
 
 @strawberry.type
@@ -156,10 +167,10 @@ class ScoreBetNotFound:
         return score_bet_not_found_message(self.id)
 
 
-ScoreBetResult = strawberry.union(
-    "ScoreBetResult",
-    types=(ScoreBet, ScoreBetNotFound, InvalidToken, ExpiredToken),
-)
+ScoreBetResult = Annotated[
+    Union[ScoreBet, ScoreBetNotFound, InvalidToken, ExpiredToken],
+    strawberry.union("ScoreBetResult"),
+]
 
 
 @strawberry.type
@@ -171,15 +182,15 @@ class BinaryBetNotFound:
         return binary_bet_not_found_message(self.id)
 
 
-BinaryBetResult = strawberry.union(
-    "BinaryBetResult",
-    types=(
+BinaryBetResult = Annotated[
+    Union[
         BinaryBet,
         BinaryBetNotFound,
         InvalidToken,
         ExpiredToken,
-    ),
-)
+    ],
+    strawberry.union("BinaryBetResult"),
+]
 
 
 @strawberry.type
@@ -187,7 +198,10 @@ class Groups:
     groups: List[Group]
 
 
-AllGroupsResult = strawberry.union("AllGroupsResult", types=(Groups, InvalidToken, ExpiredToken))
+AllGroupsResult = Annotated[
+    Union[Groups, InvalidToken, ExpiredToken],
+    strawberry.union("AllGroupsResult"),
+]
 
 
 @strawberry.type
@@ -199,10 +213,12 @@ class GroupByCodeNotFound:
         return group_not_found_message(self.code)
 
 
-GroupByCodeResult = strawberry.union(
-    "GroupByCodeResult",
-    types=(Group, GroupByCodeNotFound, InvalidToken, ExpiredToken),
-)
+GroupByCodeResult = Annotated[
+    Union[Group, GroupByCodeNotFound, InvalidToken, ExpiredToken],
+    strawberry.union(
+        "GroupByCodeResult",
+    ),
+]
 
 
 @strawberry.type
@@ -214,10 +230,12 @@ class GroupByIdNotFound:
         return group_not_found_message(self.id)
 
 
-GroupByIdResult = strawberry.union(
-    "GroupByIdResult",
-    types=(Group, GroupByIdNotFound, InvalidToken, ExpiredToken),
-)
+GroupByIdResult = Annotated[
+    Union[Group, GroupByIdNotFound, InvalidToken, ExpiredToken],
+    strawberry.union(
+        "GroupByIdResult",
+    ),
+]
 
 
 @strawberry.type
@@ -225,7 +243,10 @@ class Phases:
     phases: List[Phase]
 
 
-AllPhasesResult = strawberry.union("AllPhasesResult", types=(Phases, InvalidToken, ExpiredToken))
+AllPhasesResult = Annotated[
+    Union[Phases, InvalidToken, ExpiredToken],
+    strawberry.union("AllPhasesResult"),
+]
 
 
 @strawberry.type
@@ -237,10 +258,12 @@ class PhaseByCodeNotFound:
         return phase_not_found_message(self.code)
 
 
-PhaseByCodeResult = strawberry.union(
-    "PhaseByCodeResult",
-    types=(Phase, PhaseByCodeNotFound, InvalidToken, ExpiredToken),
-)
+PhaseByCodeResult = Annotated[
+    Union[Phase, PhaseByCodeNotFound, InvalidToken, ExpiredToken],
+    strawberry.union(
+        "PhaseByCodeResult",
+    ),
+]
 
 
 @strawberry.type
@@ -252,10 +275,10 @@ class PhaseByIdNotFound:
         return phase_not_found_message(self.id)
 
 
-PhaseByIdResult = strawberry.union(
-    "PhaseByIdResult",
-    types=(Phase, PhaseByIdNotFound, InvalidToken, ExpiredToken),
-)
+PhaseByIdResult = Annotated[
+    Union[Phase, PhaseByIdNotFound, InvalidToken, ExpiredToken],
+    strawberry.union("PhaseByIdResult"),
+]
 
 
 @strawberry.type
@@ -263,10 +286,12 @@ class ScoreBoard:
     users: List[UserWithoutSensitiveInfo]
 
 
-ScoreBoardResult = strawberry.union(
-    "ScoreBoardResult",
-    types=(ScoreBoard, InvalidToken, ExpiredToken),
-)
+ScoreBoardResult = Annotated[
+    Union[ScoreBoard, InvalidToken, ExpiredToken],
+    strawberry.union(
+        "ScoreBoardResult",
+    ),
+]
 
 
 @strawberry.type
@@ -278,7 +303,10 @@ class UserNameAlreadyExists:
         return name_already_exists_message(self.user_name)
 
 
-SignupResult = strawberry.union("SignupResult", types=(UserWithToken, UserNameAlreadyExists))
+SignupResult = Annotated[
+    Union[UserWithToken, UserNameAlreadyExists],
+    strawberry.union("SignupResult"),
+]
 
 
 @strawberry.type
@@ -286,7 +314,7 @@ class InvalidCredentials:
     message: str = INVALID_CREDENTIALS_MESSAGE
 
 
-LoginResult = strawberry.union("LoginResult", types=(UserWithToken, InvalidCredentials))
+LoginResult = Annotated[Union[UserWithToken, InvalidCredentials], strawberry.union("LoginResult")]
 
 
 @strawberry.type
@@ -295,16 +323,20 @@ class GroupRank:
     group: Group
 
 
-GroupRankByCodeResult = strawberry.union(
-    "GroupRankByCodeResult",
-    types=(GroupRank, GroupByCodeNotFound, InvalidToken, ExpiredToken),
-)
+GroupRankByCodeResult = Annotated[
+    Union[GroupRank, GroupByCodeNotFound, InvalidToken, ExpiredToken],
+    strawberry.union(
+        "GroupRankByCodeResult",
+    ),
+]
 
 
-GroupRankByIdResult = strawberry.union(
-    "GroupRankByIdResult",
-    types=(GroupRank, GroupByIdNotFound, InvalidToken, ExpiredToken),
-)
+GroupRankByIdResult = Annotated[
+    Union[GroupRank, GroupByIdNotFound, InvalidToken, ExpiredToken],
+    strawberry.union(
+        "GroupRankByIdResult",
+    ),
+]
 
 
 @strawberry.type
@@ -316,13 +348,15 @@ class UserNotFound:
         return user_not_found_message(self.id)
 
 
-ModifyUserResult = strawberry.union(
-    "ModifyUserResult",
-    types=(
+ModifyUserResult = Annotated[
+    Union[
         UserWithoutSensitiveInfo,
         UserNotFound,
         InvalidToken,
         ExpiredToken,
         UnauthorizedAccessToAdminAPI,
+    ],
+    strawberry.union(
+        "ModifyUserResult",
     ),
-)
+]
