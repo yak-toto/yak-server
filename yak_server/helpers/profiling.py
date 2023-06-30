@@ -33,7 +33,7 @@ def set_yappi_profiler(app: "FastAPI") -> None:
         folder_location.mkdir(parents=True, exist_ok=True)
         profiling_log_id = uuid4()
 
-        with Path(f"{folder_location}/{profiling_log_id}.log") as path, path.open(mode="w") as file:
+        with Path(f"{folder_location}/{profiling_log_id}.log").open(mode="w") as file:
             stats = yappi.get_func_stats()
             stats.print_all(
                 out=file,
