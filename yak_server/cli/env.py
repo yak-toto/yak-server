@@ -67,10 +67,7 @@ class EnvBuilder:
     def choose_competition(self) -> None:
         # Select competition to load associated rules
         with resources.as_file(resources.files("yak_server") / "data") as path:
-            available_competitions = []
-
-            for competition in path.glob("*"):
-                available_competitions.append(competition.stem)
+            available_competitions = [competition.stem for competition in path.glob("*")]
 
             for index, competition in enumerate(available_competitions, 1):
                 print(f"{index} - {competition}")
