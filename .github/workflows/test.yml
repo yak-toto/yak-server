@@ -9,7 +9,6 @@ on:
       - "yak_server/**"
       - "tests/**"
       - "pyproject.toml"
-      - "poetry.lock"
       - ".github/workflows/test.yml"
 
 jobs:
@@ -32,28 +31,28 @@ jobs:
           mysql user: ${{ secrets.MYSQL_USER_NAME }}
           mysql root password: ${{ secrets.MYSQL_PASSWORD }}
 
-      - name: Install poetry
-        run: pipx install poetry
-
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "poetry"
 
-      - name: Using python environment
-        run: poetry env use ${{ matrix.python-version }}
+      - name: Set up cache
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml', 'requirements-tests.txt') }}-test-v03
 
       - name: Install dependencies
-        run: poetry install --without pre_commit
+        run: pip install -r requirements-tests.txt
 
       - name: Run test
         env:
           MYSQL_USER_NAME: ${{ secrets.MYSQL_USER_NAME }}
           MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run:
-          poetry run pytest --cov=yak_server --cov-report=xml --cov-config=pyproject.toml -vv
+          pytest --cov=yak_server --cov-report=xml --cov-config=pyproject.toml -vv
         if: ${{ always() }}
 
       - name: Upload coverage reports to Codecov

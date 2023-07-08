@@ -67,7 +67,7 @@ def test_yak_env_init():
     assert env["MULTIPLYING_FACTOR_CORRECT_SCORE"] == "7"
     assert env["TEAM_QUALIFIED"] == "10"
     assert env["FIRST_TEAM_QUALIFIED"] == "20"
-    assert "yak-server/yak_server/data/world_cup_2022" in env["DATA_FOLDER"]
+    assert "yak_server/data/world_cup_2022" in env["DATA_FOLDER"]
 
     env_mysql = dotenv_values(folder_path / ".env.mysql")
 

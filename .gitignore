@@ -186,3 +186,6 @@ yarn-error.log*
 
 yak_server/cli/backup_files
 .ruff_cache
+
+.activate.sh
+.deactivate.sh
