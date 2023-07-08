@@ -1,12 +1,6 @@
-import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 from uuid import uuid4
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
 
 import yappi
 
@@ -27,10 +21,10 @@ def set_yappi_profiler(app: "FastAPI") -> None:
 
         yappi.stop()
 
-        with resources.as_file(resources.files("yak_server") / ".." / "profiling") as path:
+        with Path(__file__).parents[2] / "profiling" as path:
             folder_location = path
+            folder_location.mkdir(parents=True, exist_ok=True)
 
-        folder_location.mkdir(parents=True, exist_ok=True)
         profiling_log_id = uuid4()
 
         with Path(f"{folder_location}/{profiling_log_id}.log").open(mode="w") as file:

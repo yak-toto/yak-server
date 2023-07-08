@@ -1,11 +1,6 @@
-import sys
 from datetime import timedelta
+from pathlib import Path
 from typing import TYPE_CHECKING, Optional
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
 
 from . import get_paris_datetime_now
 
@@ -39,7 +34,7 @@ def create_mock(
             mock.jwt_expiration_time = jwt_expiration_time
 
         if data_folder is not None:
-            with resources.as_file(resources.files("tests") / "test_data" / data_folder) as path:
+            with Path(__file__).parents[1] / "test_data" / data_folder as path:
                 mock.data_folder = path
 
         if lock_datetime_shift is not None:

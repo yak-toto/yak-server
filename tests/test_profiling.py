@@ -1,10 +1,5 @@
-import sys
 from http import HTTPStatus
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -30,12 +25,9 @@ def test_debug_profiling(debug_app_with_profiler):
     assert response.status_code == HTTPStatus.CREATED
     assert "profiling-log-id" in response.headers
 
-    with resources.as_file(
-        resources.files("yak_server")
-        / ".."
-        / "profiling"
-        / f"{response.headers['profiling-log-id']}.log",
-    ) as path:
+    file_name = response.headers["profiling-log-id"]
+
+    with Path(__file__).parents[1] / f"profiling/{file_name}.log" as path:
         assert path.exists()
 
 
