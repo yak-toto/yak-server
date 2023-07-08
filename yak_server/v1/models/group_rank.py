@@ -1,8 +1,7 @@
 from typing import TYPE_CHECKING
 
-from pydantic import BaseModel
+from pydantic import BaseModel, NonNegativeInt
 
-from .generic import PositiveOrZeroInt
 from .teams import TeamOut
 
 if TYPE_CHECKING:
@@ -12,14 +11,14 @@ if TYPE_CHECKING:
 
 class GroupPositionOut(BaseModel):
     team: TeamOut
-    played: PositiveOrZeroInt
-    won: PositiveOrZeroInt
-    drawn: PositiveOrZeroInt
-    lost: PositiveOrZeroInt
-    goals_for: PositiveOrZeroInt
-    goals_against: PositiveOrZeroInt
+    played: NonNegativeInt
+    won: NonNegativeInt
+    drawn: NonNegativeInt
+    lost: NonNegativeInt
+    goals_for: NonNegativeInt
+    goals_against: NonNegativeInt
     goals_difference: int
-    points: PositiveOrZeroInt
+    points: NonNegativeInt
 
     @classmethod
     def from_instance(

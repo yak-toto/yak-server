@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import UUID4, BaseModel, PositiveInt
+from pydantic import UUID4, BaseModel, ConfigDict, PositiveInt
 
 from yak_server.helpers.language import Lang, get_language_description
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class BinaryBetIn(BaseModel):
-    is_one_won: Optional[bool]
+    is_one_won: Optional[bool] = None
     index: PositiveInt
     team1: TeamIn
     team2: TeamIn
@@ -23,8 +23,8 @@ class BinaryBetIn(BaseModel):
 class BinaryBetOut(BaseModel):
     id: UUID4
     locked: bool
-    team1: Optional[TeamWithWonOut]
-    team2: Optional[TeamWithWonOut]
+    team1: Optional[TeamWithWonOut] = None
+    team2: Optional[TeamWithWonOut] = None
 
     @classmethod
     def from_instance(
@@ -65,8 +65,8 @@ class BinaryBetWithGroupIdOut(BaseModel):
     id: UUID4
     locked: bool
     group: Group
-    team1: Optional[TeamWithWonOut]
-    team2: Optional[TeamWithWonOut]
+    team1: Optional[TeamWithWonOut] = None
+    team2: Optional[TeamWithWonOut] = None
 
     @classmethod
     def from_instance(
@@ -107,9 +107,8 @@ class BinaryBetResponse(BaseModel):
 
 
 class ModifyBinaryBetIn(BaseModel):
-    is_one_won: Optional[bool]
-    team1: Optional[TeamModifyBinaryBetIn]
-    team2: Optional[TeamModifyBinaryBetIn]
+    is_one_won: Optional[bool] = None
+    team1: Optional[TeamModifyBinaryBetIn] = None
+    team2: Optional[TeamModifyBinaryBetIn] = None
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")

@@ -1,7 +1,7 @@
 from functools import lru_cache
 
 import pymysql
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -12,10 +12,11 @@ class MySQLSettings(BaseSettings):
     port: int = 3306
     db: str = ""
 
-    class Config:
-        env_file = ".env.mysql"
-        env_file_encoding = "utf-8"
-        env_prefix = "mysql_"
+    model_config = SettingsConfigDict(
+        env_file=".env.mysql",
+        env_file_encoding="utf-8",
+        env_prefix="mysql_",
+    )
 
 
 @lru_cache(maxsize=None)

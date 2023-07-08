@@ -158,10 +158,13 @@ def modify_binary_bet_by_id(
         modify_binary_bet_successfully(user.name, binary_bet, modify_binary_bet_in.is_one_won),
     )
 
-    if "is_one_won" in modify_binary_bet_in.__fields_set__:
+    if "is_one_won" in modify_binary_bet_in.model_fields_set:
         binary_bet.is_one_won = modify_binary_bet_in.is_one_won
 
-    if modify_binary_bet_in.team1 is not None and "id" in modify_binary_bet_in.team1.__fields_set__:
+    if (
+        modify_binary_bet_in.team1 is not None
+        and "id" in modify_binary_bet_in.team1.model_fields_set
+    ):
         binary_bet.match.team1_id = modify_binary_bet_in.team1.id
 
         try:
@@ -170,7 +173,10 @@ def modify_binary_bet_by_id(
             db.rollback()
             raise TeamNotFound(modify_binary_bet_in.team1.id) from integrity_error
 
-    if modify_binary_bet_in.team2 is not None and "id" in modify_binary_bet_in.team2.__fields_set__:
+    if (
+        modify_binary_bet_in.team2 is not None
+        and "id" in modify_binary_bet_in.team2.model_fields_set
+    ):
         binary_bet.match.team2_id = modify_binary_bet_in.team2.id
 
         try:

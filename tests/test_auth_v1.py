@@ -231,14 +231,19 @@ def test_expired_token(app: "FastAPI", client: "TestClient"):
 
 
 def test_invalid_signup_body(client: "TestClient"):
+    name = get_random_string(10)
+    first_name = get_random_string(12)
+    last_name = get_random_string(6)
+    password = get_random_string(5)
+
     # Try to signup with invalid body
     response_signup = client.post(
         "/api/v1/users/signup",
         json={
-            "name": get_random_string(10),
-            "first_name": get_random_string(12),
-            "last_name": get_random_string(6),
-            "passwor": get_random_string(5),
+            "name": name,
+            "first_name": first_name,
+            "last_name": last_name,
+            "passwor": password,
         },
     )
 
@@ -247,11 +252,24 @@ def test_invalid_signup_body(client: "TestClient"):
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
         "description": [
-            {"loc": ["body", "password"], "msg": "field required", "type": "value_error.missing"},
             {
+                "type": "missing",
+                "loc": ["body", "password"],
+                "msg": "Field required",
+                "input": {
+                    "name": name,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "passwor": password,
+                },
+                "url": "https://errors.pydantic.dev/2.1.2/v/missing",
+            },
+            {
+                "type": "extra_forbidden",
                 "loc": ["body", "passwor"],
-                "msg": "extra fields not permitted",
-                "type": "value_error.extra",
+                "msg": "Extra inputs are not permitted",
+                "input": password,
+                "url": "https://errors.pydantic.dev/2.1.2/v/extra_forbidden",
             },
         ],
     }
@@ -274,11 +292,19 @@ def test_invalid_login_body(client: "TestClient"):
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
         "description": [
-            {"loc": ["body", "name"], "msg": "field required", "type": "value_error.missing"},
             {
+                "type": "missing",
+                "loc": ["body", "name"],
+                "msg": "Field required",
+                "input": {"nme": user_name, "password": password},
+                "url": "https://errors.pydantic.dev/2.1.2/v/missing",
+            },
+            {
+                "type": "extra_forbidden",
                 "loc": ["body", "nme"],
-                "msg": "extra fields not permitted",
-                "type": "value_error.extra",
+                "msg": "Extra inputs are not permitted",
+                "input": user_name,
+                "url": "https://errors.pydantic.dev/2.1.2/v/extra_forbidden",
             },
         ],
     }

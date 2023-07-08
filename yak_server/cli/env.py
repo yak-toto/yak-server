@@ -74,7 +74,7 @@ class EnvBuilder:
         data_folder = path / competition
 
         # Load rules in environment
-        rules = Rules(__root__=[])
+        rules = Rules([])
 
         for rule_file in Path(f"{data_folder}/rules").glob("*.json"):
             rule_id = UUID(rule_file.stem)
@@ -83,7 +83,7 @@ class EnvBuilder:
                 raise RuleNotDefined(rule_id)
 
             with rule_file.open() as rule_content:
-                rules.__root__.append(
+                rules.append(
                     RuleContainer(id=rule_id, config=json.loads(rule_content.read())),
                 )
 
@@ -106,7 +106,7 @@ class EnvBuilder:
         self.env["TEAM_QUALIFIED"] = config.getint("points", "team_qualified")
         self.env["FIRST_TEAM_QUALIFIED"] = config.getint("points", "first_team_qualified")
         self.env["DATA_FOLDER"] = data_folder
-        self.env["RULES"] = rules.json(separators=(",", ":"))
+        self.env["RULES"] = rules.model_dump_json()
 
     def write(self) -> None:
         write_env_file(self.env, ".env")

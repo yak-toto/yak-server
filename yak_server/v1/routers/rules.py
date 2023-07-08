@@ -19,10 +19,10 @@ def execute_rule(
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
-) -> GenericOut[None]:
+) -> GenericOut[str]:
     found_rule = None
 
-    for rule in settings.rules.__root__:
+    for rule in settings.rules:
         if rule.id == rule_id:
             found_rule = rule
             break
@@ -35,4 +35,4 @@ def execute_rule(
 
     rule_function(db, user, rule_config)
 
-    return GenericOut(result=None)
+    return GenericOut(result="")

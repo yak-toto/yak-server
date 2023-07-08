@@ -1,10 +1,8 @@
 from typing import TYPE_CHECKING, List, Optional
 
-from pydantic import UUID4, BaseModel
+from pydantic import UUID4, BaseModel, NonNegativeInt
 
 from yak_server.helpers.language import Lang, get_language_description
-
-from .generic import PositiveOrZeroInt
 
 if TYPE_CHECKING:
     from yak_server.database.models import TeamModel
@@ -16,7 +14,7 @@ class FlagOut(BaseModel):
 
 class TeamIn(BaseModel):
     id: UUID4
-    score: Optional[PositiveOrZeroInt]
+    score: Optional[NonNegativeInt] = None
 
 
 class TeamOut(BaseModel):
@@ -48,7 +46,7 @@ class TeamWithWonOut(BaseModel):
     code: str
     description: str
     flag: FlagOut
-    won: Optional[bool]
+    won: Optional[bool] = None
 
 
 class TeamWithScoreOut(BaseModel):
@@ -56,12 +54,12 @@ class TeamWithScoreOut(BaseModel):
     code: str
     description: str
     flag: FlagOut
-    score: Optional[PositiveOrZeroInt]
+    score: Optional[NonNegativeInt] = None
 
 
 class TeamModifyScoreBetIn(BaseModel):
-    score: Optional[PositiveOrZeroInt]
+    score: Optional[NonNegativeInt] = None
 
 
 class TeamModifyBinaryBetIn(BaseModel):
-    id: Optional[UUID4]
+    id: Optional[UUID4] = None

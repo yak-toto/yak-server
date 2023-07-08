@@ -85,11 +85,19 @@ def test_modify_password(app_with_valid_jwt_config: "TestClient"):
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
         "description": [
-            {"loc": ["body", "password"], "msg": "field required", "type": "value_error.missing"},
             {
+                "type": "missing",
+                "loc": ["body", "password"],
+                "msg": "Field required",
+                "input": {"name": other_user_name},
+                "url": "https://errors.pydantic.dev/2.1.2/v/missing",
+            },
+            {
+                "type": "extra_forbidden",
                 "loc": ["body", "name"],
-                "msg": "extra fields not permitted",
-                "type": "value_error.extra",
+                "msg": "Extra inputs are not permitted",
+                "input": other_user_name,
+                "url": "https://errors.pydantic.dev/2.1.2/v/extra_forbidden",
             },
         ],
     }
