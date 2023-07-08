@@ -27,17 +27,17 @@ You can also set MySQL port by adding `MYSQL_PORT=my_port` to `.env` file. If no
 
 ### Backend
 
-Run your project in a Python env is highly recommend. You can use poetry env using the following command:
+Run your project in a Python env is highly recommend. You can use venv python module using the following command:
 
 ```bash
-poetry env use 3.9
-poetry shell
+python -m venv venv
+. venv/bin/activate
 ```
 
-Fetch all packages using poetry with the following command:
+Fetch all packages using pip with the following command:
 
 ```bash
-poetry install
+pip install -r requirements.txt
 ```
 
 Before starting the backend, add `JWT_SECRET_KEY` and `JWT_EXPIRATION_TIME` in `.env` same as the MySQL user name and password. As
@@ -76,7 +76,7 @@ To run local testing, you can use the script `create_database.py`, `initialize_d
 
 To set up test, please add a MySQL database named `yak_toto_test`. It will contain all the records created during unit tests. This database is cleaned everytime you run test. That's why a different database is created to avoid deleting records you use for your local testing.
 
-Yak-server is using `pytest` to run tests and can run them using `poetry run pytest` command into root folder.
+Yak-server is using `pytest` to run tests.
 
 ## Profiling
 
