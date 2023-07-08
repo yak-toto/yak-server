@@ -1,17 +1,11 @@
 import json
 import secrets
-import sys
 from configparser import ConfigParser
 from getpass import getpass
 from pathlib import Path
 from uuid import UUID
 
 from dateutil import parser
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
 
 from yak_server.config_file import RuleContainer, Rules
 from yak_server.database import MySQLSettings
@@ -66,7 +60,7 @@ class EnvBuilder:
 
     def choose_competition(self) -> None:
         # Select competition to load associated rules
-        with resources.as_file(resources.files("yak_server") / "data") as path:
+        with Path(__file__).parents[1] / "data" as path:
             available_competitions = [competition.stem for competition in path.glob("*")]
 
             for index, competition in enumerate(available_competitions, 1):

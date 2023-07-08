@@ -1,16 +1,10 @@
 import json
 import logging
 import subprocess
-import sys
 from datetime import datetime, timezone
 from getpass import getpass
 from pathlib import Path
 from typing import TYPE_CHECKING
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
 
 from fastapi.testclient import TestClient
 
@@ -154,7 +148,7 @@ def initialize_database(app: "FastAPI") -> None:
 
 
 def backup_database() -> None:
-    with resources.as_file(resources.files("yak_server") / "cli/backup_files") as path:
+    with Path(__file__).parents[1] / "cli/backup_files" as path:
         backup_location = path
 
     Path(backup_location).mkdir(exist_ok=True)
@@ -217,7 +211,7 @@ def drop_database(app: "FastAPI") -> None:
 
 
 def setup_migration() -> None:
-    with resources.as_file(resources.files("yak_server") / ".." / "alembic.ini") as path:
+    with Path(__file__).parents[2] / "alembic.ini" as path:
         print(
             "To be able to run the database migration "
             "scripts, you need to run the following command:",

@@ -1,16 +1,11 @@
 import json
 import os
 import subprocess
-import sys
 from base64 import b64decode
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
+from pathlib import Path
 from typing import TYPE_CHECKING
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
 
 import pexpect
 from dateutil import parser
@@ -43,8 +38,8 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
     assert result.returncode == 0
 
     # Check database initialization
-    with resources.as_file(resources.files("yak_server") / "data" / "world_cup_2022") as path:
-        data_folder = path
+    with Path(__file__).parents[1] / "yak_server/data/world_cup_2022" as path:
+        data_folder = str(path.resolve())
 
     result = subprocess.run(
         "yak db init",
@@ -55,7 +50,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
             "JWT_EXPIRATION_TIME": "1800",
             "JWT_SECRET_KEY": get_random_string(128),
             "COMPETITION": "world_cup_2022",
-            "DATA_FOLDER": str(data_folder.resolve()),
+            "DATA_FOLDER": data_folder,
             "LOCK_DATETIME": str(datetime.now(tz=timezone.utc)),
             "BASE_CORRECT_RESULT": "1",
             "MULTIPLYING_FACTOR_CORRECT_RESULT": "1",
@@ -79,7 +74,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
             "JWT_EXPIRATION_TIME": "1800",
             "JWT_SECRET_KEY": get_random_string(128),
             "COMPETITION": "world_cup_2022",
-            "DATA_FOLDER": str(data_folder.resolve()),
+            "DATA_FOLDER": data_folder,
             "LOCK_DATETIME": str(datetime.now(tz=timezone.utc)),
             "BASE_CORRECT_RESULT": "1",
             "MULTIPLYING_FACTOR_CORRECT_RESULT": "1",
@@ -127,7 +122,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
 
     list_datetime_backup = sorted(
         parser.parse(file.name.replace(".sql", "").replace("yak_toto_backup_", ""))
-        for file in (resources.files("yak_server") / "cli/backup_files").iterdir()
+        for file in (Path(__file__).parents[1] / "yak_server/cli/backup_files").glob("*")
     )
 
     # Check that most recent backup file has been created less than 2 seconds ago

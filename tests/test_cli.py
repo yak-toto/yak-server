@@ -1,13 +1,7 @@
-import sys
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
+from pathlib import Path
 from typing import TYPE_CHECKING
-
-if sys.version_info >= (3, 9):
-    from importlib import resources
-else:
-    import importlib_resources as resources
-
 from unittest.mock import Mock
 
 import pytest
@@ -101,7 +95,7 @@ def test_backup(monkeypatch):
 
     list_datetime_backup = sorted(
         parser.parse(file.name.replace(".sql", "").replace("yak_toto_backup_", ""))
-        for file in (resources.files("yak_server") / "cli/backup_files").iterdir()
+        for file in (Path(__file__).parents[1] / "yak_server/cli/backup_files").glob("*")
     )
 
     # Check that most recent backup file has been created less than 2 seconds ago
