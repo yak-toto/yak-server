@@ -38,8 +38,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
     assert result.returncode == 0
 
     # Check database initialization
-    with Path(__file__).parents[1] / "yak_server/data/world_cup_2022" as path:
-        data_folder = str(path.resolve())
+    data_folder = str((Path(__file__).parents[1] / "yak_server/data/world_cup_2022").resolve())
 
     result = subprocess.run(
         "yak db init",

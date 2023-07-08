@@ -34,8 +34,7 @@ def create_mock(
             mock.jwt_expiration_time = jwt_expiration_time
 
         if data_folder is not None:
-            with Path(__file__).parents[1] / "test_data" / data_folder as path:
-                mock.data_folder = path
+            mock.data_folder = Path(__file__).parents[1] / "test_data" / data_folder
 
         if lock_datetime_shift is not None:
             mock.lock_datetime = get_paris_datetime_now() + lock_datetime_shift

@@ -21,8 +21,7 @@ def set_yappi_profiler(app: "FastAPI") -> None:
 
         yappi.stop()
 
-        with Path(__file__).parents[2] / "profiling" as path:
-            folder_location = path
+        with Path(__file__).parents[2] / "profiling" as folder_location:
             folder_location.mkdir(parents=True, exist_ok=True)
 
         profiling_log_id = uuid4()

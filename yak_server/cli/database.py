@@ -148,10 +148,8 @@ def initialize_database(app: "FastAPI") -> None:
 
 
 def backup_database() -> None:
-    with Path(__file__).parents[1] / "cli/backup_files" as path:
-        backup_location = path
-
-    Path(backup_location).mkdir(exist_ok=True)
+    with Path(__file__).parents[1] / "cli/backup_files" as backup_location:
+        backup_location.mkdir(exist_ok=True)
 
     backup_datetime = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%z")
 
@@ -211,14 +209,15 @@ def drop_database(app: "FastAPI") -> None:
 
 
 def setup_migration() -> None:
-    with Path(__file__).parents[2] / "alembic.ini" as path:
-        print(
-            "To be able to run the database migration "
-            "scripts, you need to run the following command:",
-        )
-        print(f"export ALEMBIC_CONFIG='{path.resolve()}'")
-        print()
-        print(
-            "Follow this link for more informations: "
-            "https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file",
-        )
+    alembic_ini_path = Path(__file__).parents[2] / "alembic.ini"
+
+    print(
+        "To be able to run the database migration "
+        "scripts, you need to run the following command:",
+    )
+    print(f"export ALEMBIC_CONFIG='{alembic_ini_path.resolve()}'")
+    print()
+    print(
+        "Follow this link for more informations: "
+        "https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file",
+    )
