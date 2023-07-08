@@ -60,17 +60,18 @@ class EnvBuilder:
 
     def choose_competition(self) -> None:
         # Select competition to load associated rules
-        with Path(__file__).parents[1] / "data" as path:
-            available_competitions = [competition.stem for competition in path.glob("*")]
+        path = Path(__file__).parents[1] / "data"
 
-            for index, competition in enumerate(available_competitions, 1):
-                print(f"{index} - {competition}")
+        available_competitions = [competition.stem for competition in path.glob("*")]
 
-            competition_choice = int(input("Choose your competition: "))
+        for index, competition in enumerate(available_competitions, 1):
+            print(f"{index} - {competition}")
 
-            competition = available_competitions[competition_choice - 1]
+        competition_choice = int(input("Choose your competition: "))
 
-            data_folder = path / competition
+        competition = available_competitions[competition_choice - 1]
+
+        data_folder = path / competition
 
         # Load rules in environment
         rules = Rules(__root__=[])
