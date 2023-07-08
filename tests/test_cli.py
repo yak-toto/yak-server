@@ -6,12 +6,12 @@ from unittest.mock import Mock
 
 import pytest
 from dateutil import parser
+from starlette.testclient import TestClient
 
 from yak_server.cli.database import (
     BackupError,
     ConfirmPasswordDoesNotMatch,
     RecordDeletionInProduction,
-    SignupError,
     TableDropInProduction,
     backup_database,
     create_admin,
@@ -19,20 +19,22 @@ from yak_server.cli.database import (
     drop_database,
 )
 from yak_server.config_file import get_settings
+from yak_server.v1.helpers.errors import NameAlreadyExists
 
 from .utils import get_random_string
 from .utils.mock import create_mock
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
-    from starlette.testclient import TestClient
 
 
-def test_create_admin(app: "FastAPI", client: "TestClient", monkeypatch):
+def test_create_admin(app: "FastAPI", monkeypatch):
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=20,
         jwt_secret_key=get_random_string(10),
     )
+
+    client = TestClient(app)
 
     # Error case : password and confirm password does not match
     mock_password_does_not_match = Mock(
@@ -45,7 +47,7 @@ def test_create_admin(app: "FastAPI", client: "TestClient", monkeypatch):
     monkeypatch.setattr("yak_server.cli.database.getpass", mock_password_does_not_match)
 
     with pytest.raises(ConfirmPasswordDoesNotMatch):
-        create_admin(app)
+        create_admin()
 
     # Success case : create admin using script and test login is OK
     password_admin = get_random_string(6)
@@ -55,7 +57,7 @@ def test_create_admin(app: "FastAPI", client: "TestClient", monkeypatch):
         lambda prompt: password_admin,  # noqa: ARG005
     )
 
-    create_admin(app)
+    create_admin()
 
     response_login = client.post(
         "/api/v1/users/login",
@@ -76,8 +78,8 @@ def test_create_admin(app: "FastAPI", client: "TestClient", monkeypatch):
         lambda prompt: password_admin,  # noqa: ARG005
     )
 
-    with pytest.raises(SignupError):
-        create_admin(app)
+    with pytest.raises(NameAlreadyExists):
+        create_admin()
 
 
 def test_delete_all_records(production_app):

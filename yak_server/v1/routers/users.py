@@ -38,12 +38,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.post("/signup", status_code=status.HTTP_201_CREATED)
-def signup(
-    signup_in: SignupIn,
-    db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
-) -> GenericOut[SignupOut]:
+def signup_user(db: Session, signup_in: SignupIn) -> UserModel:
     # Check existing user in db
     existing_user = db.query(UserModel).filter_by(name=signup_in.name).first()
     if existing_user:
@@ -78,6 +73,17 @@ def signup(
     db.commit()
 
     logger.info(signed_up_successfully(user.name))
+
+    return user
+
+
+@router.post("/signup", status_code=status.HTTP_201_CREATED)
+def signup(
+    signup_in: SignupIn,
+    db: Session = Depends(get_db),
+    settings: Settings = Depends(get_settings),
+) -> GenericOut[SignupOut]:
+    user = signup_user(db, signup_in)
 
     return GenericOut(
         result=SignupOut(
