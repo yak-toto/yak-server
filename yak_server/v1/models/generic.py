@@ -1,15 +1,12 @@
 from typing import Generic, TypeVar
 
-from pydantic import ConstrainedInt, Extra
-from pydantic.generics import GenericModel
+from pydantic import BaseModel, ConfigDict
 
 Result = TypeVar("Result")
 
 
-class GenericOut(GenericModel, Generic[Result], extra=Extra.forbid):
+class GenericOut(BaseModel, Generic[Result]):
     ok: bool = True
     result: Result
 
-
-class PositiveOrZeroInt(ConstrainedInt):
-    gt = -1
+    model_config = ConfigDict(extra="forbid")

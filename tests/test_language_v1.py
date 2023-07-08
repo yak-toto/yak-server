@@ -100,10 +100,11 @@ def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch):
     assert response_german_lang.json() == {
         "description": [
             {
-                "ctx": {"enum_values": ["fr", "en"]},
+                "ctx": {"expected": "'fr' or 'en'"},
+                "type": "enum",
+                "input": "de",
                 "loc": ["query", "lang"],
-                "msg": "value is not a valid enumeration member; permitted: 'fr', 'en'",
-                "type": "type_error.enum",
+                "msg": "Input should be 'fr' or 'en'",
             },
         ],
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,

@@ -16,7 +16,7 @@ def test_rule(app: "FastAPI", client: "TestClient"):
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=10,
         jwt_secret_key=get_random_string(100),
-        rules=Rules(__root__=[RuleContainer(id="9bfa5f83-09ff-4e63-95fc-aaf9177d5d07", config={})]),
+        rules=Rules([RuleContainer(id="9bfa5f83-09ff-4e63-95fc-aaf9177d5d07", config={})]),
     )
 
     response_signup = client.post(

@@ -60,6 +60,7 @@ def put_finale_phase(client: TestClient, token: str, is_one_won: Optional[bool])
         headers={"Authorization": f"Bearer {token}"},
     )
 
+    assert response_post_finale_phase_bets_admin.json() == {"ok": True, "result": ""}
     assert response_post_finale_phase_bets_admin.status_code == HTTPStatus.OK
 
     response_get_finale_phase = client.get(
@@ -88,7 +89,7 @@ def test_compute_points(app: "FastAPI", monkeypatch):
         jwt_secret_key=get_random_string(100),
         lock_datetime_shift=timedelta(seconds=10),
         rules=Rules(
-            __root__=[
+            [
                 RuleContainer(
                     id="492345de-8d4a-45b6-8b94-d219f2b0c3e9",
                     config={

@@ -1,9 +1,10 @@
 from datetime import datetime
 from functools import lru_cache
-from typing import List
+from typing import Iterator, List
 from uuid import UUID
 
-from pydantic import BaseModel, BaseSettings
+from pydantic import BaseModel, RootModel
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class RuleContainer(BaseModel):
@@ -11,8 +12,14 @@ class RuleContainer(BaseModel):
     config: dict
 
 
-class Rules(BaseModel):
-    __root__: List[RuleContainer]
+class Rules(RootModel):
+    root: List[RuleContainer]
+
+    def __iter__(self) -> Iterator[RuleContainer]:
+        return iter(self.root)
+
+    def append(self, rule: RuleContainer) -> None:
+        self.root.append(rule)
 
 
 class Settings(BaseSettings):
@@ -29,9 +36,7 @@ class Settings(BaseSettings):
     data_folder: str
     rules: Rules
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
 
 
 @lru_cache(maxsize=None)

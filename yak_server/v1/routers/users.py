@@ -141,9 +141,9 @@ def modify_user(
 
     logger.info(modify_password_successfully(user.name))
 
-    return GenericOut(result=CurrentUserOut.from_orm(user))
+    return GenericOut(result=CurrentUserOut.model_validate(user))
 
 
 @router.get("/current")
 def current_user(user: UserModel = Depends(get_current_user)) -> GenericOut[CurrentUserOut]:
-    return GenericOut(result=CurrentUserOut.from_orm(user))
+    return GenericOut(result=CurrentUserOut.model_validate(user))

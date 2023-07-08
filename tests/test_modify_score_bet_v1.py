@@ -96,7 +96,13 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
         "description": [
-            {"loc": ["body", "team1"], "msg": "field required", "type": "value_error.missing"},
+            {
+                "type": "missing",
+                "loc": ["body", "team1"],
+                "msg": "Field required",
+                "input": {"team2": {"score": score2}},
+                "url": "https://errors.pydantic.dev/2.1.2/v/missing",
+            },
         ],
     }
 
@@ -152,10 +158,12 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
         "description": [
             {
-                "ctx": {"limit_value": -1},
+                "type": "greater_than_equal",
                 "loc": ["body", "team1", "score"],
-                "msg": "ensure this value is greater than -1",
-                "type": "value_error.number.not_gt",
+                "msg": "Input should be greater than or equal to 0",
+                "input": -1,
+                "ctx": {"ge": 0},
+                "url": "https://errors.pydantic.dev/2.1.2/v/greater_than_equal",
             },
         ],
     }

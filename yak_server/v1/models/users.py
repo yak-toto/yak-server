@@ -1,37 +1,46 @@
-from pydantic import UUID4, BaseModel, Extra
+from pydantic import UUID4, BaseModel, ConfigDict
 
 
-class SignupIn(BaseModel, extra=Extra.forbid):
+class SignupIn(BaseModel):
     name: str
     first_name: str
     last_name: str
     password: str
 
+    model_config = ConfigDict(extra="forbid")
 
-class SignupOut(BaseModel, extra=Extra.forbid):
+
+class SignupOut(BaseModel):
     id: UUID4
     name: str
     token: str
 
+    model_config = ConfigDict(extra="forbid")
 
-class LoginIn(BaseModel, extra=Extra.forbid):
+
+class LoginIn(BaseModel):
     name: str
     password: str
 
+    model_config = ConfigDict(extra="forbid")
 
-class LoginOut(BaseModel, extra=Extra.forbid):
+
+class LoginOut(BaseModel):
     id: UUID4
     name: str
     token: str
+
+    model_config = ConfigDict(extra="forbid")
 
 
 class CurrentUserOut(BaseModel):
     id: UUID4
     name: str
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
-class ModifyUserIn(BaseModel, extra=Extra.forbid):
+class ModifyUserIn(BaseModel):
     password: str
+
+    model_config = ConfigDict(extra="forbid")
