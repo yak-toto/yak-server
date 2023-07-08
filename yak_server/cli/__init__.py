@@ -44,8 +44,7 @@ def delete() -> None:
 @click.command()
 def admin() -> None:
     """Create admin account in database."""
-    app = create_app()
-    create_admin(app)
+    create_admin()
 
 
 @click.command()

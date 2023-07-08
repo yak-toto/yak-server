@@ -6,8 +6,6 @@ from getpass import getpass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from fastapi.testclient import TestClient
-
 from yak_server.config_file import get_settings
 from yak_server.database import Base, SessionLocal, engine, mysql_settings
 from yak_server.database.models import (
@@ -21,6 +19,8 @@ from yak_server.database.models import (
     TeamModel,
     UserModel,
 )
+from yak_server.v1.models.users import SignupIn
+from yak_server.v1.routers.users import signup_user
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -31,11 +31,6 @@ logger = logging.getLogger(__name__)
 class ConfirmPasswordDoesNotMatch(Exception):
     def __init__(self) -> None:
         super().__init__("Password and Confirm Password fields does not match.")
-
-
-class SignupError(Exception):
-    def __init__(self, description: str) -> None:
-        super().__init__(f"Error during signup. {description}")
 
 
 class RecordDeletionInProduction(Exception):
@@ -57,27 +52,19 @@ def create_database() -> None:
     Base.metadata.create_all(bind=engine)
 
 
-def create_admin(app: "FastAPI") -> None:
+def create_admin() -> None:
     password = getpass(prompt="Admin user password: ")
     confirm_password = getpass(prompt="Confirm admin password: ")
 
     if password != confirm_password:
         raise ConfirmPasswordDoesNotMatch
 
-    client = TestClient(app)
+    db = SessionLocal()
 
-    response_signup = client.post(
-        "/api/v1/users/signup",
-        json={
-            "name": "admin",
-            "first_name": "admin",
-            "last_name": "admin",
-            "password": password,
-        },
+    _ = signup_user(
+        db,
+        SignupIn(name="admin", first_name="admin", last_name="admin", password=password),
     )
-
-    if not response_signup.json()["ok"]:
-        raise SignupError(response_signup.json()["description"])
 
 
 def initialize_database(app: "FastAPI") -> None:
