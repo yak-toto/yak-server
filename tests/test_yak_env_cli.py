@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from random import randint
 from uuid import uuid4
@@ -68,6 +69,7 @@ def test_yak_env_init():
     assert env["TEAM_QUALIFIED"] == "10"
     assert env["FIRST_TEAM_QUALIFIED"] == "20"
     assert env["DATA_FOLDER"].endswith("yak_server/data/world_cup_2022")
+    assert len(json.loads(env["RULES"])) == 1
 
     env_mysql = dotenv_values(folder_path / ".env.mysql")
 

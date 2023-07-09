@@ -106,7 +106,7 @@ class EnvBuilder:
         self.env["TEAM_QUALIFIED"] = config.getint("points", "team_qualified")
         self.env["FIRST_TEAM_QUALIFIED"] = config.getint("points", "first_team_qualified")
         self.env["DATA_FOLDER"] = data_folder
-        self.env["RULES"] = rules.json()
+        self.env["RULES"] = rules.json(separators=(",", ":"))
 
     def write(self) -> None:
         write_env_file(self.env, ".env")
