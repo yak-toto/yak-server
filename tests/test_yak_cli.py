@@ -1,7 +1,5 @@
-import json
 import os
 import subprocess
-from base64 import b64decode
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from pathlib import Path
@@ -109,6 +107,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
     assert response_login.status_code == HTTPStatus.CREATED
 
     auth_token = response_login.json()["result"]["token"]
+    user_id = response_login.json()["result"]["id"]
 
     # Check backup command
     result = subprocess.run(
@@ -142,8 +141,6 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
         "/api/v1/bets",
         headers={"Authorization": f"Bearer {auth_token}"},
     )
-
-    user_id = json.loads(b64decode(auth_token.split(".")[1] + "=="))["sub"]
 
     assert response_login_user_not_found.status_code == HTTPStatus.NOT_FOUND
     assert response_login_user_not_found.json() == {
