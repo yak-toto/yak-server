@@ -23,6 +23,8 @@ jobs:
         uses: github/codeql-action/init@v2
         with:
           languages: python
+          paths:
+            - yak_server
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2

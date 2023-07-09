@@ -13,7 +13,7 @@ def encode_bearer_token(sub: str, expiration_time: timedelta, secret_key: str) -
             "exp": datetime.now(tz=timezone.utc) + expiration_time,
         },
         secret_key,
-        algorithm="HS512",
+        algorithm="HS256",
     )
 
 
