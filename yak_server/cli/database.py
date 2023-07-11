@@ -135,8 +135,8 @@ def initialize_database(app: "FastAPI") -> None:
 
 
 def backup_database() -> None:
-    with Path(__file__).parents[1] / "cli/backup_files" as backup_location:
-        backup_location.mkdir(exist_ok=True)
+    backup_location = Path(__file__).parents[1] / "cli/backup_files"
+    backup_location.mkdir(exist_ok=True)
 
     backup_datetime = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%z")
 
