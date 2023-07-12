@@ -1,8 +1,8 @@
-from typing import TYPE_CHECKING, List
-from uuid import UUID
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import strawberry
-from strawberry.types import Info
 
 from yak_server.database.models import (
     BinaryBetModel,
@@ -60,8 +60,10 @@ from .schema import (
 
 if TYPE_CHECKING:
     from datetime import datetime
+    from uuid import UUID
 
     from sqlalchemy.orm import Session
+    from strawberry.types import Info
 
     from yak_server.config_file import Settings
 
@@ -71,16 +73,16 @@ class Query:
     @strawberry.field
     @is_authenticated
     def current_user_result(self, info: Info) -> CurrentUserResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
         user: UserModel = info.context.user
-        settings: "Settings" = info.context.settings
+        settings: Settings = info.context.settings
 
         return User.from_instance(db=db, instance=user, lock_datetime=settings.lock_datetime)
 
     @strawberry.field
     @is_authenticated
     def all_teams_result(self, info: Info) -> AllTeamsResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
 
         return AllTeamsSuccessful(
             teams=[Team.from_instance(instance=team) for team in db.query(TeamModel).all()],
@@ -89,7 +91,7 @@ class Query:
     @strawberry.field
     @is_authenticated
     def team_by_id_result(self, id: UUID, info: Info) -> TeamByIdResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
 
         team_record = db.query(TeamModel).filter_by(id=str(id)).first()
 
@@ -101,7 +103,7 @@ class Query:
     @strawberry.field
     @is_authenticated
     def team_by_code_result(self, code: str, info: Info) -> TeamByCodeResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
 
         team_record = db.query(TeamModel).filter_by(code=code).first()
 
@@ -113,9 +115,9 @@ class Query:
     @strawberry.field
     @is_authenticated
     def score_bet_result(self, id: UUID, info: Info) -> ScoreBetResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
         user: UserModel = info.context.user
-        settings: "Settings" = info.context.settings
+        settings: Settings = info.context.settings
 
         score_bet_record = db.query(ScoreBetModel).filter_by(id=str(id), user_id=user.id).first()
 
@@ -131,9 +133,9 @@ class Query:
     @strawberry.field
     @is_authenticated
     def binary_bet_result(self, id: UUID, info: Info) -> BinaryBetResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
         user: UserModel = info.context.user
-        settings: "Settings" = info.context.settings
+        settings: Settings = info.context.settings
 
         binary_bet_record = db.query(BinaryBetModel).filter_by(id=str(id), user_id=user.id).first()
 
@@ -149,9 +151,9 @@ class Query:
     @strawberry.field
     @is_authenticated
     def all_groups_result(self, info: Info) -> AllGroupsResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
         user: UserModel = info.context.user
-        settings: "Settings" = info.context.settings
+        settings: Settings = info.context.settings
 
         return Groups(
             groups=[
@@ -168,9 +170,9 @@ class Query:
     @strawberry.field
     @is_authenticated
     def group_by_id_result(self, id: UUID, info: Info) -> GroupByIdResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
         user: UserModel = info.context.user
-        settings: "Settings" = info.context.settings
+        settings: Settings = info.context.settings
 
         group_record = db.query(GroupModel).filter_by(id=str(id)).first()
 
@@ -187,9 +189,9 @@ class Query:
     @strawberry.field
     @is_authenticated
     def group_by_code_result(self, code: strawberry.ID, info: Info) -> GroupByCodeResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
         user: UserModel = info.context.user
-        settings: "Settings" = info.context.settings
+        settings: Settings = info.context.settings
 
         group_record = db.query(GroupModel).filter_by(code=code).first()
 
@@ -206,9 +208,9 @@ class Query:
     @strawberry.field
     @is_authenticated
     def all_phases_result(self, info: Info) -> AllPhasesResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
         user: UserModel = info.context.user
-        settings: "Settings" = info.context.settings
+        settings: Settings = info.context.settings
 
         phases = db.query(PhaseModel).order_by(PhaseModel.index)
 
@@ -227,9 +229,9 @@ class Query:
     @strawberry.field
     @is_authenticated
     def phase_by_id_result(self, id: UUID, info: Info) -> PhaseByIdResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
         user: UserModel = info.context.user
-        settings: "Settings" = info.context.settings
+        settings: Settings = info.context.settings
 
         phase_record = db.query(PhaseModel).filter_by(id=str(id)).first()
 
@@ -246,9 +248,9 @@ class Query:
     @strawberry.field
     @is_authenticated
     def phase_by_code_result(self, code: str, info: Info) -> PhaseByCodeResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
         user: UserModel = info.context.user
-        settings: "Settings" = info.context.settings
+        settings: Settings = info.context.settings
 
         phase_record = db.query(PhaseModel).filter_by(code=code).first()
 
@@ -265,7 +267,7 @@ class Query:
     @strawberry.field
     @is_authenticated
     def score_board_result(self, info: Info) -> ScoreBoardResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
 
         users = db.query(UserModel).filter(UserModel.name != "admin")
 
@@ -276,9 +278,9 @@ class Query:
     @strawberry.field
     @is_authenticated
     def group_rank_by_code_result(self, code: str, info: Info) -> GroupRankByCodeResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
         user: UserModel = info.context.user
-        settings: "Settings" = info.context.settings
+        settings: Settings = info.context.settings
 
         group = db.query(GroupModel).filter_by(code=code).first()
 
@@ -291,11 +293,11 @@ class Query:
         )
 
         def send_response(
-            db: "Session",
+            db: Session,
             user_id: UUID,
             group: GroupModel,
-            group_rank: List[GroupPositionModel],
-            lock_datetime: "datetime",
+            group_rank: list[GroupPositionModel],
+            lock_datetime: datetime,
         ) -> GroupRank:
             return GroupRank(
                 group_rank=send_group_position(group_rank),
@@ -321,9 +323,9 @@ class Query:
     @strawberry.field
     @is_authenticated
     def group_rank_by_id_result(self, id: UUID, info: Info) -> GroupRankByIdResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
         user: UserModel = info.context.user
-        settings: "Settings" = info.context.settings
+        settings: Settings = info.context.settings
 
         group = db.query(GroupModel).filter_by(id=str(id)).first()
 
@@ -336,11 +338,11 @@ class Query:
         )
 
         def send_response(
-            db: "Session",
+            db: Session,
             user_id: UUID,
             group: GroupModel,
-            group_rank: List[GroupPositionModel],
-            lock_datetime: "datetime",
+            group_rank: list[GroupPositionModel],
+            lock_datetime: datetime,
         ) -> GroupRank:
             return GroupRank(
                 group_rank=send_group_position(group_rank),

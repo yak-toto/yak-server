@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, Depends
-from pydantic import UUID4
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
 
 from yak_server.config_file import Settings, get_settings
 from yak_server.database.models import (
@@ -33,6 +34,10 @@ from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.groups import GroupOut
 from yak_server.v1.models.phases import PhaseOut
 from yak_server.v1.models.teams import FlagOut
+
+if TYPE_CHECKING:
+    from pydantic import UUID4
+    from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 

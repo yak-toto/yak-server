@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from itertools import chain
 from typing import TYPE_CHECKING
 from uuid import UUID
@@ -20,8 +22,8 @@ if TYPE_CHECKING:
 
 
 def compute_finale_phase_from_group_rank(
-    db: "Session",
-    user: "UserModel",
+    db: Session,
+    user: UserModel,
     rule_config: dict,
 ) -> None:
     first_phase_phase_group = db.query(GroupModel).filter_by(code=rule_config["to_group"]).first()

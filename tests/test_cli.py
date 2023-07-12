@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from pathlib import Path
@@ -28,7 +30,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_create_admin(app: "FastAPI", monkeypatch):
+def test_create_admin(app: FastAPI, monkeypatch):
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=20,
         jwt_secret_key=get_random_string(10),

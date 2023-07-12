@@ -1,25 +1,28 @@
-from datetime import timedelta
+from __future__ import annotations
+
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from . import get_paris_datetime_now
 
 if TYPE_CHECKING:
+    from datetime import timedelta
+
     from yak_server.config_file import Rules
 
 
 def create_mock(
-    jwt_secret_key: Optional[str] = None,
-    jwt_expiration_time: Optional[int] = None,
-    data_folder: Optional[str] = None,
-    lock_datetime_shift: Optional[timedelta] = None,
-    rules: "Optional[Rules]" = None,
-    base_correct_result: Optional[int] = None,
-    multiplying_factor_correct_result: Optional[int] = None,
-    base_correct_score: Optional[int] = None,
-    multiplying_factor_correct_score: Optional[int] = None,
-    team_qualified: Optional[int] = None,
-    first_team_qualified: Optional[int] = None,
+    jwt_secret_key: str | None = None,
+    jwt_expiration_time: int | None = None,
+    data_folder: str | None = None,
+    lock_datetime_shift: timedelta | None = None,
+    rules: Rules | None = None,
+    base_correct_result: int | None = None,
+    multiplying_factor_correct_result: int | None = None,
+    base_correct_score: int | None = None,
+    multiplying_factor_correct_score: int | None = None,
+    team_qualified: int | None = None,
+    first_team_qualified: int | None = None,
 ):
     def mock_function():
         class Mock:

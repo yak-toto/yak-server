@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
@@ -13,7 +15,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_valid_auth(app_with_valid_jwt_config: "FastAPI"):
+def test_valid_auth(app_with_valid_jwt_config: FastAPI):
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(6)
@@ -62,7 +64,7 @@ def test_valid_auth(app_with_valid_jwt_config: "FastAPI"):
     }
 
 
-def test_double_signup(app_with_valid_jwt_config: "FastAPI"):
+def test_double_signup(app_with_valid_jwt_config: FastAPI):
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(6)
@@ -104,7 +106,7 @@ def test_double_signup(app_with_valid_jwt_config: "FastAPI"):
     }
 
 
-def test_login_wrong_name(app_with_valid_jwt_config: "FastAPI"):
+def test_login_wrong_name(app_with_valid_jwt_config: FastAPI):
     client = TestClient(app_with_valid_jwt_config)
 
     response_login = client.post(
@@ -123,7 +125,7 @@ def test_login_wrong_name(app_with_valid_jwt_config: "FastAPI"):
     }
 
 
-def test_login_wrong_password(app_with_valid_jwt_config: "FastAPI"):
+def test_login_wrong_password(app_with_valid_jwt_config: FastAPI):
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(6)
@@ -153,7 +155,7 @@ def test_login_wrong_password(app_with_valid_jwt_config: "FastAPI"):
     }
 
 
-def test_invalid_token(app_with_valid_jwt_config: "FastAPI"):
+def test_invalid_token(app_with_valid_jwt_config: FastAPI):
     client = TestClient(app_with_valid_jwt_config)
 
     response_signup = client.post(
@@ -192,7 +194,7 @@ def test_invalid_token(app_with_valid_jwt_config: "FastAPI"):
     }
 
 
-def test_expired_token(app: "FastAPI", client: "TestClient"):
+def test_expired_token(app: FastAPI, client: TestClient):
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = create_mock(
@@ -230,7 +232,7 @@ def test_expired_token(app: "FastAPI", client: "TestClient"):
     }
 
 
-def test_invalid_signup_body(client: "TestClient"):
+def test_invalid_signup_body(client: TestClient):
     name = get_random_string(10)
     first_name = get_random_string(12)
     last_name = get_random_string(6)
@@ -275,7 +277,7 @@ def test_invalid_signup_body(client: "TestClient"):
     }
 
 
-def test_invalid_login_body(client: "TestClient"):
+def test_invalid_login_body(client: TestClient):
     user_name = get_random_string(6)
     password = get_random_string(10)
 

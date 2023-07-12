@@ -123,6 +123,7 @@ src = ["yak_server", "tests"]
 
 [tool.ruff.isort]
 known-first-party = ["yak_server"]
+required-imports = ["from __future__ import annotations"]
 
 
 [tool.pytest.ini_options]

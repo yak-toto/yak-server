@@ -1,5 +1,8 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
 from yak_server.config_file import Settings, get_settings
 from yak_server.database.models import (
@@ -32,6 +35,9 @@ from yak_server.v1.models.group_rank import GroupPositionOut
 from yak_server.v1.models.groups import GroupOut, GroupWithPhaseIdOut
 from yak_server.v1.models.phases import PhaseOut
 from yak_server.v1.models.score_bets import ScoreBetOut, ScoreBetWithGroupIdOut
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 router = APIRouter(
     prefix="/bets",

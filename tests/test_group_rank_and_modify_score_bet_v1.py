@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from copy import copy
 from datetime import timedelta
 from http import HTTPStatus
@@ -15,7 +17,7 @@ if TYPE_CHECKING:
     from starlette.testclient import TestClient
 
 
-def test_group_rank_and_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
+def test_group_rank_and_modify_score_bet(app: FastAPI, client: TestClient, monkeypatch):
     fake_jwt_secret_key = get_random_string(100)
 
     app.dependency_overrides[get_settings] = create_mock(

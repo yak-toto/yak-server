@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from datetime import timedelta
 from http import HTTPStatus
-from typing import TYPE_CHECKING, List, Optional, Tuple
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 
 from starlette.testclient import TestClient
@@ -18,7 +20,7 @@ if TYPE_CHECKING:
 def patch_score_bets(
     client: TestClient,
     user_name: str,
-    new_scores: List[Tuple[Optional[int], Optional[int]]],
+    new_scores: list[tuple[int | None, int | None]],
 ):
     # signup admin user
     response_signup = client.post(
@@ -54,7 +56,7 @@ def patch_score_bets(
     return token
 
 
-def put_finale_phase(client: TestClient, token: str, is_one_won: Optional[bool]):
+def put_finale_phase(client: TestClient, token: str, is_one_won: bool | None):
     response_post_finale_phase_bets_admin = client.post(
         "/api/v1/rules/492345de-8d4a-45b6-8b94-d219f2b0c3e9",
         headers={"Authorization": f"Bearer {token}"},
@@ -81,7 +83,7 @@ def put_finale_phase(client: TestClient, token: str, is_one_won: Optional[bool])
     assert response_patch_finale_phase.status_code == HTTPStatus.OK
 
 
-def test_compute_points(app: "FastAPI", monkeypatch):
+def test_compute_points(app: FastAPI, monkeypatch):
     client = TestClient(app)
 
     app.dependency_overrides[get_settings] = create_mock(

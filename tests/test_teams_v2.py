@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from operator import itemgetter
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
@@ -14,7 +16,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch):
+def test_teams(app_with_valid_jwt_config: FastAPI, monkeypatch):
     client = TestClient(app_with_valid_jwt_config)
 
     monkeypatch.setattr(

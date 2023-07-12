@@ -1,9 +1,8 @@
-from datetime import datetime
-from typing import List, Optional
-from uuid import UUID
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import strawberry
-from sqlalchemy.orm import Session
 
 from yak_server.database.models import (
     BinaryBetModel,
@@ -17,6 +16,12 @@ from yak_server.database.models import (
 )
 from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.group_position import compute_group_rank
+
+if TYPE_CHECKING:
+    from datetime import datetime
+    from uuid import UUID
+
+    from sqlalchemy.orm import Session
 
 
 @strawberry.type
@@ -34,7 +39,7 @@ class Result:
     points: float
 
     @classmethod
-    def from_instance(cls, instance: UserModel) -> "Result":
+    def from_instance(cls, instance: UserModel) -> Result:
         return cls(
             instance=instance,
             number_match_guess=instance.number_match_guess,
@@ -63,7 +68,7 @@ class UserWithoutSensitiveInfo:
     result: Result
 
     @classmethod
-    def from_instance(cls, instance: UserModel) -> "UserWithoutSensitiveInfo":
+    def from_instance(cls, instance: UserModel) -> UserWithoutSensitiveInfo:
         return cls(
             instance=instance,
             first_name=instance.first_name,
@@ -90,7 +95,7 @@ class User:
     result: Result
 
     @strawberry.field
-    def binary_bets(self) -> List["BinaryBet"]:
+    def binary_bets(self) -> list[BinaryBet]:
         return [
             BinaryBet.from_instance(
                 db=self.db,
@@ -105,7 +110,7 @@ class User:
         ]
 
     @strawberry.field
-    def score_bets(self) -> List["ScoreBet"]:
+    def score_bets(self) -> list[ScoreBet]:
         return [
             ScoreBet.from_instance(db=self.db, instance=score_bet, lock_datetime=self.lock_datetime)
             for score_bet in self.db.query(ScoreBetModel)
@@ -116,7 +121,7 @@ class User:
         ]
 
     @strawberry.field
-    def groups(self) -> List["Group"]:
+    def groups(self) -> list[Group]:
         return [
             Group.from_instance(
                 db=self.db,
@@ -128,7 +133,7 @@ class User:
         ]
 
     @strawberry.field
-    def phases(self) -> List["Phase"]:
+    def phases(self) -> list[Phase]:
         return [
             Phase.from_instance(
                 db=self.db,
@@ -140,7 +145,7 @@ class User:
         ]
 
     @classmethod
-    def from_instance(cls, db: Session, instance: UserModel, lock_datetime: datetime) -> "User":
+    def from_instance(cls, db: Session, instance: UserModel, lock_datetime: datetime) -> User:
         return cls(
             db=db,
             instance=instance,
@@ -164,7 +169,7 @@ class UserWithToken(User):
         instance: UserModel,
         lock_datetime: datetime,
         token: str,
-    ) -> "UserWithToken":
+    ) -> UserWithToken:
         return cls(
             instance=instance,
             db=db,
@@ -193,7 +198,7 @@ class Team:
     flag: Flag
 
     @classmethod
-    def from_instance(cls, instance: TeamModel) -> "Team":
+    def from_instance(cls, instance: TeamModel) -> Team:
         return cls(
             instance=instance,
             id=instance.id,
@@ -205,10 +210,10 @@ class Team:
 
 @strawberry.type
 class TeamWithScore(Team):
-    score: Optional[int]
+    score: int | None
 
     @classmethod
-    def from_instance(cls, instance: TeamModel, score: Optional[int]) -> "TeamWithScore":
+    def from_instance(cls, instance: TeamModel, score: int | None) -> TeamWithScore:
         return cls(
             instance=instance,
             id=instance.id,
@@ -221,10 +226,10 @@ class TeamWithScore(Team):
 
 @strawberry.type
 class TeamWithVictory(Team):
-    won: Optional[bool]
+    won: bool | None
 
     @classmethod
-    def from_instance(cls, instance: TeamModel, won: Optional[bool]) -> "TeamWithVictory":
+    def from_instance(cls, instance: TeamModel, won: bool | None) -> TeamWithVictory:
         return cls(
             instance=instance,
             id=instance.id,
@@ -256,7 +261,7 @@ class GroupPosition:
         return self.won * 3 + self.drawn
 
     @classmethod
-    def from_instance(cls, instance: GroupPositionModel) -> "GroupPosition":
+    def from_instance(cls, instance: GroupPositionModel) -> GroupPosition:
         return cls(
             instance=instance,
             team=Team.from_instance(instance=instance.team),
@@ -269,7 +274,7 @@ class GroupPosition:
         )
 
 
-def send_group_position(group_rank: List[GroupPositionModel]) -> List[GroupPosition]:
+def send_group_position(group_rank: list[GroupPositionModel]) -> list[GroupPosition]:
     return sorted(
         [GroupPosition.from_instance(instance=group_position) for group_position in group_rank],
         key=lambda team: (
@@ -293,7 +298,7 @@ class Group:
     description: str
 
     @strawberry.field
-    def group_rank(self) -> List[GroupPosition]:
+    def group_rank(self) -> list[GroupPosition]:
         group_rank = self.db.query(GroupPositionModel).filter_by(
             user_id=self.user_id,
             group_id=self.id,
@@ -313,7 +318,7 @@ class Group:
         return send_group_position(group_rank)
 
     @strawberry.field
-    def phase(self) -> "Phase":
+    def phase(self) -> Phase:
         return Phase.from_instance(
             db=self.db,
             instance=self.instance.phase,
@@ -322,7 +327,7 @@ class Group:
         )
 
     @strawberry.field
-    def score_bets(self) -> List["ScoreBet"]:
+    def score_bets(self) -> list[ScoreBet]:
         return [
             ScoreBet.from_instance(db=self.db, instance=score_bet, lock_datetime=self.lock_datetime)
             for score_bet in (
@@ -338,7 +343,7 @@ class Group:
         ]
 
     @strawberry.field
-    def binary_bets(self) -> List["BinaryBet"]:
+    def binary_bets(self) -> list[BinaryBet]:
         return [
             BinaryBet.from_instance(
                 db=self.db,
@@ -364,7 +369,7 @@ class Group:
         instance: GroupModel,
         user_id: str,
         lock_datetime: datetime,
-    ) -> "Group":
+    ) -> Group:
         return cls(
             db=db,
             instance=instance,
@@ -388,7 +393,7 @@ class Phase:
     description: str
 
     @strawberry.field
-    def groups(self) -> List[Group]:
+    def groups(self) -> list[Group]:
         return [
             Group.from_instance(
                 db=self.db,
@@ -404,7 +409,7 @@ class Phase:
         ]
 
     @strawberry.field
-    def binary_bets(self) -> List["BinaryBet"]:
+    def binary_bets(self) -> list[BinaryBet]:
         return [
             BinaryBet.from_instance(
                 db=self.db,
@@ -422,7 +427,7 @@ class Phase:
         ]
 
     @strawberry.field
-    def score_bets(self) -> List["ScoreBet"]:
+    def score_bets(self) -> list[ScoreBet]:
         return [
             ScoreBet.from_instance(db=self.db, instance=score_bet, lock_datetime=self.lock_datetime)
             for score_bet in self.db.query(ScoreBetModel)
@@ -442,7 +447,7 @@ class Phase:
         instance: PhaseModel,
         user_id: str,
         lock_datetime: datetime,
-    ) -> "Phase":
+    ) -> Phase:
         return cls(
             db=db,
             instance=instance,
@@ -461,16 +466,16 @@ class ScoreBet:
     id: UUID
     locked: bool
     group: Group
-    team1: Optional[TeamWithScore]
-    team2: Optional[TeamWithScore]
+    team1: TeamWithScore | None
+    team2: TeamWithScore | None
 
     @classmethod
     def from_instance(
         cls,
-        db: "Session",
+        db: Session,
         instance: ScoreBetModel,
         lock_datetime: datetime,
-    ) -> "ScoreBet":
+    ) -> ScoreBet:
         return cls(
             instance=instance,
             id=instance.id,
@@ -503,16 +508,16 @@ class BinaryBet:
     id: UUID
     locked: bool
     group: Group
-    team1: Optional[TeamWithVictory]
-    team2: Optional[TeamWithVictory]
+    team1: TeamWithVictory | None
+    team2: TeamWithVictory | None
 
     @classmethod
     def from_instance(
         cls,
-        db: "Session",
+        db: Session,
         instance: BinaryBetModel,
         lock_datetime: datetime,
-    ) -> "BinaryBet":
+    ) -> BinaryBet:
         bet_results = instance.bet_from_is_one_won()
 
         return cls(

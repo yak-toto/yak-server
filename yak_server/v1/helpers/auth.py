@@ -1,14 +1,10 @@
-import sys
+from __future__ import annotations
 
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
+from typing import TYPE_CHECKING
 
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import ExpiredSignatureError, PyJWTError
-from sqlalchemy.orm import Session
 
 from yak_server.config_file import Settings, get_settings
 from yak_server.database.models import UserModel
@@ -20,6 +16,17 @@ from yak_server.v1.helpers.errors import (
     UnauthorizedAccessToAdminAPI,
     UserNotFound,
 )
+
+if TYPE_CHECKING:
+    import sys
+
+    if sys.version_info >= (3, 9):
+        from typing import Annotated
+    else:
+        from typing_extensions import Annotated
+
+    from sqlalchemy.orm import Session
+
 
 security = HTTPBearer(auto_error=False)
 

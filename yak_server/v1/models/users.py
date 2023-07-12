@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pydantic import UUID4, BaseModel, ConfigDict
 
 

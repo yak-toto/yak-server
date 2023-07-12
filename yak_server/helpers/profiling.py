@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 from uuid import uuid4
@@ -8,12 +10,12 @@ if TYPE_CHECKING:
     from fastapi import FastAPI, Request, Response
 
 
-def set_yappi_profiler(app: "FastAPI") -> None:
+def set_yappi_profiler(app: FastAPI) -> None:
     @app.middleware("http")
     async def profile_process_time(
-        request: "Request",
-        call_next: Callable[["Request"], "Response"],
-    ) -> "Response":
+        request: Request,
+        call_next: Callable[[Request], Response],
+    ) -> Response:
         yappi.set_clock_type("cpu")
         yappi.start()
 

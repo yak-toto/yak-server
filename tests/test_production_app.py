@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from fastapi.testclient import TestClient
@@ -10,7 +12,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_no_schema_introspection_in_production(production_app: "FastAPI") -> None:
+def test_no_schema_introspection_in_production(production_app: FastAPI) -> None:
     client = TestClient(production_app)
 
     production_app.dependency_overrides[get_settings] = create_mock()

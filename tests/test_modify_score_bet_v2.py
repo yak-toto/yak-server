@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import timedelta
 from random import randint
 from typing import TYPE_CHECKING
@@ -15,7 +17,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
+def test_modify_score_bet(app_with_valid_jwt_config: FastAPI, monkeypatch):
     client = TestClient(app_with_valid_jwt_config)
 
     monkeypatch.setattr(

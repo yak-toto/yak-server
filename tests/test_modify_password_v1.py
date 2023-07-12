@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from uuid import uuid4
 
@@ -6,7 +8,7 @@ from starlette.testclient import TestClient
 from .utils import get_random_string
 
 
-def test_modify_password(app_with_valid_jwt_config: "TestClient"):
+def test_modify_password(app_with_valid_jwt_config: TestClient):
     client = TestClient(app_with_valid_jwt_config)
 
     admin_name = "admin"

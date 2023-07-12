@@ -1,5 +1,8 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
 from yak_server.database.models import GroupModel, PhaseModel, UserModel
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang
@@ -15,6 +18,9 @@ from yak_server.v1.models.groups import (
     GroupWithPhaseIdOut,
 )
 from yak_server.v1.models.phases import PhaseOut
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/groups", tags=["groups"])
 

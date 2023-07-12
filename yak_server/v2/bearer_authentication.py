@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from functools import wraps
 from typing import TYPE_CHECKING
 
@@ -20,8 +22,8 @@ def is_authenticated(f):  # noqa: ANN001, ANN201
     @wraps(f)
     def _verify(*args, **kwargs):
         auth_headers = kwargs["info"].context.request.headers.get("Authorization", "").split()
-        db: "Session" = kwargs["info"].context.db
-        settings: "Settings" = kwargs["info"].context.settings
+        db: Session = kwargs["info"].context.db
+        settings: Settings = kwargs["info"].context.settings
 
         if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION or auth_headers[0] != "Bearer":
             return InvalidToken()

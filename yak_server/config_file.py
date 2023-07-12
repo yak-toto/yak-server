@@ -1,10 +1,14 @@
-from datetime import datetime
+from __future__ import annotations
+
 from functools import lru_cache
-from typing import Iterator, List
-from uuid import UUID
+from typing import TYPE_CHECKING, Iterator
 
 from pydantic import BaseModel, RootModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+if TYPE_CHECKING:
+    from datetime import datetime
+    from uuid import UUID
 
 
 class RuleContainer(BaseModel):
@@ -13,7 +17,7 @@ class RuleContainer(BaseModel):
 
 
 class Rules(RootModel):
-    root: List[RuleContainer]
+    root: list[RuleContainer]
 
     def __iter__(self) -> Iterator[RuleContainer]:
         return iter(self.root)

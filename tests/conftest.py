@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from datetime import timedelta
 from typing import TYPE_CHECKING, Generator
@@ -43,7 +45,7 @@ def app(app_session) -> Generator:
 
 
 @pytest.fixture(scope="module")
-def client(app: "FastAPI") -> TestClient:
+def client(app: FastAPI) -> TestClient:
     return TestClient(app)
 
 
@@ -95,7 +97,7 @@ def production_app_with_profiler() -> Generator:
 
 
 @pytest.fixture()
-def app_with_valid_jwt_config(app: "FastAPI"):
+def app_with_valid_jwt_config(app: FastAPI):
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = create_mock(
@@ -110,7 +112,7 @@ def app_with_valid_jwt_config(app: "FastAPI"):
 
 
 @pytest.fixture()
-def app_with_null_jwt_expiration_time(app: "FastAPI"):
+def app_with_null_jwt_expiration_time(app: FastAPI):
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = create_mock(
@@ -125,7 +127,7 @@ def app_with_null_jwt_expiration_time(app: "FastAPI"):
 
 
 @pytest.fixture()
-def app_with_lock_datetime_in_past(app: "FastAPI"):
+def app_with_lock_datetime_in_past(app: FastAPI):
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = create_mock(

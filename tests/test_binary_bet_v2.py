@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import timedelta
 from random import choice
 from typing import TYPE_CHECKING
@@ -15,7 +17,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_binary_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
+def test_binary_bet(app_with_valid_jwt_config: FastAPI, monkeypatch):
     client = TestClient(app_with_valid_jwt_config)
 
     jwt_secret_key = app_with_valid_jwt_config.dependency_overrides[get_settings]().jwt_secret_key

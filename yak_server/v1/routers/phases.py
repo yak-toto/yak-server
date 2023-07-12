@@ -1,8 +1,8 @@
-from typing import List
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, Depends
-from pydantic import UUID4
-from sqlalchemy.orm import Session
 
 from yak_server.database.models import PhaseModel, UserModel
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang
@@ -12,6 +12,10 @@ from yak_server.v1.helpers.errors import PhaseNotFound
 from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.phases import PhaseOut
 
+if TYPE_CHECKING:
+    from pydantic import UUID4
+    from sqlalchemy.orm import Session
+
 router = APIRouter(prefix="/phases", tags=["phases"])
 
 
@@ -20,7 +24,7 @@ def retrieve_all_phases(
     lang: Lang = DEFAULT_LANGUAGE,
     _: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
-) -> GenericOut[List[PhaseOut]]:
+) -> GenericOut[list[PhaseOut]]:
     return GenericOut(
         result=[
             PhaseOut.from_instance(phase, lang)

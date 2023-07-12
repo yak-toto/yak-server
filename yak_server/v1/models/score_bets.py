@@ -1,15 +1,18 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from pydantic import UUID4, BaseModel, PositiveInt
 
 from yak_server.helpers.language import Lang, get_language_description
 
-from .groups import GroupIn, GroupOut
-from .phases import PhaseOut
 from .teams import FlagOut, TeamIn, TeamModifyScoreBetIn, TeamWithScoreOut
 
 if TYPE_CHECKING:
     from yak_server.database.models import ScoreBetModel
+
+    from .groups import GroupIn, GroupOut
+    from .phases import PhaseOut
 
 
 class ScoreBetIn(BaseModel):
@@ -26,7 +29,7 @@ class ScoreBetOut(BaseModel):
     team2: TeamWithScoreOut
 
     @classmethod
-    def from_instance(cls, score_bet: "ScoreBetModel", locked: bool, lang: Lang) -> "ScoreBetOut":
+    def from_instance(cls, score_bet: ScoreBetModel, locked: bool, lang: Lang) -> ScoreBetOut:
         return cls(
             id=score_bet.id,
             locked=locked,
@@ -61,10 +64,10 @@ class ScoreBetWithGroupIdOut(BaseModel):
     @classmethod
     def from_instance(
         cls,
-        score_bet: "ScoreBetModel",
+        score_bet: ScoreBetModel,
         locked: bool,
         lang: Lang,
-    ) -> "ScoreBetWithGroupIdOut":
+    ) -> ScoreBetWithGroupIdOut:
         description_team1 = get_language_description(score_bet.match.team1, lang)
         description_team2 = get_language_description(score_bet.match.team2, lang)
 

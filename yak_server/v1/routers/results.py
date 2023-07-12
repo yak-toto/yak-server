@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 from itertools import chain
-from typing import List
+from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import and_
-from sqlalchemy.orm import Session
 
 from yak_server.config_file import Settings, get_settings
 from yak_server.database.models import (
@@ -21,6 +22,9 @@ from yak_server.v1.helpers.errors import NoResultsForAdminUser
 from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.results import UserResult
 
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
 router = APIRouter(
     tags=["results"],
 )
@@ -30,7 +34,7 @@ router = APIRouter(
 def retrieve_score_board(
     _: UserModel = Depends(get_current_user),
     db: Session = Depends(get_db),
-) -> GenericOut[List[UserResult]]:
+) -> GenericOut[list[UserResult]]:
     return GenericOut(
         result=[
             UserResult.from_instance(user, rank)
@@ -76,7 +80,7 @@ def compute_pointsby_by_admin(
     _: UserModel = Depends(get_admin_user),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
-) -> GenericOut[List[UserResult]]:
+) -> GenericOut[list[UserResult]]:
     users = compute_points(
         db,
         settings.base_correct_result,

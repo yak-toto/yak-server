@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import sys
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 if sys.version_info >= (3, 11):
     from enum import StrEnum
@@ -16,7 +18,7 @@ class Lang(StrEnum):
 
 
 def get_language_description(
-    instance: Union["GroupModel", "PhaseModel", "TeamModel"],
+    instance: GroupModel | PhaseModel | TeamModel,
     lang: Lang,
 ) -> str:
     if lang == Lang.fr:

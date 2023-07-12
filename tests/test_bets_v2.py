@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
@@ -13,7 +15,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_bets(app_with_lock_datetime_in_past: "FastAPI", monkeypatch):
+def test_bets(app_with_lock_datetime_in_past: FastAPI, monkeypatch):
     client = TestClient(app_with_lock_datetime_in_past)
 
     monkeypatch.setattr(

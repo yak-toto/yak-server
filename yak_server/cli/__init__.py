@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import click
 
 from yak_server import create_app

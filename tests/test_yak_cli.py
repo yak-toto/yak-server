@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import subprocess
 from datetime import datetime, timedelta, timezone
@@ -15,7 +17,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_cli(app_with_valid_jwt_config: "FastAPI"):
+def test_cli(app_with_valid_jwt_config: FastAPI):
     # Check database drop
     result = subprocess.run(
         "yak db drop",

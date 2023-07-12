@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import traceback
 from typing import TYPE_CHECKING
@@ -5,7 +7,6 @@ from typing import TYPE_CHECKING
 from fastapi import HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from yak_server.helpers.errors import (
@@ -28,12 +29,6 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 logger = logging.getLogger(__name__)
-
-
-class Error(BaseModel):
-    ok: bool = False
-    error_code: int
-    description: str
 
 
 class InvalidCredentials(HTTPException):
@@ -144,7 +139,7 @@ class RuleNotFound(HTTPException):
         )
 
 
-def set_exception_handler(app: "FastAPI") -> None:
+def set_exception_handler(app: FastAPI) -> None:
     @app.exception_handler(StarletteHTTPException)
     def http_exception_handler(_: Request, http_exception: StarletteHTTPException) -> JSONResponse:
         return JSONResponse(

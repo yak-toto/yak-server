@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, NonNegativeInt
@@ -23,9 +25,9 @@ class GroupPositionOut(BaseModel):
     @classmethod
     def from_instance(
         cls,
-        group_position: "GroupPositionModel",
-        lang: "Lang",
-    ) -> "GroupPositionOut":
+        group_position: GroupPositionModel,
+        lang: Lang,
+    ) -> GroupPositionOut:
         return cls(
             team=TeamOut.from_instance(group_position.team, lang),
             played=group_position.played,

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 from typing import TYPE_CHECKING
 from uuid import uuid4
@@ -114,7 +116,7 @@ class UserModel(Base):
         self.password = ph.hash(password)
 
     @classmethod
-    def authenticate(cls, db: "Session", name: str, password: str) -> "UserModel":
+    def authenticate(cls, db: Session, name: str, password: str) -> UserModel:
         user = db.query(cls).filter_by(name=name).first()
 
         is_correct_username = bool(user)
@@ -171,14 +173,14 @@ class ScoreBetModel(Base):
     def is_2_win(self) -> bool:
         return self.is_valid() and self.score1 < self.score2
 
-    def is_same_results(self, other: "ScoreBetModel") -> bool:
+    def is_same_results(self, other: ScoreBetModel) -> bool:
         return (
             (self.is_1_win() and other.is_1_win())
             or (self.is_draw() and other.is_draw())
             or (self.is_2_win() and other.is_2_win())
         )
 
-    def is_same_scores(self, other: "ScoreBetModel") -> bool:
+    def is_same_scores(self, other: ScoreBetModel) -> bool:
         return (
             self.is_valid()
             and other.is_valid()

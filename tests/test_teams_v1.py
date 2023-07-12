@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from operator import itemgetter
 from typing import TYPE_CHECKING
@@ -13,7 +15,7 @@ if TYPE_CHECKING:
     from starlette.testclient import TestClient
 
 
-def test_teams(app: "FastAPI", client: "TestClient", monkeypatch):
+def test_teams(app: FastAPI, client: TestClient, monkeypatch):
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         create_mock(data_folder="test_teams_v1"),

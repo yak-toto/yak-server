@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import subprocess
@@ -67,7 +69,7 @@ def create_admin() -> None:
     )
 
 
-def initialize_database(app: "FastAPI") -> None:
+def initialize_database(app: FastAPI) -> None:
     db = SessionLocal()
 
     data_folder = get_settings().data_folder
@@ -170,7 +172,7 @@ def backup_database() -> None:
         logger.info(f"Backup done on {backup_datetime}")
 
 
-def delete_database(app: "FastAPI") -> None:
+def delete_database(app: FastAPI) -> None:
     if not app.debug:
         raise RecordDeletionInProduction
 
@@ -188,7 +190,7 @@ def delete_database(app: "FastAPI") -> None:
     db.commit()
 
 
-def drop_database(app: "FastAPI") -> None:
+def drop_database(app: FastAPI) -> None:
     if not app.debug:
         raise TableDropInProduction
 
