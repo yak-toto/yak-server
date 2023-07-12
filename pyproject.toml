@@ -33,7 +33,7 @@ dependencies = [
     "python-dotenv>=0.21.0",
     # "pydantic-settings >=2.0.0", # to be uncommented
     "pydantic-settings @ git+https://github.com/pydantic/pydantic-settings.git@main", # to be removed
-    "strawberry-graphql >=0.168.1,<0.193.0",
+    "strawberry-graphql >=0.168.1,<0.195.0",
 ]
 dynamic = ["version"]
 
