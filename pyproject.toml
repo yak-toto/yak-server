@@ -107,6 +107,8 @@ ignore = [
     "S607",
 
     "FBT001",
+
+    "FA100",
 ]
 fix = true
 src = ["yak_server", "tests"]
