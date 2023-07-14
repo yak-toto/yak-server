@@ -44,13 +44,14 @@ router = APIRouter(
 
 def send_response(
     binary_bet: BinaryBetModel,
+    *,
     locked: bool,
     lang: Lang,
 ) -> GenericOut[BinaryBetResponse]:
     return GenericOut(
         result=BinaryBetResponse(
-            phase=PhaseOut.from_instance(binary_bet.match.group.phase, lang),
-            group=GroupOut.from_instance(binary_bet.match.group, lang),
+            phase=PhaseOut.from_instance(binary_bet.match.group.phase, lang=lang),
+            group=GroupOut.from_instance(binary_bet.match.group, lang=lang),
             binary_bet=BinaryBetOut(
                 id=binary_bet.id,
                 locked=locked,
@@ -118,7 +119,7 @@ def create_binary_bet(
     db.commit()
     db.refresh(binary_bet)
 
-    return send_response(binary_bet, is_locked(user.name, settings.lock_datetime), lang)
+    return send_response(binary_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
 
 
 @router.get("/{bet_id}")
@@ -134,7 +135,7 @@ def retrieve_binary_bet_by_id(
     if not binary_bet:
         raise BetNotFound(bet_id)
 
-    return send_response(binary_bet, is_locked(user.name, settings.lock_datetime), lang)
+    return send_response(binary_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
 
 
 @router.patch("/{bet_id}")
@@ -187,7 +188,7 @@ def modify_binary_bet_by_id(
 
     db.commit()
 
-    return send_response(binary_bet, is_locked(user.name, settings.lock_datetime), lang)
+    return send_response(binary_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
 
 
 @router.delete("/{bet_id}")
@@ -206,7 +207,11 @@ def delete_binary_bet_by_id(
     if not binary_bet:
         raise BetNotFound(bet_id)
 
-    response = send_response(binary_bet, is_locked(user.name, settings.lock_datetime), lang)
+    response = send_response(
+        binary_bet,
+        locked=is_locked(user.name, settings.lock_datetime),
+        lang=lang,
+    )
 
     db.delete(binary_bet)
     db.commit()

@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from fastapi import HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from yak_server.helpers.errors import (
@@ -28,12 +27,6 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 logger = logging.getLogger(__name__)
-
-
-class Error(BaseModel):
-    ok: bool = False
-    error_code: int
-    description: str
 
 
 class InvalidCredentials(HTTPException):

@@ -55,7 +55,7 @@ def backup() -> None:
 
 @click.command()
 def migration() -> None:
-    """Help to run database migration scripts"""
+    """Help to run database migration scripts."""
     setup_migration()
 
 
@@ -75,7 +75,7 @@ db.add_command(migration)
 
 @click.command()
 def init() -> None:
-    """Build the env files you need to start the server"""
+    """Build the env files you need to start the server."""
     init_env()
 
 

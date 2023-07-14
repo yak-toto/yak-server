@@ -30,6 +30,7 @@ class BinaryBetOut(BaseModel):
     def from_instance(
         cls,
         binary_bet: "BinaryBetModel",
+        *,
         locked: bool,
         lang: "Lang",
     ) -> "BinaryBetOut":
@@ -72,6 +73,7 @@ class BinaryBetWithGroupIdOut(BaseModel):
     def from_instance(
         cls,
         binary_bet: "BinaryBetModel",
+        *,
         locked: bool,
         lang: Lang,
     ) -> "BinaryBetWithGroupIdOut":

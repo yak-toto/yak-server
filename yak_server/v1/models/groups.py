@@ -20,7 +20,7 @@ class GroupOut(BaseModel):
     description: str
 
     @classmethod
-    def from_instance(cls, group: "GroupModel", lang: Lang) -> "GroupOut":
+    def from_instance(cls, group: "GroupModel", *, lang: Lang) -> "GroupOut":
         return cls(id=group.id, code=group.code, description=get_language_description(group, lang))
 
 
@@ -35,7 +35,7 @@ class GroupWithPhaseIdOut(BaseModel):
     description: str
 
     @classmethod
-    def from_instance(cls, group: "GroupModel", lang: Lang) -> "GroupWithPhaseIdOut":
+    def from_instance(cls, group: "GroupModel", *, lang: Lang) -> "GroupWithPhaseIdOut":
         return cls(
             id=group.id,
             code=group.code,
