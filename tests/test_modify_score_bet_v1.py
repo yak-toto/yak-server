@@ -2,6 +2,7 @@ from datetime import timedelta
 from http import HTTPStatus
 from random import randint
 from typing import TYPE_CHECKING
+from unittest.mock import ANY
 from uuid import uuid4
 
 from yak_server.cli.database import initialize_database
@@ -101,7 +102,7 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
                 "loc": ["body", "team1"],
                 "msg": "Field required",
                 "input": {"team2": {"score": score2}},
-                "url": "https://errors.pydantic.dev/2.1.2/v/missing",
+                "url": ANY,
             },
         ],
     }
@@ -163,7 +164,7 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
                 "msg": "Input should be greater than or equal to 0",
                 "input": -1,
                 "ctx": {"ge": 0},
-                "url": "https://errors.pydantic.dev/2.1.2/v/greater_than_equal",
+                "url": ANY,
             },
         ],
     }

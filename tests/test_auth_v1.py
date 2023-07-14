@@ -262,14 +262,14 @@ def test_invalid_signup_body(client: "TestClient"):
                     "last_name": last_name,
                     "passwor": password,
                 },
-                "url": "https://errors.pydantic.dev/2.1.2/v/missing",
+                "url": ANY,
             },
             {
                 "type": "extra_forbidden",
                 "loc": ["body", "passwor"],
                 "msg": "Extra inputs are not permitted",
                 "input": password,
-                "url": "https://errors.pydantic.dev/2.1.2/v/extra_forbidden",
+                "url": ANY,
             },
         ],
     }
@@ -297,14 +297,14 @@ def test_invalid_login_body(client: "TestClient"):
                 "loc": ["body", "name"],
                 "msg": "Field required",
                 "input": {"nme": user_name, "password": password},
-                "url": "https://errors.pydantic.dev/2.1.2/v/missing",
+                "url": ANY,
             },
             {
                 "type": "extra_forbidden",
                 "loc": ["body", "nme"],
                 "msg": "Extra inputs are not permitted",
                 "input": user_name,
-                "url": "https://errors.pydantic.dev/2.1.2/v/extra_forbidden",
+                "url": ANY,
             },
         ],
     }
