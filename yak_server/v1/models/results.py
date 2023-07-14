@@ -22,7 +22,7 @@ class UserResult(BaseModel):
     points: float
 
     @classmethod
-    def from_instance(cls, user: "UserModel", rank: PositiveInt) -> "UserResult":
+    def from_instance(cls, user: "UserModel", *, rank: PositiveInt) -> "UserResult":
         return cls(
             rank=rank,
             first_name=user.first_name,

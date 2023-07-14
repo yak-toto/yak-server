@@ -30,8 +30,8 @@ def retrieve_all_groups(
 
     return GenericOut(
         result=AllGroupsResponse(
-            phases=[PhaseOut.from_instance(phase, lang) for phase in phases],
-            groups=[GroupWithPhaseIdOut.from_instance(group, lang) for group in groups],
+            phases=[PhaseOut.from_instance(phase, lang=lang) for phase in phases],
+            groups=[GroupWithPhaseIdOut.from_instance(group, lang=lang) for group in groups],
         ),
     )
 
@@ -50,8 +50,8 @@ def retrieve_group_by_id(
 
     return GenericOut(
         result=GroupResponse(
-            phase=PhaseOut.from_instance(group.phase, lang),
-            group=GroupOut.from_instance(group, lang),
+            phase=PhaseOut.from_instance(group.phase, lang=lang),
+            group=GroupOut.from_instance(group, lang=lang),
         ),
     )
 
@@ -72,7 +72,7 @@ def retrieve_groups_by_phase_code(
 
     return GenericOut(
         result=GroupsByPhaseCodeResponse(
-            phase=PhaseOut.from_instance(phase, lang),
-            groups=[GroupOut.from_instance(group, lang) for group in groups],
+            phase=PhaseOut.from_instance(phase, lang=lang),
+            groups=[GroupOut.from_instance(group, lang=lang) for group in groups],
         ),
     )

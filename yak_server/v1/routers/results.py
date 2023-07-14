@@ -33,7 +33,7 @@ def retrieve_score_board(
 ) -> GenericOut[List[UserResult]]:
     return GenericOut(
         result=[
-            UserResult.from_instance(user, rank)
+            UserResult.from_instance(user, rank=rank)
             for rank, user in enumerate(
                 db.query(UserModel)
                 .order_by(UserModel.points.desc())
@@ -54,7 +54,7 @@ def retrieve_user_results(
 
     user_result = UserResult.from_instance(
         user,
-        [
+        rank=[
             index
             for index, user_result in enumerate(
                 db.query(UserModel)
@@ -88,7 +88,7 @@ def compute_pointsby_by_admin(
     )
 
     return GenericOut(
-        result=[UserResult.from_instance(user, rank) for rank, user in enumerate(users, 1)],
+        result=[UserResult.from_instance(user, rank=rank) for rank, user in enumerate(users, 1)],
     )
 
 

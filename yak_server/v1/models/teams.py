@@ -24,7 +24,7 @@ class TeamOut(BaseModel):
     flag: FlagOut
 
     @classmethod
-    def from_instance(cls, team: "TeamModel", lang: Lang) -> "TeamOut":
+    def from_instance(cls, team: "TeamModel", *, lang: Lang) -> "TeamOut":
         return cls(
             id=team.id,
             code=team.code,

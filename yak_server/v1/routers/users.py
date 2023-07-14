@@ -1,6 +1,5 @@
 import logging
 from datetime import timedelta
-from typing import Union
 
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
@@ -22,7 +21,7 @@ from yak_server.helpers.logging import (
 )
 from yak_server.v1.helpers.auth import get_admin_user, get_current_user
 from yak_server.v1.helpers.database import get_db
-from yak_server.v1.helpers.errors import Error, InvalidCredentials, NameAlreadyExists, UserNotFound
+from yak_server.v1.helpers.errors import InvalidCredentials, NameAlreadyExists, UserNotFound
 from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.users import (
     CurrentUserOut,
@@ -103,7 +102,7 @@ def login(
     login_in: LoginIn,
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
-) -> Union[Error, GenericOut[LoginOut]]:
+) -> GenericOut[LoginOut]:
     user = UserModel.authenticate(db, login_in.name, login_in.password)
 
     if not user:

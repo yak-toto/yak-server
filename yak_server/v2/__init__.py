@@ -14,7 +14,7 @@ from .mutation import Mutation
 from .query import Query
 
 
-def get_schema(debug: bool) -> strawberry.Schema:
+def get_schema(*, debug: bool) -> strawberry.Schema:
     def should_ignore(_: IgnoreContext) -> bool:
         return False
 

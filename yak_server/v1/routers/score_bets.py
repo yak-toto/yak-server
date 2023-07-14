@@ -45,13 +45,14 @@ router = APIRouter(
 
 def send_response(
     score_bet: ScoreBetModel,
+    *,
     locked: bool,
     lang: Lang,
 ) -> GenericOut[ScoreBetResponse]:
     return GenericOut(
         result=ScoreBetResponse(
-            phase=PhaseOut.from_instance(score_bet.match.group.phase, lang),
-            group=GroupOut.from_instance(score_bet.match.group, lang),
+            phase=PhaseOut.from_instance(score_bet.match.group.phase, lang=lang),
+            group=GroupOut.from_instance(score_bet.match.group, lang=lang),
             score_bet=ScoreBetOut(
                 id=score_bet.id,
                 locked=locked,
@@ -132,7 +133,7 @@ def create_score_bet(
     db.commit()
     db.refresh(score_bet)
 
-    return send_response(score_bet, is_locked(user.name, settings.lock_datetime), lang)
+    return send_response(score_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
 
 
 @router.get("/{bet_id}")
@@ -148,7 +149,7 @@ def retrieve_score_bet_by_id(
     if not score_bet:
         raise BetNotFound(bet_id)
 
-    return send_response(score_bet, is_locked(user.name, settings.lock_datetime), lang)
+    return send_response(score_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
 
 
 @router.patch("/{bet_id}")
@@ -174,7 +175,11 @@ def modify_score_bet(
         score_bet.score1 == modify_score_bet_in.team1.score
         and score_bet.score2 == modify_score_bet_in.team2.score
     ):
-        return send_response(score_bet, is_locked(user.name, settings.lock_datetime), lang)
+        return send_response(
+            score_bet,
+            locked=is_locked(user.name, settings.lock_datetime),
+            lang=lang,
+        )
 
     logger.info(
         modify_score_bet_successfully(
@@ -206,7 +211,7 @@ def modify_score_bet(
     score_bet.score2 = modify_score_bet_in.team2.score
     db.commit()
 
-    return send_response(score_bet, is_locked(user.name, settings.lock_datetime), lang)
+    return send_response(score_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
 
 
 @router.delete("/{bet_id}")
@@ -225,7 +230,11 @@ def delete_score_bet_by_id(
     if not score_bet:
         raise BetNotFound(bet_id)
 
-    response = send_response(score_bet, is_locked(user.name, settings.lock_datetime), lang)
+    response = send_response(
+        score_bet,
+        locked=is_locked(user.name, settings.lock_datetime),
+        lang=lang,
+    )
 
     db.execute(
         update(GroupPositionModel)

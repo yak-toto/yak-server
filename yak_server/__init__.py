@@ -58,7 +58,7 @@ def create_app() -> FastAPI:
     from .v2.context import get_context
 
     graphql_app = GraphQLRouter(
-        get_schema(app.debug),
+        get_schema(debug=app.debug),
         graphiql=app.debug,
         context_getter=get_context,
     )

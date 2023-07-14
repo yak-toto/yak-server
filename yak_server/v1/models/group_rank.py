@@ -24,10 +24,11 @@ class GroupPositionOut(BaseModel):
     def from_instance(
         cls,
         group_position: "GroupPositionModel",
+        *,
         lang: "Lang",
     ) -> "GroupPositionOut":
         return cls(
-            team=TeamOut.from_instance(group_position.team, lang),
+            team=TeamOut.from_instance(group_position.team, lang=lang),
             played=group_position.played,
             won=group_position.won,
             drawn=group_position.drawn,

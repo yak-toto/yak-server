@@ -26,7 +26,13 @@ class ScoreBetOut(BaseModel):
     team2: TeamWithScoreOut
 
     @classmethod
-    def from_instance(cls, score_bet: "ScoreBetModel", locked: bool, lang: Lang) -> "ScoreBetOut":
+    def from_instance(
+        cls,
+        score_bet: "ScoreBetModel",
+        *,
+        locked: bool,
+        lang: Lang,
+    ) -> "ScoreBetOut":
         return cls(
             id=score_bet.id,
             locked=locked,
@@ -62,6 +68,7 @@ class ScoreBetWithGroupIdOut(BaseModel):
     def from_instance(
         cls,
         score_bet: "ScoreBetModel",
+        *,
         locked: bool,
         lang: Lang,
     ) -> "ScoreBetWithGroupIdOut":

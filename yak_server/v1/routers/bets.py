@@ -63,21 +63,21 @@ def retrieve_all_bets(
 
     return GenericOut(
         result=AllBetsResponse(
-            phases=[PhaseOut.from_instance(phase, lang) for phase in phases],
-            groups=[GroupWithPhaseIdOut.from_instance(group, lang) for group in groups],
+            phases=[PhaseOut.from_instance(phase, lang=lang) for phase in phases],
+            groups=[GroupWithPhaseIdOut.from_instance(group, lang=lang) for group in groups],
             score_bets=[
                 ScoreBetWithGroupIdOut.from_instance(
                     score_bet,
-                    is_locked(user.name, settings.lock_datetime),
-                    lang,
+                    locked=is_locked(user.name, settings.lock_datetime),
+                    lang=lang,
                 )
                 for score_bet in score_bets
             ],
             binary_bets=[
                 BinaryBetWithGroupIdOut.from_instance(
                     binary_bet,
-                    is_locked(user.name, settings.lock_datetime),
-                    lang,
+                    locked=is_locked(user.name, settings.lock_datetime),
+                    lang=lang,
                 )
                 for binary_bet in binary_bets
             ],
@@ -100,21 +100,21 @@ def retrieve_bets_by_phase_code(
 
     return GenericOut(
         result=BetsByPhaseCodeResponse(
-            phase=PhaseOut.from_instance(phase, lang),
-            groups=[GroupOut.from_instance(group, lang) for group in groups],
+            phase=PhaseOut.from_instance(phase, lang=lang),
+            groups=[GroupOut.from_instance(group, lang=lang) for group in groups],
             score_bets=[
                 ScoreBetWithGroupIdOut.from_instance(
                     score_bet,
-                    is_locked(user.name, settings.lock_datetime),
-                    lang,
+                    locked=is_locked(user.name, settings.lock_datetime),
+                    lang=lang,
                 )
                 for score_bet in score_bets
             ],
             binary_bets=[
                 BinaryBetWithGroupIdOut.from_instance(
                     binary_bet,
-                    is_locked(user.name, settings.lock_datetime),
-                    lang,
+                    locked=is_locked(user.name, settings.lock_datetime),
+                    lang=lang,
                 )
                 for binary_bet in binary_bets
             ],
@@ -137,21 +137,21 @@ def retrieve_bets_by_group_code(
 
     return GenericOut(
         result=BetsByGroupCodeResponse(
-            phase=PhaseOut.from_instance(group.phase, lang),
-            group=GroupOut.from_instance(group, lang),
+            phase=PhaseOut.from_instance(group.phase, lang=lang),
+            group=GroupOut.from_instance(group, lang=lang),
             score_bets=[
                 ScoreBetOut.from_instance(
                     score_bet,
-                    is_locked(user.name, settings.lock_datetime),
-                    lang,
+                    locked=is_locked(user.name, settings.lock_datetime),
+                    lang=lang,
                 )
                 for score_bet in score_bets
             ],
             binary_bets=[
                 BinaryBetOut.from_instance(
                     binary_bet,
-                    is_locked(user.name, settings.lock_datetime),
-                    lang,
+                    locked=is_locked(user.name, settings.lock_datetime),
+                    lang=lang,
                 )
                 for binary_bet in binary_bets
             ],
@@ -175,10 +175,10 @@ def retrieve_group_rank_by_code(
 
     return GenericOut(
         result=GroupRankResponse(
-            phase=PhaseOut.from_instance(group.phase, lang),
-            group=GroupOut.from_instance(group, lang),
+            phase=PhaseOut.from_instance(group.phase, lang=lang),
+            group=GroupOut.from_instance(group, lang=lang),
             group_rank=[
-                GroupPositionOut.from_instance(group_position, lang)
+                GroupPositionOut.from_instance(group_position, lang=lang)
                 for group_position in group_rank
             ],
         ),
