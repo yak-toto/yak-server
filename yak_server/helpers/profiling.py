@@ -26,19 +26,10 @@ def set_yappi_profiler(app: "FastAPI") -> None:
 
         profiling_log_id = uuid4()
 
-        with Path(f"{folder_location}/{profiling_log_id}.log").open(mode="w") as file:
-            stats = yappi.get_func_stats()
-            stats.print_all(
-                out=file,
-                columns={
-                    0: ("name", 180),
-                    1: ("ncall", 8),
-                    2: ("tsub", 8),
-                    3: ("ttot", 8),
-                    4: ("tavg", 8),
-                },
-            )
+        yappi.convert2pstats(yappi.get_func_stats()).dump_stats(
+            f"{folder_location}/{profiling_log_id}.pstats",
+        )
 
-            response.headers["profiling-log-id"] = str(profiling_log_id)
+        response.headers["profiling-log-id"] = str(profiling_log_id)
 
         return response
