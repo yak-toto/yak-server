@@ -2,7 +2,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 from uuid import uuid4
 
-import yappi
+try:
+    import yappi
+except ImportError as import_error:  # pragma: no cover
+    msg = (
+        "Profiling is not available without yappi installed. "
+        "Either install it or disable profiling."
+    )
+    raise ImportError(msg) from import_error
 
 if TYPE_CHECKING:
     from fastapi import FastAPI, Request, Response
