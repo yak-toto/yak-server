@@ -14,6 +14,7 @@ def set_yappi_profiler(app: "FastAPI") -> None:
         request: "Request",
         call_next: Callable[["Request"], "Response"],
     ) -> "Response":
+        yappi.clear_stats()
         yappi.set_clock_type("cpu")
         yappi.start()
 
