@@ -26,7 +26,6 @@ dependencies = [
     "PyJWT >=2.6.0,<3.0.0",
     "PyMySQL[rsa] >=1.0.2,<2.0.0",
     "StrEnum >=0.4.10,<0.5.0; python_version < '3.11'",
-    "alembic >=1.10.3,<2.0.0",
     "argon2-cffi >=21.3.0,<22.0.0",
     "fastapi >=0.95.1,<0.101.0",
     "click >=8.0.0,<9.0.0",
@@ -45,6 +44,7 @@ Repository = "https://github.com/yak-toto/yak-server"
 [project.optional-dependencies]
 all = [
     "yappi >=1.4.0,<2.0.0",
+    "alembic >=1.10.3,<2.0.0",
 ]
 
 
@@ -71,7 +71,7 @@ branch = "true"
 
 [tool.coverage.report]
 omit = ["./yak_server/database/migrations/*"]
-exclude_lines = ["if TYPE_CHECKING:", "def handle_exception.*"]
+exclude_lines = ["if TYPE_CHECKING:", "def handle_exception.*", "pragma: no cover"]
 
 
 [tool.ruff]

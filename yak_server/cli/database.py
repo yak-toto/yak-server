@@ -22,6 +22,12 @@ from yak_server.database.models import (
 from yak_server.v1.models.users import SignupIn
 from yak_server.v1.routers.users import signup_user
 
+try:
+    import alembic
+except ImportError:  # pragma: no cover
+    alembic = None
+
+
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
@@ -208,3 +214,7 @@ def setup_migration() -> None:
         "Follow this link for more informations: "
         "https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file",
     )
+
+    if alembic is None:  # pragma: no cover
+        print()
+        print("To enable migration using alembic, please run: pip install alembic")
