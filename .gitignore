@@ -189,3 +189,5 @@ yak_server/cli/backup_files
 
 .activate.sh
 .deactivate.sh
+
+profiling/

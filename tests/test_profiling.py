@@ -27,7 +27,7 @@ def test_debug_profiling(debug_app_with_profiler):
 
     file_name = response.headers["profiling-log-id"]
 
-    profiling_file = Path(__file__).parents[1] / f"profiling/{file_name}.log"
+    profiling_file = Path(__file__).parents[1] / f"profiling/{file_name}.pstats"
     assert profiling_file.exists()
 
 
