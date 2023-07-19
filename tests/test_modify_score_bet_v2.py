@@ -1,5 +1,5 @@
 from datetime import timedelta
-from random import randint
+from secrets import SystemRandom
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
@@ -169,7 +169,7 @@ def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
     }
 
     # Error case : check NewScoreNegative error is send back if one of score1 is negative
-    score1 = randint(-8, -1)
+    score1 = -SystemRandom().randrange(2, 9)
     score2 = 0
 
     response_modify_bet_new_score1_negative = client.post(

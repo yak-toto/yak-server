@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from random import randint
+from secrets import randbelow
 from uuid import uuid4
 
 import pexpect
@@ -16,7 +16,7 @@ def test_yak_env_init():
 
     user_name = get_random_string(15)
     password = get_random_string(250)
-    port = randint(0, 80000)
+    port = randbelow(80000)
     database = get_random_string(15)
 
     child = pexpect.spawn("yak env init", cwd=folder_path)

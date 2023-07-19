@@ -1,6 +1,6 @@
 from datetime import timedelta
 from http import HTTPStatus
-from random import randint
+from secrets import SystemRandom
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
@@ -54,7 +54,7 @@ def test_create_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
 
     team1 = response_all_teams.json()["result"]["teams"][0]
     team2 = response_all_teams.json()["result"]["teams"][1]
-    score1 = randint(1, 5)
+    score1 = SystemRandom().randrange(1, 5)
 
     # Fetch all groups
     response_all_groups = client.get("/api/v1/groups", headers={"Authorization": f"Bearer {token}"})

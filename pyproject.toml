@@ -111,7 +111,7 @@ src = ["yak_server", "tests"]
 "yak_server/cli/*" = ["T20"]
 "yak_server/database/migrations/*" = ["ANN001", "ANN201"]
 "yak_server/helpers/errors.py" = ["S105"]
-"tests/*" = ["S101", "S105", "S311", "ANN001", "ANN201"]
+"tests/*" = ["S101", "S105", "ANN001", "ANN201"]
 "setup.py" = ["INP001"]
 
 

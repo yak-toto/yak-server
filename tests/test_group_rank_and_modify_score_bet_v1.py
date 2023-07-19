@@ -1,7 +1,7 @@
 from copy import copy
 from datetime import timedelta
 from http import HTTPStatus
-from random import randint, shuffle
+from secrets import SystemRandom, randbelow
 from typing import TYPE_CHECKING
 
 from yak_server.cli.database import initialize_database
@@ -56,11 +56,11 @@ def test_group_rank_and_modify_score_bet(app: "FastAPI", client: "TestClient", m
 
     # Perform PATCH bets
     bet_ids = [score_bet["id"] for score_bet in response_all_bets.json()["result"]["score_bets"]]
-    shuffle(bet_ids)
+    SystemRandom().shuffle(bet_ids)
 
     for bet_id in bet_ids:
-        score1 = randint(0, 5)
-        score2 = randint(0, 5)
+        score1 = randbelow(5)
+        score2 = randbelow(5)
 
         response = client.patch(
             f"/api/v1/score_bets/{bet_id}",

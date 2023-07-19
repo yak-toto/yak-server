@@ -1,6 +1,6 @@
 from datetime import timedelta
 from http import HTTPStatus
-from random import randint
+from secrets import SystemRandom, randbelow
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
@@ -170,9 +170,11 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     }
 
     # Patch second bet
+    secret_rng = SystemRandom()
+
     response_patch_second_bet = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[1]}",
-        json={"team1": {"score": randint(0, 5)}, "team2": {"score": randint(1, 3)}},
+        json={"team1": {"score": randbelow(5)}, "team2": {"score": secret_rng.randrange(1, 3)}},
         headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
@@ -181,7 +183,7 @@ def test_modify_score_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     # Patch third bet
     response_patch_third_bet = client.patch(
         f"/api/v1/score_bets/{score_bet_ids[2]}",
-        json={"team1": {"score": randint(0, 3)}, "team2": {"score": randint(2, 3)}},
+        json={"team1": {"score": randbelow(3)}, "team2": {"score": secret_rng.randrange(2, 3)}},
         headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
