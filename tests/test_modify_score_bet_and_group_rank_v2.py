@@ -1,4 +1,4 @@
-from random import randint
+from secrets import SystemRandom, randbelow
 from typing import TYPE_CHECKING
 
 from starlette.testclient import TestClient
@@ -107,8 +107,8 @@ def test_modify_score_bet_and_group_rank(app_with_valid_jwt_config: "FastAPI", m
         }
     """
 
-    score1 = randint(1, 7)
-    score2 = randint(0, score1 - 1)
+    score1 = SystemRandom().randrange(1, 7)
+    score2 = randbelow(score1)
 
     # Apply twice the same update to check first, updates are ok and then second, that nothing
     # change

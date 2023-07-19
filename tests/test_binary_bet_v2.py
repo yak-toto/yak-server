@@ -1,5 +1,5 @@
 from datetime import timedelta
-from random import choice
+from secrets import choice
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
