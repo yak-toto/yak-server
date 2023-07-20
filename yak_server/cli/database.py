@@ -149,13 +149,11 @@ def backup_database() -> None:
     file_name = f"{backup_location}/yak_toto_backup_{backup_datetime}.sql"
 
     result = subprocess.run(
-        (
-            f"mysqldump {mysql_settings.db} "
-            f"-u {mysql_settings.user_name} "
-            f"-P {mysql_settings.port} "
-            "--protocol=tcp "
-            f"--password='{mysql_settings.password}'"
-        ),
+        f"mysqldump {mysql_settings.db} "
+        f"-u {mysql_settings.user_name} "
+        f"-P {mysql_settings.port} "
+        "--protocol=tcp "
+        f"--password='{mysql_settings.password}'",
         shell=True,
         capture_output=True,
         encoding="utf-8",
@@ -205,8 +203,7 @@ def setup_migration() -> None:
     alembic_ini_path = Path(__file__).parents[2] / "alembic.ini"
 
     print(
-        "To be able to run the database migration "
-        "scripts, you need to run the following command:",
+        "To be able to run the database migration scripts, you need to run the following command:",
     )
     print(f"export ALEMBIC_CONFIG='{alembic_ini_path.resolve()}'")
     print()

@@ -160,9 +160,11 @@ def set_exception_handler(app: "FastAPI") -> None:
             content={
                 "ok": False,
                 "error_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "description": f"{type(exception).__name__}: {exception!s}"
-                if app.debug
-                else "Unexpected error",
+                "description": (
+                    f"{type(exception).__name__}: {exception!s}"
+                    if app.debug
+                    else "Unexpected error"
+                ),
             },
         )
 

@@ -88,8 +88,9 @@ def test_teams(app: "FastAPI", client: "TestClient", monkeypatch):
     assert response_one_team_with_invalid_id.json() == {
         "ok": False,
         "error_code": HTTPStatus.BAD_REQUEST,
-        "description": f"Invalid team id: {invalid_team_id}. "
-        "Retry with a uuid or ISO 3166-1 alpha-2 code",
+        "description": (
+            f"Invalid team id: {invalid_team_id}. Retry with a uuid or ISO 3166-1 alpha-2 code"
+        ),
     }
 
     # Try to fetch a team using a non existing team id
