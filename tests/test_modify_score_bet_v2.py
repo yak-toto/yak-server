@@ -137,14 +137,12 @@ def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
         },
     )
 
-    assert response_modify_bet.json()["data"]["modifyScoreBetResult"]["__typename"] == "ScoreBet"
-    assert response_modify_bet.json()["data"]["modifyScoreBetResult"]["team1"]["score"] == score1
-    assert response_modify_bet.json()["data"]["modifyScoreBetResult"]["team2"]["score"] == score2
-    assert response_modify_bet.json()["data"]["modifyScoreBetResult"]["team1"]["flag"]["url"] == (
-        "/api/v1/teams/"
-        f"{response_modify_bet.json()['data']['modifyScoreBetResult']['team1']['id']}/flag"
-    )
-    assert response_modify_bet.json()["data"]["modifyScoreBetResult"]["team2"]["score"] == score2
+    new_bet = response_modify_bet.json()["data"]["modifyScoreBetResult"]
+
+    assert new_bet["__typename"] == "ScoreBet"
+    assert new_bet["team1"]["score"] == score1
+    assert new_bet["team2"]["score"] == score2
+    assert new_bet["team1"]["flag"]["url"] == f"/api/v1/teams/{new_bet['team1']['id']}/flag"
 
     # Error case : check NewScoreNegative error is send back if one of score is negative
     score1 = 5

@@ -55,24 +55,28 @@ def send_response(
             binary_bet=BinaryBetOut(
                 id=binary_bet.id,
                 locked=locked,
-                team1=TeamWithWonOut(
-                    id=binary_bet.match.team1.id,
-                    code=binary_bet.match.team1.code,
-                    description=get_language_description(binary_bet.match.team1, lang),
-                    flag=FlagOut(url=binary_bet.match.team1.flag_url),
-                    won=binary_bet.bet_from_is_one_won()[0],
-                )
-                if binary_bet.match.team1
-                else None,
-                team2=TeamWithWonOut(
-                    id=binary_bet.match.team2.id,
-                    code=binary_bet.match.team2.code,
-                    description=get_language_description(binary_bet.match.team2, lang),
-                    flag=FlagOut(url=binary_bet.match.team2.flag_url),
-                    won=binary_bet.bet_from_is_one_won()[1],
-                )
-                if binary_bet.match.team2
-                else None,
+                team1=(
+                    TeamWithWonOut(
+                        id=binary_bet.match.team1.id,
+                        code=binary_bet.match.team1.code,
+                        description=get_language_description(binary_bet.match.team1, lang),
+                        flag=FlagOut(url=binary_bet.match.team1.flag_url),
+                        won=binary_bet.bet_from_is_one_won()[0],
+                    )
+                    if binary_bet.match.team1
+                    else None
+                ),
+                team2=(
+                    TeamWithWonOut(
+                        id=binary_bet.match.team2.id,
+                        code=binary_bet.match.team2.code,
+                        description=get_language_description(binary_bet.match.team2, lang),
+                        flag=FlagOut(url=binary_bet.match.team2.flag_url),
+                        won=binary_bet.bet_from_is_one_won()[1],
+                    )
+                    if binary_bet.match.team2
+                    else None
+                ),
             ),
         ),
     )

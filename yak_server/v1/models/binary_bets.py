@@ -37,24 +37,28 @@ class BinaryBetOut(BaseModel):
         return cls(
             id=binary_bet.id,
             locked=locked,
-            team1=TeamWithWonOut(
-                id=binary_bet.match.team1.id,
-                code=binary_bet.match.team1.code,
-                description=get_language_description(binary_bet.match.team1, lang),
-                won=binary_bet.bet_from_is_one_won()[0],
-                flag=FlagOut(url=binary_bet.match.team1.flag_url),
-            )
-            if binary_bet.match.team1
-            else None,
-            team2=TeamWithWonOut(
-                id=binary_bet.match.team2.id,
-                code=binary_bet.match.team2.code,
-                description=get_language_description(binary_bet.match.team2, lang),
-                won=binary_bet.bet_from_is_one_won()[1],
-                flag=FlagOut(url=binary_bet.match.team2.flag_url),
-            )
-            if binary_bet.match.team2
-            else None,
+            team1=(
+                TeamWithWonOut(
+                    id=binary_bet.match.team1.id,
+                    code=binary_bet.match.team1.code,
+                    description=get_language_description(binary_bet.match.team1, lang),
+                    won=binary_bet.bet_from_is_one_won()[0],
+                    flag=FlagOut(url=binary_bet.match.team1.flag_url),
+                )
+                if binary_bet.match.team1
+                else None
+            ),
+            team2=(
+                TeamWithWonOut(
+                    id=binary_bet.match.team2.id,
+                    code=binary_bet.match.team2.code,
+                    description=get_language_description(binary_bet.match.team2, lang),
+                    won=binary_bet.bet_from_is_one_won()[1],
+                    flag=FlagOut(url=binary_bet.match.team2.flag_url),
+                )
+                if binary_bet.match.team2
+                else None
+            ),
         )
 
 
@@ -81,24 +85,28 @@ class BinaryBetWithGroupIdOut(BaseModel):
             id=binary_bet.id,
             locked=locked,
             group=Group(id=binary_bet.match.group_id),
-            team1=TeamWithWonOut(
-                id=binary_bet.match.team1.id,
-                code=binary_bet.match.team1.code,
-                description=get_language_description(binary_bet.match.team1, lang),
-                won=binary_bet.bet_from_is_one_won()[0],
-                flag=FlagOut(url=binary_bet.match.team1.flag_url),
-            )
-            if binary_bet.match.team1
-            else None,
-            team2=TeamWithWonOut(
-                id=binary_bet.match.team2.id,
-                code=binary_bet.match.team2.code,
-                description=get_language_description(binary_bet.match.team2, lang),
-                won=binary_bet.bet_from_is_one_won()[1],
-                flag=FlagOut(url=binary_bet.match.team2.flag_url),
-            )
-            if binary_bet.match.team2
-            else None,
+            team1=(
+                TeamWithWonOut(
+                    id=binary_bet.match.team1.id,
+                    code=binary_bet.match.team1.code,
+                    description=get_language_description(binary_bet.match.team1, lang),
+                    won=binary_bet.bet_from_is_one_won()[0],
+                    flag=FlagOut(url=binary_bet.match.team1.flag_url),
+                )
+                if binary_bet.match.team1
+                else None
+            ),
+            team2=(
+                TeamWithWonOut(
+                    id=binary_bet.match.team2.id,
+                    code=binary_bet.match.team2.code,
+                    description=get_language_description(binary_bet.match.team2, lang),
+                    won=binary_bet.bet_from_is_one_won()[1],
+                    flag=FlagOut(url=binary_bet.match.team2.flag_url),
+                )
+                if binary_bet.match.team2
+                else None
+            ),
         )
 
 

@@ -481,18 +481,22 @@ class ScoreBet:
                 user_id=instance.user_id,
                 lock_datetime=lock_datetime,
             ),
-            team1=TeamWithScore.from_instance(
-                instance=instance.match.team1,
-                score=instance.score1,
-            )
-            if instance.match.team1
-            else None,
-            team2=TeamWithScore.from_instance(
-                instance=instance.match.team2,
-                score=instance.score2,
-            )
-            if instance.match.team2
-            else None,
+            team1=(
+                TeamWithScore.from_instance(
+                    instance=instance.match.team1,
+                    score=instance.score1,
+                )
+                if instance.match.team1
+                else None
+            ),
+            team2=(
+                TeamWithScore.from_instance(
+                    instance=instance.match.team2,
+                    score=instance.score2,
+                )
+                if instance.match.team2
+                else None
+            ),
         )
 
 
@@ -525,16 +529,20 @@ class BinaryBet:
                 user_id=instance.user_id,
                 lock_datetime=lock_datetime,
             ),
-            team1=TeamWithVictory.from_instance(
-                instance=instance.match.team1,
-                won=bet_results[0],
-            )
-            if instance.match.team1
-            else None,
-            team2=TeamWithVictory.from_instance(
-                instance=instance.match.team2,
-                won=bet_results[1],
-            )
-            if instance.match.team2
-            else None,
+            team1=(
+                TeamWithVictory.from_instance(
+                    instance=instance.match.team1,
+                    won=bet_results[0],
+                )
+                if instance.match.team1
+                else None
+            ),
+            team2=(
+                TeamWithVictory.from_instance(
+                    instance=instance.match.team2,
+                    won=bet_results[1],
+                )
+                if instance.match.team2
+                else None
+            ),
         )
