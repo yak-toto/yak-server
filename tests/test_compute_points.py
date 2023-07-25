@@ -14,6 +14,31 @@ from .utils.mock import create_mock
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
+QUERY_SCORE_BOARD = """
+    query {
+        scoreBoardResult {
+            __typename
+            ... on ScoreBoard {
+                users {
+                    fullName
+                    result {
+                        numberMatchGuess
+                        numberScoreGuess
+                        numberQualifiedTeamsGuess
+                        points
+                    }
+                }
+            }
+            ... on InvalidToken {
+                message
+            }
+            ... on ExpiredToken {
+                message
+            }
+        }
+    }
+"""
+
 
 def patch_score_bets(
     client: TestClient,
@@ -21,12 +46,15 @@ def patch_score_bets(
     new_scores: List[Tuple[Optional[int], Optional[int]]],
 ):
     # signup admin user
+    first_name = get_random_string(6)
+    last_name = get_random_string(10)
+
     response_signup = client.post(
         "/api/v1/users/signup",
         json={
             "name": user_name,
-            "first_name": get_random_string(6),
-            "last_name": get_random_string(10),
+            "first_name": first_name,
+            "last_name": last_name,
             "password": get_random_string(12),
         },
     )
@@ -51,7 +79,7 @@ def patch_score_bets(
 
         assert response_patch_score_bet.status_code == HTTPStatus.OK
 
-    return token
+    return first_name, last_name, token
 
 
 def put_finale_phase(client: TestClient, token: str, is_one_won: Optional[bool]):
@@ -72,9 +100,7 @@ def put_finale_phase(client: TestClient, token: str, is_one_won: Optional[bool])
 
     response_patch_finale_phase = client.patch(
         f"/api/v1/binary_bets/{response_get_finale_phase.json()['result']['binary_bets'][0]['id']}",
-        json={
-            "is_one_won": is_one_won,
-        },
+        json={"is_one_won": is_one_won},
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -120,10 +146,22 @@ def test_compute_points(app: "FastAPI", monkeypatch):
     initialize_database(app)
 
     # Create 4 accounts and patch bets
-    admin_token = patch_score_bets(client, "admin", [(1, 2), (5, 1), (5, 5)])
-    user_token = patch_score_bets(client, "user", [(2, 2), (5, 1), (5, 5)])
-    user2_token = patch_score_bets(client, "user2", [(2, 0), (2, 0), (1, 4)])
-    user3_token = patch_score_bets(client, "user3", [(0, 2), (2, 0), (1, 1)])
+    _, _, admin_token = patch_score_bets(client, "admin", [(1, 2), (5, 1), (5, 5)])
+    user_first_name, user_last_name, user_token = patch_score_bets(
+        client,
+        "user",
+        [(2, 2), (5, 1), (5, 5)],
+    )
+    user2_first_name, user2_last_name, user2_token = patch_score_bets(
+        client,
+        "user2",
+        [(2, 0), (2, 0), (1, 4)],
+    )
+    user3_first_name, user3_last_name, user3_token = patch_score_bets(
+        client,
+        "user3",
+        [(0, 2), (2, 0), (1, 1)],
+    )
 
     # Success case : compute_points call
     response_compute_points = client.post(
@@ -155,9 +193,9 @@ def test_compute_points(app: "FastAPI", monkeypatch):
     assert score_board_response.json()["result"] == [
         {
             "rank": 1,
-            "first_name": ANY,
-            "full_name": ANY,
-            "last_name": ANY,
+            "first_name": user3_first_name,
+            "full_name": f"{user3_first_name} {user3_last_name}",
+            "last_name": user3_last_name,
             "number_final_guess": 0,
             "number_first_qualified_guess": 1,
             "number_match_guess": 3,
@@ -170,9 +208,9 @@ def test_compute_points(app: "FastAPI", monkeypatch):
         },
         {
             "rank": 2,
-            "first_name": ANY,
-            "full_name": ANY,
-            "last_name": ANY,
+            "first_name": user_first_name,
+            "full_name": f"{user_first_name} {user_last_name}",
+            "last_name": user_last_name,
             "number_final_guess": 0,
             "number_first_qualified_guess": 0,
             "number_match_guess": 2,
@@ -185,9 +223,9 @@ def test_compute_points(app: "FastAPI", monkeypatch):
         },
         {
             "rank": 3,
-            "first_name": ANY,
-            "full_name": ANY,
-            "last_name": ANY,
+            "first_name": user2_first_name,
+            "full_name": f"{user2_first_name} {user2_last_name}",
+            "last_name": user2_last_name,
             "number_final_guess": 0,
             "number_first_qualified_guess": 0,
             "number_match_guess": 1,
@@ -223,9 +261,9 @@ def test_compute_points(app: "FastAPI", monkeypatch):
     assert score_board_response_after_finale_phase.json()["result"] == [
         {
             "rank": 1,
-            "first_name": ANY,
-            "full_name": ANY,
-            "last_name": ANY,
+            "first_name": user_first_name,
+            "full_name": f"{user_first_name} {user_last_name}",
+            "last_name": user_last_name,
             "number_final_guess": 2,
             "number_first_qualified_guess": 0,
             "number_match_guess": 2,
@@ -238,9 +276,9 @@ def test_compute_points(app: "FastAPI", monkeypatch):
         },
         {
             "rank": 2,
-            "first_name": ANY,
-            "full_name": ANY,
-            "last_name": ANY,
+            "first_name": user3_first_name,
+            "full_name": f"{user3_first_name} {user3_last_name}",
+            "last_name": user3_last_name,
             "number_final_guess": 2,
             "number_first_qualified_guess": 1,
             "number_match_guess": 3,
@@ -253,9 +291,9 @@ def test_compute_points(app: "FastAPI", monkeypatch):
         },
         {
             "rank": 3,
-            "first_name": ANY,
-            "full_name": ANY,
-            "last_name": ANY,
+            "first_name": user2_first_name,
+            "full_name": f"{user2_first_name} {user2_last_name}",
+            "last_name": user2_last_name,
             "number_final_guess": 1,
             "number_first_qualified_guess": 0,
             "number_match_guess": 1,
@@ -267,6 +305,50 @@ def test_compute_points(app: "FastAPI", monkeypatch):
             "points": 131.0,
         },
     ]
+
+    # Check score board
+    response_score_board_v2 = client.post(
+        "/api/v2",
+        json={"query": QUERY_SCORE_BOARD},
+        headers={"Authorization": f"Bearer {user_token}"},
+    )
+
+    assert response_score_board_v2.json() == {
+        "data": {
+            "scoreBoardResult": {
+                "__typename": "ScoreBoard",
+                "users": [
+                    {
+                        "fullName": f"{user_first_name} {user_last_name}",
+                        "result": {
+                            "numberMatchGuess": 2,
+                            "numberQualifiedTeamsGuess": 2,
+                            "numberScoreGuess": 2,
+                            "points": 483.0,
+                        },
+                    },
+                    {
+                        "fullName": f"{user3_first_name} {user3_last_name}",
+                        "result": {
+                            "numberMatchGuess": 3,
+                            "numberQualifiedTeamsGuess": 2,
+                            "numberScoreGuess": 0,
+                            "points": 286.0,
+                        },
+                    },
+                    {
+                        "fullName": f"{user2_first_name} {user2_last_name}",
+                        "result": {
+                            "numberMatchGuess": 1,
+                            "numberQualifiedTeamsGuess": 1,
+                            "numberScoreGuess": 0,
+                            "points": 131.0,
+                        },
+                    },
+                ],
+            },
+        },
+    }
 
     # Success case : check user GET /results call
     get_results_response = client.get(

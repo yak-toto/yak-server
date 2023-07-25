@@ -267,7 +267,9 @@ class Query:
     def score_board_result(self, info: Info) -> ScoreBoardResult:
         db: Session = info.context.db
 
-        users = db.query(UserModel).filter(UserModel.name != "admin")
+        users = (
+            db.query(UserModel).filter(UserModel.name != "admin").order_by(UserModel.points.desc())
+        )
 
         return ScoreBoard(
             users=[UserWithoutSensitiveInfo.from_instance(instance=user) for user in users],
