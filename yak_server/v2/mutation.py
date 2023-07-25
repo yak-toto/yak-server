@@ -70,8 +70,8 @@ class Mutation:
         last_name: str,
         info: Info,
     ) -> SignupResult:
-        db: "Session" = info.context.db
-        settings: "Settings" = info.context.settings
+        db: Session = info.context.db
+        settings: Settings = info.context.settings
 
         # Check existing user in db
         existing_user = db.query(UserModel).filter_by(name=user_name).first()
@@ -125,8 +125,8 @@ class Mutation:
 
     @strawberry.mutation
     def login_result(self, user_name: str, password: str, info: Info) -> LoginResult:
-        db: "Session" = info.context.db
-        settings: "Settings" = info.context.settings
+        db: Session = info.context.db
+        settings: Settings = info.context.settings
 
         user = UserModel.authenticate(db=db, name=user_name, password=password)
 
@@ -156,9 +156,9 @@ class Mutation:
         is_one_won: Optional[bool],
         info: Info,
     ) -> ModifyBinaryBetResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
         user: UserModel = info.context.user
-        settings: "Settings" = info.context.settings
+        settings: Settings = info.context.settings
 
         bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=str(id)).first()
 
@@ -184,9 +184,9 @@ class Mutation:
         score2: Optional[int],
         info: Info,
     ) -> ModifyScoreBetResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
         user: UserModel = info.context.user
-        settings: "Settings" = info.context.settings
+        settings: Settings = info.context.settings
 
         bet = db.query(ScoreBetModel).filter_by(user_id=user.id, id=str(id)).first()
 
@@ -238,7 +238,7 @@ class Mutation:
         password: str,
         info: Info,
     ) -> ModifyUserResult:
-        db: "Session" = info.context.db
+        db: Session = info.context.db
 
         user = db.query(UserModel).filter_by(id=str(id)).first()
 

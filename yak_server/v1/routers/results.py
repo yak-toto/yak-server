@@ -54,7 +54,7 @@ def retrieve_user_results(
 
     user_result = UserResult.from_instance(
         user,
-        rank=[
+        rank=next(
             index
             for index, user_result in enumerate(
                 db.query(UserModel)
@@ -65,7 +65,7 @@ def retrieve_user_results(
                 1,
             )
             if user_result.id == user.id
-        ][0],
+        ),
     )
 
     return GenericOut(result=user_result)

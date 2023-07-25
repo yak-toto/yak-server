@@ -157,11 +157,11 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch):
         key=itemgetter("code"),
     ) == sorted(expected_teams, key=itemgetter("code"))
 
-    team_id = [
+    team_id = next(
         team["id"]
         for team in response_all_teams.json()["data"]["allTeamsResult"]["teams"]
         if team["description"] == "Norvège"
-    ][0]
+    )
 
     response_all_teams_invalid_token = client.post(
         "/api/v2",
