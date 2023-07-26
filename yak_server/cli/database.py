@@ -141,23 +141,22 @@ def initialize_database(app: "FastAPI") -> None:
 
 
 def backup_database() -> None:
-    backup_location = Path(__file__).parents[1] / "cli/backup_files"
-    backup_location.mkdir(exist_ok=True)
-
-    backup_datetime = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%z")
-
-    file_name = f"{backup_location}/yak_toto_backup_{backup_datetime}.sql"
-
     result = subprocess.run(
-        f"mysqldump {mysql_settings.db} "
-        f"-u {mysql_settings.user_name} "
-        f"-P {mysql_settings.port} "
-        "--protocol=tcp "
-        f"--password='{mysql_settings.password}'",
-        shell=True,
+        [
+            "mysqldump",
+            mysql_settings.db,
+            "-u",
+            mysql_settings.user_name,
+            "-P",
+            str(mysql_settings.port),
+            "--protocol=tcp",
+            f"--password={mysql_settings.password}",
+        ],
         capture_output=True,
         encoding="utf-8",
     )
+
+    backup_datetime = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%z")
 
     if result.returncode:
         error_message = (
@@ -168,6 +167,11 @@ def backup_database() -> None:
         logger.error(error_message)
 
         raise BackupError(error_message)
+
+    backup_location = Path(__file__).parents[1] / "cli/backup_files"
+    backup_location.mkdir(exist_ok=True)
+
+    file_name = f"{backup_location}/yak_toto_backup_{backup_datetime}.sql"
 
     with Path(file_name).open(mode="w") as file:
         file.write(result.stdout)

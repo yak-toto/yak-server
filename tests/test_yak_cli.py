@@ -18,8 +18,7 @@ if TYPE_CHECKING:
 def test_cli(app_with_valid_jwt_config: "FastAPI"):
     # Check database drop
     result = subprocess.run(
-        "yak db drop",
-        shell=True,
+        ["yak", "db", "drop"],
         capture_output=True,
         env={**os.environ, "DEBUG": "1"},
     )
@@ -28,8 +27,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
 
     # Check database creation
     result = subprocess.run(
-        "yak db create",
-        shell=True,
+        ["yak", "db", "create"],
         capture_output=True,
     )
 
@@ -39,8 +37,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
     data_folder = str((Path(__file__).parents[1] / "yak_server/data/world_cup_2022").resolve())
 
     result = subprocess.run(
-        "yak db init",
-        shell=True,
+        ["yak", "db", "init"],
         capture_output=True,
         env={
             **os.environ,
@@ -111,8 +108,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
 
     # Check backup command
     result = subprocess.run(
-        "yak db backup",
-        shell=True,
+        ["yak", "db", "backup"],
         capture_output=True,
     )
 
@@ -128,8 +124,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
 
     # Check records deletion
     result = subprocess.run(
-        "yak db delete",
-        shell=True,
+        ["yak", "db", "delete"],
         capture_output=True,
         env={**os.environ, "DEBUG": "1"},
     )
@@ -184,8 +179,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
 
     # Test the migration helper command line
     result = subprocess.run(
-        "yak db migration",
-        shell=True,
+        ["yak", "db", "migration"],
         capture_output=True,
     )
 
