@@ -30,7 +30,7 @@ dependencies = [
     "click >=8.0.0,<9.0.0",
     "sqlalchemy >=2.0.19,<3.0.0",
     "pydantic-settings ==2.0.2",
-    "strawberry-graphql >=0.168.1,<0.196.0",
+    "strawberry-graphql >=0.168.1,<0.198.0",
 ]
 dynamic = ["version"]
 
