@@ -6,7 +6,6 @@ from getpass import getpass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from yak_server.config_file import get_settings
 from yak_server.database import Base, SessionLocal, engine, mysql_settings
 from yak_server.database.models import (
     BinaryBetModel,
@@ -19,6 +18,7 @@ from yak_server.database.models import (
     TeamModel,
     UserModel,
 )
+from yak_server.helpers.settings import get_settings
 from yak_server.v1.models.users import SignupIn
 from yak_server.v1.routers.users import signup_user
 

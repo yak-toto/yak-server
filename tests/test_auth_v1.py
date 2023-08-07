@@ -4,7 +4,7 @@ from unittest.mock import ANY
 
 from starlette.testclient import TestClient
 
-from yak_server.config_file import get_settings
+from yak_server.helpers.settings import get_settings
 
 from .utils import get_random_string
 from .utils.mock import create_mock

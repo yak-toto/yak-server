@@ -18,7 +18,7 @@ from yak_server.cli.database import (
     delete_database,
     drop_database,
 )
-from yak_server.config_file import get_settings
+from yak_server.helpers.settings import get_settings
 from yak_server.v1.helpers.errors import NameAlreadyExists
 
 from .utils import get_random_string

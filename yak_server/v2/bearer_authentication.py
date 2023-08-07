@@ -13,7 +13,7 @@ NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-    from yak_server.config_file import Settings
+    from yak_server.helpers.settings import Settings
 
 
 def is_authenticated(f):  # noqa: ANN001, ANN201
