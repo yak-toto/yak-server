@@ -12,6 +12,7 @@ from yak_server.database.models import (
     UserModel,
 )
 from yak_server.helpers.authentication import encode_bearer_token
+from yak_server.helpers.database import get_db
 from yak_server.helpers.group_position import create_group_position
 from yak_server.helpers.logging import (
     logged_in_successfully,
@@ -20,7 +21,6 @@ from yak_server.helpers.logging import (
 )
 from yak_server.helpers.settings import Settings, get_settings
 from yak_server.v1.helpers.auth import get_admin_user, get_current_user
-from yak_server.v1.helpers.database import get_db
 from yak_server.v1.helpers.errors import InvalidCredentials, NameAlreadyExists, UserNotFound
 from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.users import (

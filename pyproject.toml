@@ -127,3 +127,33 @@ env = [
     "MYSQL_DB=yak_toto_test",
     "PROFILING=0",
 ]
+
+
+[tool.importlinter]
+root_package = "yak_server"
+
+
+[[tool.importlinter.contracts]]
+name = "yak_server.database should not import other yak_server modules"
+type = "independence"
+modules = ["yak_server.database"]
+
+
+[[tool.importlinter.contracts]]
+name = "yak_server.helpers should not import yak_server.{v1,v2,cli}"
+type = "forbidden"
+source_modules = ["yak_server.helpers"]
+forbidden_modules = ["yak_server.v1", "yak_server.v2", "yak_server.cli"]
+
+
+[[tool.importlinter.contracts]]
+name = "yak_server.v1.helpers should not import yak_server.v1.models and yak_server.v1.routers"
+type = "forbidden"
+source_modules = ["yak_server.v1.helpers"]
+forbidden_modules = ["yak_server.v1.models", "yak_server.v1.routers"]
+
+
+[[tool.importlinter.contracts]]
+name = "yak_server.v1 and yak_server.v2 should be independent"
+type = "independence"
+modules = ["yak_server.v1", "yak_server.v2"]
