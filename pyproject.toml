@@ -26,11 +26,11 @@ dependencies = [
     "PyJWT >=2.6.0,<3.0.0",
     "PyMySQL[rsa] >=1.0.2,<2.0.0",
     "argon2-cffi >=21.3.0,<22.0.0",
-    "fastapi >=0.95.1,<0.101.0",
+    "fastapi >=0.95.1,<0.102.0",
     "click >=8.0.0,<9.0.0",
     "sqlalchemy >=2.0.19,<3.0.0",
     "pydantic-settings ==2.0.2",
-    "strawberry-graphql >=0.168.1,<0.199.0",
+    "strawberry-graphql >=0.168.1,<0.200.0",
 ]
 dynamic = ["version"]
 
