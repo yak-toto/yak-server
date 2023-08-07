@@ -1,16 +1,16 @@
 version: 2
 updates:
-- package-ecosystem: pip
-  directory: "/"
-  schedule:
-    interval: "weekly"
-    day: "monday"
-    time: "09:00"
-    timezone: "Europe/Paris"
-  groups:
-    dependencies:
-      patterns:
-        - "*"
-  open-pull-requests-limit: 30
-  allow:
-  - dependency-type: all
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 30
+    allow:
+      - dependency-type: all
