@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
-from yak_server.config_file import RuleContainer, Rules, get_settings
+from yak_server.helpers.settings import RuleContainer, Rules, get_settings
 
 from .utils import get_random_string
 from .utils.mock import create_mock

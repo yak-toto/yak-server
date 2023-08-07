@@ -54,7 +54,7 @@ from .schema import (
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
-    from yak_server.config_file import Settings
+    from yak_server.helpers.settings import Settings
 
 logger = logging.getLogger(__name__)
 

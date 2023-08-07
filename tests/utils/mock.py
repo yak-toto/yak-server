@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 from . import get_paris_datetime_now
 
 if TYPE_CHECKING:
-    from yak_server.config_file import Rules
+    from yak_server.helpers.settings import Rules
 
 
 def create_mock(

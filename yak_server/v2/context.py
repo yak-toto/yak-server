@@ -4,8 +4,8 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from strawberry.fastapi import BaseContext
 
-from yak_server.config_file import Settings, get_settings
 from yak_server.database.models import UserModel
+from yak_server.helpers.settings import Settings, get_settings
 from yak_server.v1.helpers.database import get_db
 
 

@@ -7,9 +7,9 @@ from uuid import UUID
 
 from dateutil import parser
 
-from yak_server.config_file import RuleContainer, Rules
 from yak_server.database import MySQLSettings
 from yak_server.helpers.rules import RULE_MAPPING
+from yak_server.helpers.settings import RuleContainer, Rules
 
 
 class RuleNotDefined(Exception):
