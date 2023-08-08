@@ -41,3 +41,5 @@ jobs:
 
       - name: Push
         uses: ad-m/github-push-action@0.6.0
+        with:
+          tags: true
