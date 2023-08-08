@@ -1,9 +1,15 @@
 name: 🆙 Release
 
 on:
-  push:
-    tags:
-      - "*.*.*"
+  workflow_dispatch:
+    inputs:
+      release-type:
+        type: choice
+        description: Release type
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
   release:
@@ -17,7 +23,30 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-          cache-dependency-path: pyproject.toml
+
+      - name: Install hatch
+        run: pip install hatchling
+
+      - name: Create commits
+        id: create-commits
+        run: |
+          git config user.name 'yak-toto'
+          git config user.email 'yaktoto648@gmail.com'
+          CURRENT_VERSION=`hatchling version`
+          export NEW_VERSION=`python -W ignore -m scripts.compute_new_version $CURRENT_VERSION ${{ github.event.inputs.release-type }}`
+          sed -i 's/__version__ = ".*"/__version__ = "'"$NEW_VERSION"'"/g' yak_server/__init__.py
+          git add yak_server/__init__.py
+          git commit -m "Release "$NEW_VERSION
+          git tag -a $NEW_VERSION HEAD -m \"$NEW_VERSION\"
+          echo "new-version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Push
+        uses: ad-m/github-push-action@master
+        with:
+          tags: true
+
+      - name: Checkout code
+        run: git checkout ${{ steps.create-commits.outputs.new-version }}
 
       - name: Set up cache
         uses: actions/cache@v3
@@ -42,6 +71,5 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: "dist/*"
-          token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: steps.check-version.outputs.prerelease == 'true'
           generateReleaseNotes: true
+          tag: ${{ steps.create-commits.outputs.new-version }}
