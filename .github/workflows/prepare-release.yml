@@ -5,11 +5,11 @@ on:
     inputs:
       release-type:
         type: choice
-        description: Type of release
+        description: Release type
         options:
-          - major
-          - minor
           - patch
+          - minor
+          - major
 
 jobs:
   prepare-release:
@@ -19,11 +19,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up python
+        uses: actions/setup-python@v4
+        id: setup-python
+        with:
+          python-version: 3.10
+
+      - name: Install hatch
+        run: pip install hatchling
+
       - name: Create commits
         run: |
           git config user.name 'yak-toto'
           git config user.email 'yaktoto648@gmail.com'
-          NEW_VERSION=`python -W ignore -m scripts.compute_new_version ${{ github.event.inputs.release-type }}`
+          CURRENT_VERSION=`hatchling version`
+          NEW_VERSION=`python -W ignore -m scripts.compute_new_version $CURRENT_VERSION ${{ github.event.inputs.release-type }}`
           sed -i 's/__version__ = ".*"/__version__ = "'"$NEW_VERSION"'"/g' yak_server/__init__.py
           git add yak_server/__init__.py
           git commit -m "Release "$NEW_VERSION
