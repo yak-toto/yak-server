@@ -38,8 +38,5 @@ jobs:
           git add yak_server/__init__.py
           git commit -m "Release "$NEW_VERSION
           git tag -a $NEW_VERSION HEAD -m \"$NEW_VERSION\"
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5.0.2
-        with:
-          delete-branch: true
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git push origin HEAD:refs/heads/main --tags
