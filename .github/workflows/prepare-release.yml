@@ -3,7 +3,7 @@ name: 🍲 Prepare release
 on:
   workflow_dispatch:
     inputs:
-      type:
+      release-type:
         type: choice
         description: Type of release
         options:
@@ -18,3 +18,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Create commits
+        run: |
+          git config user.name 'yak-toto'
+          git config user.email 'yaktoto648@gmail.com'
+          NEW_VERSION=`python -W ignore -m scripts.compute_new_version ${{ github.event.inputs.release-type }}`
+          sed -i 's/__version__ = ".*"/__version__ = "'"$NEW_VERSION"'"/g' yak_server/__init__.py
+          git add yak_server/__init__.py
+          git commit -m "Release "$NEW_VERSION
+          git tag -a $NEW_VERSION HEAD -m \"$NEW_VERSION\"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5.0.2
+        with:
+          delete-branch: true
