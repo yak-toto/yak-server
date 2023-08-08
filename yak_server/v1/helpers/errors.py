@@ -150,7 +150,7 @@ def set_exception_handler(app: "FastAPI") -> None:
         )
 
     @app.exception_handler(Exception)
-    def handle_exception(_: Request, exception: Exception) -> JSONResponse:
+    def handle_exception(_: Request, exception: Exception) -> JSONResponse:  # pragma: no cover
         # Return JSON instead of HTML for generic errors.
         logger.error(traceback.format_exc())
         logger.error(f"An unexpected exception occurs: {type(exception).__name__} {exception}")
