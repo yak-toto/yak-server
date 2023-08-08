@@ -29,6 +29,7 @@ jobs:
         run: pip install hatchling
 
       - name: Create commits
+        id: create-commits
         run: |
           git config user.name 'yak-toto'
           git config user.email 'yaktoto648@gmail.com'
@@ -38,6 +39,7 @@ jobs:
           git add yak_server/__init__.py
           git commit -m "Release "$NEW_VERSION
           git tag -a $NEW_VERSION HEAD -m \"$NEW_VERSION\"
+          echo "new-version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Push
         uses: ad-m/github-push-action@master
@@ -45,7 +47,7 @@ jobs:
           tags: true
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        run: git checkout ${{ steps.create-commits.outputs.new-version }}
 
       - name: Set up cache
         uses: actions/cache@v3
