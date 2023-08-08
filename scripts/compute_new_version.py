@@ -2,13 +2,11 @@ import argparse
 from enum import Enum
 from typing import List, Tuple
 
-from yak_server import __version__
-
 
 class ReleaseType(Enum):
-    major = "major"
-    minor = "minor"
-    patch = "patch"
+    MAJOR = "major"
+    MINOR = "minor"
+    PATCH = "patch"
 
 
 def parse_version(version: str) -> List[int]:
@@ -20,26 +18,24 @@ def unparse_version(major: int, minor: int, patch: int) -> str:
 
 
 def compute_new_version(current_version: str, release_type: ReleaseType) -> Tuple[int, int, int]:
-    current_version = parse_version(__version__)
+    current_version = parse_version(current_version)
 
-    if release_type == ReleaseType.major:
+    if release_type == ReleaseType.MAJOR:
         return unparse_version(current_version[0] + 1, 0, 0)
 
-    if release_type == ReleaseType.minor:
+    if release_type == ReleaseType.MINOR:
         return unparse_version(current_version[0], current_version[1] + 1, 0)
 
-    if release_type == ReleaseType.patch:
-        return unparse_version(current_version[0], current_version[1], current_version[2] + 1)
-
-    return ValueError(f"Invalid release type: {release_type}")
+    return unparse_version(current_version[0], current_version[1], current_version[2] + 1)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("release_type")
+    parser.add_argument("current_version")
+    parser.add_argument("release_type", choices=[e.value for e in ReleaseType])
 
     args = parser.parse_args()
 
-    print(compute_new_version(__version__, ReleaseType(args.release_type)))
+    print(compute_new_version(args.current_version, ReleaseType(args.release_type)))
 
     raise SystemExit(0)
