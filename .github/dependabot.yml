@@ -14,3 +14,15 @@ updates:
     open-pull-requests-limit: 30
     allow:
       - dependency-type: all
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
