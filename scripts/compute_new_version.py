@@ -10,7 +10,13 @@ class ReleaseType(Enum):
 
 
 def parse_version(version: str) -> List[int]:
-    return [int(version_digit) for version_digit in version.split(".")]
+    parsed_version = [int(version_digit) for version_digit in version.split(".")]
+
+    if len(parsed_version) != 3:
+        msg = f"Incorrect version {parsed_version}. Expecting 3 digits."
+        raise ValueError(msg)
+
+    return parsed_version
 
 
 def unparse_version(major: int, minor: int, patch: int) -> str:
@@ -29,7 +35,7 @@ def compute_new_version(current_version: str, release_type: ReleaseType) -> Tupl
     return unparse_version(current_version[0], current_version[1], current_version[2] + 1)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     parser = argparse.ArgumentParser()
     parser.add_argument("current_version")
     parser.add_argument("release_type", choices=[e.value for e in ReleaseType])
@@ -38,4 +44,4 @@ if __name__ == "__main__":
 
     print(compute_new_version(args.current_version, ReleaseType(args.release_type)))
 
-    raise SystemExit(0)
+    exit(0)
