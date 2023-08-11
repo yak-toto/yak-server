@@ -2,16 +2,13 @@
 requires = ["hatchling >= 1.13.0"]
 build-backend = "hatchling.build"
 
-
 [project]
 name = "yak-server"
 description = "Football bet rest/graphql server"
 readme = "README.md"
 requires-python = ">=3.7"
 license = "MIT"
-authors = [
-    { name = "Guillaume Le Pape", email = "gui.lepape25@gmail.com" }
-]
+authors = [{name = "Guillaume Le Pape", email = "gui.lepape25@gmail.com"}]
 keywords = ["mysql", "api", "rest", "graphql"]
 classifiers = [
     "Operating System :: Unix",
@@ -45,11 +42,9 @@ dependencies = [
 ]
 dynamic = ["version"]
 
-
 [project.urls]
 Homepage = "https://github.com/yak-toto/yak-server"
 Repository = "https://github.com/yak-toto/yak-server"
-
 
 [project.optional-dependencies]
 all = [
@@ -57,33 +52,26 @@ all = [
     "alembic >=1.10.3,<2.0.0",
 ]
 
+[project.scripts]
+yak = "yak_server.cli:main"
 
 [tool.hatch.version]
 path = "yak_server/__init__.py"
 
-
 [tool.hatch.build]
 include = ["yak_server", "alembic.ini"]
-
-
-[project.scripts]
-yak = "yak_server.cli:main"
-
 
 [tool.black]
 line-length = 100
 target-version = ['py37']
 preview = true
 
-
 [tool.coverage.run]
 branch = "true"
-
 
 [tool.coverage.report]
 omit = ["./yak_server/database/migrations/*"]
 exclude_lines = ["if TYPE_CHECKING:", "pragma: no cover"]
-
 
 [tool.ruff]
 line-length = 100
@@ -92,30 +80,23 @@ target-version = "py37"
 ignore = [
     "D",
     "ANN101",  # missing annotation for self?
-
     "ANN002",
     "ANN003",
     "ANN102",
     "ANN202",
     "N818",
-
     # shadowing builtins
     "A002",
     "A003",
-
     "C901",
     "PLR",
-
     "G004",
-
     "S603",
     "S607",
-
     "FA100",
 ]
 fix = true
 src = ["yak_server", "tests"]
-
 
 [tool.ruff.per-file-ignores]
 "yak_server/*" = ["B008"]
@@ -126,10 +107,8 @@ src = ["yak_server", "tests"]
 "setup.py" = ["INP001"]
 "scripts/*" = ["T201"]
 
-
 [tool.ruff.isort]
 known-first-party = ["yak_server"]
-
 
 [tool.pytest.ini_options]
 log_file = "yak_test.log"
@@ -140,16 +119,13 @@ env = [
     "PROFILING=0",
 ]
 
-
 [tool.importlinter]
 root_package = "yak_server"
-
 
 [[tool.importlinter.contracts]]
 name = "yak_server.database should not import other yak_server modules"
 type = "independence"
 modules = ["yak_server.database"]
-
 
 [[tool.importlinter.contracts]]
 name = "yak_server.helpers should not import yak_server.{v1,v2,cli}"
@@ -157,13 +133,11 @@ type = "forbidden"
 source_modules = ["yak_server.helpers"]
 forbidden_modules = ["yak_server.v1", "yak_server.v2", "yak_server.cli"]
 
-
 [[tool.importlinter.contracts]]
 name = "yak_server.v1.helpers should not import yak_server.v1.models and yak_server.v1.routers"
 type = "forbidden"
 source_modules = ["yak_server.v1.helpers"]
 forbidden_modules = ["yak_server.v1.models", "yak_server.v1.routers"]
-
 
 [[tool.importlinter.contracts]]
 name = "yak_server.v1 and yak_server.v2 should be independent"
