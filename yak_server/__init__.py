@@ -5,6 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.config import Config
 from strawberry.fastapi import GraphQLRouter
 
+from .helpers.logging import setup_logging
+
 logger = logging.getLogger(__name__)
 
 GLOBAL_ENDPOINT = "api"
@@ -75,11 +77,7 @@ def create_app() -> FastAPI:
     )
 
     # Declare logger configuration for yak server
-    logging.basicConfig(
-        filename="yak.log",
-        level=logging.DEBUG if app.debug else logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
+    setup_logging(debug=app.debug)
 
     # Set yappi profiler
     profiling = config("PROFILING", cast=bool, default=False)

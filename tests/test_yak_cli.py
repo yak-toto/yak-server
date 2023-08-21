@@ -21,6 +21,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
         ["yak", "db", "drop"],
         capture_output=True,
         env={**os.environ, "DEBUG": "1"},
+        check=True,
     )
 
     assert result.returncode == 0
@@ -29,6 +30,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
     result = subprocess.run(
         ["yak", "db", "create"],
         capture_output=True,
+        check=True,
     )
 
     assert result.returncode == 0
@@ -54,6 +56,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
             "FIRST_TEAM_QUALIFIED": "20",
             "RULES": "[]",
         },
+        check=True,
     )
 
     assert result.returncode == 0
@@ -107,10 +110,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
     user_id = response_login.json()["result"]["id"]
 
     # Check backup command
-    result = subprocess.run(
-        ["yak", "db", "backup"],
-        capture_output=True,
-    )
+    result = subprocess.run(["yak", "db", "backup"], capture_output=True, check=True)
 
     assert result.returncode == 0
 
@@ -127,6 +127,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
         ["yak", "db", "delete"],
         capture_output=True,
         env={**os.environ, "DEBUG": "1"},
+        check=True,
     )
 
     assert result.returncode == 0
@@ -178,9 +179,6 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
     }
 
     # Test the migration helper command line
-    result = subprocess.run(
-        ["yak", "db", "migration"],
-        capture_output=True,
-    )
+    result = subprocess.run(["yak", "db", "migration"], capture_output=True, check=True)
 
     assert result.returncode == 0
