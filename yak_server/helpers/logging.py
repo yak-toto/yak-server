@@ -1,3 +1,4 @@
+import logging
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
@@ -45,3 +46,11 @@ def logged_in_successfully(user_name: str) -> str:
 
 def modify_password_successfully(user_name: str) -> str:
     return f"admin user modify {user_name} password"
+
+
+def setup_logging(*, debug: False) -> None:
+    logging.basicConfig(
+        filename="yak.log",
+        level=logging.DEBUG if debug else logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )

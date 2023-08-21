@@ -18,6 +18,7 @@ from yak_server.database.models import (
     TeamModel,
     UserModel,
 )
+from yak_server.helpers.logging import setup_logging
 from yak_server.helpers.settings import get_settings
 from yak_server.v1.models.users import SignupIn
 from yak_server.v1.routers.users import signup_user
@@ -141,6 +142,8 @@ def initialize_database(app: "FastAPI") -> None:
 
 
 def backup_database() -> None:
+    setup_logging(debug=False)
+
     result = subprocess.run(
         [
             "mysqldump",
@@ -154,6 +157,7 @@ def backup_database() -> None:
         ],
         capture_output=True,
         encoding="utf-8",
+        check=False,
     )
 
     backup_datetime = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%z")
