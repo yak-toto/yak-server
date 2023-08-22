@@ -34,7 +34,7 @@ repos:
       - id: prettier
         types: [yaml]
 
-  - repo: https://github.com/seddonym/import-linter.git
+  - repo: https://github.com/seddonym/import-linter
     rev: v1.11.1
     hooks:
       - id: import-linter
