@@ -13,7 +13,7 @@ repos:
       - id: check-merge-conflict
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.282
+    rev: v0.0.286
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
@@ -24,18 +24,18 @@ repos:
       - id: black
 
   - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.16
+    rev: 0.7.17
     hooks:
       - id: mdformat
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.1
+    rev: v3.0.2
     hooks:
       - id: prettier
         types: [yaml]
 
   - repo: https://github.com/seddonym/import-linter
-    rev: v1.10.0
+    rev: v1.11.1
     hooks:
       - id: import-linter
 
