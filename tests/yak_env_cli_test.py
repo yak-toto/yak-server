@@ -32,13 +32,16 @@ def test_yak_env_init() -> None:
         assert env["DEBUG"] == "1"
         assert env["PROFILING"] == "1"
         assert env["JWT_EXPIRATION_TIME"] == "1800"
+        assert env["JWT_SECRET_KEY"] is not None
         assert len(env["JWT_SECRET_KEY"]) == 256
         assert env["COMPETITION"] == "world_cup_2022"
         assert env["LOCK_DATETIME"] == "2022-11-20T17:00:00+01:00"
         assert env["OFFICIAL_RESULTS_URL"] == "https://en.wikipedia.org/wiki/2022_FIFA_World_Cup"
+        assert env["DATA_FOLDER"] is not None
         assert Path(env["DATA_FOLDER"]).samefile(
             Path(__file__).parents[1] / "yak_server" / "data" / "world_cup_2022"
         )
+        assert env["RULES"] is not None
         assert len(json.loads(env["RULES"])) == 2
 
         env_mysql = dotenv_values(Path(".env.mysql"))
@@ -78,4 +81,5 @@ def test_yak_env_init_world_cup_2018() -> None:
 
         env = dotenv_values(Path(".env"))
 
+        assert env["RULES"] is not None
         assert json.loads(env["RULES"]) == {}

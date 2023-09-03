@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from http import HTTPStatus
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, Generator, List, Optional, Tuple
 
 import pytest
 from fastapi.testclient import TestClient
@@ -18,7 +18,9 @@ runner = CliRunner()
 
 
 @pytest.fixture
-def app_with_valid_jwt_config_function_scope(app_with_valid_jwt_config: "FastAPI") -> "FastAPI":
+def app_with_valid_jwt_config_function_scope(
+    app_with_valid_jwt_config: "FastAPI",
+) -> Generator["FastAPI", None, None]:
     yield app_with_valid_jwt_config
 
     delete_database(app_with_valid_jwt_config)
@@ -28,8 +30,8 @@ def app_with_valid_jwt_config_function_scope(app_with_valid_jwt_config: "FastAPI
 class CompetitionData:
     url: str
     folder: str
-    excepted_score_bets: List[Tuple[int, int]]
-    excepted_binary_bets: List[bool]
+    excepted_score_bets: List[Tuple[Optional[int], Optional[int]]]
+    excepted_binary_bets: List[Optional[bool]]
 
 
 euro_2024_data = CompetitionData(

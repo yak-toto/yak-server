@@ -106,6 +106,19 @@ max-complexity = 11
 "testing/*" = ["S101"]
 "scripts/*" = ["T201"]
 
+[tool.mypy]
+strict = true
+pretty = true
+plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin", "strawberry.ext.mypy_plugin"]
+
+[[tool.mypy.overrides]]
+module = "sqlalchemy_utils"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "yappi"
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 log_file = "yak_test.log"
 # log_file_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
