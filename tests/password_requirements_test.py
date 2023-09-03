@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 
 def test_valid_password() -> None:
-    assert validate_password(get_random_string(18)) is None
+    validate_password(get_random_string(18))
 
 
 def test_password_too_short() -> None:

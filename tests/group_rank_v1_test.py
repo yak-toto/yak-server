@@ -363,12 +363,9 @@ def test_group_rank(
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    def sort_group_position(group_position: dict):
-        return group_position["team"]["code"]
-
     assert sorted(
         response_group_rank_response.json()["result"]["group_rank"],
-        key=sort_group_position,
+        key=lambda group_position: group_position["team"]["code"],
     ) == sorted(
         [
             {
@@ -420,7 +417,7 @@ def test_group_rank(
                 "points": 0,
             },
         ],
-        key=sort_group_position,
+        key=lambda group_position: group_position["team"]["code"],  # type: ignore[index]
     )
 
     response_patch_bet = client.patch(

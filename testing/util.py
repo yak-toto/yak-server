@@ -29,7 +29,7 @@ class UserData:
     last_name: str
     name: str
     scores: List[Optional[Tuple[Optional[int], Optional[int]]]]
-    token: Optional[str] = None
+    token: str = ""
 
 
 def patch_score_bets(

@@ -115,15 +115,15 @@ def test_teams(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.Monkey
     assert response_retrieve_flag.status_code == HTTPStatus.TEMPORARY_REDIRECT
 
     # Check flag fetching with invalid team id
-    invalid_team_id = uuid4()
+    invalid_team_id_with_flag = uuid4()
 
     response_retrieve_flag_with_invalid_id = client.get(
-        f"/api/v1/teams/{invalid_team_id}/flag",
+        f"/api/v1/teams/{invalid_team_id_with_flag}/flag",
     )
 
     assert response_retrieve_flag_with_invalid_id.status_code == HTTPStatus.NOT_FOUND
     assert response_retrieve_flag_with_invalid_id.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
-        "description": f"Team not found: {invalid_team_id}",
+        "description": f"Team not found: {invalid_team_id_with_flag}",
     }
