@@ -3,24 +3,24 @@
         "code": "FR",
         "description_fr": "France",
         "description_en": "France",
-        "flag_url": "url"
+        "internal_flag_url": "url"
     },
     {
         "code": "ES",
         "description_fr": "Espagne",
         "description_en": "Spain",
-        "flag_url": "url"
+        "internal_flag_url": "url"
     },
     {
         "code": "CH",
         "description_fr": "Suisse",
         "description_en": "Switzerland",
-        "flag_url": "url"
+        "internal_flag_url": "url"
     },
     {
         "code": "VJ",
         "description_fr": "\u00c9tats-Unis",
         "description_en": "United-States",
-        "flag_url": "url"
+        "internal_flag_url": "url"
     }
 ]

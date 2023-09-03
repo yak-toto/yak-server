@@ -273,8 +273,8 @@ class TeamModel(Base):
     code = sa.Column(sa.String(10), unique=True, nullable=False)
     description_fr = sa.Column(sa.String(100), unique=True, nullable=False)
     description_en = sa.Column(sa.String(100), unique=True, nullable=False)
-    flag_url = sa.Column(sa.String(100))
-    internal_flag_url = sa.Column(sa.String(300))
+    flag_url = sa.Column(sa.String(100), nullable=False)
+    internal_flag_url = sa.Column(sa.String(300), nullable=False)
 
 
 class GroupModel(Base):

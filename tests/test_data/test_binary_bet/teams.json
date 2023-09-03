@@ -3,18 +3,18 @@
         "code": "FR",
         "description_fr": "France",
         "description_en": "France",
-        "flag_url": null
+        "internal_flag_url": "url"
     },
     {
         "code": "GR",
         "description_fr": "Allemagne",
         "description_en": "Germany",
-        "flag_url": null
+        "internal_flag_url": "url"
     },
     {
         "code": "ES",
         "description_fr": "Espagne",
         "description_en": "Spain",
-        "flag_url": null
+        "internal_flag_url": "url"
     }
 ]
