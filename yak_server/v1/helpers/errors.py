@@ -1,6 +1,7 @@
 import logging
 import traceback
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
+from uuid import UUID
 
 from fastapi import HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -46,7 +47,7 @@ class NameAlreadyExists(HTTPException):
 
 
 class BetNotFound(HTTPException):
-    def __init__(self, bet_id: str) -> None:
+    def __init__(self, bet_id: UUID) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=bet_not_found_message(bet_id),
@@ -54,7 +55,7 @@ class BetNotFound(HTTPException):
 
 
 class UserNotFound(HTTPException):
-    def __init__(self, user_id: str) -> None:
+    def __init__(self, user_id: Union[str, UUID]) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=user_not_found_message(user_id),
@@ -78,7 +79,7 @@ class InvalidTeamId(HTTPException):
 
 
 class TeamNotFound(HTTPException):
-    def __init__(self, team_id: str) -> None:
+    def __init__(self, team_id: Union[None, str, UUID]) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=team_not_found_message(team_id),
@@ -104,7 +105,7 @@ class NoResultsForAdminUser(HTTPException):
 
 
 class GroupNotFound(HTTPException):
-    def __init__(self, group_id: str) -> None:
+    def __init__(self, group_id: Union[str, UUID]) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=group_not_found_message(group_id),
@@ -112,7 +113,7 @@ class GroupNotFound(HTTPException):
 
 
 class PhaseNotFound(HTTPException):
-    def __init__(self, phase_id: str) -> None:
+    def __init__(self, phase_id: Union[str, UUID]) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=phase_not_found_message(phase_id),
@@ -130,7 +131,7 @@ class ExpiredToken(HTTPException):
 
 
 class RuleNotFound(HTTPException):
-    def __init__(self, rule_id: str) -> None:
+    def __init__(self, rule_id: UUID) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=rule_not_found_message(rule_id),

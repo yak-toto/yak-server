@@ -364,7 +364,7 @@ def test_group_rank(
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    def sort_group_position(group_position: dict):
+    def sort_group_position(group_position: dict) -> str:
         return group_position["team"]["code"]
 
     assert sorted(

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, Iterable, Optional, Tuple
 
 from .models import BinaryBetModel, GroupModel, MatchModel, PhaseModel, ScoreBetModel
 
@@ -12,7 +12,7 @@ def bets_from_group_code(
     db: "Session",
     user: "UserModel",
     group_code: str,
-) -> Tuple[GroupModel, List[ScoreBetModel], List[BinaryBetModel]]:
+) -> Tuple[Optional[GroupModel], Iterable[ScoreBetModel], Iterable[BinaryBetModel]]:
     group = db.query(GroupModel).filter_by(code=group_code).first()
 
     if not group:
@@ -37,7 +37,12 @@ def bets_from_phase_code(
     db: "Session",
     user: "UserModel",
     phase_code: str,
-) -> Tuple[PhaseModel, List[GroupModel], List[ScoreBetModel], List[BinaryBetModel]]:
+) -> Tuple[
+    Optional[PhaseModel],
+    Iterable[GroupModel],
+    Iterable[ScoreBetModel],
+    Iterable[BinaryBetModel],
+]:
     phase = db.query(PhaseModel).filter_by(code=phase_code).first()
 
     if not phase:

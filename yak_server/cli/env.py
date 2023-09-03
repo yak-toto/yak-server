@@ -2,15 +2,14 @@ import json
 import secrets
 from enum import Enum
 from pathlib import Path
-from typing import Dict
+from typing import Any, Dict
 from uuid import UUID
 
 import pendulum
 import typer
 
 from yak_server.database import MySQLSettings
-from yak_server.helpers.rules import RULE_MAPPING
-from yak_server.helpers.settings import Rules
+from yak_server.helpers.rules import RULE_MAPPING, Rules
 
 
 class YesOrNo(str, Enum):
@@ -19,7 +18,7 @@ class YesOrNo(str, Enum):
 
 
 class RuleNotDefinedError(Exception):
-    def __init__(self, rule_id: str) -> None:
+    def __init__(self, rule_id: UUID) -> None:
         super().__init__(f"Rule not defined: {rule_id}")
 
 
@@ -31,8 +30,8 @@ def write_env_file(env: dict, filename: str) -> None:
 
 class EnvBuilder:
     def __init__(self) -> None:
-        self.env = {}
-        self.env_mysql = {}
+        self.env: Dict[str, Any] = {}
+        self.env_mysql: Dict[str, Any] = {}
 
         debug = typer.prompt("DEBUG (y/n)", type=YesOrNo)
 

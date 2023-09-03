@@ -98,7 +98,13 @@ class Team:
 
 
 @strawberry.type
-class TeamWithScore(Team):
+class TeamWithScore:
+    instance: strawberry.Private[TeamModel]
+
+    id: UUID
+    code: str
+    description: str
+    flag: Flag
     score: Optional[int]
 
     @classmethod
@@ -114,7 +120,13 @@ class TeamWithScore(Team):
 
 
 @strawberry.type
-class TeamWithVictory(Team):
+class TeamWithVictory:
+    instance: strawberry.Private[TeamModel]
+
+    id: UUID
+    code: str
+    description: str
+    flag: Flag
     won: Optional[bool]
 
     @classmethod

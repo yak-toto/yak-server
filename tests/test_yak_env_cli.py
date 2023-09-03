@@ -32,6 +32,7 @@ def test_yak_env_init() -> None:
         assert env["DEBUG"] == "1"
         assert env["PROFILING"] == "1"
         assert env["JWT_EXPIRATION_TIME"] == "1800"
+        assert env["JWT_SECRET_KEY"] is not None
         assert len(env["JWT_SECRET_KEY"]) == 256
         assert env["COMPETITION"] == "world_cup_2022"
         assert env["LOCK_DATETIME"] == "2022-11-20T17:00:00+01:00"
