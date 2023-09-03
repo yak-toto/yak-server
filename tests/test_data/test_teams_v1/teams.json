@@ -3,48 +3,48 @@
         "code": "DE",
         "description_fr": "Allemagne",
         "description_en": "Germany",
-        "flag_url": "https://fake-team-flag_germany.com"
+        "internal_flag_url": "https://fake-team-flag_germany.com"
     },
     {
         "code": "GR",
         "description_fr": "Gr\u00e8ce",
         "description_en": "Greece",
-        "flag_url": "https://fake-team-flag_greece.com"
+        "internal_flag_url": "https://fake-team-flag_greece.com"
     },
     {
         "code": "GD",
         "description_fr": "Grenade",
         "description_en": "Grenada",
-        "flag_url": "https://fake-team-flag_grenada.com"
+        "internal_flag_url": "https://fake-team-flag_grenada.com"
     },
     {
         "code": "JM",
         "description_fr": "Jama\u00efque",
         "description_en": "Jamaica",
-        "flag_url": "https://fake-team-flag_jamaica.com"
+        "internal_flag_url": "https://fake-team-flag_jamaica.com"
     },
     {
         "code": "JO",
         "description_fr": "Jordanie",
         "description_en": "Jordan",
-        "flag_url": "https://fake-team-flag_jordan.com"
+        "internal_flag_url": "https://fake-team-flag_jordan.com"
     },
     {
         "code": "ML",
         "description_fr": "Mali",
         "description_en": "Mali",
-        "flag_url": "https://fake-team-flag_mali.com"
+        "internal_flag_url": "https://fake-team-flag_mali.com"
     },
     {
         "code": "NO",
         "description_fr": "Norv\u00e8ge",
         "description_en": "Norway",
-        "flag_url": "https://fake-team-flag_norway.com"
+        "internal_flag_url": "https://fake-team-flag_norway.com"
     },
     {
         "code": "UA",
         "description_fr": "Ukraine",
         "description_en": "Ukraine",
-        "flag_url": "https://fake-team-flag_ukraine.com"
+        "internal_flag_url": "https://fake-team-flag_ukraine.com"
     }
 ]

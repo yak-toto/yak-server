@@ -89,8 +89,7 @@ def initialize_database(app: "FastAPI") -> None:
         groups = json.loads(file.read())
 
         for group in groups:
-            phase = db.query(PhaseModel).filter_by(code=group["phase_code"]).first()
-            group.pop("phase_code")
+            phase = db.query(PhaseModel).filter_by(code=group.pop("phase_code")).first()
             group["phase_id"] = phase.id
 
         db.add_all(GroupModel(**group) for group in groups)
@@ -116,24 +115,23 @@ def initialize_database(app: "FastAPI") -> None:
         matches = json.loads(file.read())
 
         for match in matches:
-            if match["team1_code"] is None:
+            team1_code = match.pop("team1_code")
+            team2_code = match.pop("team2_code")
+
+            if team1_code is None:
                 match["team1_id"] = None
             else:
-                team1 = db.query(TeamModel).filter_by(code=match["team1_code"]).first()
+                team1 = db.query(TeamModel).filter_by(code=team1_code).first()
                 match["team1_id"] = team1.id
 
-            if match["team2_code"] is None:
+            if team2_code is None:
                 match["team2_id"] = None
             else:
-                team2 = db.query(TeamModel).filter_by(code=match["team2_code"]).first()
+                team2 = db.query(TeamModel).filter_by(code=team2_code).first()
                 match["team2_id"] = team2.id
 
-            group = db.query(GroupModel).filter_by(code=match["group_code"]).first()
+            group = db.query(GroupModel).filter_by(code=match.pop("group_code")).first()
             match["group_id"] = group.id
-
-            match.pop("team1_code")
-            match.pop("team2_code")
-            match.pop("group_code")
 
         db.add_all(MatchReferenceModel(**match) for match in matches)
         db.flush()
