@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from itertools import chain
-from typing import TYPE_CHECKING, Dict, Iterable, List
+from typing import TYPE_CHECKING, Dict, Iterable, List, Sequence, Set
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -18,6 +18,8 @@ from yak_server.helpers.group_position import get_group_rank_with_code
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
+
+    from yak_server.database.models import GroupPositionModel
 
 
 class RuleComputePoints(BaseModel):
@@ -77,7 +79,7 @@ class ResultForGroupRank:
     number_first_qualified_guess: int = 0
 
 
-def all_results_filled_in_group(group_result: list) -> bool:
+def all_results_filled_in_group(group_result: Sequence["GroupPositionModel"]) -> bool:
     return all(team.played == len(group_result) - 1 for team in group_result)
 
 
@@ -122,7 +124,7 @@ def compute_results_for_group_rank(
     return result_groups
 
 
-def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set:
+def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> Set[UUID]:
     return set(
         chain(
             *(
@@ -138,7 +140,7 @@ def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set
     )
 
 
-def winner_from_user(db: "Session", user: UserModel) -> set:
+def winner_from_user(db: "Session", user: UserModel) ->  Set[UUID]:
     finale_bet = next(
         iter(
             db.query(BinaryBetModel)
@@ -151,9 +153,10 @@ def winner_from_user(db: "Session", user: UserModel) -> set:
     if finale_bet.is_one_won is None:
         return set()
 
-    return {
-        finale_bet.match.team1.id if finale_bet.is_one_won else finale_bet.match.team2.id,
-    }
+    if finale_bet.match.team1 is None or finale_bet.match.team2 is None:
+        return set()
+
+    return {finale_bet.match.team1.id if finale_bet.is_one_won else finale_bet.match.team2.id}
 
 
 def compute_points(db: "Session", admin: UserModel, rule_config: RuleComputePoints) -> None:
