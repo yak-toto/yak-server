@@ -1,3 +1,10 @@
+import sys
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 from pydantic import UUID4
@@ -16,8 +23,8 @@ router = APIRouter(prefix="/teams", tags=["teams"])
 
 @router.get("/")
 def retrieve_all_teams(
+    db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
-    db: Session = Depends(get_db),
 ) -> GenericOut[AllTeamsResponse]:
     return GenericOut(
         result=AllTeamsResponse(
@@ -29,8 +36,8 @@ def retrieve_all_teams(
 @router.get("/{team_id}")
 def retrieve_team_by_id(
     team_id: str,
+    db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
-    db: Session = Depends(get_db),
 ) -> GenericOut[OneTeamResponse]:
     if is_uuid4(team_id):
         team = db.query(TeamModel).filter_by(id=team_id).first()
@@ -46,7 +53,10 @@ def retrieve_team_by_id(
 
 
 @router.get("/{team_id}/flag")
-def retrieve_team_flag_by_id(team_id: UUID4, db: Session = Depends(get_db)) -> RedirectResponse:
+def retrieve_team_flag_by_id(
+    team_id: UUID4,
+    db: Annotated[Session, Depends(get_db)],
+) -> RedirectResponse:
     team = db.query(TeamModel).filter_by(id=str(team_id)).first()
 
     if not team:

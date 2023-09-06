@@ -1,4 +1,11 @@
+import sys
 from typing import Optional
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
 
 from fastapi import Depends
 from sqlalchemy.orm import Session
@@ -22,7 +29,7 @@ class YakContext(BaseContext):
 
 
 def get_context(
-    db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
+    db: Annotated[Session, Depends(get_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> YakContext:
     return YakContext(db, settings)

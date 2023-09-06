@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
 
@@ -6,8 +7,11 @@ from starlette.testclient import TestClient
 
 from .utils import get_random_string
 
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
-def test_modify_password(app_with_valid_jwt_config: "TestClient"):
+
+def test_modify_password(app_with_valid_jwt_config: "FastAPI"):
     client = TestClient(app_with_valid_jwt_config)
 
     admin_name = "admin"

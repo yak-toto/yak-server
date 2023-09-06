@@ -1,5 +1,11 @@
+import sys
 from itertools import chain
 from typing import List
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import and_
@@ -28,8 +34,8 @@ router = APIRouter(
 
 @router.get("/score_board")
 def retrieve_score_board(
-    _: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    _: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
 ) -> GenericOut[List[UserResult]]:
     return GenericOut(
         result=[
@@ -46,8 +52,8 @@ def retrieve_score_board(
 
 @router.get("/results")
 def retrieve_user_results(
-    user: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    user: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
 ) -> GenericOut[UserResult]:
     if user.name == "admin":
         raise NoResultsForAdminUser
@@ -73,9 +79,9 @@ def retrieve_user_results(
 
 @router.post("/compute_points")
 def compute_pointsby_by_admin(
-    _: UserModel = Depends(get_admin_user),
-    db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
+    _: Annotated[UserModel, Depends(get_admin_user)],
+    db: Annotated[Session, Depends(get_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> GenericOut[List[UserResult]]:
     users = compute_points(
         db,

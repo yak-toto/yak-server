@@ -1,6 +1,6 @@
 import argparse
 from enum import Enum
-from typing import List, Tuple
+from typing import List
 
 
 class ReleaseType(Enum):
@@ -23,16 +23,20 @@ def unparse_version(major: int, minor: int, patch: int) -> str:
     return f"{major}.{minor}.{patch}"
 
 
-def compute_new_version(current_version: str, release_type: ReleaseType) -> Tuple[int, int, int]:
-    current_version = parse_version(current_version)
+def compute_new_version(current_version: str, release_type: ReleaseType) -> str:
+    parsed_current_version = parse_version(current_version)
 
     if release_type == ReleaseType.MAJOR:
-        return unparse_version(current_version[0] + 1, 0, 0)
+        return unparse_version(parsed_current_version[0] + 1, 0, 0)
 
     if release_type == ReleaseType.MINOR:
-        return unparse_version(current_version[0], current_version[1] + 1, 0)
+        return unparse_version(parsed_current_version[0], parsed_current_version[1] + 1, 0)
 
-    return unparse_version(current_version[0], current_version[1], current_version[2] + 1)
+    return unparse_version(
+        parsed_current_version[0],
+        parsed_current_version[1],
+        parsed_current_version[2] + 1,
+    )
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -44,4 +48,4 @@ if __name__ == "__main__":  # pragma: no cover
 
     print(compute_new_version(args.current_version, ReleaseType(args.release_type)))
 
-    exit(0)
+    raise SystemExit(0)

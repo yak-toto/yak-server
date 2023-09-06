@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Awaitable, Callable
 from uuid import uuid4
 
 try:
@@ -19,7 +19,7 @@ def set_yappi_profiler(app: "FastAPI") -> None:
     @app.middleware("http")
     async def profile_process_time(
         request: "Request",
-        call_next: Callable[["Request"], "Response"],
+        call_next: Callable[["Request"], Awaitable["Response"]],
     ) -> "Response":
         yappi.clear_stats()
         yappi.set_clock_type("cpu")

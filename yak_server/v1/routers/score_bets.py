@@ -1,4 +1,10 @@
 import logging
+import sys
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
@@ -78,10 +84,10 @@ def send_response(
 @router.post("/")
 def create_score_bet(
     score_bet_in: ScoreBetIn,
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[UserModel, Depends(get_current_user)],
+    settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
-    db: Session = Depends(get_db),
-    user: UserModel = Depends(get_current_user),
-    settings: Settings = Depends(get_settings),
 ) -> GenericOut[ScoreBetResponse]:
     if is_locked(user.name, settings.lock_datetime):
         raise LockedScoreBet
@@ -139,10 +145,10 @@ def create_score_bet(
 @router.get("/{bet_id}")
 def retrieve_score_bet_by_id(
     bet_id: UUID4,
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[UserModel, Depends(get_current_user)],
+    settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
-    db: Session = Depends(get_db),
-    user: UserModel = Depends(get_current_user),
-    settings: Settings = Depends(get_settings),
 ) -> GenericOut[ScoreBetResponse]:
     score_bet = db.query(ScoreBetModel).filter_by(user_id=user.id, id=str(bet_id)).first()
 
@@ -156,10 +162,10 @@ def retrieve_score_bet_by_id(
 def modify_score_bet(
     bet_id: UUID4,
     modify_score_bet_in: ModifyScoreBetIn,
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[UserModel, Depends(get_current_user)],
+    settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
-    db: Session = Depends(get_db),
-    user: UserModel = Depends(get_current_user),
-    settings: Settings = Depends(get_settings),
 ) -> GenericOut[ScoreBetResponse]:
     if is_locked(user.name, settings.lock_datetime):
         raise LockedScoreBet
@@ -217,10 +223,10 @@ def modify_score_bet(
 @router.delete("/{bet_id}")
 def delete_score_bet_by_id(
     bet_id: UUID4,
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[UserModel, Depends(get_current_user)],
+    settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
-    db: Session = Depends(get_db),
-    user: UserModel = Depends(get_current_user),
-    settings: Settings = Depends(get_settings),
 ) -> GenericOut[ScoreBetResponse]:
     if is_locked(user.name, settings.lock_datetime):
         raise LockedScoreBet

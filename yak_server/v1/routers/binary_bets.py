@@ -1,4 +1,10 @@
 import logging
+import sys
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
@@ -85,10 +91,10 @@ def send_response(
 @router.post("/")
 def create_binary_bet(
     binary_bet_in: BinaryBetIn,
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[UserModel, Depends(get_current_user)],
+    settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
-    db: Session = Depends(get_db),
-    user: UserModel = Depends(get_current_user),
-    settings: Settings = Depends(get_settings),
 ) -> GenericOut[BinaryBetResponse]:
     if is_locked(user.name, settings.lock_datetime):
         raise LockedBinaryBet
@@ -129,10 +135,10 @@ def create_binary_bet(
 @router.get("/{bet_id}")
 def retrieve_binary_bet_by_id(
     bet_id: UUID4,
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[UserModel, Depends(get_current_user)],
+    settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
-    db: Session = Depends(get_db),
-    user: UserModel = Depends(get_current_user),
-    settings: Settings = Depends(get_settings),
 ) -> GenericOut[BinaryBetResponse]:
     binary_bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=str(bet_id)).first()
 
@@ -146,10 +152,10 @@ def retrieve_binary_bet_by_id(
 def modify_binary_bet_by_id(
     bet_id: UUID4,
     modify_binary_bet_in: ModifyBinaryBetIn,
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[UserModel, Depends(get_current_user)],
+    settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
-    db: Session = Depends(get_db),
-    user: UserModel = Depends(get_current_user),
-    settings: Settings = Depends(get_settings),
 ) -> GenericOut[BinaryBetResponse]:
     if is_locked(user.name, settings.lock_datetime):
         raise LockedBinaryBet
@@ -198,10 +204,10 @@ def modify_binary_bet_by_id(
 @router.delete("/{bet_id}")
 def delete_binary_bet_by_id(
     bet_id: UUID4,
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[UserModel, Depends(get_current_user)],
+    settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
-    db: Session = Depends(get_db),
-    user: UserModel = Depends(get_current_user),
-    settings: Settings = Depends(get_settings),
 ) -> GenericOut[BinaryBetResponse]:
     if is_locked(user.name, settings.lock_datetime):
         raise LockedBinaryBet

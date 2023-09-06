@@ -1,5 +1,11 @@
 import logging
+import sys
 from datetime import timedelta
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
@@ -79,8 +85,8 @@ def signup_user(db: Session, signup_in: SignupIn) -> UserModel:
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 def signup(
     signup_in: SignupIn,
-    db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
+    db: Annotated[Session, Depends(get_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> GenericOut[SignupOut]:
     user = signup_user(db, signup_in)
 
@@ -100,8 +106,8 @@ def signup(
 @router.post("/login", status_code=status.HTTP_201_CREATED)
 def login(
     login_in: LoginIn,
-    db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
+    db: Annotated[Session, Depends(get_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> GenericOut[LoginOut]:
     user = UserModel.authenticate(db, login_in.name, login_in.password)
 
@@ -127,8 +133,8 @@ def login(
 def modify_user(
     user_id: UUID4,
     modify_user_in: ModifyUserIn,
-    db: Session = Depends(get_db),
-    _: UserModel = Depends(get_admin_user),
+    db: Annotated[Session, Depends(get_db)],
+    _: Annotated[UserModel, Depends(get_admin_user)],
 ) -> GenericOut[CurrentUserOut]:
     user = db.query(UserModel).filter_by(id=str(user_id)).first()
     if not user:
@@ -144,5 +150,7 @@ def modify_user(
 
 
 @router.get("/current")
-def current_user(user: UserModel = Depends(get_current_user)) -> GenericOut[CurrentUserOut]:
+def current_user(
+    user: Annotated[UserModel, Depends(get_current_user)],
+) -> GenericOut[CurrentUserOut]:
     return GenericOut(result=CurrentUserOut.model_validate(user))
