@@ -48,7 +48,7 @@ def modify_password_successfully(user_name: str) -> str:
     return f"admin user modify {user_name} password"
 
 
-def setup_logging(*, debug: False) -> None:
+def setup_logging(*, debug: bool) -> None:
     logging.basicConfig(
         filename="yak.log",
         level=logging.DEBUG if debug else logging.INFO,

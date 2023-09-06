@@ -42,8 +42,8 @@ def user_from_token(db: Session, secret_key: str, token: str) -> UserModel:
 
 def get_current_user(
     token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-    db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
+    db: Annotated[Session, Depends(get_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> UserModel:
     if token is None:
         raise InvalidToken
@@ -53,8 +53,8 @@ def get_current_user(
 
 def get_admin_user(
     token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-    db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
+    db: Annotated[Session, Depends(get_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> UserModel:
     user = get_current_user(token, db, settings)
 

@@ -1,3 +1,10 @@
+import sys
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -21,9 +28,9 @@ router = APIRouter(prefix="/groups", tags=["groups"])
 
 @router.get("/")
 def retrieve_all_groups(
+    _: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
-    _: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db),
 ) -> GenericOut[AllGroupsResponse]:
     groups = db.query(GroupModel).order_by(GroupModel.index)
     phases = db.query(PhaseModel).order_by(PhaseModel.index)
@@ -39,9 +46,9 @@ def retrieve_all_groups(
 @router.get("/{group_code}")
 def retrieve_group_by_id(
     group_code: str,
+    _: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
-    _: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db),
 ) -> GenericOut[GroupResponse]:
     group = db.query(GroupModel).filter_by(code=group_code).first()
 
@@ -59,9 +66,9 @@ def retrieve_group_by_id(
 @router.get("/phases/{phase_code}")
 def retrieve_groups_by_phase_code(
     phase_code: str,
+    _: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
-    _: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db),
 ) -> GenericOut[GroupsByPhaseCodeResponse]:
     phase = db.query(PhaseModel).filter_by(code=phase_code).first()
 

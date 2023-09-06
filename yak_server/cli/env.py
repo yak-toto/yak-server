@@ -114,7 +114,7 @@ class EnvBuilder:
 
 
 def write_env_file(env: dict, filename: str) -> None:
-    with Path(f"./{filename}").open(mode="w") as file:
+    with Path(filename).open(mode="w") as file:
         for env_var, env_value in env.items():
             file.write(f"{env_var}={env_value}\n")
 

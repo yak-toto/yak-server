@@ -1,3 +1,10 @@
+import sys
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
 from sqlalchemy.orm import Session
@@ -16,9 +23,9 @@ router = APIRouter(prefix="/rules", tags=["rules"])
 @router.post("/{rule_id}")
 def execute_rule(
     rule_id: UUID4,
-    db: Session = Depends(get_db),
-    user: UserModel = Depends(get_current_user),
-    settings: Settings = Depends(get_settings),
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[UserModel, Depends(get_current_user)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> GenericOut[str]:
     found_rule = None
 

@@ -26,7 +26,7 @@ from yak_server.v1.routers.users import signup_user
 try:
     import alembic
 except ImportError:  # pragma: no cover
-    alembic = None
+    alembic = None  # type: ignore[assignment]
 
 
 if TYPE_CHECKING:

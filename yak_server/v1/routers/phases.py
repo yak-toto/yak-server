@@ -1,4 +1,10 @@
+import sys
 from typing import List
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
@@ -17,9 +23,9 @@ router = APIRouter(prefix="/phases", tags=["phases"])
 
 @router.get("/")
 def retrieve_all_phases(
+    _: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
-    _: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db),
 ) -> GenericOut[List[PhaseOut]]:
     return GenericOut(
         result=[
@@ -32,9 +38,9 @@ def retrieve_all_phases(
 @router.get("/{phase_id}")
 def retrieve_phase(
     phase_id: UUID4,
+    _: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
-    _: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db),
 ) -> GenericOut[PhaseOut]:
     phase = db.query(PhaseModel).filter_by(id=str(phase_id)).first()
 

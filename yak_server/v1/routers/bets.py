@@ -1,3 +1,10 @@
+import sys
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -41,10 +48,10 @@ router = APIRouter(
 
 @router.get("/")
 def retrieve_all_bets(
+    user: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
-    user: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
 ) -> GenericOut[AllBetsResponse]:
     binary_bets = (
         user.binary_bets.join(BinaryBetModel.match)
@@ -88,10 +95,10 @@ def retrieve_all_bets(
 @router.get("/phases/{phase_code}")
 def retrieve_bets_by_phase_code(
     phase_code: str,
+    user: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
-    user: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
 ) -> GenericOut[BetsByPhaseCodeResponse]:
     phase, groups, score_bets, binary_bets = bets_from_phase_code(db, user, phase_code)
 
@@ -125,10 +132,10 @@ def retrieve_bets_by_phase_code(
 @router.get("/groups/{group_code}")
 def retrieve_bets_by_group_code(
     group_code: str,
+    user: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
-    user: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db),
-    settings: Settings = Depends(get_settings),
 ) -> GenericOut[BetsByGroupCodeResponse]:
     group, score_bets, binary_bets = bets_from_group_code(db, user, group_code)
 
@@ -162,9 +169,9 @@ def retrieve_bets_by_group_code(
 @router.get("/groups/rank/{group_code}")
 def retrieve_group_rank_by_code(
     group_code: str,
+    user: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
-    user: UserModel = Depends(get_current_user),
-    db: Session = Depends(get_db),
 ) -> GenericOut[GroupRankResponse]:
     group = db.query(GroupModel).filter_by(code=group_code).first()
 
