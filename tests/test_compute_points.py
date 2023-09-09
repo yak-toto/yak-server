@@ -45,7 +45,7 @@ def patch_score_bets(
     client: TestClient,
     user_name: str,
     new_scores: List[Tuple[Optional[int], Optional[int]]],
-):
+) -> Tuple[str, str, str]:
     # signup admin user
     first_name = get_random_string(6)
     last_name = get_random_string(10)
@@ -83,7 +83,7 @@ def patch_score_bets(
     return first_name, last_name, token
 
 
-def put_finale_phase(client: TestClient, token: str, is_one_won: Optional[bool]):
+def put_finale_phase(client: TestClient, token: str, is_one_won: Optional[bool]) -> None:
     response_post_finale_phase_bets_admin = client.post(
         "/api/v1/rules/492345de-8d4a-45b6-8b94-d219f2b0c3e9",
         headers={"Authorization": f"Bearer {token}"},
@@ -108,7 +108,7 @@ def put_finale_phase(client: TestClient, token: str, is_one_won: Optional[bool])
     assert response_patch_finale_phase.status_code == HTTPStatus.OK
 
 
-def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch"):
+def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
     client = TestClient(app)
 
     app.dependency_overrides[get_settings] = create_mock(
@@ -142,7 +142,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch"):
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
-        create_mock(data_folder="test_compute_points_v1"),
+        create_mock(data_folder_relative="test_compute_points_v1"),
     )
     initialize_database(app)
 

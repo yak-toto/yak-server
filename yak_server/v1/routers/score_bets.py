@@ -43,10 +43,7 @@ from yak_server.v1.models.teams import FlagOut, TeamWithScoreOut
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(
-    prefix="/score_bets",
-    tags=["score_bets"],
-)
+router = APIRouter(prefix="/score_bets", tags=["score_bets"])
 
 
 def send_response(

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from starlette.testclient import TestClient
 
 
-def test_phase(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyPatch"):
+def test_phase(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyPatch") -> None:
     fake_jwt_secret_key = get_random_string(100)
 
     app.dependency_overrides[get_settings] = create_mock(
@@ -27,7 +27,7 @@ def test_phase(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.Monkey
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
-        create_mock(data_folder="test_phase_v1"),
+        create_mock(data_folder_relative="test_phase_v1"),
     )
 
     initialize_database(app)

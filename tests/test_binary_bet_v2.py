@@ -16,14 +16,17 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_binary_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.MonkeyPatch"):
+def test_binary_bet(
+    app_with_valid_jwt_config: "FastAPI",
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     jwt_secret_key = app_with_valid_jwt_config.dependency_overrides[get_settings]().jwt_secret_key
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
-        create_mock(data_folder="test_binary_bet"),
+        create_mock(data_folder_relative="test_binary_bet"),
     )
     initialize_database(app_with_valid_jwt_config)
 

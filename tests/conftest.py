@@ -95,7 +95,7 @@ def production_app_with_profiler() -> Generator:
 
 
 @pytest.fixture()
-def app_with_valid_jwt_config(app: "FastAPI"):
+def app_with_valid_jwt_config(app: "FastAPI") -> None:
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = create_mock(
@@ -110,7 +110,7 @@ def app_with_valid_jwt_config(app: "FastAPI"):
 
 
 @pytest.fixture()
-def app_with_null_jwt_expiration_time(app: "FastAPI"):
+def app_with_null_jwt_expiration_time(app: "FastAPI") -> None:
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = create_mock(
@@ -125,7 +125,7 @@ def app_with_null_jwt_expiration_time(app: "FastAPI"):
 
 
 @pytest.fixture()
-def app_with_lock_datetime_in_past(app: "FastAPI"):
+def app_with_lock_datetime_in_past(app: "FastAPI") -> None:
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = create_mock(

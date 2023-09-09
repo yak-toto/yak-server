@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_modify_password(app_with_valid_jwt_config: "FastAPI"):
+def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     admin_name = "admin"
@@ -24,7 +24,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI"):
             "name": admin_name,
             "first_name": "admin",
             "last_name": "admin",
-            "password": "admin",
+            "password": get_random_string(9),
         },
     )
 
@@ -37,7 +37,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI"):
             "name": other_user_name,
             "first_name": "Guillaume",
             "last_name": "Le Pape",
-            "password": "password",
+            "password": get_random_string(18),
         },
     )
 
@@ -45,7 +45,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI"):
     authentication_token_glepape = response_signup_glepape.json()["result"]["token"]
 
     # Check update is properly process
-    new_password_other_user = "new_password"
+    new_password_other_user = get_random_string(15)
 
     response_modify_password = client.patch(
         f"/api/v1/users/{user_id}",

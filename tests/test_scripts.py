@@ -4,19 +4,19 @@ import pytest
 from scripts.compute_new_version import ReleaseType, compute_new_version
 
 
-def test_compute_new_version():
+def test_compute_new_version() -> None:
     assert compute_new_version("1.30.2", ReleaseType.MAJOR) == "2.0.0"
 
 
-def test_compute_new_minor_version():
+def test_compute_new_minor_version() -> None:
     assert compute_new_version("0.5.3", ReleaseType.MINOR) == "0.6.0"
 
 
-def test_compute_new_patch_version():
+def test_compute_new_patch_version() -> None:
     assert compute_new_version("5.4.1", ReleaseType.PATCH) == "5.4.2"
 
 
-def test_compute_incorrect_version():
+def test_compute_incorrect_version() -> None:
     major, minor = 1, 3
 
     with pytest.raises(
@@ -26,7 +26,7 @@ def test_compute_incorrect_version():
         compute_new_version(f"{major}.{minor}", ReleaseType.MAJOR)
 
 
-def test_compute_value_error():
+def test_compute_value_error() -> None:
     major, minor, patch = "a", 3, 6
 
     with pytest.raises(

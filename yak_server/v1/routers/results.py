@@ -27,9 +27,7 @@ from yak_server.v1.helpers.errors import NoResultsForAdminUser
 from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.results import UserResult
 
-router = APIRouter(
-    tags=["results"],
-)
+router = APIRouter(tags=["results"])
 
 
 @router.get("/score_board")
