@@ -12,10 +12,11 @@ from .utils import get_random_string
 from .utils.mock import create_mock
 
 if TYPE_CHECKING:
+    import pytest
     from fastapi import FastAPI
 
 
-def test_binary_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch):
+def test_binary_bet(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.MonkeyPatch"):
     client = TestClient(app_with_valid_jwt_config)
 
     jwt_secret_key = app_with_valid_jwt_config.dependency_overrides[get_settings]().jwt_secret_key

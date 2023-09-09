@@ -10,11 +10,12 @@ from .utils import get_random_string
 from .utils.mock import create_mock
 
 if TYPE_CHECKING:
+    import pytest
     from fastapi import FastAPI
     from starlette.testclient import TestClient
 
 
-def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch):
+def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyPatch"):
     fake_jwt_secret_key = get_random_string(100)
 
     app.dependency_overrides[get_settings] = create_mock(
@@ -358,7 +359,7 @@ def test_group_rank(app: "FastAPI", client: "TestClient", monkeypatch):
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    def sort_group_position(group_position):
+    def sort_group_position(group_position: dict):
         return group_position["team"]["code"]
 
     assert sorted(

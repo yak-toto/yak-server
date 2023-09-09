@@ -12,6 +12,7 @@ from .utils import get_random_string
 from .utils.mock import create_mock
 
 if TYPE_CHECKING:
+    import pytest
     from fastapi import FastAPI
 
 QUERY_SCORE_BOARD = """
@@ -107,7 +108,7 @@ def put_finale_phase(client: TestClient, token: str, is_one_won: Optional[bool])
     assert response_patch_finale_phase.status_code == HTTPStatus.OK
 
 
-def test_compute_points(app: "FastAPI", monkeypatch):
+def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch"):
     client = TestClient(app)
 
     app.dependency_overrides[get_settings] = create_mock(

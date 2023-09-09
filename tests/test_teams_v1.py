@@ -9,11 +9,12 @@ from yak_server.cli.database import initialize_database
 from .utils.mock import create_mock
 
 if TYPE_CHECKING:
+    import pytest
     from fastapi import FastAPI
     from starlette.testclient import TestClient
 
 
-def test_teams(app: "FastAPI", client: "TestClient", monkeypatch):
+def test_teams(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyPatch"):
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         create_mock(data_folder="test_teams_v1"),

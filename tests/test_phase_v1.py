@@ -11,11 +11,12 @@ from .utils import get_random_string
 from .utils.mock import create_mock
 
 if TYPE_CHECKING:
+    import pytest
     from fastapi import FastAPI
     from starlette.testclient import TestClient
 
 
-def test_phase(app: "FastAPI", client: "TestClient", monkeypatch):
+def test_phase(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyPatch"):
     fake_jwt_secret_key = get_random_string(100)
 
     app.dependency_overrides[get_settings] = create_mock(

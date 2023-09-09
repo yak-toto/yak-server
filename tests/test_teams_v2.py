@@ -11,10 +11,11 @@ from .utils import get_random_string
 from .utils.mock import create_mock
 
 if TYPE_CHECKING:
+    import pytest
     from fastapi import FastAPI
 
 
-def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch):
+def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.MonkeyPatch"):
     client = TestClient(app_with_valid_jwt_config)
 
     monkeypatch.setattr(
