@@ -1274,6 +1274,26 @@ wheels = [
 ]
 
 [[package]]
+name = "slipcover"
+version = "1.0.16"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "tabulate" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/90/af/036f83dfd54612b6ea6b4dadfc59148d111d5490caa6db1352f977f1ae14/slipcover-1.0.16.tar.gz", hash = "sha256:b8293f7e2be3e8c3883e22a1c202f61811627faf05035bd1a03a29689ae9f05e", size = 58189, upload-time = "2024-11-24T17:02:49.374Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cd/85/6cfbb4e9553147d97be69c3d14652184d39c981e894bf3ca0177c9cc58c1/slipcover-1.0.16-cp310-abi3-macosx_13_0_universal2.whl", hash = "sha256:3ecaf29e495b8d671d7a8fc0546f12da6a11ec15cae287f42512df7daabe8988", size = 46333, upload-time = "2024-11-24T17:08:36.378Z" },
+    { url = "https://files.pythonhosted.org/packages/e1/49/7e287fca54c7b16eb0717cbe06aa4be04df540e23eab5a9b2c8d98df1081/slipcover-1.0.16-cp310-abi3-macosx_14_0_universal2.whl", hash = "sha256:90594b3575cd393ad3eedee58878a595cd1562fc31a324e0f412bba17b902dec", size = 45805, upload-time = "2024-11-24T17:04:22.67Z" },
+    { url = "https://files.pythonhosted.org/packages/34/83/a57ce36d39b3f65b6f93174240447a846d8034132b992641d113950b5dd1/slipcover-1.0.16-cp310-abi3-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0523ff5b0a97b5585be7773f8745ece649bfe74e0e8ef80a4e8fce5121856ed5", size = 52562, upload-time = "2024-11-24T17:03:14.849Z" },
+    { url = "https://files.pythonhosted.org/packages/5f/28/6462d9a676a721ac47f265f1cbbfb9a0992877c0ac37d83a0119a47ef15f/slipcover-1.0.16-cp310-abi3-win_amd64.whl", hash = "sha256:10b82c6e1964d85ccea4478a3d2f2e237296571d05198003264c7a8c328682a2", size = 89217, upload-time = "2024-11-24T17:03:46.065Z" },
+    { url = "https://files.pythonhosted.org/packages/23/bc/80c3956e06cca6e3b7c95718505de084c5f3a86b5b380624be9b39241390/slipcover-1.0.16-cp39-cp39-macosx_13_0_universal2.whl", hash = "sha256:30ff1977930251810001f7e381a7ab409eb2d0c1648280d8b213ce70f37c634d", size = 46363, upload-time = "2024-11-24T17:08:08.022Z" },
+    { url = "https://files.pythonhosted.org/packages/77/00/13d469cb55708b91474c1fb38b60a43e4c8edfa030d8face56e74e195b64/slipcover-1.0.16-cp39-cp39-macosx_14_0_universal2.whl", hash = "sha256:292bd2a75aa168eb53ac6b5c1ee4bf650b5a10deb0d033dbd2ea764ce3942c82", size = 45839, upload-time = "2024-11-24T17:08:12.453Z" },
+    { url = "https://files.pythonhosted.org/packages/5e/bd/418c1079dc9ece6e8ed3de022ec7cc2ea260733f657f680b4ad4839ea1de/slipcover-1.0.16-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8050f828731904b683180d609010d1763f308a233a359c113b4a2d722bcad63d", size = 55303, upload-time = "2024-11-24T17:03:14.255Z" },
+    { url = "https://files.pythonhosted.org/packages/c7/cd/8f07c610538e29b2f9a01e47e5f1806e77596a93cc3fe4d9e2f644de089c/slipcover-1.0.16-cp39-cp39-win_amd64.whl", hash = "sha256:644f58a7b865fa17b236c44f7530c8b75f53aef3bd671a187e1e918cfd37b0b5", size = 89272, upload-time = "2024-11-24T17:03:11.239Z" },
+    { url = "https://files.pythonhosted.org/packages/9f/19/d42ac85de31554321e59d146400f586bd241deb05d39467b992f12e6ee3f/slipcover-1.0.16-py312-none-any.whl", hash = "sha256:d3c2970816d16ee896bc616687e4e041f9a896063817f09a8bd006fa28c09d05", size = 35437, upload-time = "2024-11-24T17:02:47.734Z" },
+]
+
+[[package]]
 name = "sniffio"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1370,6 +1390,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/92/94/c7732096c3f420fbd66fe944cb377188ce799041e8d336aafad1aba32162/strawberry_graphql-0.275.7.tar.gz", hash = "sha256:431c19a084452e5dd015994e9a8cf82fee0dbcc46bcc662e5f74c56d23e73e81", size = 209679, upload-time = "2025-07-14T14:20:00.857Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/56/d6/41e61c14fe041f7b11e09dc0b4c41e06e20900e5c2d8917da94bd13c7a7a/strawberry_graphql-0.275.7-py3-none-any.whl", hash = "sha256:3543a9afe7ce76f475303999660ce6eece2593014277ef97ba73fe201992a360", size = 306324, upload-time = "2025-07-14T14:19:58.244Z" },
+]
+
+[[package]]
+name = "tabulate"
+version = "0.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ec/fe/802052aecb21e3797b8f7902564ab6ea0d60ff8ca23952079064155d1ae1/tabulate-0.9.0.tar.gz", hash = "sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c", size = 81090, upload-time = "2022-10-06T17:21:48.54Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/40/44/4a5f08c96eb108af5cb50b41f76142f0afa346dfa99d5296fe7202a11854/tabulate-0.9.0-py3-none-any.whl", hash = "sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f", size = 35252, upload-time = "2022-10-06T17:21:44.262Z" },
 ]
 
 [[package]]
@@ -1786,6 +1815,7 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-env" },
+    { name = "slipcover" },
     { name = "yappi" },
 ]
 type-checking = [
@@ -1821,6 +1851,7 @@ dev = [
     { name = "pytest", specifier = ">=8.4.0" },
     { name = "pytest-cov", specifier = ">=6.0.0" },
     { name = "pytest-env", specifier = ">=1.1.5" },
+    { name = "slipcover", specifier = ">=1.0.16" },
     { name = "yappi", specifier = ">=1.6.10" },
 ]
 type-checking = [
