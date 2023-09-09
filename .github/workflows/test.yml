@@ -69,7 +69,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ env.password }}
           POSTGRES_PORT: ${{ env.port }}
           POSTGRES_DB: ${{ env.database }}
-        run: uv run pytest --cov=yak_server --cov=scripts --cov=tests --cov=testing --cov-report=xml --cov-config=pyproject.toml -vv
+        run: uv run slipcover --branch --source yak_server,scripts,tests,testing --out coverage.json --json -m pytest -vv
         if: ${{ always() }}
 
       - name: Upload coverage reports to Codecov

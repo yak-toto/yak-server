@@ -60,6 +60,7 @@ dev = [
     "pytest==8.4.2",
     "pytest-cov==7.0.0",
     "pytest-env==1.2.0",
+    "slipcover==1.0.17",
     "uvicorn[standard]==0.38.0",
     "yappi==1.7.3",
 ]
