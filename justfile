@@ -2,6 +2,7 @@ alias s := setup
 alias i := install
 alias t := test
 alias tc := test-cov
+alias tcs := test-cov-slipcover
 alias r := run
 alias c := check
 alias f := fmt
@@ -27,6 +28,9 @@ test-cov:
       --cov-report=xml \
       --cov-config={{ justfile_directory() }}/pyproject.toml \
       -vv
+
+test-cov-slipcover:
+    slipcover --branch --source yak_server,scripts,tests --out coverage.json --json -m pytest -vv
 
 run:
     uvicorn --reload --factory yak_server:create_app
