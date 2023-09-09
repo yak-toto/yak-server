@@ -10,10 +10,11 @@ from .utils import get_random_string
 from .utils.mock import create_mock
 
 if TYPE_CHECKING:
+    import pytest
     from fastapi import FastAPI
 
 
-def test_phase(app_with_lock_datetime_in_past: "FastAPI", monkeypatch):
+def test_phase(app_with_lock_datetime_in_past: "FastAPI", monkeypatch: "pytest.MonkeyPatch"):
     client = TestClient(app_with_lock_datetime_in_past)
 
     monkeypatch.setattr(

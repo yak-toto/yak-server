@@ -5,7 +5,7 @@ from datetime import datetime
 from dateutil import tz
 
 
-def get_random_string(length):
+def get_random_string(length: int):
     return "".join(secrets.choice(string.ascii_letters) for _ in range(length))
 
 
