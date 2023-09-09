@@ -2,7 +2,6 @@ import json
 import logging
 import subprocess
 from datetime import datetime, timezone
-from getpass import getpass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -35,11 +34,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class ConfirmPasswordDoesNotMatch(Exception):
-    def __init__(self) -> None:
-        super().__init__("Password and Confirm Password fields does not match.")
-
-
 class RecordDeletionInProduction(Exception):
     def __init__(self) -> None:
         super().__init__("Trying to delete records in production using script. DO NOT DO IT.")
@@ -59,13 +53,7 @@ def create_database() -> None:
     Base.metadata.create_all(bind=engine)
 
 
-def create_admin() -> None:
-    password = getpass(prompt="Admin user password: ")
-    confirm_password = getpass(prompt="Confirm admin password: ")
-
-    if password != confirm_password:
-        raise ConfirmPasswordDoesNotMatch
-
+def create_admin(password: str) -> None:
     db = SessionLocal()
 
     _ = signup_user(
