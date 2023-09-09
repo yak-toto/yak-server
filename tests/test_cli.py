@@ -37,14 +37,15 @@ def test_create_admin(app: "FastAPI", monkeypatch):
     client = TestClient(app)
 
     # Error case : password and confirm password does not match
-    mock_password_does_not_match = Mock(
-        side_effect=[
-            lambda prompt: get_random_string(6),  # noqa: ARG005
-            lambda prompt: get_random_string(8),  # noqa: ARG005
-        ],
+    monkeypatch.setattr(
+        "yak_server.cli.database.getpass",
+        Mock(
+            side_effect=[
+                Mock(return_value=get_random_string(6)),
+                Mock(return_value=get_random_string(8)),
+            ],
+        ),
     )
-
-    monkeypatch.setattr("yak_server.cli.database.getpass", mock_password_does_not_match)
 
     with pytest.raises(ConfirmPasswordDoesNotMatch):
         create_admin()
@@ -52,10 +53,7 @@ def test_create_admin(app: "FastAPI", monkeypatch):
     # Success case : create admin using script and test login is OK
     password_admin = get_random_string(6)
 
-    monkeypatch.setattr(
-        "yak_server.cli.database.getpass",
-        lambda prompt: password_admin,  # noqa: ARG005
-    )
+    monkeypatch.setattr("yak_server.cli.database.getpass", Mock(return_value=password_admin))
 
     create_admin()
 
@@ -73,10 +71,7 @@ def test_create_admin(app: "FastAPI", monkeypatch):
     # if signup call is KO (Here admin already exists in db)
     password_admin = get_random_string(6)
 
-    monkeypatch.setattr(
-        "yak_server.cli.database.getpass",
-        lambda prompt: password_admin,  # noqa: ARG005
-    )
+    monkeypatch.setattr("yak_server.cli.database.getpass", Mock(return_value=password_admin))
 
     with pytest.raises(NameAlreadyExists):
         create_admin()

@@ -157,11 +157,15 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch):
         key=itemgetter("code"),
     ) == sorted(expected_teams, key=itemgetter("code"))
 
-    team_id = next(
-        team["id"]
+    team_norway = [
+        team
         for team in response_all_teams.json()["data"]["allTeamsResult"]["teams"]
         if team["description"] == "Norvège"
-    )
+    ]
+
+    assert len(team_norway) == 1
+
+    team_norway_id = team_norway[0]["id"]
 
     response_all_teams_invalid_token = client.post(
         "/api/v2",
@@ -206,7 +210,7 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch):
         json={
             "query": team_by_id_query,
             "variables": {
-                "teamId": team_id,
+                "teamId": team_norway_id,
             },
         },
         headers={"Authorization": f"Bearer {auth_token}"},
@@ -218,8 +222,8 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch):
                 "__typename": "Team",
                 "code": "NO",
                 "description": "Norvège",
-                "flag": {"url": f"/api/v1/teams/{team_id}/flag"},
-                "id": team_id,
+                "flag": {"url": f"/api/v1/teams/{team_norway_id}/flag"},
+                "id": team_norway_id,
             },
         },
     }
@@ -288,8 +292,8 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch):
                 "__typename": "Team",
                 "code": "NO",
                 "description": "Norvège",
-                "flag": {"url": f"/api/v1/teams/{team_id}/flag"},
-                "id": team_id,
+                "flag": {"url": f"/api/v1/teams/{team_norway_id}/flag"},
+                "id": team_norway_id,
             },
         },
     }

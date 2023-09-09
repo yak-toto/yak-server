@@ -207,15 +207,18 @@ def test_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
     # Success case : Change team2
     response_all_teams = client.get("/api/v1/teams")
 
-    for team in response_all_teams.json()["result"]["teams"]:
-        if team["code"] == "ES":
-            team_id = team["id"]
-            break
+    team_spain = [
+        team for team in response_all_teams.json()["result"]["teams"] if team["code"] == "ES"
+    ]
+
+    assert len(team_spain) == 1
+
+    team_spain = team_spain[0]["id"]
 
     response_change_team2 = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
         headers={"Authorization": f"Bearer {token}"},
-        json={"team2": {"id": team_id}},
+        json={"team2": {"id": team_spain}},
     )
 
     assert response_change_team2.status_code == HTTPStatus.OK
@@ -224,7 +227,7 @@ def test_binary_bet(app: "FastAPI", client: "TestClient", monkeypatch):
         "locked": False,
         "team1": None,
         "team2": {
-            "id": team_id,
+            "id": team_spain,
             "code": "ES",
             "description": "Espagne",
             "flag": ANY,
