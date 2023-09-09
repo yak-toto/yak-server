@@ -1,15 +1,21 @@
 import json
 import secrets
 from configparser import ConfigParser
-from getpass import getpass
+from enum import Enum
 from pathlib import Path
 from uuid import UUID
 
+import typer
 from dateutil import parser
 
 from yak_server.database import MySQLSettings
 from yak_server.helpers.rules import RULE_MAPPING
 from yak_server.helpers.settings import RuleContainer, Rules
+
+
+class YesOrNo(str, Enum):
+    y = "y"
+    n = "n"
 
 
 class RuleNotDefined(Exception):
@@ -22,38 +28,33 @@ class EnvBuilder:
         self.env = {}
         self.env_mysql = {}
 
-        debug = input("DEBUG (y/n): ")
+        debug = typer.prompt("DEBUG (y/n)", type=YesOrNo)
 
-        self.debug = debug == "y"
+        self.debug = debug == YesOrNo.y
         self.env["DEBUG"] = 1 if self.debug else 0
 
     def setup_profiling(self) -> None:
         if self.debug:
-            profiling = input("PROFILING (y/n): ")
+            profiling = typer.prompt("PROFILING (y/n)", type=YesOrNo)
 
-            self.env["PROFILING"] = 1 if profiling == "y" else 0
+            self.env["PROFILING"] = 1 if profiling == YesOrNo.y else 0
 
     def setup_mysql_env(self) -> None:
-        user_name = input("MYSQL USER NAME: ")
-        password = getpass("MYSQL PASSWORD: ")
-        port = input("MYSQL PORT (default: 3306): ")
-        db = input("MYSQL DB: ")
+        user_name = typer.prompt("MYSQL USER NAME")
+        password = typer.prompt("MYSQL PASSWORD", hide_input=True)
+        port = typer.prompt("MYSQL PORT", type=int, default=3306)
+        db = typer.prompt("MYSQL DB")
 
-        # try to instance pydantic model to check if
-        # settings are ok
-        if not port:
-            MySQLSettings(user_name=user_name, password=password, db=db)
-        else:
-            MySQLSettings(user_name=user_name, password=password, port=port, db=db)
+        # try to instance pydantic model to check if settings are ok
+        MySQLSettings(user_name=user_name, password=password, port=port, db=db)
 
         self.env_mysql["MYSQL_USER_NAME"] = user_name
         self.env_mysql["MYSQL_PASSWORD"] = password
-        if port:
-            self.env_mysql["MYSQL_PORT"] = port
+        self.env_mysql["MYSQL_PORT"] = port
         self.env_mysql["MYSQL_DB"] = db
 
     def setup_jwt(self) -> None:
-        jwt_expiration_time = input("JWT_EXPIRATION_TIME: ")
+        jwt_expiration_time = typer.prompt("JWT_EXPIRATION_TIME")
 
         self.env["JWT_EXPIRATION_TIME"] = jwt_expiration_time
         self.env["JWT_SECRET_KEY"] = secrets.token_hex(128)
@@ -67,7 +68,7 @@ class EnvBuilder:
         for index, competition in enumerate(available_competitions, 1):
             print(f"{index} - {competition}")
 
-        competition_choice = int(input("Choose your competition: "))
+        competition_choice = typer.prompt("Choose your competition", type=int)
 
         competition = available_competitions[competition_choice - 1]
 

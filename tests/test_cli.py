@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from pathlib import Path
 from typing import TYPE_CHECKING
-from unittest.mock import Mock
 
 import pytest
 from dateutil import parser
@@ -10,7 +9,6 @@ from starlette.testclient import TestClient
 
 from yak_server.cli.database import (
     BackupError,
-    ConfirmPasswordDoesNotMatch,
     RecordDeletionInProduction,
     TableDropInProduction,
     backup_database,
@@ -28,7 +26,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_create_admin(app: "FastAPI", monkeypatch: pytest.MonkeyPatch):
+def test_create_admin(app: "FastAPI"):
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=20,
         jwt_secret_key=get_random_string(10),
@@ -36,26 +34,10 @@ def test_create_admin(app: "FastAPI", monkeypatch: pytest.MonkeyPatch):
 
     client = TestClient(app)
 
-    # Error case : password and confirm password does not match
-    monkeypatch.setattr(
-        "yak_server.cli.database.getpass",
-        Mock(
-            side_effect=[
-                Mock(return_value=get_random_string(6)),
-                Mock(return_value=get_random_string(8)),
-            ],
-        ),
-    )
-
-    with pytest.raises(ConfirmPasswordDoesNotMatch):
-        create_admin()
-
     # Success case : create admin using script and test login is OK
     password_admin = get_random_string(6)
 
-    monkeypatch.setattr("yak_server.cli.database.getpass", Mock(return_value=password_admin))
-
-    create_admin()
+    create_admin(password_admin)
 
     response_login = client.post(
         "/api/v1/users/login",
@@ -71,10 +53,8 @@ def test_create_admin(app: "FastAPI", monkeypatch: pytest.MonkeyPatch):
     # if signup call is KO (Here admin already exists in db)
     password_admin = get_random_string(6)
 
-    monkeypatch.setattr("yak_server.cli.database.getpass", Mock(return_value=password_admin))
-
     with pytest.raises(NameAlreadyExists):
-        create_admin()
+        create_admin(password_admin)
 
 
 def test_delete_all_records(production_app: "FastAPI"):

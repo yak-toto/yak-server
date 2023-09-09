@@ -1,48 +1,41 @@
 import os
-import subprocess
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import pexpect
 from dateutil import parser
 from starlette.testclient import TestClient
+from typer.testing import CliRunner
+
+from yak_server.cli import app
 
 from .utils import get_random_string
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
+runner = CliRunner()
+
 
 def test_cli(app_with_valid_jwt_config: "FastAPI"):
     # Check database drop
-    result = subprocess.run(
-        ["yak", "db", "drop"],
-        capture_output=True,
-        env={**os.environ, "DEBUG": "1"},
-        check=True,
-    )
+    result = runner.invoke(app, ["db", "drop"], env={"DEBUG": "1"})
 
-    assert result.returncode == 0
+    assert result.exit_code == 0
 
     # Check database creation
-    result = subprocess.run(
-        ["yak", "db", "create"],
-        capture_output=True,
-        check=True,
-    )
+    result = runner.invoke(app, ["db", "create"])
 
-    assert result.returncode == 0
+    assert result.exit_code == 0
 
     # Check database initialization
     data_folder = str((Path(__file__).parents[1] / "yak_server/data/world_cup_2022").resolve())
 
-    result = subprocess.run(
-        ["yak", "db", "init"],
-        capture_output=True,
+    result = runner.invoke(
+        app,
+        ["db", "init"],
         env={
-            **os.environ,
             "JWT_EXPIRATION_TIME": "1800",
             "JWT_SECRET_KEY": get_random_string(128),
             "COMPETITION": "world_cup_2022",
@@ -56,18 +49,17 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
             "FIRST_TEAM_QUALIFIED": "20",
             "RULES": "[]",
         },
-        check=True,
     )
 
-    assert result.returncode == 0
+    assert result.exit_code == 0
 
     # Check admin account creation
     admin_password = get_random_string(7)
 
-    child = pexpect.spawn(
-        "yak db admin",
+    result = runner.invoke(
+        app,
+        ["db", "admin"],
         env={
-            **os.environ,
             "JWT_EXPIRATION_TIME": "1800",
             "JWT_SECRET_KEY": get_random_string(128),
             "COMPETITION": "world_cup_2022",
@@ -81,18 +73,10 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
             "FIRST_TEAM_QUALIFIED": "20",
             "RULES": "[]",
         },
+        input=f"{admin_password}\n{admin_password}\n",
     )
 
-    child.expect("Admin user password: ", timeout=100)
-    child.sendline(admin_password)
-    child.expect("Confirm admin password: ", timeout=100)
-    child.sendline(admin_password)
-    child.expect(pexpect.EOF)
-
-    child.close()
-
-    assert child.exitstatus == 0
-    assert child.signalstatus is None
+    assert result.exit_code == 0
 
     client = TestClient(app_with_valid_jwt_config)
 
@@ -110,9 +94,9 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
     user_id = response_login.json()["result"]["id"]
 
     # Check backup command
-    result = subprocess.run(["yak", "db", "backup"], capture_output=True, check=True)
+    result = runner.invoke(app, ["db", "backup"])
 
-    assert result.returncode == 0
+    assert result.exit_code == 0
 
     list_datetime_backup = sorted(
         parser.parse(file.name.replace(".sql", "").replace("yak_toto_backup_", ""))
@@ -123,14 +107,9 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
     assert datetime.now(tz=timezone.utc) - list_datetime_backup[-1] <= timedelta(seconds=2)
 
     # Check records deletion
-    result = subprocess.run(
-        ["yak", "db", "delete"],
-        capture_output=True,
-        env={**os.environ, "DEBUG": "1"},
-        check=True,
-    )
+    result = runner.invoke(app, ["db", "delete"], env={**os.environ, "DEBUG": "1"})
 
-    assert result.returncode == 0
+    assert result.exit_code == 0
 
     # Check user cannot access after records are cleaned
     response_login_user_not_found = client.get(
@@ -179,6 +158,6 @@ def test_cli(app_with_valid_jwt_config: "FastAPI"):
     }
 
     # Test the migration helper command line
-    result = subprocess.run(["yak", "db", "migration"], capture_output=True, check=True)
+    result = runner.invoke(app, ["db", "migration"])
 
-    assert result.returncode == 0
+    assert result.exit_code == 0
