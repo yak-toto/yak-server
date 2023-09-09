@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 runner = CliRunner()
 
 
-def test_cli(app_with_valid_jwt_config: "FastAPI"):
+def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
     # Check database drop
     result = runner.invoke(app, ["db", "drop"], env={"DEBUG": "1"})
 

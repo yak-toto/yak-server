@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from starlette.testclient import TestClient
 
 
-def test_rule(app: "FastAPI", client: "TestClient"):
+def test_rule(app: "FastAPI", client: "TestClient") -> None:
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=10,
         jwt_secret_key=get_random_string(100),

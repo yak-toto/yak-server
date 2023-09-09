@@ -71,7 +71,7 @@ QUERY_MODIFY_USER = """
 """
 
 
-def test_modify_password(app_with_valid_jwt_config: "FastAPI"):
+def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     # Create admin account
@@ -117,7 +117,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI"):
     authentication_token_glepape = response_signup_glepape.json()["data"]["signupResult"]["token"]
 
     # Check update is properly process
-    new_password_other_user = "new_password"
+    new_password_other_user = get_random_string(15)
 
     response_modify_password = client.post(
         "/api/v2",

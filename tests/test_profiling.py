@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_debug_profiling(debug_app_with_profiler: "FastAPI"):
+def test_debug_profiling(debug_app_with_profiler: "FastAPI") -> None:
     client = TestClient(debug_app_with_profiler)
 
     user_name = get_random_string(6)
@@ -35,7 +35,7 @@ def test_debug_profiling(debug_app_with_profiler: "FastAPI"):
     assert profiling_file.exists()
 
 
-def test_production_profiling(production_app_with_profiler: "FastAPI"):
+def test_production_profiling(production_app_with_profiler: "FastAPI") -> None:
     client = TestClient(production_app_with_profiler)
 
     user_name = get_random_string(6)

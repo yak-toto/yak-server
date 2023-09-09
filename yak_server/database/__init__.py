@@ -45,7 +45,7 @@ SQLALCHEMY_DATABASE_URL = compute_database_uri(
     mysql_settings.db,
 )
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_recycle=1800)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_recycle=1800, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

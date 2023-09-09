@@ -40,10 +40,7 @@ from yak_server.v1.models.groups import GroupOut, GroupWithPhaseIdOut
 from yak_server.v1.models.phases import PhaseOut
 from yak_server.v1.models.score_bets import ScoreBetOut, ScoreBetWithGroupIdOut
 
-router = APIRouter(
-    prefix="/bets",
-    tags=["bets"],
-)
+router = APIRouter(prefix="/bets", tags=["bets"])
 
 
 @router.get("/")

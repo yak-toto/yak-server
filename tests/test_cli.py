@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_create_admin(app: "FastAPI"):
+def test_create_admin(app: "FastAPI") -> None:
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=20,
         jwt_secret_key=get_random_string(10),
@@ -57,17 +57,17 @@ def test_create_admin(app: "FastAPI"):
         create_admin(password_admin)
 
 
-def test_delete_all_records(production_app: "FastAPI"):
+def test_delete_all_records(production_app: "FastAPI") -> None:
     with pytest.raises(RecordDeletionInProduction):
         delete_database(production_app)
 
 
-def test_drop_all_tables(production_app: "FastAPI"):
+def test_drop_all_tables(production_app: "FastAPI") -> None:
     with pytest.raises(TableDropInProduction):
         drop_database(production_app)
 
 
-def test_backup(monkeypatch: pytest.MonkeyPatch):
+def test_backup(monkeypatch: pytest.MonkeyPatch) -> None:
     backup_database()
 
     list_datetime_backup = sorted(

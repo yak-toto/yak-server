@@ -16,12 +16,12 @@ if TYPE_CHECKING:
 def test_modify_score_bet_and_group_rank(
     app_with_valid_jwt_config: "FastAPI",
     monkeypatch: "pytest.MonkeyPatch",
-):
+) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
-        create_mock(data_folder="test_modify_score_bet_and_group_rank"),
+        create_mock(data_folder_relative="test_modify_score_bet_and_group_rank"),
     )
     initialize_database(app_with_valid_jwt_config)
 

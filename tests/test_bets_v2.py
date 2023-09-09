@@ -14,12 +14,12 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_bets(app_with_lock_datetime_in_past: "FastAPI", monkeypatch: "pytest.MonkeyPatch"):
+def test_bets(app_with_lock_datetime_in_past: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
     client = TestClient(app_with_lock_datetime_in_past)
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
-        create_mock(data_folder="test_modify_bet_v2"),
+        create_mock(data_folder_relative="test_modify_bet_v2"),
     )
 
     initialize_database(app_with_lock_datetime_in_past)
