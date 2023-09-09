@@ -20,7 +20,7 @@ def test_group_rank_and_modify_score_bet(
     app: "FastAPI",
     client: "TestClient",
     monkeypatch: "pytest.MonkeyPatch",
-):
+) -> None:
     fake_jwt_secret_key = get_random_string(100)
 
     app.dependency_overrides[get_settings] = create_mock(
@@ -31,7 +31,7 @@ def test_group_rank_and_modify_score_bet(
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
-        create_mock(data_folder="test_modify_bet_v2"),
+        create_mock(data_folder_relative="test_modify_bet_v2"),
     )
 
     initialize_database(app)

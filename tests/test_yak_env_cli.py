@@ -12,7 +12,7 @@ from .utils import get_random_string
 runner = CliRunner()
 
 
-def test_yak_env_init():
+def test_yak_env_init() -> None:
     user_name = get_random_string(15)
     password = get_random_string(250)
     port = randbelow(80000)
@@ -52,7 +52,7 @@ def test_yak_env_init():
         assert env_mysql["MYSQL_DB"] == database
 
 
-def test_yak_env_init_production():
+def test_yak_env_init_production() -> None:
     with runner.isolated_filesystem():
         result = runner.invoke(
             app,

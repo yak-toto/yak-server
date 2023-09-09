@@ -13,12 +13,12 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.MonkeyPatch"):
+def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
-        create_mock(data_folder="test_language"),
+        create_mock(data_folder_relative="test_language"),
     )
     initialize_database(app_with_valid_jwt_config)
 

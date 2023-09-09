@@ -63,7 +63,7 @@ QUERY_CURRENT_USER = """
 """
 
 
-def test_signup_and_login(app_with_valid_jwt_config: "FastAPI"):
+def test_signup_and_login(app_with_valid_jwt_config: "FastAPI") -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(10)
@@ -129,7 +129,7 @@ def test_signup_and_login(app_with_valid_jwt_config: "FastAPI"):
     }
 
 
-def test_signup_and_invalid_token(app_with_valid_jwt_config: "FastAPI"):
+def test_signup_and_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(10)
@@ -243,7 +243,7 @@ def test_signup_and_invalid_token(app_with_valid_jwt_config: "FastAPI"):
     }
 
 
-def test_name_already_exists(app_with_valid_jwt_config: "FastAPI"):
+def test_name_already_exists(app_with_valid_jwt_config: "FastAPI") -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(8)
@@ -280,7 +280,7 @@ def test_name_already_exists(app_with_valid_jwt_config: "FastAPI"):
     }
 
 
-def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI"):
+def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI") -> None:
     client = TestClient(app_with_null_jwt_expiration_time)
 
     user_name = get_random_string(6)
