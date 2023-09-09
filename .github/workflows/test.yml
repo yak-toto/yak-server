@@ -15,7 +15,7 @@ jobs:
   unit-tests:
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
@@ -47,11 +47,14 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-tests.txt
 
+      - name: Install coverage
+        run: pip install git+https://github.com/guillaumeLepape/slipcover.git@xml_report
+
       - name: Run test
         env:
           MYSQL_USER_NAME: ${{ secrets.MYSQL_USER_NAME }}
           MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-        run: pytest --cov=yak_server --cov=scripts --cov=tests --cov-report=xml --cov-config=pyproject.toml -vv
+        run: slipcover --xml --out coverage.xml --source=scripts,yak_server,tests -m pytest -vv
         if: ${{ always() }}
 
       - name: Upload coverage reports to Codecov

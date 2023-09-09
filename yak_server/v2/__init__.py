@@ -29,8 +29,4 @@ def get_schema(*, debug: bool) -> strawberry.Schema:
     if not debug:
         extensions.append(AddValidationRules([NoSchemaIntrospectionCustomRule]))
 
-    return strawberry.Schema(
-        query=Query,
-        mutation=Mutation,
-        extensions=extensions,
-    )
+    return strawberry.Schema(query=Query, mutation=Mutation, extensions=extensions)
