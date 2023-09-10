@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from sqlalchemy import text as sa_text
+
 from yak_server.database import Base, SessionLocal, engine, mysql_settings
 from yak_server.database.models import (
     BinaryBetModel,
@@ -190,7 +192,17 @@ def drop_database(app: "FastAPI") -> None:
     if not app.debug:
         raise TableDropInProduction
 
-    Base.metadata.drop_all(bind=engine)
+    with engine.connect():
+        # delete all table data (but keep tables)
+        # we do cleanup before test 'cause if previous test errored,
+        # DB can contain dust
+        con = engine.connect()
+        trans = con.begin()
+        con.execute(sa_text("SET FOREIGN_KEY_CHECKS = 0"))
+        for table in Base.metadata.sorted_tables:
+            con.execute(table.delete())
+        con.execute(sa_text("SET FOREIGN_KEY_CHECKS = 1"))
+        trans.commit()
 
 
 def setup_migration() -> None:
