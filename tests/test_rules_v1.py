@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
-from yak_server.helpers.settings import RuleContainer, Rules, get_settings
+from yak_server.helpers.settings import Rules, get_settings
 
 from .utils import get_random_string
 from .utils.mock import create_mock
@@ -16,7 +16,7 @@ def test_rule(app: "FastAPI", client: "TestClient") -> None:
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=10,
         jwt_secret_key=get_random_string(100),
-        rules=Rules([RuleContainer(id="9bfa5f83-09ff-4e63-95fc-aaf9177d5d07", config={})]),
+        rules=Rules(),
     )
 
     response_signup = client.post(
