@@ -190,7 +190,12 @@ def drop_database(app: "FastAPI") -> None:
     if not app.debug:
         raise TableDropInProduction
 
-    Base.metadata.drop_all(bind=engine)
+    with engine.connect():
+        con = engine.connect()
+        trans = con.begin()
+        for table in Base.metadata.sorted_tables:
+            con.execute(table.delete())
+        trans.commit()
 
 
 def setup_migration() -> None:
