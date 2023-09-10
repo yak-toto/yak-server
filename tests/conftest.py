@@ -34,7 +34,9 @@ def app_session() -> Generator:
 @pytest.fixture(scope="module")
 def app(app_session: "FastAPI") -> Generator:
     # Clean database before running test
-    delete_database(app_session)
+    delete_database(
+        app_session,
+    )
 
     yield app_session
 
