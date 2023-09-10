@@ -11,6 +11,7 @@ from yak_server.helpers.rules.compute_final_from_rank import (
     Team,
     Versus,
 )
+from yak_server.helpers.rules.compute_points import RuleComputePoints
 from yak_server.helpers.settings import Rules, get_settings
 
 from .utils import get_random_string
@@ -126,6 +127,14 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
                 from_phase="GROUP",
                 versus=[Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="A"))],
             ),
+            compute_points=RuleComputePoints(
+                base_correct_result=1,
+                multiplying_factor_correct_result=2,
+                base_correct_score=3,
+                multiplying_factor_correct_score=7,
+                team_qualified=10,
+                first_team_qualified=20,
+            ),
         ),
         base_correct_result=1,
         multiplying_factor_correct_result=2,
@@ -161,7 +170,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
 
     # Success case : compute_points call
     response_compute_points = client.post(
-        "/api/v1/compute_points",
+        "/api/v1/rules/62d46542-8cf1-4a3b-af77-a5086f10ac59",
         headers={"Authorization": f"Bearer {admin_token}"},
     )
 
@@ -169,7 +178,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
 
     # Error case : check unauthorized admin access to compute_points
     response_compute_points_unauthorized = client.post(
-        "/api/v1/compute_points",
+        "/api/v1/rules/62d46542-8cf1-4a3b-af77-a5086f10ac59",
         headers={"Authorization": f"Bearer {user_token}"},
     )
 
@@ -242,7 +251,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
 
     # Compute points again
     response_compute_points = client.post(
-        "/api/v1/compute_points",
+        "/api/v1/rules/62d46542-8cf1-4a3b-af77-a5086f10ac59",
         headers={"Authorization": f"Bearer {admin_token}"},
     )
 
