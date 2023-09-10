@@ -68,6 +68,7 @@ def make_env_typer() -> typer.Typer:
     @env_typer.command()
     def init() -> None:
         """Build the env files you need to start the server."""
+
         init_env()
 
     return env_typer

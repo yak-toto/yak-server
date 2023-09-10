@@ -5,7 +5,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from yak_server.database import Base, SessionLocal, engine, mysql_settings
+from sqlalchemy.orm import Session
+
+from yak_server.database import Base, engine, mysql_settings
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
@@ -50,81 +52,80 @@ class BackupError(Exception):
 
 
 def create_database() -> None:
-    Base.metadata.create_all(bind=engine)
+    with Session(engine):
+        Base.metadata.create_all(bind=engine)
 
 
 def create_admin(password: str) -> None:
-    db = SessionLocal()
-
-    _ = signup_user(
-        db,
-        SignupIn(name="admin", first_name="admin", last_name="admin", password=password),
-    )
+    with Session(engine) as db:
+        _ = signup_user(
+            db,
+            SignupIn(name="admin", first_name="admin", last_name="admin", password=password),
+        )
 
 
 def initialize_database(app: "FastAPI") -> None:
-    db = SessionLocal()
+    with Session(engine) as db:
+        data_folder = get_settings().data_folder
 
-    data_folder = get_settings().data_folder
+        with Path(f"{data_folder}/phases.json").open() as file:
+            phases = json.loads(file.read())
 
-    with Path(f"{data_folder}/phases.json").open() as file:
-        phases = json.loads(file.read())
-
-        db.add_all(PhaseModel(**phase) for phase in phases)
-        db.flush()
-
-    with Path(f"{data_folder}/groups.json").open() as file:
-        groups = json.loads(file.read())
-
-        for group in groups:
-            phase = db.query(PhaseModel).filter_by(code=group.pop("phase_code")).first()
-            group["phase_id"] = phase.id
-
-        db.add_all(GroupModel(**group) for group in groups)
-        db.flush()
-
-    with Path(f"{data_folder}/teams.json").open() as file:
-        teams = json.loads(file.read())
-
-        for team in teams:
-            team["flag_url"] = ""
-
-            team_instance = TeamModel(**team)
-            db.add(team_instance)
+            db.add_all(PhaseModel(**phase) for phase in phases)
             db.flush()
 
-            team_instance.flag_url = app.url_path_for(
-                "retrieve_team_flag_by_id",
-                team_id=team_instance.id,
-            )
+        with Path(f"{data_folder}/groups.json").open() as file:
+            groups = json.loads(file.read())
+
+            for group in groups:
+                phase = db.query(PhaseModel).filter_by(code=group.pop("phase_code")).first()
+                group["phase_id"] = phase.id
+
+            db.add_all(GroupModel(**group) for group in groups)
             db.flush()
 
-    with Path(f"{data_folder}/matches.json").open() as file:
-        matches = json.loads(file.read())
+        with Path(f"{data_folder}/teams.json").open() as file:
+            teams = json.loads(file.read())
 
-        for match in matches:
-            team1_code = match.pop("team1_code")
-            team2_code = match.pop("team2_code")
+            for team in teams:
+                team["flag_url"] = ""
 
-            if team1_code is None:
-                match["team1_id"] = None
-            else:
-                team1 = db.query(TeamModel).filter_by(code=team1_code).first()
-                match["team1_id"] = team1.id
+                team_instance = TeamModel(**team)
+                db.add(team_instance)
+                db.flush()
 
-            if team2_code is None:
-                match["team2_id"] = None
-            else:
-                team2 = db.query(TeamModel).filter_by(code=team2_code).first()
-                match["team2_id"] = team2.id
+                team_instance.flag_url = app.url_path_for(
+                    "retrieve_team_flag_by_id",
+                    team_id=team_instance.id,
+                )
+                db.flush()
 
-            group = db.query(GroupModel).filter_by(code=match.pop("group_code")).first()
-            match["group_id"] = group.id
+        with Path(f"{data_folder}/matches.json").open() as file:
+            matches = json.loads(file.read())
 
-        db.add_all(MatchReferenceModel(**match) for match in matches)
-        db.flush()
+            for match in matches:
+                team1_code = match.pop("team1_code")
+                team2_code = match.pop("team2_code")
 
-    db.commit()
+                if team1_code is None:
+                    match["team1_id"] = None
+                else:
+                    team1 = db.query(TeamModel).filter_by(code=team1_code).first()
+                    match["team1_id"] = team1.id
+
+                if team2_code is None:
+                    match["team2_id"] = None
+                else:
+                    team2 = db.query(TeamModel).filter_by(code=team2_code).first()
+                    match["team2_id"] = team2.id
+
+                group = db.query(GroupModel).filter_by(code=match.pop("group_code")).first()
+                match["group_id"] = group.id
+
+            db.add_all(MatchReferenceModel(**match) for match in matches)
+            db.flush()
+
+        db.commit()
 
 
 def backup_database() -> None:
@@ -172,18 +173,17 @@ def delete_database(app: "FastAPI") -> None:
     if not app.debug:
         raise RecordDeletionInProduction
 
-    db = SessionLocal()
-
-    db.query(GroupPositionModel).delete()
-    db.query(ScoreBetModel).delete()
-    db.query(BinaryBetModel).delete()
-    db.query(UserModel).delete()
-    db.query(MatchReferenceModel).delete()
-    db.query(MatchModel).delete()
-    db.query(GroupModel).delete()
-    db.query(PhaseModel).delete()
-    db.query(TeamModel).delete()
-    db.commit()
+    with Session(engine) as db:
+        db.query(GroupPositionModel).delete()
+        db.query(ScoreBetModel).delete()
+        db.query(BinaryBetModel).delete()
+        db.query(UserModel).delete()
+        db.query(MatchReferenceModel).delete()
+        db.query(MatchModel).delete()
+        db.query(GroupModel).delete()
+        db.query(PhaseModel).delete()
+        db.query(TeamModel).delete()
+        db.commit()
 
 
 def drop_database(app: "FastAPI") -> None:
