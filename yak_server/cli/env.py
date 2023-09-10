@@ -84,7 +84,7 @@ class EnvBuilder:
             if rule_id not in RULE_MAPPING:
                 raise RuleNotDefined(rule_id)
 
-            rule_name = RULE_MAPPING[rule_id][1]
+            rule_name = RULE_MAPPING[rule_id].attribute
 
             with rule_file.open() as rule_content:
                 rules_list[rule_name] = json.loads(rule_content.read())

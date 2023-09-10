@@ -27,11 +27,11 @@ def execute_rule(
     user: Annotated[UserModel, Depends(get_current_user)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> GenericOut[str]:
-    if rule_id in RULE_MAPPING:
-        function_rule, attr_rule = RULE_MAPPING[rule_id]
+    rule_metadata = RULE_MAPPING.get(rule_id)
 
-        function_rule(db, user, getattr(settings.rules, attr_rule))
-    else:
+    if rule_metadata is None:
         raise RuleNotFound(rule_id)
+
+    rule_metadata.function(db, user, getattr(settings.rules, rule_metadata.attribute))
 
     return GenericOut(result="")
