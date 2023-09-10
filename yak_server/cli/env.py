@@ -72,8 +72,10 @@ class EnvBuilder:
         competition_choice = typer.prompt("Choose your competition", type=int)
 
         competition = available_competitions[competition_choice - 1]
+        self.env["COMPETITION"] = competition
 
         data_folder = path / competition
+        self.env["DATA_FOLDER"] = data_folder
 
         # Load rules in environment
         rules_list: Dict[str, dict] = {}
@@ -90,27 +92,13 @@ class EnvBuilder:
                 rules_list[rule_name] = json.loads(rule_content.read())
 
         rules = Rules.model_validate(rules_list)
+        self.env["RULES"] = rules.model_dump_json()
 
-        # Load configuration to compute points
+        # Load lock datetime
         config = ConfigParser()
         config.read(f"{data_folder}/config.ini")
 
-        self.env["COMPETITION"] = competition
         self.env["LOCK_DATETIME"] = parser.parse(config.get("locking", "datetime"))
-        self.env["BASE_CORRECT_RESULT"] = config.getint("points", "base_correct_result")
-        self.env["MULTIPLYING_FACTOR_CORRECT_RESULT"] = config.getint(
-            "points",
-            "multiplying_factor_correct_result",
-        )
-        self.env["BASE_CORRECT_SCORE"] = config.getint("points", "base_correct_score")
-        self.env["MULTIPLYING_FACTOR_CORRECT_SCORE"] = config.getint(
-            "points",
-            "multiplying_factor_correct_score",
-        )
-        self.env["TEAM_QUALIFIED"] = config.getint("points", "team_qualified")
-        self.env["FIRST_TEAM_QUALIFIED"] = config.getint("points", "first_team_qualified")
-        self.env["DATA_FOLDER"] = data_folder
-        self.env["RULES"] = rules.model_dump_json()
 
     def write(self) -> None:
         write_env_file(self.env, ".env")

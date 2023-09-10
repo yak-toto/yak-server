@@ -35,14 +35,8 @@ def test_yak_env_init() -> None:
         assert len(env["JWT_SECRET_KEY"]) == 256
         assert env["COMPETITION"] == "world_cup_2022"
         assert env["LOCK_DATETIME"] == "2022-11-20 17:00:00+01:00"
-        assert env["BASE_CORRECT_RESULT"] == "1"
-        assert env["MULTIPLYING_FACTOR_CORRECT_RESULT"] == "2"
-        assert env["BASE_CORRECT_SCORE"] == "3"
-        assert env["MULTIPLYING_FACTOR_CORRECT_SCORE"] == "7"
-        assert env["TEAM_QUALIFIED"] == "10"
-        assert env["FIRST_TEAM_QUALIFIED"] == "20"
         assert env["DATA_FOLDER"].endswith("yak_server/data/world_cup_2022")
-        assert len(json.loads(env["RULES"])) == 1
+        assert len(json.loads(env["RULES"])) == 2
 
         env_mysql = dotenv_values(Path(".env.mysql"))
 
