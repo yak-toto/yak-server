@@ -3,6 +3,7 @@ import secrets
 from configparser import ConfigParser
 from enum import Enum
 from pathlib import Path
+from typing import Dict
 from uuid import UUID
 
 import typer
@@ -10,7 +11,7 @@ from dateutil import parser
 
 from yak_server.database import MySQLSettings
 from yak_server.helpers.rules import RULE_MAPPING
-from yak_server.helpers.settings import RuleContainer, Rules
+from yak_server.helpers.settings import Rules
 
 
 class YesOrNo(str, Enum):
@@ -75,7 +76,7 @@ class EnvBuilder:
         data_folder = path / competition
 
         # Load rules in environment
-        rules = Rules([])
+        rules_list: Dict[str, dict] = {}
 
         for rule_file in Path(f"{data_folder}/rules").glob("*.json"):
             rule_id = UUID(rule_file.stem)
@@ -83,10 +84,12 @@ class EnvBuilder:
             if rule_id not in RULE_MAPPING:
                 raise RuleNotDefined(rule_id)
 
+            rule_name = RULE_MAPPING[rule_id][1]
+
             with rule_file.open() as rule_content:
-                rules.append(
-                    RuleContainer(id=rule_id, config=json.loads(rule_content.read())),
-                )
+                rules_list[rule_name] = json.loads(rule_content.read())
+
+        rules = Rules.model_validate(rules_list)
 
         # Load configuration to compute points
         config = ConfigParser()

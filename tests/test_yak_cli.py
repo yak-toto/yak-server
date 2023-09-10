@@ -47,7 +47,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
             "MULTIPLYING_FACTOR_CORRECT_SCORE": "1",
             "TEAM_QUALIFIED": "10",
             "FIRST_TEAM_QUALIFIED": "20",
-            "RULES": "[]",
+            "RULES": "{}",
         },
     )
 
@@ -71,7 +71,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
             "MULTIPLYING_FACTOR_CORRECT_SCORE": "1",
             "TEAM_QUALIFIED": "10",
             "FIRST_TEAM_QUALIFIED": "20",
-            "RULES": "[]",
+            "RULES": "{}",
         },
         input=f"{admin_password}\n{admin_password}\n",
     )

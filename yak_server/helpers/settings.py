@@ -1,25 +1,9 @@
 from datetime import datetime
 from functools import lru_cache
-from typing import Iterator, List
-from uuid import UUID
 
-from pydantic import BaseModel, RootModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
-class RuleContainer(BaseModel):
-    id: UUID
-    config: dict
-
-
-class Rules(RootModel):
-    root: List[RuleContainer]
-
-    def __iter__(self) -> Iterator[RuleContainer]:
-        return iter(self.root)
-
-    def append(self, rule: RuleContainer) -> None:
-        self.root.append(rule)
+from .rules import Rules
 
 
 class Settings(BaseSettings):
