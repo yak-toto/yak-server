@@ -116,7 +116,6 @@ env = [
     "MYSQL_DB=yak_toto_test",
     "PROFILING=0",
 ]
-timeout = 120
 
 [tool.importlinter]
 root_package = "yak_server"
