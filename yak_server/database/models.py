@@ -9,6 +9,7 @@ from sqlalchemy import CheckConstraint
 from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
+from sqlalchemy_utils import UUIDType
 
 from . import Base
 
@@ -20,12 +21,7 @@ ph = PasswordHasher()
 
 class UserModel(Base):
     __tablename__ = "user"
-    id = sa.Column(
-        sa.String(100),
-        primary_key=True,
-        nullable=False,
-        default=lambda: str(uuid4()),
-    )
+    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
     name = sa.Column(sa.String(100), unique=True, nullable=False)
     first_name = sa.Column(sa.String(100), nullable=False)
     last_name = sa.Column(sa.String(100), nullable=False)
@@ -137,20 +133,15 @@ class UserModel(Base):
 
 class ScoreBetModel(Base):
     __tablename__ = "score_bet"
-    id = sa.Column(
-        sa.String(100),
-        primary_key=True,
-        nullable=False,
-        default=lambda: str(uuid4()),
-    )
+    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
     user_id = sa.Column(
-        sa.String(100),
+        UUIDType(binary=False),
         sa.ForeignKey("user.id", ondelete="CASCADE"),
         nullable=False,
     )
     user = relationship("UserModel", back_populates="score_bets")
 
-    match_id = sa.Column(sa.String(100), sa.ForeignKey("match.id"), nullable=False)
+    match_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("match.id"), nullable=False)
     match = relationship("MatchModel", back_populates="score_bets")
 
     score1 = sa.Column(sa.Integer, CheckConstraint("score1>=0"), default=None)
@@ -189,20 +180,15 @@ class ScoreBetModel(Base):
 
 class BinaryBetModel(Base):
     __tablename__ = "binary_bet"
-    id = sa.Column(
-        sa.String(100),
-        primary_key=True,
-        nullable=False,
-        default=lambda: str(uuid4()),
-    )
+    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
     user_id = sa.Column(
-        sa.String(100),
+        UUIDType(binary=False),
         sa.ForeignKey("user.id", ondelete="CASCADE"),
         nullable=False,
     )
     user = relationship("UserModel", back_populates="binary_bets")
 
-    match_id = sa.Column(sa.String(100), sa.ForeignKey("match.id"), nullable=False)
+    match_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("match.id"), nullable=False)
     match = relationship("MatchModel", back_populates="binary_bets")
 
     is_one_won = sa.Column(sa.Boolean, default=None)
@@ -221,41 +207,31 @@ class BetMapping(Enum):
 
 class MatchReferenceModel(Base):
     __tablename__ = "match_reference"
-    id = sa.Column(
-        sa.String(100),
-        primary_key=True,
-        nullable=False,
-        default=lambda: str(uuid4()),
-    )
+    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
 
-    group_id = sa.Column(sa.String(100), sa.ForeignKey("group.id"), nullable=False)
+    group_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("group.id"), nullable=False)
 
     index = sa.Column(sa.Integer, nullable=False)
 
-    team1_id = sa.Column(sa.String(100), sa.ForeignKey("team.id"), nullable=True)
-    team2_id = sa.Column(sa.String(100), sa.ForeignKey("team.id"), nullable=True)
+    team1_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("team.id"), nullable=True)
+    team2_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("team.id"), nullable=True)
 
     bet_type_from_match = sa.Column(SqlEnum(BetMapping), nullable=False)
 
 
 class MatchModel(Base):
     __tablename__ = "match"
-    id = sa.Column(
-        sa.String(100),
-        primary_key=True,
-        nullable=False,
-        default=lambda: str(uuid4()),
-    )
+    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
 
-    group_id = sa.Column(sa.String(100), sa.ForeignKey("group.id"), nullable=False)
+    group_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("group.id"), nullable=False)
     group = relationship("GroupModel", foreign_keys=group_id, backref="matches")
 
     index = sa.Column(sa.Integer, nullable=False)
 
-    team1_id = sa.Column(sa.String(100), sa.ForeignKey("team.id"), nullable=True)
+    team1_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("team.id"), nullable=True)
     team1 = relationship("TeamModel", foreign_keys=team1_id)
 
-    team2_id = sa.Column(sa.String(100), sa.ForeignKey("team.id"), nullable=True)
+    team2_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("team.id"), nullable=True)
     team2 = relationship("TeamModel", foreign_keys=team2_id)
 
     score_bets = relationship("ScoreBetModel", back_populates="match")
@@ -264,12 +240,7 @@ class MatchModel(Base):
 
 class TeamModel(Base):
     __tablename__ = "team"
-    id = sa.Column(
-        sa.String(100),
-        primary_key=True,
-        nullable=False,
-        default=lambda: str(uuid4()),
-    )
+    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
     code = sa.Column(sa.String(10), unique=True, nullable=False)
     description_fr = sa.Column(sa.String(100), unique=True, nullable=False)
     description_en = sa.Column(sa.String(100), unique=True, nullable=False)
@@ -279,29 +250,19 @@ class TeamModel(Base):
 
 class GroupModel(Base):
     __tablename__ = "group"
-    id = sa.Column(
-        sa.String(100),
-        primary_key=True,
-        nullable=False,
-        default=lambda: str(uuid4()),
-    )
+    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
     code = sa.Column(sa.String(1), primary_key=True, unique=True, nullable=False)
     description_fr = sa.Column(sa.String(100), unique=True, nullable=False)
     description_en = sa.Column(sa.String(100), unique=True, nullable=False)
     index = sa.Column(sa.Integer, nullable=False)
 
-    phase_id = sa.Column(sa.String(100), sa.ForeignKey("phase.id"), nullable=False)
+    phase_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("phase.id"), nullable=False)
     phase = relationship("PhaseModel", backref="groups")
 
 
 class PhaseModel(Base):
     __tablename__ = "phase"
-    id = sa.Column(
-        sa.String(100),
-        primary_key=True,
-        nullable=False,
-        default=lambda: str(uuid4()),
-    )
+    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
     code = sa.Column(sa.String(10), primary_key=True, unique=True, nullable=False)
     description_fr = sa.Column(sa.String(100), nullable=False)
     description_en = sa.Column(sa.String(100), nullable=False)
@@ -310,12 +271,7 @@ class PhaseModel(Base):
 
 class GroupPositionModel(Base):
     __tablename__ = "group_position"
-    id = sa.Column(
-        sa.String(100),
-        primary_key=True,
-        nullable=False,
-        default=lambda: str(uuid4()),
-    )
+    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
     won = sa.Column(sa.Integer, CheckConstraint("won>=0"), nullable=False, default=0)
     drawn = sa.Column(sa.Integer, CheckConstraint("drawn>=0"), nullable=False, default=0)
     lost = sa.Column(sa.Integer, CheckConstraint("lost>=0"), nullable=False, default=0)
@@ -342,20 +298,20 @@ class GroupPositionModel(Base):
     need_recomputation = sa.Column(sa.Boolean, nullable=False, default=False)
 
     user_id = sa.Column(
-        sa.String(100),
+        UUIDType(binary=False),
         sa.ForeignKey("user.id", ondelete="CASCADE"),
         nullable=False,
     )
 
     team_id = sa.Column(
-        sa.String(100),
+        UUIDType(binary=False),
         sa.ForeignKey("team.id"),
         nullable=False,
     )
     team = relationship("TeamModel")
 
     group_id = sa.Column(
-        sa.String(100),
+        UUIDType(binary=False),
         sa.ForeignKey("group.id"),
         nullable=False,
     )
