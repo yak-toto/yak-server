@@ -1,14 +1,15 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
+from uuid import UUID
 
 from jwt import decode as jwt_decode
 from jwt import encode as jwt_encode
 
 
-def encode_bearer_token(sub: str, expiration_time: timedelta, secret_key: str) -> str:
+def encode_bearer_token(sub: UUID, expiration_time: timedelta, secret_key: str) -> str:
     return jwt_encode(
         {
-            "sub": sub,
+            "sub": str(sub),
             "iat": datetime.now(tz=timezone.utc),
             "exp": datetime.now(tz=timezone.utc) + expiration_time,
         },

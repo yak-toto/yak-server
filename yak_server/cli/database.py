@@ -189,7 +189,7 @@ def drop_database(app: "FastAPI") -> None:
         raise TableDropInProduction
 
     with SessionLocal():
-        Base.metadata.create_all(bind=engine)
+        Base.metadata.drop_all(bind=engine)
 
 
 def setup_migration() -> None:
