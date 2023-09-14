@@ -47,7 +47,6 @@ from .result import (
     TeamByCodeResult,
     TeamByIdNotFound,
     TeamByIdResult,
-    User,
 )
 from .schema import (
     BinaryBet,
@@ -55,6 +54,7 @@ from .schema import (
     Phase,
     ScoreBet,
     Team,
+    User,
     UserWithoutSensitiveInfo,
     send_group_position,
 )

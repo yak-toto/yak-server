@@ -72,9 +72,6 @@ class ScoreBetWithGroupIdOut(BaseModel):
         locked: bool,
         lang: Lang,
     ) -> "ScoreBetWithGroupIdOut":
-        description_team1 = get_language_description(score_bet.match.team1, lang)
-        description_team2 = get_language_description(score_bet.match.team2, lang)
-
         return cls(
             id=score_bet.id,
             locked=locked,
@@ -82,14 +79,14 @@ class ScoreBetWithGroupIdOut(BaseModel):
             team1=TeamWithScoreOut(
                 id=score_bet.match.team1.id,
                 code=score_bet.match.team1.code,
-                description=description_team1,
+                description=get_language_description(score_bet.match.team1, lang),
                 score=score_bet.score1,
                 flag=FlagOut(url=score_bet.match.team1.flag_url),
             ),
             team2=TeamWithScoreOut(
                 id=score_bet.match.team2.id,
                 code=score_bet.match.team2.code,
-                description=description_team2,
+                description=get_language_description(score_bet.match.team2, lang),
                 score=score_bet.score2,
                 flag=FlagOut(url=score_bet.match.team2.flag_url),
             ),

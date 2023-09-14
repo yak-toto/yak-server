@@ -6,13 +6,14 @@ from unittest.mock import ANY
 from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
+from yak_server.helpers.rules import Rules
 from yak_server.helpers.rules.compute_final_from_rank import (
     RuleComputeFinaleFromGroupRank,
     Team,
     Versus,
 )
 from yak_server.helpers.rules.compute_points import RuleComputePoints
-from yak_server.helpers.settings import Rules, get_settings
+from yak_server.helpers.settings import get_settings
 
 from .utils import get_random_string
 from .utils.mock import create_mock
