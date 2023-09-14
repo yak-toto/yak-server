@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Callable, Optional
 from . import get_paris_datetime_now
 
 if TYPE_CHECKING:
-    from yak_server.helpers.settings import Rules
+    from yak_server.helpers.rules import Rules
 
 
 @dataclass
@@ -18,7 +18,7 @@ class MockSettings:
         jwt_expiration_time: Optional[int] = None,
         data_folder_relative: Optional[str] = None,
         lock_datetime_shift: Optional[timedelta] = None,
-        rules: "Optional[Rules]" = None,
+        rules: Optional["Rules"] = None,
         base_correct_result: Optional[int] = None,
         multiplying_factor_correct_result: Optional[int] = None,
         base_correct_score: Optional[int] = None,

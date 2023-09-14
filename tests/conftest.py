@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope="session")
-def app_session() -> Generator:
+def app_session() -> Generator["FastAPI", None, None]:
     # Create app and set TESTING config
     app = create_app()
     app.debug = True
@@ -32,7 +32,7 @@ def app_session() -> Generator:
 
 
 @pytest.fixture(scope="module")
-def app(app_session: "FastAPI") -> Generator:
+def app(app_session: "FastAPI") -> Generator["FastAPI", None, None]:
     # Clean database before running test
     delete_database(app_session)
 
@@ -48,14 +48,14 @@ def client(app: "FastAPI") -> TestClient:
 
 
 @pytest.fixture()
-def production_app() -> Generator:
+def production_app() -> "FastAPI":
     os.environ["DEBUG"] = "0"
 
     return create_app()
 
 
 @pytest.fixture()
-def debug_app_with_profiler() -> Generator:
+def debug_app_with_profiler() -> Generator["FastAPI", None, None]:
     os.environ["PROFILING"] = "1"
     os.environ["DEBUG"] = "1"
     app = create_app()
@@ -75,7 +75,7 @@ def debug_app_with_profiler() -> Generator:
 
 
 @pytest.fixture()
-def production_app_with_profiler() -> Generator:
+def production_app_with_profiler() -> Generator["FastAPI", None, None]:
     os.environ["PROFILING"] = "1"
     os.environ["DEBUG"] = "0"
     app = create_app()
@@ -95,7 +95,7 @@ def production_app_with_profiler() -> Generator:
 
 
 @pytest.fixture()
-def app_with_valid_jwt_config(app: "FastAPI") -> None:
+def app_with_valid_jwt_config(app: "FastAPI") -> Generator["FastAPI", None, None]:
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = create_mock(
@@ -110,7 +110,7 @@ def app_with_valid_jwt_config(app: "FastAPI") -> None:
 
 
 @pytest.fixture()
-def app_with_null_jwt_expiration_time(app: "FastAPI") -> None:
+def app_with_null_jwt_expiration_time(app: "FastAPI") -> Generator["FastAPI", None, None]:
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = create_mock(
@@ -125,7 +125,7 @@ def app_with_null_jwt_expiration_time(app: "FastAPI") -> None:
 
 
 @pytest.fixture()
-def app_with_lock_datetime_in_past(app: "FastAPI") -> None:
+def app_with_lock_datetime_in_past(app: "FastAPI") -> Generator["FastAPI", None, None]:
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = create_mock(

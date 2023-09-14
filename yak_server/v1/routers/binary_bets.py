@@ -33,12 +33,11 @@ from yak_server.v1.models.binary_bets import (
     BinaryBetOut,
     BinaryBetResponse,
     ModifyBinaryBetIn,
-    TeamWithWonOut,
 )
 from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.groups import GroupOut
 from yak_server.v1.models.phases import PhaseOut
-from yak_server.v1.models.teams import FlagOut
+from yak_server.v1.models.teams import FlagOut, TeamWithWonOut
 
 logger = logging.getLogger(__name__)
 

@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -23,9 +23,9 @@ class RuleMetadata:
     def __init__(
         self,
         *,
-        function: Callable[
-            [Session, UserModel, RuleComputeFinaleFromGroupRank],
-            None,
+        function: Union[
+            Callable[[Session, UserModel, RuleComputeFinaleFromGroupRank], None],
+            Callable[[Session, UserModel, RuleComputePoints], None],
         ],
         attribute: str,
         required_admin: bool = False,
