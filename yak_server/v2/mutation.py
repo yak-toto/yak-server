@@ -1,6 +1,6 @@
 import logging
 from datetime import timedelta
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 from uuid import UUID
 
 import strawberry
@@ -29,6 +29,7 @@ from .bearer_authentication import (
     is_admin_authenticated,
     is_authenticated,
 )
+from .context import YakContext
 from .result import (
     BinaryBetNotFoundForUpdate,
     InvalidCredentials,
@@ -51,11 +52,6 @@ from .schema import (
     UserWithToken,
 )
 
-if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
-
-    from yak_server.helpers.settings import Settings
-
 logger = logging.getLogger(__name__)
 
 
@@ -68,10 +64,10 @@ class Mutation:
         password: str,
         first_name: str,
         last_name: str,
-        info: Info,
+        info: Info[YakContext, None],
     ) -> SignupResult:
-        db: Session = info.context.db
-        settings: Settings = info.context.settings
+        db = info.context.db
+        settings = info.context.settings
 
         # Check existing user in db
         existing_user = db.query(UserModel).filter_by(name=user_name).first()
@@ -124,9 +120,14 @@ class Mutation:
         )
 
     @strawberry.mutation
-    def login_result(self, user_name: str, password: str, info: Info) -> LoginResult:
-        db: Session = info.context.db
-        settings: Settings = info.context.settings
+    def login_result(
+        self,
+        user_name: str,
+        password: str,
+        info: Info[YakContext, None],
+    ) -> LoginResult:
+        db = info.context.db
+        settings = info.context.settings
 
         user = UserModel.authenticate(db=db, name=user_name, password=password)
 
@@ -154,11 +155,11 @@ class Mutation:
         self,
         id: UUID,
         is_one_won: Optional[bool],
-        info: Info,
+        info: Info[YakContext, None],
     ) -> ModifyBinaryBetResult:
-        db: Session = info.context.db
-        user: UserModel = info.context.user
-        settings: Settings = info.context.settings
+        db = info.context.db
+        user = info.context.user
+        settings = info.context.settings
 
         bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=str(id)).first()
 
@@ -182,11 +183,11 @@ class Mutation:
         id: UUID,
         score1: Optional[int],
         score2: Optional[int],
-        info: Info,
+        info: Info[YakContext, None],
     ) -> ModifyScoreBetResult:
-        db: Session = info.context.db
-        user: UserModel = info.context.user
-        settings: Settings = info.context.settings
+        db = info.context.db
+        user = info.context.user
+        settings = info.context.settings
 
         bet = db.query(ScoreBetModel).filter_by(user_id=user.id, id=str(id)).first()
 
@@ -236,9 +237,9 @@ class Mutation:
         self,
         id: UUID,
         password: str,
-        info: Info,
+        info: Info[YakContext, None],
     ) -> ModifyUserResult:
-        db: Session = info.context.db
+        db = info.context.db
 
         user = db.query(UserModel).filter_by(id=str(id)).first()
 

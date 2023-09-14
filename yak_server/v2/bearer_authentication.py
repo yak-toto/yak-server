@@ -1,27 +1,23 @@
 from functools import wraps
-from typing import TYPE_CHECKING
 
 from jwt import ExpiredSignatureError, PyJWTError
+from strawberry.types import Info
 
 from yak_server.database.models import UserModel
 from yak_server.helpers.authentication import decode_bearer_token
 
+from .context import YakContext
 from .result import ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI
 
 NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
 
-if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
-
-    from yak_server.helpers.settings import Settings
-
 
 def is_authenticated(f):  # noqa: ANN001, ANN201
     @wraps(f)
-    def _verify(*args, **kwargs):
-        auth_headers = kwargs["info"].context.request.headers.get("Authorization", "").split()
-        db: Session = kwargs["info"].context.db
-        settings: Settings = kwargs["info"].context.settings
+    def _verify(*args, info: Info[YakContext, None], **kwargs):
+        auth_headers = info.context.request.headers.get("Authorization", "").split()
+        db = info.context.db
+        settings = info.context.settings
 
         if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION or auth_headers[0] != "Bearer":
             return InvalidToken()
@@ -38,21 +34,21 @@ def is_authenticated(f):  # noqa: ANN001, ANN201
         if not user:
             return InvalidToken()
 
-        kwargs["info"].context.user = user
+        info.context.user = user
 
-        return f(*args, **kwargs)
+        return f(*args, info=info, **kwargs)
 
     return _verify
 
 
 def is_admin_authenticated(f):  # noqa: ANN001, ANN201
     @wraps(f)
-    def _verify(*args, **kwargs):
-        user: UserModel = kwargs["info"].context.user
+    def _verify(*args, info: Info[YakContext, None], **kwargs):
+        user = info.context.user
 
         if user.name != "admin":
             return UnauthorizedAccessToAdminAPI()
 
-        return f(*args, **kwargs)
+        return f(*args, info=info, **kwargs)
 
     return _verify
