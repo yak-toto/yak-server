@@ -90,7 +90,7 @@ class Query:
     def team_by_id_result(self, id: UUID, info: Info[YakContext, None]) -> TeamByIdResult:
         db = info.context.db
 
-        team_record = db.query(TeamModel).filter_by(id=str(id)).first()
+        team_record = db.query(TeamModel).filter_by(id=id).first()
 
         if not team_record:
             return TeamByIdNotFound(id=id)
@@ -116,7 +116,7 @@ class Query:
         user = info.context.user
         settings = info.context.settings
 
-        score_bet_record = db.query(ScoreBetModel).filter_by(id=str(id), user_id=user.id).first()
+        score_bet_record = db.query(ScoreBetModel).filter_by(id=id, user_id=user.id).first()
 
         if not score_bet_record:
             return ScoreBetNotFound(id=id)
@@ -134,7 +134,7 @@ class Query:
         user = info.context.user
         settings = info.context.settings
 
-        binary_bet_record = db.query(BinaryBetModel).filter_by(id=str(id), user_id=user.id).first()
+        binary_bet_record = db.query(BinaryBetModel).filter_by(id=id, user_id=user.id).first()
 
         if not binary_bet_record:
             return BinaryBetNotFound(id=id)
@@ -171,7 +171,7 @@ class Query:
         user = info.context.user
         settings = info.context.settings
 
-        group_record = db.query(GroupModel).filter_by(id=str(id)).first()
+        group_record = db.query(GroupModel).filter_by(id=id).first()
 
         if not group_record:
             return GroupByIdNotFound(id=id)
@@ -234,7 +234,7 @@ class Query:
         user = info.context.user
         settings = info.context.settings
 
-        phase_record = db.query(PhaseModel).filter_by(id=str(id)).first()
+        phase_record = db.query(PhaseModel).filter_by(id=id).first()
 
         if not phase_record:
             return PhaseByIdNotFound(id=id)
@@ -338,7 +338,7 @@ class Query:
         user = info.context.user
         settings = info.context.settings
 
-        group = db.query(GroupModel).filter_by(id=str(id)).first()
+        group = db.query(GroupModel).filter_by(id=id).first()
 
         if not group:
             return GroupByIdNotFound(id=id)

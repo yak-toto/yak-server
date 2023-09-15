@@ -136,7 +136,7 @@ def modify_user(
     db: Annotated[Session, Depends(get_db)],
     _: Annotated[UserModel, Depends(get_admin_user)],
 ) -> GenericOut[CurrentUserOut]:
-    user = db.query(UserModel).filter_by(id=str(user_id)).first()
+    user = db.query(UserModel).filter_by(id=user_id).first()
     if not user:
         raise UserNotFound(user_id)
 

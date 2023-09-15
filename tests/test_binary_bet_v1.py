@@ -125,7 +125,7 @@ def test_binary_bet(
     assert response_invalid_inputs.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     # Error case : invalid bet id
-    invalid_bet_id = str(uuid4())
+    invalid_bet_id = uuid4()
 
     response_with_invalid_bet_id = client.patch(
         f"/api/v1/binary_bets/{invalid_bet_id}",
@@ -174,7 +174,7 @@ def test_binary_bet(
     }
 
     # Error case : retrieve binary bet with invalid id
-    invalid_bet_id = str(uuid4())
+    invalid_bet_id = uuid4()
 
     response_retrieve_with_invalid_bet_id = client.get(
         f"/api/v1/binary_bets/{invalid_bet_id}",
@@ -241,12 +241,12 @@ def test_binary_bet(
     }
 
     # Error case : modify team id with invalid team id
-    invalid_team_id = uuid4()
+    invalid_team_id = str(uuid4())
 
     response_invalid_team1_id = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
         headers={"Authorization": f"Bearer {token}"},
-        json={"team1": {"id": str(invalid_team_id)}},
+        json={"team1": {"id": invalid_team_id}},
     )
 
     assert response_invalid_team1_id.status_code == HTTPStatus.NOT_FOUND
@@ -255,7 +255,7 @@ def test_binary_bet(
     response_invalid_team2_id = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
         headers={"Authorization": f"Bearer {token}"},
-        json={"team2": {"id": str(invalid_team_id)}},
+        json={"team2": {"id": invalid_team_id}},
     )
 
     assert response_invalid_team2_id.status_code == HTTPStatus.NOT_FOUND

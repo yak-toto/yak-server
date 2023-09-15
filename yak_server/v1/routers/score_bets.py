@@ -147,7 +147,7 @@ def retrieve_score_bet_by_id(
     settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[ScoreBetResponse]:
-    score_bet = db.query(ScoreBetModel).filter_by(user_id=user.id, id=str(bet_id)).first()
+    score_bet = db.query(ScoreBetModel).filter_by(user_id=user.id, id=bet_id).first()
 
     if not score_bet:
         raise BetNotFound(bet_id)
@@ -168,7 +168,7 @@ def modify_score_bet(
         raise LockedScoreBet
 
     score_bet = (
-        db.query(ScoreBetModel).filter_by(user_id=user.id, id=str(bet_id)).with_for_update().first()
+        db.query(ScoreBetModel).filter_by(user_id=user.id, id=bet_id).with_for_update().first()
     )
 
     if not score_bet:
@@ -228,7 +228,7 @@ def delete_score_bet_by_id(
     if is_locked(user.name, settings.lock_datetime):
         raise LockedScoreBet
 
-    score_bet = db.query(ScoreBetModel).filter_by(user_id=user.id, id=str(bet_id)).first()
+    score_bet = db.query(ScoreBetModel).filter_by(user_id=user.id, id=bet_id).first()
 
     if not score_bet:
         raise BetNotFound(bet_id)

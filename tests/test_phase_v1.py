@@ -79,7 +79,7 @@ def test_phase(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.Monkey
     }
 
     # Error case : retrieve phase by invalid id
-    invalid_phase_id = str(uuid4())
+    invalid_phase_id = uuid4()
 
     response_phase_with_invalid_id = client.get(
         f"/api/v1/phases/{invalid_phase_id}",
