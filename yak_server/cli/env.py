@@ -1,6 +1,5 @@
 import json
 import secrets
-from configparser import ConfigParser
 from enum import Enum
 from pathlib import Path
 from typing import Dict
@@ -95,10 +94,9 @@ class EnvBuilder:
         self.env["RULES"] = rules.model_dump_json()
 
         # Load lock datetime
-        config = ConfigParser()
-        config.read(f"{data_folder}/config.ini")
-
-        self.env["LOCK_DATETIME"] = parser.parse(config.get("locking", "datetime"))
+        with Path(f"{data_folder}/common.json").open() as file:
+            common_settings = json.loads(file.read())
+            self.env["LOCK_DATETIME"] = parser.parse(common_settings["lock_datetime"])
 
     def write(self) -> None:
         write_env_file(self.env, ".env")
