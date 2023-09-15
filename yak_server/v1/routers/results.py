@@ -1,5 +1,6 @@
 import sys
-from typing import List
+from typing import List, Optional
+from uuid import UUID
 
 if sys.version_info >= (3, 9):
     from typing import Annotated
@@ -7,11 +8,10 @@ else:
     from typing_extensions import Annotated
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from yak_server.database.models import (
-    UserModel,
-)
+from yak_server.database.models import UserModel
 from yak_server.helpers.database import get_db
 from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.errors import NoResultsForAdminUser
@@ -44,23 +44,32 @@ def retrieve_user_results(
     user: Annotated[UserModel, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> GenericOut[UserResult]:
-    if user.name == "admin":
+    rank = compute_rank(db, user.id)
+
+    if rank is None:
         raise NoResultsForAdminUser
 
     user_result = UserResult.from_instance(
         user,
-        rank=next(
-            index
-            for index, user_result in enumerate(
-                db.query(UserModel)
-                .order_by(UserModel.points.desc())
-                .filter(
-                    UserModel.name != "admin",
-                ),
-                1,
-            )
-            if user_result.id == user.id
-        ),
+        rank=rank,
     )
 
     return GenericOut(result=user_result)
+
+
+def compute_rank(db: Session, user_id: UUID) -> Optional[int]:
+    subq = (
+        db.query(
+            UserModel,
+            func.row_number().over(order_by=UserModel.points.desc()).label("rownum"),
+        )
+        .filter(UserModel.name != "admin")
+        .subquery()
+    )
+
+    rank = db.query(subq.c.rownum).filter(subq.c.id == user_id).first()
+
+    if not rank:
+        return None
+
+    return rank[0]
