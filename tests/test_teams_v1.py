@@ -95,7 +95,7 @@ def test_teams(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.Monkey
     }
 
     # Try to fetch a team using a non existing team id
-    non_existing_team_id = str(uuid4())
+    non_existing_team_id = uuid4()
 
     response_non_existing_team_id = client.get(
         f"api/v1/teams/{non_existing_team_id}",
@@ -116,7 +116,7 @@ def test_teams(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.Monkey
     assert response_retrieve_flag.status_code == HTTPStatus.TEMPORARY_REDIRECT
 
     # Check flag fetching with invalid team id
-    invalid_team_id = str(uuid4())
+    invalid_team_id = uuid4()
 
     response_retrieve_flag_with_invalid_id = client.get(
         f"/api/v1/teams/{invalid_team_id}/flag",

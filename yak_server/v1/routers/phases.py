@@ -42,7 +42,7 @@ def retrieve_phase(
     db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[PhaseOut]:
-    phase = db.query(PhaseModel).filter_by(id=str(phase_id)).first()
+    phase = db.query(PhaseModel).filter_by(id=phase_id).first()
 
     if not phase:
         raise PhaseNotFound(phase_id)

@@ -104,7 +104,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyP
     }
 
     # Error case : bet with invalid id
-    invalid_bet_id = str(uuid4())
+    invalid_bet_id = uuid4()
 
     response_bet_with_invalid_id = client.get(
         f"/api/v1/score_bets/{invalid_bet_id}",

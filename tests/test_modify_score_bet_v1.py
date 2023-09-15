@@ -138,7 +138,7 @@ def test_modify_score_bet(
     )
 
     # Error case : check bet not found
-    non_existing_bet_id = str(uuid4())
+    non_existing_bet_id = uuid4()
 
     response_bet_not_found = client.patch(
         f"/api/v1/score_bets/{non_existing_bet_id}",

@@ -136,7 +136,7 @@ def retrieve_binary_bet_by_id(
     settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[BinaryBetResponse]:
-    binary_bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=str(bet_id)).first()
+    binary_bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=bet_id).first()
 
     if not binary_bet:
         raise BetNotFound(bet_id)
@@ -156,7 +156,7 @@ def modify_binary_bet_by_id(
     if is_locked(user.name, settings.lock_datetime):
         raise LockedBinaryBet
 
-    binary_bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=str(bet_id)).first()
+    binary_bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=bet_id).first()
 
     if not binary_bet:
         raise BetNotFound(bet_id)
@@ -208,7 +208,7 @@ def delete_binary_bet_by_id(
     if is_locked(user.name, settings.lock_datetime):
         raise LockedBinaryBet
 
-    binary_bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=str(bet_id)).first()
+    binary_bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=bet_id).first()
 
     if not binary_bet:
         raise BetNotFound(bet_id)

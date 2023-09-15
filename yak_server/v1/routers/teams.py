@@ -57,7 +57,7 @@ def retrieve_team_flag_by_id(
     team_id: UUID4,
     db: Annotated[Session, Depends(get_db)],
 ) -> RedirectResponse:
-    team = db.query(TeamModel).filter_by(id=str(team_id)).first()
+    team = db.query(TeamModel).filter_by(id=team_id).first()
 
     if not team:
         raise TeamNotFound(team_id)

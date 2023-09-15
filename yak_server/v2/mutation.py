@@ -161,7 +161,7 @@ class Mutation:
         user = info.context.user
         settings = info.context.settings
 
-        bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=str(id)).first()
+        bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=id).first()
 
         if is_locked(user.name, settings.lock_datetime):
             return LockedBinaryBetError()
@@ -189,7 +189,7 @@ class Mutation:
         user = info.context.user
         settings = info.context.settings
 
-        bet = db.query(ScoreBetModel).filter_by(user_id=user.id, id=str(id)).first()
+        bet = db.query(ScoreBetModel).filter_by(user_id=user.id, id=id).first()
 
         if is_locked(user.name, settings.lock_datetime):
             return LockedScoreBetError()
@@ -241,7 +241,7 @@ class Mutation:
     ) -> ModifyUserResult:
         db = info.context.db
 
-        user = db.query(UserModel).filter_by(id=str(id)).first()
+        user = db.query(UserModel).filter_by(id=id).first()
 
         if not user:
             return UserNotFound(id=id)
