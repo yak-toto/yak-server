@@ -95,9 +95,7 @@ class Mutation:
             db.add(match)
             db.flush()
 
-            db.add(
-                match_reference.bet_type_from_match.value(user_id=user.id, match_id=match.id),
-            )
+            db.add(match_reference.bet_type_from_match.value(user_id=user.id, match_id=match.id))
             db.flush()
 
         # Create group position records

@@ -157,7 +157,7 @@ class Query:
                 Group.from_instance(
                     db=db,
                     instance=group,
-                    user_id=user.id,
+                    user=user,
                     lock_datetime=settings.lock_datetime,
                 )
                 for group in db.query(GroupModel).order_by(GroupModel.index)
@@ -179,7 +179,7 @@ class Query:
         return Group.from_instance(
             db=db,
             instance=group_record,
-            user_id=user.id,
+            user=user,
             lock_datetime=settings.lock_datetime,
         )
 
@@ -202,7 +202,7 @@ class Query:
         return Group.from_instance(
             db=db,
             instance=group_record,
-            user_id=user.id,
+            user=user,
             lock_datetime=settings.lock_datetime,
         )
 
@@ -220,7 +220,7 @@ class Query:
                 Phase.from_instance(
                     db=db,
                     instance=phase,
-                    user_id=user.id,
+                    user=user,
                     lock_datetime=settings.lock_datetime,
                 )
                 for phase in phases
@@ -242,7 +242,7 @@ class Query:
         return Phase.from_instance(
             db=db,
             instance=phase_record,
-            user_id=user.id,
+            user=user,
             lock_datetime=settings.lock_datetime,
         )
 
@@ -261,7 +261,7 @@ class Query:
         return Phase.from_instance(
             db=db,
             instance=phase_record,
-            user_id=user.id,
+            user=user,
             lock_datetime=settings.lock_datetime,
         )
 
@@ -301,7 +301,7 @@ class Query:
 
         def send_response(
             db: "Session",
-            user_id: UUID,
+            user: UserModel,
             group: GroupModel,
             group_rank: List[GroupPositionModel],
             lock_datetime: "datetime",
@@ -311,13 +311,13 @@ class Query:
                 group=Group.from_instance(
                     db=db,
                     instance=group,
-                    user_id=user_id,
+                    user=user,
                     lock_datetime=lock_datetime,
                 ),
             )
 
         if not any(group_position.need_recomputation for group_position in group_rank):
-            return send_response(db, user.id, group, group_rank, settings.lock_datetime)
+            return send_response(db, user, group, group_rank, settings.lock_datetime)
 
         score_bets = user.score_bets.filter(MatchModel.group_id == group.id).join(
             ScoreBetModel.match,
@@ -325,7 +325,7 @@ class Query:
         group_rank = compute_group_rank(group_rank, score_bets)
         db.commit()
 
-        return send_response(db, user.id, group, group_rank, settings.lock_datetime)
+        return send_response(db, user, group, group_rank, settings.lock_datetime)
 
     @strawberry.field
     @is_authenticated
@@ -350,7 +350,7 @@ class Query:
 
         def send_response(
             db: "Session",
-            user_id: UUID,
+            user: UserModel,
             group: GroupModel,
             group_rank: List[GroupPositionModel],
             lock_datetime: "datetime",
@@ -360,13 +360,13 @@ class Query:
                 group=Group.from_instance(
                     db=db,
                     instance=group,
-                    user_id=user_id,
+                    user=user,
                     lock_datetime=lock_datetime,
                 ),
             )
 
         if not any(group_position.need_recomputation for group_position in group_rank):
-            return send_response(db, user.id, group, group_rank, settings.lock_datetime)
+            return send_response(db, user, group, group_rank, settings.lock_datetime)
 
         score_bets = user.score_bets.filter(MatchModel.group_id == group.id).join(
             ScoreBetModel.match,
@@ -374,4 +374,4 @@ class Query:
         group_rank = compute_group_rank(group_rank, score_bets)
         db.commit()
 
-        return send_response(db, user.id, group, group_rank, settings.lock_datetime)
+        return send_response(db, user, group, group_rank, settings.lock_datetime)
