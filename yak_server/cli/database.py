@@ -205,6 +205,6 @@ def setup_migration() -> None:
         "https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file",
     )
 
-    if alembic is None:  # pragma: no cover
+    if alembic is None:
         print()
         print("To enable migration using alembic, please run: pip install alembic")

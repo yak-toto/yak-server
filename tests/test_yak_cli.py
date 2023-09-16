@@ -13,6 +13,7 @@ from yak_server.cli import app
 from .utils import get_random_string
 
 if TYPE_CHECKING:
+    import pytest
     from fastapi import FastAPI
 
 runner = CliRunner()
@@ -145,7 +146,17 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
         },
     }
 
-    # Test the migration helper command line
+
+def test_db_migration_cli_with_alembic_present() -> None:
     result = runner.invoke(app, ["db", "migration"])
 
     assert result.exit_code == 0
+
+
+def test_db_migration_cli_with_alembic_missing(monkeypatch: "pytest.MonkeyPatch") -> None:
+    monkeypatch.setattr("yak_server.cli.database.alembic", None)
+
+    result = runner.invoke(app, ["db", "migration"])
+
+    assert result.exit_code == 0
+    assert "To enable migration using alembic, please run: pip install alembic" in result.output
