@@ -121,7 +121,7 @@ class User:
             Group.from_instance(
                 db=self.db,
                 instance=group,
-                user_id=self.instance.id,
+                user=self.instance,
                 lock_datetime=self.lock_datetime,
             )
             for group in self.db.query(GroupModel).order_by(GroupModel.index)
@@ -133,7 +133,7 @@ class User:
             Phase.from_instance(
                 db=self.db,
                 instance=phase,
-                user_id=self.instance.id,
+                user=self.instance,
                 lock_datetime=self.lock_datetime,
             )
             for phase in self.db.query(PhaseModel).order_by(PhaseModel.index)
@@ -285,7 +285,7 @@ def send_group_position(group_rank: List[GroupPositionModel]) -> List[GroupPosit
 class Group:
     db: strawberry.Private[Session]
     instance: strawberry.Private[GroupModel]
-    user_id: strawberry.Private[str]
+    user: strawberry.Private[UserModel]
     lock_datetime: strawberry.Private[datetime]
 
     id: UUID
@@ -295,16 +295,14 @@ class Group:
     @strawberry.field
     def group_rank(self) -> List[GroupPosition]:
         group_rank = self.db.query(GroupPositionModel).filter_by(
-            user_id=self.user_id,
+            user_id=self.user.id,
             group_id=self.id,
         )
 
         if not any(group_position.need_recomputation for group_position in group_rank):
             return send_group_position(group_rank)
 
-        user = self.db.query(UserModel).filter_by(id=self.user_id).first()
-
-        score_bets = user.score_bets.filter(MatchModel.group_id == self.id).join(
+        score_bets = self.user.score_bets.filter(MatchModel.group_id == self.id).join(
             ScoreBetModel.match,
         )
         group_rank = compute_group_rank(group_rank, score_bets)
@@ -317,7 +315,7 @@ class Group:
         return Phase.from_instance(
             db=self.db,
             instance=self.instance.phase,
-            user_id=self.user_id,
+            user=self.user,
             lock_datetime=self.lock_datetime,
         )
 
@@ -327,7 +325,7 @@ class Group:
             ScoreBet.from_instance(db=self.db, instance=score_bet, lock_datetime=self.lock_datetime)
             for score_bet in (
                 self.db.query(ScoreBetModel)
-                .filter_by(user_id=self.user_id)
+                .filter_by(user_id=self.user.id)
                 .join(ScoreBetModel.match)
                 .join(MatchModel.group)
                 .filter(
@@ -347,7 +345,7 @@ class Group:
             )
             for binary_bet in (
                 self.db.query(BinaryBetModel)
-                .filter_by(user_id=self.user_id)
+                .filter_by(user_id=self.user.id)
                 .join(BinaryBetModel.match)
                 .join(MatchModel.group)
                 .filter(
@@ -362,13 +360,13 @@ class Group:
         cls,
         db: Session,
         instance: GroupModel,
-        user_id: str,
+        user: UserModel,
         lock_datetime: datetime,
     ) -> "Group":
         return cls(
             db=db,
             instance=instance,
-            user_id=user_id,
+            user=user,
             lock_datetime=lock_datetime,
             id=instance.id,
             code=instance.code,
@@ -380,7 +378,7 @@ class Group:
 class Phase:
     db: strawberry.Private[Session]
     instance: strawberry.Private[PhaseModel]
-    user_id: strawberry.Private[str]
+    user: strawberry.Private[UserModel]
     lock_datetime: strawberry.Private[datetime]
 
     id: UUID
@@ -393,7 +391,7 @@ class Phase:
             Group.from_instance(
                 db=self.db,
                 instance=group,
-                user_id=self.user_id,
+                user=self.user,
                 lock_datetime=self.lock_datetime,
             )
             for group in self.db.query(GroupModel)
@@ -412,7 +410,7 @@ class Phase:
                 lock_datetime=self.lock_datetime,
             )
             for binary_bet in self.db.query(BinaryBetModel)
-            .filter_by(user_id=self.user_id)
+            .filter_by(user_id=self.user.id)
             .join(BinaryBetModel.match)
             .join(MatchModel.group)
             .filter(
@@ -426,7 +424,7 @@ class Phase:
         return [
             ScoreBet.from_instance(db=self.db, instance=score_bet, lock_datetime=self.lock_datetime)
             for score_bet in self.db.query(ScoreBetModel)
-            .filter_by(user_id=self.user_id)
+            .filter_by(user_id=self.user.id)
             .join(ScoreBetModel.match)
             .join(MatchModel.group)
             .filter(
@@ -440,13 +438,13 @@ class Phase:
         cls,
         db: Session,
         instance: PhaseModel,
-        user_id: str,
+        user: UserModel,
         lock_datetime: datetime,
     ) -> "Phase":
         return cls(
             db=db,
             instance=instance,
-            user_id=user_id,
+            user=user,
             lock_datetime=lock_datetime,
             id=instance.id,
             code=instance.code,
@@ -478,7 +476,7 @@ class ScoreBet:
             group=Group.from_instance(
                 db=db,
                 instance=instance.match.group,
-                user_id=instance.user_id,
+                user=instance.user,
                 lock_datetime=lock_datetime,
             ),
             team1=(
@@ -526,7 +524,7 @@ class BinaryBet:
             group=Group.from_instance(
                 db=db,
                 instance=instance.match.group,
-                user_id=instance.user_id,
+                user=instance.user,
                 lock_datetime=lock_datetime,
             ),
             team1=(
