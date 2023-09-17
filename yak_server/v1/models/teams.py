@@ -58,6 +58,7 @@ class TeamWithScoreOut(BaseModel):
 
 
 class TeamModifyScoreBetIn(BaseModel):
+    id: Optional[UUID4] = None
     score: Optional[NonNegativeInt] = None
 
 

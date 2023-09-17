@@ -93,6 +93,9 @@ ignore = [
 fix = true
 preview = true
 
+[tool.ruff.lint.mccabe]
+max-complexity = 11
+
 [tool.ruff.lint.per-file-ignores]
 "yak_server/cli/*" = ["T20"]
 "yak_server/database/migrations/*" = ["ANN001", "ANN201"]
