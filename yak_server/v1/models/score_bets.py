@@ -1,6 +1,6 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
-from pydantic import UUID4, BaseModel, PositiveInt
+from pydantic import UUID4, BaseModel, ConfigDict, PositiveInt
 
 from yak_server.helpers.language import Lang, get_language_description
 
@@ -22,8 +22,8 @@ class ScoreBetIn(BaseModel):
 class ScoreBetOut(BaseModel):
     id: UUID4
     locked: bool
-    team1: TeamWithScoreOut
-    team2: TeamWithScoreOut
+    team1: Optional[TeamWithScoreOut] = None
+    team2: Optional[TeamWithScoreOut] = None
 
     @classmethod
     def from_instance(
@@ -36,19 +36,27 @@ class ScoreBetOut(BaseModel):
         return cls(
             id=score_bet.id,
             locked=locked,
-            team1=TeamWithScoreOut(
-                id=score_bet.match.team1.id,
-                code=score_bet.match.team1.code,
-                description=get_language_description(score_bet.match.team1, lang),
-                score=score_bet.score1,
-                flag=FlagOut(url=score_bet.match.team1.flag_url),
+            team1=(
+                TeamWithScoreOut(
+                    id=score_bet.match.team1.id,
+                    code=score_bet.match.team1.code,
+                    description=get_language_description(score_bet.match.team1, lang),
+                    score=score_bet.score1,
+                    flag=FlagOut(url=score_bet.match.team1.flag_url),
+                )
+                if score_bet.match.team1_id is not None
+                else None
             ),
-            team2=TeamWithScoreOut(
-                id=score_bet.match.team2.id,
-                code=score_bet.match.team2.code,
-                description=get_language_description(score_bet.match.team2, lang),
-                score=score_bet.score2,
-                flag=FlagOut(url=score_bet.match.team2.flag_url),
+            team2=(
+                TeamWithScoreOut(
+                    id=score_bet.match.team2.id,
+                    code=score_bet.match.team2.code,
+                    description=get_language_description(score_bet.match.team2, lang),
+                    score=score_bet.score2,
+                    flag=FlagOut(url=score_bet.match.team2.flag_url),
+                )
+                if score_bet.match.team2_id is not None
+                else None
             ),
         )
 
@@ -100,5 +108,7 @@ class ScoreBetResponse(BaseModel):
 
 
 class ModifyScoreBetIn(BaseModel):
-    team1: TeamModifyScoreBetIn
-    team2: TeamModifyScoreBetIn
+    team1: Optional[TeamModifyScoreBetIn] = None
+    team2: Optional[TeamModifyScoreBetIn] = None
+
+    model_config = ConfigDict(extra="forbid")

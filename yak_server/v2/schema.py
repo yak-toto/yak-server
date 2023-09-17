@@ -474,12 +474,12 @@ class ScoreBet:
             ),
             team1=(
                 TeamWithScore.from_instance(instance.match.team1, score=instance.score1)
-                if instance.match.team1
+                if instance.match.team1_id is not None
                 else None
             ),
             team2=(
                 TeamWithScore.from_instance(instance.match.team2, score=instance.score2)
-                if instance.match.team2
+                if instance.match.team2_id is not None
                 else None
             ),
         )
@@ -517,12 +517,12 @@ class BinaryBet:
             ),
             team1=(
                 TeamWithVictory.from_instance(instance.match.team1, won=bet_results[0])
-                if instance.match.team1
+                if instance.match.team1_id is not None
                 else None
             ),
             team2=(
                 TeamWithVictory.from_instance(instance.match.team2, won=bet_results[1])
-                if instance.match.team2
+                if instance.match.team2_id is not None
                 else None
             ),
         )

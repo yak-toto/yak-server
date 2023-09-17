@@ -58,19 +58,27 @@ def send_response(
             score_bet=ScoreBetOut(
                 id=score_bet.id,
                 locked=locked,
-                team1=TeamWithScoreOut(
-                    id=score_bet.match.team1.id,
-                    code=score_bet.match.team1.code,
-                    description=get_language_description(score_bet.match.team1, lang),
-                    flag=FlagOut(url=score_bet.match.team1.flag_url),
-                    score=score_bet.score1,
+                team1=(
+                    TeamWithScoreOut(
+                        id=score_bet.match.team1.id,
+                        code=score_bet.match.team1.code,
+                        description=get_language_description(score_bet.match.team1, lang),
+                        flag=FlagOut(url=score_bet.match.team1.flag_url),
+                        score=score_bet.score1,
+                    )
+                    if score_bet.match.team1_id is not None
+                    else None
                 ),
-                team2=TeamWithScoreOut(
-                    id=score_bet.match.team2.id,
-                    code=score_bet.match.team2.code,
-                    description=get_language_description(score_bet.match.team2, lang),
-                    flag=FlagOut(url=score_bet.match.team2.flag_url),
-                    score=score_bet.score2,
+                team2=(
+                    TeamWithScoreOut(
+                        id=score_bet.match.team2.id,
+                        code=score_bet.match.team2.code,
+                        description=get_language_description(score_bet.match.team2, lang),
+                        flag=FlagOut(url=score_bet.match.team2.flag_url),
+                        score=score_bet.score2,
+                    )
+                    if score_bet.match.team2_id is not None
+                    else None
                 ),
             ),
         ),
@@ -159,30 +167,44 @@ def modify_score_bet(
     if not score_bet:
         raise BetNotFound(bet_id)
 
-    if (
-        score_bet.score1 == modify_score_bet_in.team1.score
-        and score_bet.score2 == modify_score_bet_in.team2.score
-    ):
-        return send_response(
-            score_bet,
-            locked=is_locked(user.name, settings.lock_datetime),
-            lang=lang,
-        )
-
     logger.info(
         modify_score_bet_successfully(
             user.name,
             score_bet,
-            modify_score_bet_in.team1.score,
-            modify_score_bet_in.team2.score,
+            modify_score_bet_in.team1.score if modify_score_bet_in.team1 else None,
+            modify_score_bet_in.team2.score if modify_score_bet_in.team2 else None,
         ),
     )
+
+    if modify_score_bet_in.team1 is not None:
+        if "id" in modify_score_bet_in.team1.model_fields_set:
+            score_bet.match.team1_id = modify_score_bet_in.team1.id
+
+            try:
+                db.flush()
+            except IntegrityError as integrity_error:
+                db.rollback()
+                raise TeamNotFound(modify_score_bet_in.team1.id) from integrity_error
+
+        if "score" in modify_score_bet_in.team1.model_fields_set:
+            score_bet.score1 = modify_score_bet_in.team1.score
+
+    if modify_score_bet_in.team2 is not None:
+        if "id" in modify_score_bet_in.team2.model_fields_set:
+            score_bet.match.team2_id = modify_score_bet_in.team2.id
+
+            try:
+                db.flush()
+            except IntegrityError as integrity_error:
+                db.rollback()
+                raise TeamNotFound(modify_score_bet_in.team2.id) from integrity_error
+
+        if "score" in modify_score_bet_in.team2.model_fields_set:
+            score_bet.score2 = modify_score_bet_in.team2.score
 
     set_recomputation_flag(db, score_bet.match.team1_id, user.id)
     set_recomputation_flag(db, score_bet.match.team2_id, user.id)
 
-    score_bet.score1 = modify_score_bet_in.team1.score
-    score_bet.score2 = modify_score_bet_in.team2.score
     db.commit()
 
     return send_response(score_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)

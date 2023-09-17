@@ -65,7 +65,7 @@ def send_response(
                         flag=FlagOut(url=binary_bet.match.team1.flag_url),
                         won=binary_bet.bet_from_is_one_won()[0],
                     )
-                    if binary_bet.match.team1
+                    if binary_bet.match.team1_id is not None
                     else None
                 ),
                 team2=(
@@ -76,7 +76,7 @@ def send_response(
                         flag=FlagOut(url=binary_bet.match.team2.flag_url),
                         won=binary_bet.bet_from_is_one_won()[1],
                     )
-                    if binary_bet.match.team2
+                    if binary_bet.match.team2_id is not None
                     else None
                 ),
             ),

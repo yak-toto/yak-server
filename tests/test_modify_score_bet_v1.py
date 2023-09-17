@@ -92,27 +92,6 @@ def test_modify_score_bet(
     assert response_patch_no_updates.json()["result"]["score_bet"]["team1"]["score"] == score1
     assert response_patch_no_updates.json()["result"]["score_bet"]["team2"]["score"] == score2
 
-    # Error case : check wrong inputs
-    response_patch_wrong_inputs = client.patch(
-        f"/api/v1/score_bets/{score_bet_ids[0]}",
-        json={"team2": {"score": score2}},
-        headers={"Authorization": f"Bearer {authentication_token}"},
-    )
-
-    assert response_patch_wrong_inputs.json() == {
-        "ok": False,
-        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
-        "description": [
-            {
-                "type": "missing",
-                "loc": ["body", "team1"],
-                "msg": "Field required",
-                "input": {"team2": {"score": score2}},
-                "url": ANY,
-            },
-        ],
-    }
-
     # Error case : check locked bet
     app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=10,

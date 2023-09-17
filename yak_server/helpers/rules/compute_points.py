@@ -196,7 +196,7 @@ def team_from_group_code(user: UserModel, group_code: str) -> set:
                 for bet in user.binary_bets.filter(GroupModel.code == group_code)
                 .join(BinaryBetModel.match)
                 .join(MatchModel.group)
-                if bet.match.team1 is not None and bet.match.team2 is not None
+                if bet.match.team1_id is not None and bet.match.team2_id is not None
             ),
         ),
     )
