@@ -26,7 +26,6 @@ jobs:
       - name: Set up MySQL
         uses: mirromutth/mysql-action@v1.1
         with:
-          mysql database: "yak_toto_test"
           mysql user: ${{ secrets.MYSQL_USER_NAME }}
           mysql root password: ${{ secrets.MYSQL_PASSWORD }}
 
