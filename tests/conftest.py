@@ -2,11 +2,13 @@ import os
 from typing import TYPE_CHECKING, Generator
 
 import pendulum
+import pymysql
 import pytest
 from starlette.testclient import TestClient
 
 from yak_server import create_app
 from yak_server.cli.database import create_database, delete_database, drop_database
+from yak_server.database import mysql_settings
 from yak_server.helpers.settings import get_settings
 
 from .utils import get_random_string
@@ -14,6 +16,21 @@ from .utils.mock import create_mock
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
+
+
+def pytest_configure() -> None:
+    connection = pymysql.connect(
+        host="127.0.0.1",
+        user=mysql_settings.user_name,
+        password=mysql_settings.password,
+        port=mysql_settings.port,
+    )
+
+    with connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {mysql_settings.db}")
+
+        connection.commit()
 
 
 @pytest.fixture(scope="session")
