@@ -1,7 +1,8 @@
-from datetime import timedelta
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
+
+import pendulum
 
 from yak_server.cli.database import initialize_database
 from yak_server.helpers.settings import get_settings
@@ -21,7 +22,7 @@ def test_group(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.Monkey
     app.dependency_overrides[get_settings] = create_mock(
         jwt_secret_key=fake_jwt_secret_key,
         jwt_expiration_time=10,
-        lock_datetime_shift=timedelta(minutes=10),
+        lock_datetime_shift=pendulum.duration(minutes=10),
     )
 
     monkeypatch.setattr(

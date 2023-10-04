@@ -60,8 +60,7 @@ from .schema import (
 )
 
 if TYPE_CHECKING:
-    from datetime import datetime
-
+    import pendulum
     from sqlalchemy.orm import Session
 
 
@@ -304,7 +303,7 @@ class Query:
             user: UserModel,
             group: GroupModel,
             group_rank: List[GroupPositionModel],
-            lock_datetime: "datetime",
+            lock_datetime: "pendulum.DateTime",
         ) -> GroupRank:
             return GroupRank(
                 group_rank=send_group_position(group_rank),
@@ -353,7 +352,7 @@ class Query:
             user: UserModel,
             group: GroupModel,
             group_rank: List[GroupPositionModel],
-            lock_datetime: "datetime",
+            lock_datetime: "pendulum.DateTime",
         ) -> GroupRank:
             return GroupRank(
                 group_rank=send_group_position(group_rank),

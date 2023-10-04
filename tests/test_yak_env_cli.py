@@ -34,7 +34,7 @@ def test_yak_env_init() -> None:
         assert env["JWT_EXPIRATION_TIME"] == "1800"
         assert len(env["JWT_SECRET_KEY"]) == 256
         assert env["COMPETITION"] == "world_cup_2022"
-        assert env["LOCK_DATETIME"] == "2022-11-20 17:00:00+01:00"
+        assert env["LOCK_DATETIME"] == "2022-11-20T17:00:00+01:00"
         assert env["DATA_FOLDER"].endswith("yak_server/data/world_cup_2022")
         assert len(json.loads(env["RULES"])) == 2
 

@@ -1,8 +1,9 @@
 from copy import copy
-from datetime import timedelta
 from http import HTTPStatus
 from secrets import SystemRandom, randbelow
 from typing import TYPE_CHECKING
+
+import pendulum
 
 from yak_server.cli.database import initialize_database
 from yak_server.helpers.settings import get_settings
@@ -26,7 +27,7 @@ def test_group_rank_and_modify_score_bet(
     app.dependency_overrides[get_settings] = create_mock(
         jwt_secret_key=fake_jwt_secret_key,
         jwt_expiration_time=10,
-        lock_datetime_shift=timedelta(minutes=10),
+        lock_datetime_shift=pendulum.duration(minutes=10),
     )
 
     monkeypatch.setattr(

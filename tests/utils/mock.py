@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-from datetime import timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Optional
 
-from . import get_paris_datetime_now
+import pendulum
 
 if TYPE_CHECKING:
     from yak_server.helpers.rules import Rules
@@ -17,7 +16,7 @@ class MockSettings:
         jwt_secret_key: Optional[str] = None,
         jwt_expiration_time: Optional[int] = None,
         data_folder_relative: Optional[str] = None,
-        lock_datetime_shift: Optional[timedelta] = None,
+        lock_datetime_shift: Optional[pendulum.Duration] = None,
         rules: Optional["Rules"] = None,
         base_correct_result: Optional[int] = None,
         multiplying_factor_correct_result: Optional[int] = None,
@@ -36,9 +35,7 @@ class MockSettings:
         )
 
         self.lock_datetime = (
-            get_paris_datetime_now() + lock_datetime_shift
-            if lock_datetime_shift is not None
-            else None
+            pendulum.now() + lock_datetime_shift if lock_datetime_shift is not None else None
         )
 
         self.rules = rules

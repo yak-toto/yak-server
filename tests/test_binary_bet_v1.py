@@ -1,8 +1,9 @@
-from datetime import timedelta
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
+
+import pendulum
 
 from yak_server.cli.database import initialize_database
 from yak_server.helpers.settings import get_settings
@@ -26,7 +27,7 @@ def test_binary_bet(
     app.dependency_overrides[get_settings] = create_mock(
         jwt_secret_key=fake_jwt_secret_key,
         jwt_expiration_time=10,
-        lock_datetime_shift=timedelta(minutes=10),
+        lock_datetime_shift=pendulum.duration(minutes=10),
     )
 
     monkeypatch.setattr(
@@ -91,7 +92,7 @@ def test_binary_bet(
 
     # Error case : locked bet
     app.dependency_overrides[get_settings] = create_mock(
-        lock_datetime_shift=-timedelta(minutes=10),
+        lock_datetime_shift=-pendulum.duration(minutes=10),
         jwt_expiration_time=10,
         jwt_secret_key=fake_jwt_secret_key,
     )
@@ -110,7 +111,7 @@ def test_binary_bet(
     }
 
     app.dependency_overrides[get_settings] = create_mock(
-        lock_datetime_shift=timedelta(minutes=10),
+        lock_datetime_shift=pendulum.duration(minutes=10),
         jwt_expiration_time=10,
         jwt_secret_key=fake_jwt_secret_key,
     )
