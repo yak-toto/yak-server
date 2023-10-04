@@ -1,9 +1,10 @@
 import json
 import logging
 import subprocess
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+import pendulum
 
 from yak_server.database import Base, SessionLocal, engine, mysql_settings
 from yak_server.database.models import (
@@ -145,7 +146,7 @@ def backup_database() -> None:
         check=False,
     )
 
-    backup_datetime = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f%z")
+    backup_datetime = pendulum.now("UTC")
 
     if result.returncode:
         error_message = (

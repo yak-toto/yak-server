@@ -1,17 +1,21 @@
-from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 from uuid import UUID
 
+import pendulum
 from jwt import decode as jwt_decode
 from jwt import encode as jwt_encode
 
 
-def encode_bearer_token(sub: UUID, expiration_time: timedelta, secret_key: str) -> str:
+def encode_bearer_token(
+    sub: UUID,
+    expiration_time: pendulum.Duration,
+    secret_key: str,
+) -> str:
     return jwt_encode(
         {
             "sub": str(sub),
-            "iat": datetime.now(tz=timezone.utc),
-            "exp": datetime.now(tz=timezone.utc) + expiration_time,
+            "iat": pendulum.now("UTC"),
+            "exp": pendulum.now("UTC") + expiration_time,
         },
         secret_key,
         algorithm="HS512",

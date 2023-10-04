@@ -1,8 +1,8 @@
-from datetime import timedelta
 from http import HTTPStatus
 from typing import TYPE_CHECKING, List, Optional, Tuple
 from unittest.mock import ANY
 
+import pendulum
 from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
@@ -121,7 +121,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=10,
         jwt_secret_key=get_random_string(100),
-        lock_datetime_shift=timedelta(seconds=10),
+        lock_datetime_shift=pendulum.duration(seconds=10),
         rules=Rules(
             compute_finale_phase_from_group_rank=RuleComputeFinaleFromGroupRank(
                 to_group="1",

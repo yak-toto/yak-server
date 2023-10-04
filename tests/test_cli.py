@@ -1,10 +1,9 @@
-from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import pendulum
 import pytest
-from dateutil import parser
 from starlette.testclient import TestClient
 
 from yak_server.cli.database import (
@@ -71,12 +70,12 @@ def test_backup(monkeypatch: pytest.MonkeyPatch) -> None:
     backup_database()
 
     list_datetime_backup = sorted(
-        parser.parse(file.name.replace(".sql", "").replace("yak_toto_backup_", ""))
+        pendulum.parse(file.name.replace(".sql", "").replace("yak_toto_backup_", ""))
         for file in (Path(__file__).parents[1] / "yak_server/cli/backup_files").glob("*")
     )
 
     # Check that most recent backup file has been created less than 2 seconds ago
-    assert datetime.now(tz=timezone.utc) - list_datetime_backup[-1] <= timedelta(seconds=2)
+    assert pendulum.now("UTC") - list_datetime_backup[-1] <= pendulum.duration(seconds=2)
 
     # Check BackupError if password is incorrect
     monkeypatch.setattr("yak_server.cli.database.mysql_settings.db", get_random_string(6))

@@ -1,12 +1,12 @@
 import logging
 import sys
-from datetime import timedelta
 
 if sys.version_info >= (3, 9):
     from typing import Annotated
 else:
     from typing_extensions import Annotated
 
+import pendulum
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 from sqlalchemy.orm import Session
@@ -96,7 +96,7 @@ def signup(
             name=user.name,
             token=encode_bearer_token(
                 sub=user.id,
-                expiration_time=timedelta(seconds=settings.jwt_expiration_time),
+                expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
                 secret_key=settings.jwt_secret_key,
             ),
         ),
@@ -122,7 +122,7 @@ def login(
             name=user.name,
             token=encode_bearer_token(
                 sub=user.id,
-                expiration_time=timedelta(seconds=settings.jwt_expiration_time),
+                expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
                 secret_key=settings.jwt_secret_key,
             ),
         ),

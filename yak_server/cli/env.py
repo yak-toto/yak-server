@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Dict
 from uuid import UUID
 
+import pendulum
 import typer
-from dateutil import parser
 
 from yak_server.database import MySQLSettings
 from yak_server.helpers.rules import RULE_MAPPING
@@ -96,7 +96,7 @@ class EnvBuilder:
         # Load lock datetime
         with Path(f"{data_folder}/common.json").open() as file:
             common_settings = json.loads(file.read())
-            self.env["LOCK_DATETIME"] = parser.parse(common_settings["lock_datetime"])
+            self.env["LOCK_DATETIME"] = pendulum.parse(common_settings["lock_datetime"])
 
     def write(self) -> None:
         write_env_file(self.env, ".env")

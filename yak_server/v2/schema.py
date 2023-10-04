@@ -1,7 +1,7 @@
-from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
+import pendulum
 import strawberry
 from sqlalchemy.orm import Session
 
@@ -76,7 +76,7 @@ class UserWithoutSensitiveInfo:
 class User:
     instance: strawberry.Private[UserModel]
     db: strawberry.Private[Session]
-    lock_datetime: strawberry.Private[datetime]
+    lock_datetime: strawberry.Private[pendulum.DateTime]
 
     id: UUID
     pseudo: str
@@ -140,7 +140,12 @@ class User:
         ]
 
     @classmethod
-    def from_instance(cls, db: Session, instance: UserModel, lock_datetime: datetime) -> "User":
+    def from_instance(
+        cls,
+        db: Session,
+        instance: UserModel,
+        lock_datetime: pendulum.DateTime,
+    ) -> "User":
         return cls(
             db=db,
             instance=instance,
@@ -162,7 +167,7 @@ class UserWithToken(User):
         cls,
         db: Session,
         instance: UserModel,
-        lock_datetime: datetime,
+        lock_datetime: pendulum.DateTime,
         token: str,
     ) -> "UserWithToken":
         return cls(
@@ -286,7 +291,7 @@ class Group:
     db: strawberry.Private[Session]
     instance: strawberry.Private[GroupModel]
     user: strawberry.Private[UserModel]
-    lock_datetime: strawberry.Private[datetime]
+    lock_datetime: strawberry.Private[pendulum.DateTime]
 
     id: UUID
     code: str
@@ -361,7 +366,7 @@ class Group:
         db: Session,
         instance: GroupModel,
         user: UserModel,
-        lock_datetime: datetime,
+        lock_datetime: pendulum.DateTime,
     ) -> "Group":
         return cls(
             db=db,
@@ -379,7 +384,7 @@ class Phase:
     db: strawberry.Private[Session]
     instance: strawberry.Private[PhaseModel]
     user: strawberry.Private[UserModel]
-    lock_datetime: strawberry.Private[datetime]
+    lock_datetime: strawberry.Private[pendulum.DateTime]
 
     id: UUID
     code: str
@@ -439,7 +444,7 @@ class Phase:
         db: Session,
         instance: PhaseModel,
         user: UserModel,
-        lock_datetime: datetime,
+        lock_datetime: pendulum.DateTime,
     ) -> "Phase":
         return cls(
             db=db,
@@ -467,7 +472,7 @@ class ScoreBet:
         cls,
         db: "Session",
         instance: ScoreBetModel,
-        lock_datetime: datetime,
+        lock_datetime: pendulum.DateTime,
     ) -> "ScoreBet":
         return cls(
             instance=instance,
@@ -513,7 +518,7 @@ class BinaryBet:
         cls,
         db: "Session",
         instance: BinaryBetModel,
-        lock_datetime: datetime,
+        lock_datetime: pendulum.DateTime,
     ) -> "BinaryBet":
         bet_results = instance.bet_from_is_one_won()
 

@@ -1,8 +1,8 @@
-from datetime import timedelta
 from secrets import choice
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
+import pendulum
 from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
@@ -188,7 +188,7 @@ def test_binary_bet(
     app_with_valid_jwt_config.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=10,
         jwt_secret_key=jwt_secret_key,
-        lock_datetime_shift=-timedelta(seconds=10),
+        lock_datetime_shift=-pendulum.duration(seconds=10),
     )
 
     response_modify_locked_binary_bet = client.post(
@@ -212,7 +212,7 @@ def test_binary_bet(
     app_with_valid_jwt_config.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=10,
         jwt_secret_key=jwt_secret_key,
-        lock_datetime_shift=timedelta(seconds=10),
+        lock_datetime_shift=pendulum.duration(seconds=10),
     )
 
     # Success case : Retrieve one binary bet

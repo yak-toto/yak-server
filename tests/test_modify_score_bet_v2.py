@@ -1,8 +1,8 @@
-from datetime import timedelta
 from secrets import SystemRandom
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
+import pendulum
 from starlette.testclient import TestClient
 
 from yak_server.cli.database import initialize_database
@@ -220,7 +220,7 @@ def test_modify_score_bet(
         jwt_secret_key=app_with_valid_jwt_config.dependency_overrides[
             get_settings
         ]().jwt_secret_key,
-        lock_datetime_shift=timedelta(seconds=-10),
+        lock_datetime_shift=pendulum.duration(seconds=-10),
     )
 
     response_modify_locked_score_bet = client.post(

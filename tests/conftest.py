@@ -1,7 +1,7 @@
 import os
-from datetime import timedelta
 from typing import TYPE_CHECKING, Generator
 
+import pendulum
 import pytest
 from starlette.testclient import TestClient
 
@@ -63,7 +63,7 @@ def debug_app_with_profiler() -> Generator["FastAPI", None, None]:
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=10,
         jwt_secret_key=get_random_string(15),
-        lock_datetime_shift=timedelta(seconds=10),
+        lock_datetime_shift=pendulum.duration(seconds=10),
     )
 
     # Clean database before running test
@@ -83,7 +83,7 @@ def production_app_with_profiler() -> Generator["FastAPI", None, None]:
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=10,
         jwt_secret_key=get_random_string(15),
-        lock_datetime_shift=timedelta(seconds=10),
+        lock_datetime_shift=pendulum.duration(seconds=10),
     )
 
     # Clean database before running test
@@ -101,7 +101,7 @@ def app_with_valid_jwt_config(app: "FastAPI") -> Generator["FastAPI", None, None
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=10,
         jwt_secret_key=fake_jwt_secret_key,
-        lock_datetime_shift=timedelta(seconds=10),
+        lock_datetime_shift=pendulum.duration(seconds=10),
     )
 
     yield app
@@ -116,7 +116,7 @@ def app_with_null_jwt_expiration_time(app: "FastAPI") -> Generator["FastAPI", No
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=0,
         jwt_secret_key=fake_jwt_secret_key,
-        lock_datetime_shift=timedelta(seconds=10),
+        lock_datetime_shift=pendulum.duration(seconds=10),
     )
 
     yield app
@@ -131,7 +131,7 @@ def app_with_lock_datetime_in_past(app: "FastAPI") -> Generator["FastAPI", None,
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=10,
         jwt_secret_key=fake_jwt_secret_key,
-        lock_datetime_shift=timedelta(seconds=-10),
+        lock_datetime_shift=pendulum.duration(seconds=-10),
     )
 
     yield app

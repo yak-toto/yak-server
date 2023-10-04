@@ -1,8 +1,8 @@
 import logging
-from datetime import timedelta
 from typing import Optional
 from uuid import UUID
 
+import pendulum
 import strawberry
 from sqlalchemy import update
 from strawberry.types import Info
@@ -104,7 +104,7 @@ class Mutation:
 
         token = encode_bearer_token(
             sub=user.id,
-            expiration_time=timedelta(seconds=settings.jwt_expiration_time),
+            expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
             secret_key=settings.jwt_secret_key,
         )
 
@@ -134,7 +134,7 @@ class Mutation:
 
         token = encode_bearer_token(
             sub=user.id,
-            expiration_time=timedelta(seconds=settings.jwt_expiration_time),
+            expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
             secret_key=settings.jwt_secret_key,
         )
 

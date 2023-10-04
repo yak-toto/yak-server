@@ -1,9 +1,10 @@
-from datetime import timedelta
 from http import HTTPStatus
 from secrets import SystemRandom, randbelow
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
+
+import pendulum
 
 from yak_server.cli.database import initialize_database
 from yak_server.helpers.settings import get_settings
@@ -27,7 +28,7 @@ def test_modify_score_bet(
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=10,
         jwt_secret_key=fake_jwt_secret_key,
-        lock_datetime_shift=timedelta(minutes=10),
+        lock_datetime_shift=pendulum.duration(minutes=10),
     )
 
     monkeypatch.setattr(
@@ -116,7 +117,7 @@ def test_modify_score_bet(
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=10,
         jwt_secret_key=fake_jwt_secret_key,
-        lock_datetime_shift=-timedelta(minutes=10),
+        lock_datetime_shift=-pendulum.duration(minutes=10),
     )
 
     response_locked_bet = client.patch(
@@ -134,7 +135,7 @@ def test_modify_score_bet(
     app.dependency_overrides[get_settings] = create_mock(
         jwt_expiration_time=10,
         jwt_secret_key=fake_jwt_secret_key,
-        lock_datetime_shift=timedelta(minutes=10),
+        lock_datetime_shift=pendulum.duration(minutes=10),
     )
 
     # Error case : check bet not found

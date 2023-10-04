@@ -1,10 +1,9 @@
 import os
-from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from dateutil import parser
+import pendulum
 from starlette.testclient import TestClient
 from typer.testing import CliRunner
 
@@ -41,7 +40,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
             "JWT_SECRET_KEY": get_random_string(128),
             "COMPETITION": "world_cup_2022",
             "DATA_FOLDER": data_folder,
-            "LOCK_DATETIME": str(datetime.now(tz=timezone.utc)),
+            "LOCK_DATETIME": str(pendulum.now("UTC")),
             "RULES": "{}",
         },
     )
@@ -59,7 +58,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
             "JWT_SECRET_KEY": get_random_string(128),
             "COMPETITION": "world_cup_2022",
             "DATA_FOLDER": data_folder,
-            "LOCK_DATETIME": str(datetime.now(tz=timezone.utc)),
+            "LOCK_DATETIME": str(pendulum.now("UTC")),
             "RULES": "{}",
         },
         input=f"{admin_password}\n{admin_password}\n",
@@ -88,12 +87,12 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
     assert result.exit_code == 0
 
     list_datetime_backup = sorted(
-        parser.parse(file.name.replace(".sql", "").replace("yak_toto_backup_", ""))
+        pendulum.parse(file.name.replace(".sql", "").replace("yak_toto_backup_", ""))
         for file in (Path(__file__).parents[1] / "yak_server/cli/backup_files").glob("*")
     )
 
     # Check that most recent backup file has been created less than 2 seconds ago
-    assert datetime.now(tz=timezone.utc) - list_datetime_backup[-1] <= timedelta(seconds=2)
+    assert pendulum.now("UTC") - list_datetime_backup[-1] <= pendulum.duration(seconds=2)
 
     # Check records deletion
     result = runner.invoke(app, ["db", "delete"], env={**os.environ, "DEBUG": "1"})

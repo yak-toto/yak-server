@@ -38,6 +38,7 @@ dependencies = [
     "typer ==0.9.0",
     "sqlalchemy >=2.0.19,<3.0.0",
     "sqlalchemy-utils ==0.41.1",
+    "pendulum ==2.1.2",
     "pydantic-settings ==2.0.3",
     "strawberry-graphql >=0.168.1,<0.210.0",
 ]
@@ -111,7 +112,7 @@ known-first-party = ["yak_server"]
 
 [tool.pytest.ini_options]
 log_file = "yak_test.log"
-log_file_format = "%(levelname)s:%(message)s"
+# log_file_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 log_file_level = "INFO"
 env = [
     "MYSQL_DB=yak_toto_test",
