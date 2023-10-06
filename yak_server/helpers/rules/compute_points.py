@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from itertools import chain
 from typing import TYPE_CHECKING, Dict, Iterable, List
 from uuid import UUID
@@ -29,29 +29,19 @@ class RuleComputePoints(BaseModel):
     first_team_qualified: int
 
 
+@dataclass
 class ResultForScoreBet:
-    def __init__(
-        self,
-        *,
-        number_correct_result: int,
-        user_ids_found_correct_result: List[UUID],
-        number_correct_score: int,
-        user_ids_found_correct_score: List[UUID],
-    ) -> None:
-        self.number_correct_result = number_correct_result
-        self.user_ids_found_correct_result = user_ids_found_correct_result
-        self.number_correct_score = number_correct_score
-        self.user_ids_found_correct_score = user_ids_found_correct_score
+    number_correct_result: int = 0
+    user_ids_found_correct_result: List[UUID] = field(default_factory=list)
+    number_correct_score: int = 0
+    user_ids_found_correct_score: List[UUID] = field(default_factory=list)
 
 
-def compute_results_by_score_bet(db: "Session", admin: UserModel) -> List[ResultForScoreBet]:
+def compute_results_for_score_bet(db: "Session", admin: UserModel) -> List[ResultForScoreBet]:
     results: List[ResultForScoreBet] = []
 
     for real_score in admin.score_bets:
-        number_correct_result = 0
-        number_correct_score = 0
-        user_ids_found_correct_result: List[UUID] = []
-        user_ids_found_correct_score: List[UUID] = []
+        result_for_score_bet = ResultForScoreBet()
 
         for user_score in (
             db.query(ScoreBetModel)
@@ -65,21 +55,14 @@ def compute_results_by_score_bet(db: "Session", admin: UserModel) -> List[Result
             )
         ):
             if user_score.is_same_results(real_score):
-                number_correct_result += 1
-                user_ids_found_correct_result.append(user_score.user_id)
+                result_for_score_bet.number_correct_result += 1
+                result_for_score_bet.user_ids_found_correct_result.append(user_score.user_id)
 
                 if user_score.is_same_scores(real_score):
-                    number_correct_score += 1
-                    user_ids_found_correct_score.append(user_score.user_id)
+                    result_for_score_bet.number_correct_score += 1
+                    result_for_score_bet.user_ids_found_correct_score.append(user_score.user_id)
 
-        results.append(
-            ResultForScoreBet(
-                number_correct_result=number_correct_result,
-                user_ids_found_correct_result=user_ids_found_correct_result,
-                number_correct_score=number_correct_score,
-                user_ids_found_correct_score=user_ids_found_correct_score,
-            ),
-        )
+        results.append(result_for_score_bet)
 
     return results
 
@@ -132,7 +115,7 @@ def compute_results_for_group_rank(
 
 
 def compute_points(db: "Session", admin: UserModel, rule_config: RuleComputePoints) -> None:
-    results = compute_results_by_score_bet(db, admin)
+    results = compute_results_for_score_bet(db, admin)
 
     other_users = db.query(UserModel).filter(UserModel.name != "admin")
 
