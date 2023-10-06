@@ -90,11 +90,8 @@ ignore = [
     # shadowing builtins
     "A002",
     "A003",
-    "C901",
     "PLR",
     "G004",
-    "S603",
-    "S607",
     "FA100",
 ]
 fix = true

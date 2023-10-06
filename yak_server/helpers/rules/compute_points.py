@@ -1,5 +1,7 @@
+from dataclasses import dataclass
 from itertools import chain
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Iterable, List
+from uuid import UUID
 
 from pydantic import BaseModel
 from sqlalchemy import and_
@@ -27,14 +29,29 @@ class RuleComputePoints(BaseModel):
     first_team_qualified: int
 
 
-def compute_points(db: "Session", admin: "UserModel", rule_config: RuleComputePoints) -> None:
-    results = []
+class ResultForScoreBet:
+    def __init__(
+        self,
+        *,
+        number_correct_result: int,
+        user_ids_found_correct_result: List[UUID],
+        number_correct_score: int,
+        user_ids_found_correct_score: List[UUID],
+    ) -> None:
+        self.number_correct_result = number_correct_result
+        self.user_ids_found_correct_result = user_ids_found_correct_result
+        self.number_correct_score = number_correct_score
+        self.user_ids_found_correct_score = user_ids_found_correct_score
+
+
+def compute_results_by_score_bet(db: "Session", admin: UserModel) -> List[ResultForScoreBet]:
+    results: List[ResultForScoreBet] = []
 
     for real_score in admin.score_bets:
         number_correct_result = 0
         number_correct_score = 0
-        user_ids_found_correct_result = []
-        user_ids_found_correct_score = []
+        user_ids_found_correct_result: List[UUID] = []
+        user_ids_found_correct_score: List[UUID] = []
 
         for user_score in (
             db.query(ScoreBetModel)
@@ -56,17 +73,29 @@ def compute_points(db: "Session", admin: "UserModel", rule_config: RuleComputePo
                     user_ids_found_correct_score.append(user_score.user_id)
 
         results.append(
-            {
-                "number_correct_result": number_correct_result,
-                "user_ids_found_correct_result": user_ids_found_correct_result,
-                "number_correct_score": number_correct_score,
-                "user_ids_found_correct_score": user_ids_found_correct_score,
-            },
+            ResultForScoreBet(
+                number_correct_result=number_correct_result,
+                user_ids_found_correct_result=user_ids_found_correct_result,
+                number_correct_score=number_correct_score,
+                user_ids_found_correct_score=user_ids_found_correct_score,
+            ),
         )
 
-    result_groups = {}
+    return results
 
-    other_users = db.query(UserModel).filter(UserModel.name != "admin")
+
+@dataclass
+class ResultForGroupRank:
+    number_qualified_teams_guess: int = 0
+    number_first_qualified_guess: int = 0
+
+
+def compute_results_for_group_rank(
+    db: "Session",
+    admin: UserModel,
+    other_users: Iterable[UserModel],
+) -> Dict[UUID, ResultForGroupRank]:
+    result_groups: Dict[UUID, ResultForGroupRank] = {}
 
     for group in (
         db.query(GroupModel)
@@ -83,10 +112,7 @@ def compute_points(db: "Session", admin: "UserModel", rule_config: RuleComputePo
 
             for other_user in other_users:
                 if other_user.id not in result_groups:
-                    result_groups[other_user.id] = {
-                        "number_qualified_teams_guess": 0,
-                        "number_first_qualified_guess": 0,
-                    }
+                    result_groups[other_user.id] = ResultForGroupRank()
 
                 group_result_user = get_group_rank_with_code(db, other_user, group.id)
 
@@ -94,13 +120,27 @@ def compute_points(db: "Session", admin: "UserModel", rule_config: RuleComputePo
                     user_first_team_id = group_result_user[0].team.id
                     user_second_team_id = group_result_user[1].team.id
 
-                    result_groups[other_user.id]["number_qualified_teams_guess"] += len(
+                    result_groups[other_user.id].number_qualified_teams_guess += len(
                         {user_first_team_id, user_second_team_id}
                         & {admin_first_team_id, admin_second_team_id},
                     )
 
                     if user_first_team_id == admin_first_team_id:
-                        result_groups[other_user.id]["number_first_qualified_guess"] += 1
+                        result_groups[other_user.id].number_first_qualified_guess += 1
+
+    return result_groups
+
+
+def compute_points(db: "Session", admin: UserModel, rule_config: RuleComputePoints) -> None:
+    results = compute_results_by_score_bet(db, admin)
+
+    other_users = db.query(UserModel).filter(UserModel.name != "admin")
+
+    result_groups: Dict[UUID, ResultForGroupRank] = compute_results_for_group_rank(
+        db,
+        admin,
+        other_users,
+    )
 
     quarter_finals_team = team_from_group_code(admin, "4")
     semi_finals_team = team_from_group_code(admin, "2")
@@ -115,32 +155,26 @@ def compute_points(db: "Session", admin: "UserModel", rule_config: RuleComputePo
         user.points = 0
 
         for result in results:
-            if user.id in result["user_ids_found_correct_result"]:
+            if user.id in result.user_ids_found_correct_result:
                 user.number_match_guess += 1
                 user.points += (
                     rule_config.base_correct_result
                     + rule_config.multiplying_factor_correct_result
-                    * (numbers_of_players - result["number_correct_result"])
+                    * (numbers_of_players - result.number_correct_result)
                     / (numbers_of_players - 1)
                 )
 
-            if user.id in result["user_ids_found_correct_score"]:
+            if user.id in result.user_ids_found_correct_score:
                 user.number_score_guess += 1
                 user.points += (
                     rule_config.base_correct_score
                     + rule_config.multiplying_factor_correct_score
-                    * (numbers_of_players - result["number_correct_score"])
+                    * (numbers_of_players - result.number_correct_score)
                     / (numbers_of_players - 1)
                 )
 
-        user.number_qualified_teams_guess = result_groups.get(user.id, {}).get(
-            "number_qualified_teams_guess",
-            0,
-        )
-        user.number_first_qualified_guess = result_groups.get(user.id, {}).get(
-            "number_first_qualified_guess",
-            0,
-        )
+        user.number_qualified_teams_guess = result_groups[user.id].number_qualified_teams_guess
+        user.number_first_qualified_guess = result_groups[user.id].number_first_qualified_guess
 
         user.points += user.number_qualified_teams_guess * rule_config.team_qualified
         user.points += user.number_first_qualified_guess * rule_config.first_team_qualified
@@ -183,16 +217,13 @@ def team_from_group_code(user: UserModel, group_code: str) -> set:
 
 
 def winner_from_user(user: UserModel) -> set:
-    finale_bet = list(
-        user.binary_bets.filter(GroupModel.code == "1")
-        .join(BinaryBetModel.match)
-        .join(MatchModel.group),
+    finale_bet = next(
+        iter(
+            user.binary_bets.filter(GroupModel.code == "1")
+            .join(BinaryBetModel.match)
+            .join(MatchModel.group),
+        ),
     )
-
-    if not finale_bet:
-        return set()
-
-    finale_bet = finale_bet[0]
 
     if finale_bet.is_one_won is None:
         return set()

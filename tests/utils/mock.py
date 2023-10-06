@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Optional
 
@@ -8,7 +7,6 @@ if TYPE_CHECKING:
     from yak_server.helpers.rules import Rules
 
 
-@dataclass
 class MockSettings:
     def __init__(
         self,
