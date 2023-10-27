@@ -93,6 +93,8 @@ ignore = [
     "PLR",
     "G004",
     "FA100",
+    "COM812",
+    "ISC001",
 ]
 fix = true
 src = ["yak_server", "tests"]
