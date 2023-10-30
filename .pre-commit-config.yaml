@@ -38,7 +38,7 @@ repos:
         types: [yaml]
 
   - repo: https://github.com/seddonym/import-linter
-    rev: v1.12.0
+    rev: v1.12.1
     hooks:
       - id: import-linter
 
