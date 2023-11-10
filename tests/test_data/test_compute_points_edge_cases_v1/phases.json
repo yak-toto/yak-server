@@ -1,0 +1,14 @@
+[
+    {
+        "index": 1,
+        "code": "GROUP",
+        "description_fr": "Phase de groupes",
+        "description_en": "Group stage"
+    },
+    {
+        "index": 1,
+        "code": "FINAL",
+        "description_fr": "Phase finale",
+        "description_en": "Final stage"
+    }
+]

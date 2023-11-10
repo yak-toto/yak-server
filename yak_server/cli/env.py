@@ -18,7 +18,7 @@ class YesOrNo(str, Enum):
     n = "n"
 
 
-class RuleNotDefined(Exception):
+class RuleNotDefinedError(Exception):
     def __init__(self, rule_id: str) -> None:
         super().__init__(f"Rule not defined: {rule_id}")
 
@@ -83,7 +83,7 @@ class EnvBuilder:
             rule_id = UUID(rule_file.stem)
 
             if rule_id not in RULE_MAPPING:
-                raise RuleNotDefined(rule_id)
+                raise RuleNotDefinedError(rule_id)
 
             rule_name = RULE_MAPPING[rule_id].attribute
 

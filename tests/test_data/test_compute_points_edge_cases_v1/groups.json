@@ -1,0 +1,30 @@
+[
+    {
+        "index": 1,
+        "code": "A",
+        "phase_code": "GROUP",
+        "description_fr": "Groupe A",
+        "description_en": "Group A"
+    },
+    {
+        "index": 2,
+        "code": "B",
+        "phase_code": "GROUP",
+        "description_fr": "Groupe B",
+        "description_en": "Group B"
+    },
+    {
+        "index": 3,
+        "code": "2",
+        "phase_code": "FINAL",
+        "description_fr": "Demi-finale",
+        "description_en": "Semi-finals"
+    },
+    {
+        "index": 4,
+        "code": "1",
+        "phase_code": "FINAL",
+        "description_en": "Finale",
+        "description_fr": "Final"
+    }
+]
