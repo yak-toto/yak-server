@@ -7,7 +7,7 @@ import pytest
 from typer.testing import CliRunner
 
 from yak_server.cli import app
-from yak_server.cli.env import RuleNotDefined
+from yak_server.cli.env import RuleNotDefinedError
 
 from .utils import get_random_string
 
@@ -44,5 +44,5 @@ def test_rule_not_defined(monkeypatch: pytest.MonkeyPatch) -> None:
 
         assert result.exit_code == 1
         assert result.exception is not None
-        assert isinstance(result.exception, RuleNotDefined)
+        assert isinstance(result.exception, RuleNotDefinedError)
         assert str(result.exception) == f"Rule not defined: {rule_id}"

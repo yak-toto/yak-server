@@ -1,0 +1,50 @@
+[
+    {
+        "code": "FR",
+        "description_fr": "France",
+        "description_en": "France",
+        "internal_flag_url": "https://fake-team-flag_france.com"
+    },
+    {
+        "code": "IE",
+        "description_fr": "Irlande",
+        "description_en": "Ireland",
+        "internal_flag_url": "https://fake-team-flag_brazil.com"
+    },
+    {
+        "code": "IM",
+        "description_fr": "\u00cele de Man",
+        "description_en": "Isle of Man",
+        "internal_flag_url": "https://fake-team-flag_isle_of_man.com"
+    },
+    {
+        "code": "GE",
+        "description_fr": "Allemagne",
+        "description_en": "Germany",
+        "internal_flag_url": "https://fake-team-flag_germany.com"
+    },
+    {
+        "code": "ES",
+        "description_fr": "Espagne",
+        "description_en": "Spain",
+        "internal_flag_url": "https://fake-team-flag_spain.com"
+    },
+    {
+        "code": "IT",
+        "description_fr": "Italie",
+        "description_en": "Italia",
+        "internal_flag_url": "https://fake-team-flag_italia.com"
+    },
+    {
+        "code": "SW",
+        "description_fr": "Suisse",
+        "description_en": "Switzerland",
+        "internal_flag_url": "https://fake-team-flag_switzerland.com"
+    },
+    {
+        "code": "PT",
+        "description_fr": "Portugal",
+        "description_en": "Portugal",
+        "internal_flag_url": "https://fake-team-flag_portugal.com"
+    }
+]

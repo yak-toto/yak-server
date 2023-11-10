@@ -156,6 +156,9 @@ def compute_points(db: "Session", admin: UserModel, rule_config: RuleComputePoin
                     / (numbers_of_players - 1)
                 )
 
+        if user.id not in result_groups:
+            continue
+
         user.number_qualified_teams_guess = result_groups[user.id].number_qualified_teams_guess
         user.number_first_qualified_guess = result_groups[user.id].number_first_qualified_guess
 

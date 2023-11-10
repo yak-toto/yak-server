@@ -13,7 +13,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .rules import Rules
 
-PendulumDateTime = Annotated[pendulum.DateTime, PlainValidator(lambda x: pendulum.parse(x))]
+PendulumDateTime = Annotated[pendulum.DateTime, PlainValidator(pendulum.parse)]
 
 
 class Settings(BaseSettings):

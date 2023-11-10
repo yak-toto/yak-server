@@ -8,8 +8,8 @@ from starlette.testclient import TestClient
 
 from yak_server.cli.database import (
     BackupError,
-    RecordDeletionInProduction,
-    TableDropInProduction,
+    RecordDeletionInProductionError,
+    TableDropInProductionError,
     backup_database,
     create_admin,
     delete_database,
@@ -57,12 +57,12 @@ def test_create_admin(app: "FastAPI") -> None:
 
 
 def test_delete_all_records(production_app: "FastAPI") -> None:
-    with pytest.raises(RecordDeletionInProduction):
+    with pytest.raises(RecordDeletionInProductionError):
         delete_database(production_app)
 
 
 def test_drop_all_tables(production_app: "FastAPI") -> None:
-    with pytest.raises(TableDropInProduction):
+    with pytest.raises(TableDropInProductionError):
         drop_database(production_app)
 
 

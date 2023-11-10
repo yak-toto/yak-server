@@ -35,12 +35,12 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class RecordDeletionInProduction(Exception):
+class RecordDeletionInProductionError(Exception):
     def __init__(self) -> None:
         super().__init__("Trying to delete records in production using script. DO NOT DO IT.")
 
 
-class TableDropInProduction(Exception):
+class TableDropInProductionError(Exception):
     def __init__(self) -> None:
         super().__init__("Trying to drop database tables in production using script. DO NOT DO IT.")
 
@@ -170,7 +170,7 @@ def backup_database() -> None:
 
 def delete_database(app: "FastAPI") -> None:
     if not app.debug:
-        raise RecordDeletionInProduction
+        raise RecordDeletionInProductionError
 
     with SessionLocal() as db:
         db.query(GroupPositionModel).delete()
@@ -187,7 +187,7 @@ def delete_database(app: "FastAPI") -> None:
 
 def drop_database(app: "FastAPI") -> None:
     if not app.debug:
-        raise TableDropInProduction
+        raise TableDropInProductionError
 
     with SessionLocal():
         Base.metadata.drop_all(bind=engine)
