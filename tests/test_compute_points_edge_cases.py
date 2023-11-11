@@ -1,6 +1,5 @@
-from dataclasses import dataclass
 from http import HTTPStatus
-from typing import TYPE_CHECKING, List, Optional, Tuple
+from typing import TYPE_CHECKING
 
 import pendulum
 from starlette.testclient import TestClient
@@ -15,21 +14,12 @@ from yak_server.helpers.rules.compute_final_from_rank import (
 from yak_server.helpers.rules.compute_points import RuleComputePoints
 from yak_server.helpers.settings import get_settings
 
-from .utils import get_random_string, patch_score_bets
+from .utils import UserData, get_random_string, patch_score_bets
 from .utils.mock import create_mock
 
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
-
-
-@dataclass
-class UserData:
-    first_name: str
-    last_name: str
-    name: str
-    scores: List[Optional[Tuple[Optional[int], Optional[int]]]]
-    token: Optional[str] = None
 
 
 def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
