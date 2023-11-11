@@ -1,5 +1,6 @@
 import secrets
 import string
+from dataclasses import dataclass
 from http import HTTPStatus
 from typing import List, Optional, Tuple
 
@@ -8,6 +9,15 @@ from fastapi.testclient import TestClient
 
 def get_random_string(length: int) -> str:
     return "".join(secrets.choice(string.ascii_letters) for _ in range(length))
+
+
+@dataclass
+class UserData:
+    first_name: str
+    last_name: str
+    name: str
+    scores: List[Optional[Tuple[Optional[int], Optional[int]]]]
+    token: Optional[str] = None
 
 
 def patch_score_bets(

@@ -1,6 +1,5 @@
 from http import HTTPStatus
-from typing import TYPE_CHECKING, List, Optional, Tuple
-from unittest.mock import ANY
+from typing import TYPE_CHECKING, Optional
 
 import pendulum
 from starlette.testclient import TestClient
@@ -15,7 +14,7 @@ from yak_server.helpers.rules.compute_final_from_rank import (
 from yak_server.helpers.rules.compute_points import RuleComputePoints
 from yak_server.helpers.settings import get_settings
 
-from .utils import get_random_string
+from .utils import UserData, get_random_string, patch_score_bets
 from .utils.mock import create_mock
 
 if TYPE_CHECKING:
@@ -46,48 +45,6 @@ QUERY_SCORE_BOARD = """
         }
     }
 """
-
-
-def patch_score_bets(
-    client: TestClient,
-    user_name: str,
-    new_scores: List[Tuple[Optional[int], Optional[int]]],
-) -> Tuple[str, str, str]:
-    # signup admin user
-    first_name = get_random_string(6)
-    last_name = get_random_string(10)
-
-    response_signup = client.post(
-        "/api/v1/users/signup",
-        json={
-            "name": user_name,
-            "first_name": first_name,
-            "last_name": last_name,
-            "password": get_random_string(12),
-        },
-    )
-
-    assert response_signup.status_code == HTTPStatus.CREATED
-
-    token = response_signup.json()["result"]["token"]
-
-    response_get_all_bets = client.get("/api/v1/bets", headers={"Authorization": f"Bearer {token}"})
-
-    assert response_get_all_bets.status_code == HTTPStatus.OK
-
-    for bet, new_score in zip(response_get_all_bets.json()["result"]["score_bets"], new_scores):
-        response_patch_score_bet = client.patch(
-            f"/api/v1/score_bets/{bet['id']}",
-            headers={"Authorization": f"Bearer {token}"},
-            json={
-                "team1": {"score": new_score[0]},
-                "team2": {"score": new_score[1]},
-            },
-        )
-
-        assert response_patch_score_bet.status_code == HTTPStatus.OK
-
-    return first_name, last_name, token
 
 
 def put_finale_phase(client: TestClient, token: str, is_one_won: Optional[bool]) -> None:
@@ -151,28 +108,74 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
     )
     initialize_database(app)
 
-    # Create 4 accounts and patch bets
-    _, _, admin_token = patch_score_bets(client, "admin", [(1, 2), (5, 1), (5, 5)])
-    user_first_name, user_last_name, user_token = patch_score_bets(
-        client,
-        "user",
-        [(2, 2), (5, 1), (5, 5)],
+    # Signup admin
+    admin = UserData(
+        first_name=get_random_string(10),
+        last_name=get_random_string(12),
+        name="admin",
+        scores=[(1, 2), (5, 1), (5, 5)],
     )
-    user2_first_name, user2_last_name, user2_token = patch_score_bets(
-        client,
-        "user2",
-        [(2, 0), (2, 0), (1, 4)],
+
+    response_signup_admin = client.post(
+        "/api/v1/users/signup",
+        json={
+            "first_name": admin.first_name,
+            "last_name": admin.last_name,
+            "name": admin.name,
+            "password": get_random_string(85),
+        },
     )
-    user3_first_name, user3_last_name, user3_token = patch_score_bets(
-        client,
-        "user3",
-        [(0, 2), (2, 0), (1, 1)],
-    )
+
+    assert response_signup_admin.status_code == HTTPStatus.CREATED
+
+    admin.token = response_signup_admin.json()["result"]["token"]
+
+    # Patch admin scores
+    patch_score_bets(client, admin.token, admin.scores)
+
+    # Signup 3 players and patch their scores
+    users_data = [
+        UserData(
+            first_name=get_random_string(15),
+            last_name=get_random_string(15),
+            name="user1",
+            scores=[(2, 2), (5, 1), (5, 5)],
+        ),
+        UserData(
+            first_name=get_random_string(15),
+            last_name=get_random_string(15),
+            name="user2",
+            scores=[(2, 0), (2, 0), (1, 4)],
+        ),
+        UserData(
+            first_name=get_random_string(15),
+            last_name=get_random_string(15),
+            name="user3",
+            scores=[(0, 2), (2, 0), (1, 1)],
+        ),
+    ]
+
+    for user_data in users_data:
+        response_signup = client.post(
+            "/api/v1/users/signup",
+            json={
+                "name": user_data.name,
+                "first_name": user_data.first_name,
+                "last_name": user_data.last_name,
+                "password": get_random_string(18),
+            },
+        )
+
+        assert response_signup.status_code == HTTPStatus.CREATED
+
+        user_data.token = response_signup.json()["result"]["token"]
+
+        patch_score_bets(client, user_data.token, user_data.scores)
 
     # Success case : compute_points call
     response_compute_points = client.post(
         "/api/v1/rules/62d46542-8cf1-4a3b-af77-a5086f10ac59",
-        headers={"Authorization": f"Bearer {admin_token}"},
+        headers={"Authorization": f"Bearer {admin.token}"},
     )
 
     assert response_compute_points.status_code == HTTPStatus.OK
@@ -180,7 +183,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
     # Error case : check unauthorized admin access to compute_points
     response_compute_points_unauthorized = client.post(
         "/api/v1/rules/62d46542-8cf1-4a3b-af77-a5086f10ac59",
-        headers={"Authorization": f"Bearer {user_token}"},
+        headers={"Authorization": f"Bearer {users_data[0].token}"},
     )
 
     assert response_compute_points_unauthorized.status_code == HTTPStatus.UNAUTHORIZED
@@ -193,15 +196,15 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
     # Success case : Check score board call
     score_board_response = client.get(
         "/api/v1/score_board",
-        headers={"Authorization": f"Bearer {user_token}"},
+        headers={"Authorization": f"Bearer {users_data[0].token}"},
     )
 
     assert score_board_response.json()["result"] == [
         {
             "rank": 1,
-            "first_name": user3_first_name,
-            "full_name": f"{user3_first_name} {user3_last_name}",
-            "last_name": user3_last_name,
+            "first_name": users_data[2].first_name,
+            "full_name": f"{users_data[2].first_name} {users_data[2].last_name}",
+            "last_name": users_data[2].last_name,
             "number_final_guess": 0,
             "number_first_qualified_guess": 1,
             "number_match_guess": 3,
@@ -214,9 +217,9 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
         },
         {
             "rank": 2,
-            "first_name": user_first_name,
-            "full_name": f"{user_first_name} {user_last_name}",
-            "last_name": user_last_name,
+            "first_name": users_data[0].first_name,
+            "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
+            "last_name": users_data[0].last_name,
             "number_final_guess": 0,
             "number_first_qualified_guess": 0,
             "number_match_guess": 2,
@@ -229,9 +232,9 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
         },
         {
             "rank": 3,
-            "first_name": user2_first_name,
-            "full_name": f"{user2_first_name} {user2_last_name}",
-            "last_name": user2_last_name,
+            "first_name": users_data[1].first_name,
+            "full_name": f"{users_data[1].first_name} {users_data[1].last_name}",
+            "last_name": users_data[1].last_name,
             "number_final_guess": 0,
             "number_first_qualified_guess": 0,
             "number_match_guess": 1,
@@ -245,15 +248,15 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
     ]
 
     # Push finale phase bets
-    put_finale_phase(client, admin_token, is_one_won=True)
-    put_finale_phase(client, user_token, is_one_won=False)
-    put_finale_phase(client, user2_token, is_one_won=True)
-    put_finale_phase(client, user3_token, is_one_won=False)
+    put_finale_phase(client, admin.token, is_one_won=True)
+    put_finale_phase(client, users_data[0].token, is_one_won=False)
+    put_finale_phase(client, users_data[1].token, is_one_won=True)
+    put_finale_phase(client, users_data[2].token, is_one_won=False)
 
     # Compute points again
     response_compute_points = client.post(
         "/api/v1/rules/62d46542-8cf1-4a3b-af77-a5086f10ac59",
-        headers={"Authorization": f"Bearer {admin_token}"},
+        headers={"Authorization": f"Bearer {admin.token}"},
     )
 
     assert response_compute_points.status_code == HTTPStatus.OK
@@ -261,15 +264,15 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
     # Check score board after finale phase bets patch
     score_board_response_after_finale_phase = client.get(
         "/api/v1/score_board",
-        headers={"Authorization": f"Bearer {user_token}"},
+        headers={"Authorization": f"Bearer {users_data[0].token}"},
     )
 
     assert score_board_response_after_finale_phase.json()["result"] == [
         {
             "rank": 1,
-            "first_name": user_first_name,
-            "full_name": f"{user_first_name} {user_last_name}",
-            "last_name": user_last_name,
+            "first_name": users_data[0].first_name,
+            "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
+            "last_name": users_data[0].last_name,
             "number_final_guess": 2,
             "number_first_qualified_guess": 0,
             "number_match_guess": 2,
@@ -282,9 +285,9 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
         },
         {
             "rank": 2,
-            "first_name": user3_first_name,
-            "full_name": f"{user3_first_name} {user3_last_name}",
-            "last_name": user3_last_name,
+            "first_name": users_data[2].first_name,
+            "full_name": f"{users_data[2].first_name} {users_data[2].last_name}",
+            "last_name": users_data[2].last_name,
             "number_final_guess": 2,
             "number_first_qualified_guess": 1,
             "number_match_guess": 3,
@@ -297,9 +300,9 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
         },
         {
             "rank": 3,
-            "first_name": user2_first_name,
-            "full_name": f"{user2_first_name} {user2_last_name}",
-            "last_name": user2_last_name,
+            "first_name": users_data[1].first_name,
+            "full_name": f"{users_data[1].first_name} {users_data[1].last_name}",
+            "last_name": users_data[1].last_name,
             "number_final_guess": 1,
             "number_first_qualified_guess": 0,
             "number_match_guess": 1,
@@ -316,7 +319,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
     response_score_board_v2 = client.post(
         "/api/v2",
         json={"query": QUERY_SCORE_BOARD},
-        headers={"Authorization": f"Bearer {user_token}"},
+        headers={"Authorization": f"Bearer {users_data[0].token}"},
     )
 
     assert response_score_board_v2.json() == {
@@ -325,7 +328,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
                 "__typename": "ScoreBoard",
                 "users": [
                     {
-                        "fullName": f"{user_first_name} {user_last_name}",
+                        "fullName": f"{users_data[0].first_name} {users_data[0].last_name}",
                         "result": {
                             "numberMatchGuess": 2,
                             "numberQualifiedTeamsGuess": 2,
@@ -334,7 +337,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
                         },
                     },
                     {
-                        "fullName": f"{user3_first_name} {user3_last_name}",
+                        "fullName": f"{users_data[2].first_name} {users_data[2].last_name}",
                         "result": {
                             "numberMatchGuess": 3,
                             "numberQualifiedTeamsGuess": 2,
@@ -343,7 +346,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
                         },
                     },
                     {
-                        "fullName": f"{user2_first_name} {user2_last_name}",
+                        "fullName": f"{users_data[1].first_name} {users_data[1].last_name}",
                         "result": {
                             "numberMatchGuess": 1,
                             "numberQualifiedTeamsGuess": 1,
@@ -359,14 +362,14 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
     # Success case : check user GET /results call
     get_results_response = client.get(
         "/api/v1/results",
-        headers={"Authorization": f"Bearer {user_token}"},
+        headers={"Authorization": f"Bearer {users_data[0].token}"},
     )
 
     assert get_results_response.json()["result"] == {
         "rank": 1,
-        "first_name": ANY,
-        "last_name": ANY,
-        "full_name": ANY,
+        "first_name": users_data[0].first_name,
+        "last_name": users_data[0].last_name,
+        "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
         "number_final_guess": 2,
         "number_first_qualified_guess": 0,
         "number_match_guess": 2,
@@ -381,7 +384,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
     # Error case : check not result for admin user
     get_results_response_admin = client.get(
         "/api/v1/results",
-        headers={"Authorization": f"Bearer {admin_token}"},
+        headers={"Authorization": f"Bearer {admin.token}"},
     )
 
     assert get_results_response_admin.json() == {
