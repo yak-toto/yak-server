@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from typing import TYPE_CHECKING
+from unittest.mock import ANY
 
 import pendulum
 from starlette.testclient import TestClient
@@ -183,6 +184,59 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
     )
 
     assert response_compute_points.status_code == HTTPStatus.OK
+
+    # Check final rule execution
+    rule_final_phase_response = client.post(
+        "/api/v1/rules/492345de-8d4a-45b6-8b94-d219f2b0c3e9",
+        headers={"Authorization": f"Bearer {users_data[0].token}"},
+    )
+
+    assert rule_final_phase_response.status_code == HTTPStatus.OK
+
+    # Check retrieve all bets after final phase
+    bets_final_phase_response = client.get(
+        "/api/v1/bets/phases/FINAL", headers={"Authorization": f"Bearer {users_data[0].token}"}
+    )
+
+    assert bets_final_phase_response.status_code == HTTPStatus.OK
+
+    semi_finals_id = bets_final_phase_response.json()["result"]["groups"][0]["id"]
+    finale_id = bets_final_phase_response.json()["result"]["groups"][1]["id"]
+
+    assert bets_final_phase_response.json() == {
+        "ok": True,
+        "result": {
+            "phase": {"id": ANY, "code": "FINAL", "description": "Phase finale"},
+            "groups": [
+                {"id": semi_finals_id, "code": "2", "description": "Demi-finale"},
+                {"id": finale_id, "code": "1", "description": "Final"},
+            ],
+            "score_bets": [],
+            "binary_bets": [
+                {
+                    "id": ANY,
+                    "locked": False,
+                    "group": {"id": semi_finals_id},
+                    "team1": None,
+                    "team2": None,
+                },
+                {
+                    "id": ANY,
+                    "locked": False,
+                    "group": {"id": semi_finals_id},
+                    "team1": None,
+                    "team2": None,
+                },
+                {
+                    "id": ANY,
+                    "locked": False,
+                    "group": {"id": finale_id},
+                    "team1": None,
+                    "team2": None,
+                },
+            ],
+        },
+    }
 
     # Success case : Check score board call
     score_board_response = client.get(
