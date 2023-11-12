@@ -24,10 +24,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up MySQL
-        uses: mirromutth/mysql-action@v1.1
+        uses: shogo82148/actions-setup-mysql@v1.26.0
         with:
-          mysql user: ${{ secrets.MYSQL_USER_NAME }}
-          mysql root password: ${{ secrets.MYSQL_PASSWORD }}
+          mysql-version: "8.0"
+          root-password: ${{ secrets.MYSQL_PASSWORD }}
 
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -45,9 +45,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-tests.txt
 
+      - run: time ping localhost -c 10
+
       - name: Run test
         env:
-          MYSQL_USER_NAME: ${{ secrets.MYSQL_USER_NAME }}
+          MYSQL_USER_NAME: root
           MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run: pytest --cov=yak_server --cov=scripts --cov=tests --cov-report=xml --cov-config=pyproject.toml -vv
         if: ${{ always() }}
