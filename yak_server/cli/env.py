@@ -63,7 +63,7 @@ class EnvBuilder:
         # Select competition to load associated rules
         path = Path(__file__).parents[1] / "data"
 
-        available_competitions = [competition.stem for competition in path.glob("*")]
+        available_competitions = sorted(competition.stem for competition in path.glob("*"))
 
         for index, competition in enumerate(available_competitions, 1):
             print(f"{index} - {competition}")
