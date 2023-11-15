@@ -42,6 +42,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
             "DATA_FOLDER": data_folder,
             "LOCK_DATETIME": str(pendulum.now("UTC")),
             "RULES": "{}",
+            "OFFICIAL_RESULTS_URL": "https://en.wikipedia.org/wiki/2022_FIFA_World_Cup",
         },
     )
 

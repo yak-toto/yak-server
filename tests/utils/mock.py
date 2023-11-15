@@ -22,6 +22,7 @@ class MockSettings:
         multiplying_factor_correct_score: Optional[int] = None,
         team_qualified: Optional[int] = None,
         first_team_qualified: Optional[int] = None,
+        official_results_url: Optional[str] = None,
     ) -> None:
         self.jwt_secret_key = jwt_secret_key
         self.jwt_expiration_time = jwt_expiration_time
@@ -43,6 +44,7 @@ class MockSettings:
         self.multiplying_factor_correct_score = multiplying_factor_correct_score
         self.team_qualified = team_qualified
         self.first_team_qualified = first_team_qualified
+        self.official_results_url = official_results_url
 
 
 def create_mock(**kwargs) -> Callable[[], MockSettings]:
