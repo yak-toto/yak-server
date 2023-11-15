@@ -22,7 +22,7 @@ def test_yak_env_init() -> None:
         result = runner.invoke(
             app,
             ["env", "init"],
-            input=f"y\ny\n{user_name}\n{password}\n{port}\n{database}\n1800\n3\n",
+            input=f"y\ny\n{user_name}\n{password}\n{port}\n{database}\n1800\n4\n",
         )
 
         assert result.exit_code == 0
