@@ -8,7 +8,7 @@ if sys.version_info >= (3, 9):
 else:
     from typing_extensions import Annotated
 
-from pydantic import PlainValidator
+from pydantic import HttpUrl, PlainValidator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .rules import Rules
@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     lock_datetime: PendulumDateTime
     data_folder: str
     rules: Rules
+    official_results_url: HttpUrl
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
 
