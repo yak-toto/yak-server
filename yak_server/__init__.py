@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -59,11 +60,21 @@ def create_app() -> FastAPI:
     from .v2 import get_schema
     from .v2.context import get_context
 
-    graphql_app = GraphQLRouter(
-        get_schema(debug=app.debug),
-        graphiql=app.debug,
-        context_getter=get_context,
-    )
+    if sys.version_info >= (3, 8):
+        graphql_app = GraphQLRouter(
+            get_schema(debug=app.debug),
+            graphql_ide="apollo-sandbox" if app.debug is True else None,
+            context_getter=get_context,
+        )
+    else:
+        # The breaking change introduced in strawberry 0.213.0
+        # (link: https://strawberry.rocks/docs/breaking-changes/0.213.0) is not appliable
+        # for python 3.7.
+        graphql_app = GraphQLRouter(
+            get_schema(debug=app.debug),
+            graphiql=app.debug,
+            context_getter=get_context,
+        )
 
     app.include_router(graphql_app, prefix=f"/{GLOBAL_ENDPOINT}/{VERSION2}", tags=["graphql"])
 

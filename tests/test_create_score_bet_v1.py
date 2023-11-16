@@ -10,7 +10,7 @@ from yak_server.cli.database import initialize_database
 from yak_server.helpers.settings import get_settings
 
 from .utils import get_random_string
-from .utils.mock import create_mock
+from .utils.mock import MockSettings
 
 if TYPE_CHECKING:
     import pytest
@@ -25,7 +25,7 @@ def test_create_score_bet(
 ) -> None:
     fake_jwt_secret_key = get_random_string(100)
 
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         jwt_secret_key=fake_jwt_secret_key,
         jwt_expiration_time=10,
         lock_datetime_shift=pendulum.duration(minutes=10),
@@ -33,7 +33,7 @@ def test_create_score_bet(
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
-        create_mock(data_folder_relative="test_create_bet"),
+        MockSettings(data_folder_relative="test_create_bet"),
     )
 
     initialize_database(app)
@@ -180,7 +180,7 @@ def test_create_score_bet(
     }
 
     # Check bet locking
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         lock_datetime_shift=-pendulum.duration(minutes=10),
         jwt_expiration_time=10,
         jwt_secret_key=fake_jwt_secret_key,

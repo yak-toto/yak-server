@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 
 from yak_server.helpers.settings import get_settings
 
-from .utils.mock import create_mock
+from .utils.mock import MockSettings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 def test_no_schema_introspection_in_production(production_app: "FastAPI") -> None:
     client = TestClient(production_app)
 
-    production_app.dependency_overrides[get_settings] = create_mock()
+    production_app.dependency_overrides[get_settings] = MockSettings()
 
     response = client.post(
         "/api/v2",

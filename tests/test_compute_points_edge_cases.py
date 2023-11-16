@@ -16,7 +16,7 @@ from yak_server.helpers.rules.compute_points import RuleComputePoints
 from yak_server.helpers.settings import get_settings
 
 from .utils import UserData, get_random_string, patch_score_bets
-from .utils.mock import create_mock
+from .utils.mock import MockSettings
 
 if TYPE_CHECKING:
     import pytest
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
     client = TestClient(app)
 
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=10,
         jwt_secret_key=get_random_string(100),
         lock_datetime_shift=pendulum.duration(seconds=10),
@@ -58,7 +58,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
-        create_mock(data_folder_relative="test_compute_points_edge_cases_v1"),
+        MockSettings(data_folder_relative="test_compute_points_edge_cases_v1"),
     )
     initialize_database(app)
 

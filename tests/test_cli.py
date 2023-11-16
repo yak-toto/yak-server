@@ -19,14 +19,14 @@ from yak_server.helpers.settings import get_settings
 from yak_server.v1.helpers.errors import NameAlreadyExists
 
 from .utils import get_random_string
-from .utils.mock import create_mock
+from .utils.mock import MockSettings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
 def test_create_admin(app: "FastAPI") -> None:
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=20,
         jwt_secret_key=get_random_string(10),
     )
