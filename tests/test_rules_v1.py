@@ -6,7 +6,7 @@ from yak_server.helpers.rules import Rules
 from yak_server.helpers.settings import get_settings
 
 from .utils import get_random_string
-from .utils.mock import create_mock
+from .utils.mock import MockSettings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 def test_rule(app: "FastAPI", client: "TestClient") -> None:
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=10,
         jwt_secret_key=get_random_string(100),
         rules=Rules(),

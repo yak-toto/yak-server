@@ -1,5 +1,11 @@
+import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Optional
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 import pendulum
 
@@ -46,9 +52,5 @@ class MockSettings:
         self.first_team_qualified = first_team_qualified
         self.official_results_url = official_results_url
 
-
-def create_mock(**kwargs) -> Callable[[], MockSettings]:
-    def get_settings_mock() -> MockSettings:
-        return MockSettings(**kwargs)
-
-    return get_settings_mock
+    def __call__(self) -> Self:
+        return self

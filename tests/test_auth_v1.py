@@ -7,7 +7,7 @@ from starlette.testclient import TestClient
 from yak_server.helpers.settings import get_settings
 
 from .utils import get_random_string
-from .utils.mock import create_mock
+from .utils.mock import MockSettings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -195,7 +195,7 @@ def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
 def test_expired_token(app: "FastAPI", client: "TestClient") -> None:
     fake_jwt_secret_key = get_random_string(15)
 
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=0,
         jwt_secret_key=fake_jwt_secret_key,
     )

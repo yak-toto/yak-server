@@ -6,7 +6,7 @@ from starlette.testclient import TestClient
 from yak_server.cli.database import initialize_database
 
 from .utils import get_random_string
-from .utils.mock import create_mock
+from .utils.mock import MockSettings
 
 if TYPE_CHECKING:
     import pytest
@@ -21,7 +21,7 @@ def test_modify_score_bet_and_group_rank(
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
-        create_mock(data_folder_relative="test_modify_score_bet_and_group_rank"),
+        MockSettings(data_folder_relative="test_modify_score_bet_and_group_rank"),
     )
     initialize_database(app_with_valid_jwt_config)
 

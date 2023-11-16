@@ -12,7 +12,7 @@ from yak_server.database import mysql_settings
 from yak_server.helpers.settings import get_settings
 
 from .utils import get_random_string
-from .utils.mock import create_mock
+from .utils.mock import MockSettings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -77,7 +77,7 @@ def debug_app_with_profiler() -> Generator["FastAPI", None, None]:
     os.environ["DEBUG"] = "1"
     app = create_app()
 
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=10,
         jwt_secret_key=get_random_string(15),
         lock_datetime_shift=pendulum.duration(seconds=10),
@@ -97,7 +97,7 @@ def production_app_with_profiler() -> Generator["FastAPI", None, None]:
     os.environ["DEBUG"] = "0"
     app = create_app()
 
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=10,
         jwt_secret_key=get_random_string(15),
         lock_datetime_shift=pendulum.duration(seconds=10),
@@ -115,7 +115,7 @@ def production_app_with_profiler() -> Generator["FastAPI", None, None]:
 def app_with_valid_jwt_config(app: "FastAPI") -> Generator["FastAPI", None, None]:
     fake_jwt_secret_key = get_random_string(15)
 
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=10,
         jwt_secret_key=fake_jwt_secret_key,
         lock_datetime_shift=pendulum.duration(seconds=10),
@@ -130,7 +130,7 @@ def app_with_valid_jwt_config(app: "FastAPI") -> Generator["FastAPI", None, None
 def app_with_null_jwt_expiration_time(app: "FastAPI") -> Generator["FastAPI", None, None]:
     fake_jwt_secret_key = get_random_string(15)
 
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=0,
         jwt_secret_key=fake_jwt_secret_key,
         lock_datetime_shift=pendulum.duration(seconds=10),
@@ -145,7 +145,7 @@ def app_with_null_jwt_expiration_time(app: "FastAPI") -> Generator["FastAPI", No
 def app_with_lock_datetime_in_past(app: "FastAPI") -> Generator["FastAPI", None, None]:
     fake_jwt_secret_key = get_random_string(15)
 
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=10,
         jwt_secret_key=fake_jwt_secret_key,
         lock_datetime_shift=pendulum.duration(seconds=-10),

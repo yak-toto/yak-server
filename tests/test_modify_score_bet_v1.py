@@ -10,7 +10,7 @@ from yak_server.cli.database import initialize_database
 from yak_server.helpers.settings import get_settings
 
 from .utils import get_random_string
-from .utils.mock import create_mock
+from .utils.mock import MockSettings
 
 if TYPE_CHECKING:
     import pytest
@@ -25,7 +25,7 @@ def test_modify_score_bet(
 ) -> None:
     fake_jwt_secret_key = get_random_string(100)
 
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=10,
         jwt_secret_key=fake_jwt_secret_key,
         lock_datetime_shift=pendulum.duration(minutes=10),
@@ -33,7 +33,7 @@ def test_modify_score_bet(
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
-        create_mock(data_folder_relative="test_modify_bet_v2"),
+        MockSettings(data_folder_relative="test_modify_bet_v2"),
     )
 
     initialize_database(app)
@@ -114,7 +114,7 @@ def test_modify_score_bet(
     }
 
     # Error case : check locked bet
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=10,
         jwt_secret_key=fake_jwt_secret_key,
         lock_datetime_shift=-pendulum.duration(minutes=10),
@@ -132,7 +132,7 @@ def test_modify_score_bet(
         "description": "Cannot modify score bet, lock date is exceeded",
     }
 
-    app.dependency_overrides[get_settings] = create_mock(
+    app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=10,
         jwt_secret_key=fake_jwt_secret_key,
         lock_datetime_shift=pendulum.duration(minutes=10),
