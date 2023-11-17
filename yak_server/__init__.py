@@ -14,7 +14,7 @@ GLOBAL_ENDPOINT = "api"
 VERSION1 = "v1"
 VERSION2 = "v2"
 
-__version__ = "0.36.0"
+__version__ = "0.37.0"
 
 
 def create_app() -> FastAPI:
