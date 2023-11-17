@@ -30,15 +30,15 @@
     {
         "group_code": "A",
         "index": 5,
-        "team1_code": "NL",
-        "team2_code": "QA",
+        "team1_code": "EC",
+        "team2_code": "SN",
         "bet_type_from_match": "SCORE_BET"
     },
     {
         "group_code": "A",
         "index": 6,
-        "team1_code": "EC",
-        "team2_code": "SN",
+        "team1_code": "NL",
+        "team2_code": "QA",
         "bet_type_from_match": "SCORE_BET"
     },
     {

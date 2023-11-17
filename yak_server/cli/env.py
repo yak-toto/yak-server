@@ -91,7 +91,7 @@ class EnvBuilder:
                 rules_list[rule_name] = json.loads(rule_content.read())
 
         rules = Rules.model_validate(rules_list)
-        self.env["RULES"] = rules.model_dump_json()
+        self.env["RULES"] = rules.model_dump_json(exclude_unset=True)
 
         # Load lock datetime
         with Path(f"{data_folder}/common.json").open() as file:
