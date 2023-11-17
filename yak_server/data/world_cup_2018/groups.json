@@ -78,16 +78,16 @@
     },
     {
         "index": 12,
-        "code": "1",
-        "phase_code": "FINAL",
-        "description_fr": "Finale",
-        "description_en": "Final"
-    },
-    {
-        "index": 13,
         "code": "3",
         "phase_code": "FINAL",
         "description_fr": "Finale pour la troisi\u00e8me place",
         "description_en": "Third place play-off"
+    },
+    {
+        "index": 13,
+        "code": "1",
+        "phase_code": "FINAL",
+        "description_fr": "Finale",
+        "description_en": "Final"
     }
 ]

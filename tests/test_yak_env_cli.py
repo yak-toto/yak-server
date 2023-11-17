@@ -61,3 +61,18 @@ def test_yak_env_init_production() -> None:
 
         assert env["DEBUG"] == "0"
         assert "PROFILING" not in env
+
+
+def test_yak_env_init_world_cup_2018() -> None:
+    with runner.isolated_filesystem():
+        result = runner.invoke(
+            app,
+            ["env", "init"],
+            input="y\ny\nroot\ndddddddd\n\ndb\n1800\n3\n",
+        )
+
+        assert result.exit_code == 0
+
+        env = dotenv_values(Path(".env"))
+
+        assert json.loads(env["RULES"]) == {}
