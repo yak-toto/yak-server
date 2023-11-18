@@ -192,7 +192,7 @@ def drop_database(app: "FastAPI") -> None:
 
 
 def setup_migration() -> None:
-    alembic_ini_path = Path(__file__).parents[2] / "alembic.ini"
+    alembic_ini_path = Path(__file__).parents[1] / "alembic.ini"
 
     print(
         "To be able to run the database migration scripts, you need to run the following command:",

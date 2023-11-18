@@ -60,9 +60,6 @@ yak = "yak_server.cli:app"
 [tool.hatch.version]
 path = "yak_server/__init__.py"
 
-[tool.hatch.build]
-include = ["yak_server", "alembic.ini"]
-
 [tool.black]
 line-length = 100
 target-version = ['py37']
