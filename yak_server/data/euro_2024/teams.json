@@ -1,0 +1,146 @@
+[
+    {
+        "code": "DE",
+        "description_fr": "Allemagne",
+        "description_en": "Germany",
+        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Germany-64x38.png"
+    },
+    {
+        "code": "A2",
+        "description_fr": "A2",
+        "description_en": "A2",
+        "internal_flag_url": "A2"
+    },
+    {
+        "code": "A3",
+        "description_fr": "A3",
+        "description_en": "A3",
+        "internal_flag_url": "A3"
+    },
+    {
+        "code": "A4",
+        "description_fr": "A4",
+        "description_en": "A4",
+        "internal_flag_url": "A4"
+    },
+    {
+        "code": "B1",
+        "description_fr": "B1",
+        "description_en": "B1",
+        "internal_flag_url": "B1"
+    },
+    {
+        "code": "B2",
+        "description_fr": "B2",
+        "description_en": "B2",
+        "internal_flag_url": "B2"
+    },
+    {
+        "code": "B3",
+        "description_fr": "B3",
+        "description_en": "B3",
+        "internal_flag_url": "B3"
+    },
+    {
+        "code": "B4",
+        "description_fr": "B4",
+        "description_en": "B4",
+        "internal_flag_url": "B4"
+    },
+    {
+        "code": "C1",
+        "description_fr": "C1",
+        "description_en": "C1",
+        "internal_flag_url": "C1"
+    },
+    {
+        "code": "C2",
+        "description_fr": "C2",
+        "description_en": "C2",
+        "internal_flag_url": "C2"
+    },
+    {
+        "code": "C3",
+        "description_fr": "C3",
+        "description_en": "C3",
+        "internal_flag_url": "C3"
+    },
+    {
+        "code": "C4",
+        "description_fr": "C4",
+        "description_en": "C4",
+        "internal_flag_url": "C4"
+    },
+    {
+        "code": "D1",
+        "description_fr": "D1",
+        "description_en": "D1",
+        "internal_flag_url": "D1"
+    },
+    {
+        "code": "D2",
+        "description_fr": "D2",
+        "description_en": "D2",
+        "internal_flag_url": "D2"
+    },
+    {
+        "code": "D3",
+        "description_fr": "D3",
+        "description_en": "D3",
+        "internal_flag_url": "D3"
+    },
+    {
+        "code": "D4",
+        "description_fr": "D4",
+        "description_en": "D4",
+        "internal_flag_url": "D4"
+    },
+    {
+        "code": "E1",
+        "description_fr": "E1",
+        "description_en": "E1",
+        "internal_flag_url": "E1"
+    },
+    {
+        "code": "E2",
+        "description_fr": "E2",
+        "description_en": "E2",
+        "internal_flag_url": "E2"
+    },
+    {
+        "code": "E3",
+        "description_fr": "E3",
+        "description_en": "E3",
+        "internal_flag_url": "E3"
+    },
+    {
+        "code": "E4",
+        "description_fr": "E4",
+        "description_en": "E4",
+        "internal_flag_url": "E4"
+    },
+    {
+        "code": "F1",
+        "description_fr": "F1",
+        "description_en": "F1",
+        "internal_flag_url": "F1"
+    },
+    {
+        "code": "F2",
+        "description_fr": "F2",
+        "description_en": "F2",
+        "internal_flag_url": "F2"
+    },
+    {
+        "code": "F3",
+        "description_fr": "F3",
+        "description_en": "F3",
+        "internal_flag_url": "F3"
+    },
+    {
+        "code": "F4",
+        "description_fr": "F4",
+        "description_en": "F4",
+        "internal_flag_url": "F4"
+    }
+]

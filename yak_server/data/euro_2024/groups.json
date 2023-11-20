@@ -1,0 +1,72 @@
+[
+    {
+        "index": 1,
+        "code": "A",
+        "phase_code": "GROUP",
+        "description_fr": "Groupe A",
+        "description_en": "Group A"
+    },
+    {
+        "index": 2,
+        "code": "B",
+        "phase_code": "GROUP",
+        "description_fr": "Groupe B",
+        "description_en": "Group B"
+    },
+    {
+        "index": 3,
+        "code": "C",
+        "phase_code": "GROUP",
+        "description_fr": "Groupe C",
+        "description_en": "Group C"
+    },
+    {
+        "index": 4,
+        "code": "D",
+        "phase_code": "GROUP",
+        "description_fr": "Groupe D",
+        "description_en": "Group D"
+    },
+    {
+        "index": 5,
+        "code": "E",
+        "phase_code": "GROUP",
+        "description_fr": "Groupe E",
+        "description_en": "Group E"
+    },
+    {
+        "index": 6,
+        "code": "F",
+        "phase_code": "GROUP",
+        "description_fr": "Groupe F",
+        "description_en": "Group F"
+    },
+    {
+        "index": 9,
+        "code": "8",
+        "phase_code": "FINAL",
+        "description_fr": "8\u00e8me de finale",
+        "description_en": "Round of 16"
+    },
+    {
+        "index": 10,
+        "code": "4",
+        "phase_code": "FINAL",
+        "description_fr": "Quart de finale",
+        "description_en": "Quarter-finals"
+    },
+    {
+        "index": 11,
+        "code": "2",
+        "phase_code": "FINAL",
+        "description_fr": "Demi-finale",
+        "description_en": "Semi-finals"
+    },
+    {
+        "index": 12,
+        "code": "1",
+        "phase_code": "FINAL",
+        "description_fr": "Finale",
+        "description_en": "Final"
+    }
+]
