@@ -36,7 +36,9 @@ def test_yak_env_init() -> None:
         assert env["COMPETITION"] == "world_cup_2022"
         assert env["LOCK_DATETIME"] == "2022-11-20T17:00:00+01:00"
         assert env["OFFICIAL_RESULTS_URL"] == "https://en.wikipedia.org/wiki/2022_FIFA_World_Cup"
-        assert env["DATA_FOLDER"].endswith("yak_server/data/world_cup_2022")
+        assert Path(env["DATA_FOLDER"]).samefile(
+            Path(__file__).parents[1] / "yak_server" / "data" / "world_cup_2022"
+        )
         assert len(json.loads(env["RULES"])) == 2
 
         env_mysql = dotenv_values(Path(".env.mysql"))

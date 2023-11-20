@@ -70,8 +70,10 @@ def test_backup(monkeypatch: pytest.MonkeyPatch) -> None:
     backup_database()
 
     list_datetime_backup = sorted(
-        pendulum.parse(file.name.replace(".sql", "").replace("yak_toto_backup_", ""))
-        for file in (Path(__file__).parents[1] / "yak_server/cli/backup_files").glob("*")
+        pendulum.from_format(
+            file.name.replace(".sql", "").replace("yak_toto_backup_", ""), "YYYYMMDD[T]HHmmssZZ"
+        )
+        for file in (Path(__file__).parents[1] / "yak_server" / "cli" / "backup_files").glob("*")
     )
 
     # Check that most recent backup file has been created less than 2 seconds ago

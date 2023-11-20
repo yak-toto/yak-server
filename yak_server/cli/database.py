@@ -158,12 +158,14 @@ def backup_database() -> None:
 
         raise BackupError(error_message)
 
-    backup_location = Path(__file__).parents[1] / "cli/backup_files"
+    backup_location = Path(__file__).parent / "backup_files"
     backup_location.mkdir(exist_ok=True)
 
-    file_name = f"{backup_location}/yak_toto_backup_{backup_datetime}.sql"
+    file_path = (
+        backup_location / f"yak_toto_backup_{backup_datetime.format('YYYYMMDD[T]HHmmssZZ')}.sql"
+    )
 
-    with Path(file_name).open(mode="w") as file:
+    with Path(file_path).open(mode="w") as file:
         file.write(result.stdout)
         logger.info(f"Backup done on {backup_datetime}")
 
