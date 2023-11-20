@@ -30,7 +30,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
     assert result.exit_code == 0
 
     # Check database initialization
-    data_folder = str((Path(__file__).parents[1] / "yak_server/data/world_cup_2022").resolve())
+    data_folder = str(Path(__file__).parents[1] / "yak_server" / "data" / "world_cup_2022")
 
     result = runner.invoke(
         app,
@@ -88,8 +88,10 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
     assert result.exit_code == 0
 
     list_datetime_backup = sorted(
-        pendulum.parse(file.name.replace(".sql", "").replace("yak_toto_backup_", ""))
-        for file in (Path(__file__).parents[1] / "yak_server/cli/backup_files").glob("*")
+        pendulum.from_format(
+            file.name.replace(".sql", "").replace("yak_toto_backup_", ""), "YYYYMMDD[T]HHmmssZZ"
+        )
+        for file in (Path(__file__).parents[1] / "yak_server" / "cli" / "backup_files").glob("*")
     )
 
     # Check that most recent backup file has been created less than 2 seconds ago
