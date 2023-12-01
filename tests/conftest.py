@@ -154,3 +154,10 @@ def app_with_lock_datetime_in_past(app: "FastAPI") -> Generator["FastAPI", None,
     yield app
 
     app.dependency_overrides = {}
+
+
+@pytest.fixture(scope="module")
+def monkeymodule() -> pytest.MonkeyPatch:
+    mpatch = pytest.MonkeyPatch()
+    yield mpatch
+    mpatch.undo()
