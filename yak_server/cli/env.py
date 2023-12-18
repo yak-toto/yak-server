@@ -96,7 +96,9 @@ class EnvBuilder:
         # Load lock datetime
         with Path(f"{data_folder}/common.json").open() as file:
             common_settings = json.loads(file.read())
-            self.env["LOCK_DATETIME"] = pendulum.parse(common_settings["lock_datetime"])
+            self.env["LOCK_DATETIME"] = pendulum.parse(
+                common_settings["lock_datetime"]
+            ).to_iso8601_string()
             self.env["OFFICIAL_RESULTS_URL"] = common_settings["official_results_url"]
 
     def write(self) -> None:
