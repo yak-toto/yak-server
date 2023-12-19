@@ -3,7 +3,9 @@ from typing import TYPE_CHECKING, Optional
 
 import pendulum
 from starlette.testclient import TestClient
+from typer.testing import CliRunner
 
+from yak_server.cli import app as cli_app
 from yak_server.cli.database import initialize_database
 from yak_server.helpers.rules import Rules
 from yak_server.helpers.rules.compute_final_from_rank import (
@@ -75,25 +77,27 @@ def put_finale_phase(client: TestClient, token: str, is_one_won: Optional[bool])
 def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
     client = TestClient(app)
 
+    rules = Rules(
+        compute_finale_phase_from_group_rank=RuleComputeFinaleFromGroupRank(
+            to_group="1",
+            from_phase="GROUP",
+            versus=[Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="A"))],
+        ),
+        compute_points=RuleComputePoints(
+            base_correct_result=1,
+            multiplying_factor_correct_result=2,
+            base_correct_score=3,
+            multiplying_factor_correct_score=7,
+            team_qualified=10,
+            first_team_qualified=20,
+        ),
+    )
+
     app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=10,
         jwt_secret_key=get_random_string(100),
         lock_datetime_shift=pendulum.duration(seconds=10),
-        rules=Rules(
-            compute_finale_phase_from_group_rank=RuleComputeFinaleFromGroupRank(
-                to_group="1",
-                from_phase="GROUP",
-                versus=[Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="A"))],
-            ),
-            compute_points=RuleComputePoints(
-                base_correct_result=1,
-                multiplying_factor_correct_result=2,
-                base_correct_score=3,
-                multiplying_factor_correct_score=7,
-                team_qualified=10,
-                first_team_qualified=20,
-            ),
-        ),
+        rules=rules,
         base_correct_result=1,
         multiplying_factor_correct_result=2,
         base_correct_score=3,
@@ -253,13 +257,15 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
     put_finale_phase(client, users_data[1].token, is_one_won=True)
     put_finale_phase(client, users_data[2].token, is_one_won=False)
 
-    # Compute points again
-    response_compute_points = client.post(
-        "/api/v1/rules/62d46542-8cf1-4a3b-af77-a5086f10ac59",
-        headers={"Authorization": f"Bearer {admin.token}"},
-    )
+    # Compute points again with cli
 
-    assert response_compute_points.status_code == HTTPStatus.OK
+    monkeypatch.setattr("yak_server.cli.database.get_settings", MockSettings(rules=rules))
+
+    runner = CliRunner()
+
+    result = runner.invoke(cli_app, ["db", "score-board"])
+
+    assert result.exit_code == 0
 
     # Check score board after finale phase bets patch
     score_board_response_after_finale_phase = client.get(

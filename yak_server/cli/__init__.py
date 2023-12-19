@@ -4,6 +4,7 @@ from yak_server import create_app
 
 from .database import (
     backup_database,
+    compute_score_board,
     create_admin,
     create_database,
     delete_database,
@@ -58,6 +59,11 @@ def make_db_app() -> typer.Typer:
     def migration() -> None:
         """Help to run database migration scripts."""
         setup_migration()
+
+    @db_app.command()
+    def score_board() -> None:
+        """Compute score board."""
+        compute_score_board()
 
     return db_app
 
