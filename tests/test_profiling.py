@@ -31,7 +31,7 @@ def test_debug_profiling(debug_app_with_profiler: "FastAPI") -> None:
 
     file_name = response.headers["profiling-log-id"]
 
-    profiling_file = Path(__file__).parents[1] / f"profiling/{file_name}.pstats"
+    profiling_file = Path(__file__).parents[1] / "profiling" / f"{file_name}.pstats"
     assert profiling_file.exists()
 
 

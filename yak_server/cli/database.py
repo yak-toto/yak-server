@@ -68,62 +68,58 @@ def initialize_database(app: "FastAPI") -> None:
     with SessionLocal() as db:
         data_folder = get_settings().data_folder
 
-        with Path(f"{data_folder}/phases.json").open() as file:
-            phases = json.loads(file.read())
+        phases = json.loads(Path(data_folder, "phases.json").read_text())
 
-            db.add_all(PhaseModel(**phase) for phase in phases)
+        db.add_all(PhaseModel(**phase) for phase in phases)
+        db.flush()
+
+        groups = json.loads(Path(data_folder, "groups.json").read_text())
+
+        for group in groups:
+            phase = db.query(PhaseModel).filter_by(code=group.pop("phase_code")).first()
+            group["phase_id"] = phase.id
+
+        db.add_all(GroupModel(**group) for group in groups)
+        db.flush()
+
+        teams = json.loads(Path(data_folder, "teams.json").read_text())
+
+        for team in teams:
+            team["flag_url"] = ""
+
+            team_instance = TeamModel(**team)
+            db.add(team_instance)
             db.flush()
 
-        with Path(f"{data_folder}/groups.json").open() as file:
-            groups = json.loads(file.read())
-
-            for group in groups:
-                phase = db.query(PhaseModel).filter_by(code=group.pop("phase_code")).first()
-                group["phase_id"] = phase.id
-
-            db.add_all(GroupModel(**group) for group in groups)
+            team_instance.flag_url = app.url_path_for(
+                "retrieve_team_flag_by_id",
+                team_id=team_instance.id,
+            )
             db.flush()
 
-        with Path(f"{data_folder}/teams.json").open() as file:
-            teams = json.loads(file.read())
+        matches = json.loads(Path(data_folder, "matches.json").read_text())
 
-            for team in teams:
-                team["flag_url"] = ""
+        for match in matches:
+            team1_code = match.pop("team1_code")
+            team2_code = match.pop("team2_code")
 
-                team_instance = TeamModel(**team)
-                db.add(team_instance)
-                db.flush()
+            if team1_code is None:
+                match["team1_id"] = None
+            else:
+                team1 = db.query(TeamModel).filter_by(code=team1_code).first()
+                match["team1_id"] = team1.id
 
-                team_instance.flag_url = app.url_path_for(
-                    "retrieve_team_flag_by_id",
-                    team_id=team_instance.id,
-                )
-                db.flush()
+            if team2_code is None:
+                match["team2_id"] = None
+            else:
+                team2 = db.query(TeamModel).filter_by(code=team2_code).first()
+                match["team2_id"] = team2.id
 
-        with Path(f"{data_folder}/matches.json").open() as file:
-            matches = json.loads(file.read())
+            group = db.query(GroupModel).filter_by(code=match.pop("group_code")).first()
+            match["group_id"] = group.id
 
-            for match in matches:
-                team1_code = match.pop("team1_code")
-                team2_code = match.pop("team2_code")
-
-                if team1_code is None:
-                    match["team1_id"] = None
-                else:
-                    team1 = db.query(TeamModel).filter_by(code=team1_code).first()
-                    match["team1_id"] = team1.id
-
-                if team2_code is None:
-                    match["team2_id"] = None
-                else:
-                    team2 = db.query(TeamModel).filter_by(code=team2_code).first()
-                    match["team2_id"] = team2.id
-
-                group = db.query(GroupModel).filter_by(code=match.pop("group_code")).first()
-                match["group_id"] = group.id
-
-            db.add_all(MatchReferenceModel(**match) for match in matches)
-            db.flush()
+        db.add_all(MatchReferenceModel(**match) for match in matches)
+        db.flush()
 
         db.commit()
 
@@ -166,9 +162,8 @@ def backup_database() -> None:
         backup_location / f"yak_toto_backup_{backup_datetime.format('YYYYMMDD[T]HHmmssZZ')}.sql"
     )
 
-    with Path(file_path).open(mode="w") as file:
-        file.write(result.stdout)
-        logger.info(f"Backup done on {backup_datetime}")
+    file_path.write_text(result.stdout)
+    logger.info(f"Backup done on {backup_datetime}")
 
 
 def delete_database(app: "FastAPI") -> None:
