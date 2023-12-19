@@ -19,6 +19,7 @@ from yak_server.database.models import (
     UserModel,
 )
 from yak_server.helpers.logging import setup_logging
+from yak_server.helpers.rules.compute_points import compute_points as compute_points_func
 from yak_server.helpers.settings import get_settings
 from yak_server.v1.models.users import SignupIn
 from yak_server.v1.routers.users import signup_user
@@ -211,3 +212,12 @@ def setup_migration() -> None:
     if alembic is None:
         print()
         print("To enable migration using alembic, please run: pip install alembic")
+
+
+def compute_score_board() -> None:
+    with SessionLocal() as db:
+        admin = db.query(UserModel).filter_by(name="admin").first()
+
+        rule_config = get_settings().rules.compute_points
+
+        compute_points_func(db, admin, rule_config)
