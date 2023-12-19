@@ -79,7 +79,7 @@ class EnvBuilder:
         # Load rules in environment
         rules_list: Dict[str, dict] = {}
 
-        for rule_file in Path(f"{data_folder}/rules").glob("*.json"):
+        for rule_file in Path(data_folder, "rules").glob("*.json"):
             rule_id = UUID(rule_file.stem)
 
             if rule_id not in RULE_MAPPING:
@@ -87,19 +87,18 @@ class EnvBuilder:
 
             rule_name = RULE_MAPPING[rule_id].attribute
 
-            with rule_file.open() as rule_content:
-                rules_list[rule_name] = json.loads(rule_content.read())
+            rules_list[rule_name] = json.loads(rule_file.read_text())
 
         rules = Rules.model_validate(rules_list)
         self.env["RULES"] = rules.model_dump_json(exclude_unset=True)
 
         # Load lock datetime
-        with Path(f"{data_folder}/common.json").open() as file:
-            common_settings = json.loads(file.read())
-            self.env["LOCK_DATETIME"] = pendulum.parse(
-                common_settings["lock_datetime"]
-            ).to_iso8601_string()
-            self.env["OFFICIAL_RESULTS_URL"] = common_settings["official_results_url"]
+        common_settings = json.loads((data_folder / "common.json").read_text())
+
+        self.env["LOCK_DATETIME"] = pendulum.parse(
+            common_settings["lock_datetime"]
+        ).to_iso8601_string()
+        self.env["OFFICIAL_RESULTS_URL"] = common_settings["official_results_url"]
 
     def write(self) -> None:
         write_env_file(self.env, ".env")
@@ -107,9 +106,9 @@ class EnvBuilder:
 
 
 def write_env_file(env: dict, filename: str) -> None:
-    with Path(filename).open(mode="w") as file:
-        for env_var, env_value in env.items():
-            file.write(f"{env_var}={env_value}\n")
+    Path(filename).write_text(
+        "\n".join([f"{env_var}={env_value}" for env_var, env_value in env.items()])
+    )
 
 
 def init_env() -> None:

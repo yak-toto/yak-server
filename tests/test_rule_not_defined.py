@@ -16,20 +16,20 @@ runner = CliRunner()
 
 def test_rule_not_defined(monkeypatch: pytest.MonkeyPatch) -> None:
     with runner.isolated_filesystem():
-        competion_dir = Path("data") / "fake_competition"
+        competion_dir = Path("data", "fake_competition")
 
         rules_dir = competion_dir / "rules"
         rules_dir.mkdir(parents=True)
 
         rule_id = uuid4()
 
-        with (rules_dir / f"{rule_id}.json").open(mode="w") as file:
-            file.write(json.dumps({}))
+        (rules_dir / f"{rule_id}.json").write_text(json.dumps({}))
 
-        with (competion_dir / "config.ini").open(mode="w") as file:
-            file.write("[locking]\ndatetime = 2022-11-20T17:00:00.000000+01:00\n")
+        (competion_dir / "config.ini").write_text(
+            "[locking]\ndatetime = 2022-11-20T17:00:00.000000+01:00\n"
+        )
 
-        monkeypatch.setattr("yak_server.cli.env.__file__", Path("cli") / "env.py")
+        monkeypatch.setattr("yak_server.cli.env.__file__", Path("cli", "env.py"))
 
         user_name = get_random_string(6)
         password = get_random_string(100)
