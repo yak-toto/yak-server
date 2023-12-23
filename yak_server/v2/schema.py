@@ -68,7 +68,7 @@ class UserWithoutSensitiveInfo:
             instance=instance,
             first_name=instance.first_name,
             last_name=instance.last_name,
-            result=Result.from_instance(instance=instance),
+            result=Result.from_instance(instance),
         )
 
 
@@ -92,11 +92,7 @@ class User:
     @strawberry.field
     def binary_bets(self) -> List["BinaryBet"]:
         return [
-            BinaryBet.from_instance(
-                db=self.db,
-                instance=binary_bet,
-                lock_datetime=self.lock_datetime,
-            )
+            BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
             for binary_bet in self.db.query(BinaryBetModel)
             .filter_by(user_id=self.instance.id)
             .join(BinaryBetModel.match)
@@ -107,7 +103,7 @@ class User:
     @strawberry.field
     def score_bets(self) -> List["ScoreBet"]:
         return [
-            ScoreBet.from_instance(db=self.db, instance=score_bet, lock_datetime=self.lock_datetime)
+            ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
             for score_bet in self.db.query(ScoreBetModel)
             .filter_by(user_id=self.instance.id)
             .join(ScoreBetModel.match)
@@ -119,8 +115,8 @@ class User:
     def groups(self) -> List["Group"]:
         return [
             Group.from_instance(
+                group,
                 db=self.db,
-                instance=group,
                 user=self.instance,
                 lock_datetime=self.lock_datetime,
             )
@@ -131,8 +127,8 @@ class User:
     def phases(self) -> List["Phase"]:
         return [
             Phase.from_instance(
+                phase,
                 db=self.db,
-                instance=phase,
                 user=self.instance,
                 lock_datetime=self.lock_datetime,
             )
@@ -142,19 +138,20 @@ class User:
     @classmethod
     def from_instance(
         cls,
-        db: Session,
         instance: UserModel,
+        *,
+        db: Session,
         lock_datetime: pendulum.DateTime,
     ) -> "User":
         return cls(
-            db=db,
             instance=instance,
+            db=db,
             lock_datetime=lock_datetime,
             id=instance.id,
             pseudo=instance.name,
             first_name=instance.first_name,
             last_name=instance.last_name,
-            result=Result.from_instance(instance=instance),
+            result=Result.from_instance(instance),
         )
 
 
@@ -165,8 +162,9 @@ class UserWithToken(User):
     @classmethod
     def from_instance(
         cls,
-        db: Session,
         instance: UserModel,
+        *,
+        db: Session,
         lock_datetime: pendulum.DateTime,
         token: str,
     ) -> "UserWithToken":
@@ -178,7 +176,7 @@ class UserWithToken(User):
             pseudo=instance.name,
             first_name=instance.first_name,
             last_name=instance.last_name,
-            result=Result.from_instance(instance=instance),
+            result=Result.from_instance(instance),
             token=token,
         )
 
@@ -213,7 +211,7 @@ class TeamWithScore(Team):
     score: Optional[int]
 
     @classmethod
-    def from_instance(cls, instance: TeamModel, score: Optional[int]) -> "TeamWithScore":
+    def from_instance(cls, instance: TeamModel, *, score: Optional[int]) -> "TeamWithScore":
         return cls(
             instance=instance,
             id=instance.id,
@@ -229,7 +227,7 @@ class TeamWithVictory(Team):
     won: Optional[bool]
 
     @classmethod
-    def from_instance(cls, instance: TeamModel, won: Optional[bool]) -> "TeamWithVictory":
+    def from_instance(cls, instance: TeamModel, *, won: Optional[bool]) -> "TeamWithVictory":
         return cls(
             instance=instance,
             id=instance.id,
@@ -264,7 +262,7 @@ class GroupPosition:
     def from_instance(cls, instance: GroupPositionModel) -> "GroupPosition":
         return cls(
             instance=instance,
-            team=Team.from_instance(instance=instance.team),
+            team=Team.from_instance(instance.team),
             played=instance.won + instance.drawn + instance.lost,
             won=instance.won,
             drawn=instance.drawn,
@@ -276,7 +274,7 @@ class GroupPosition:
 
 def send_group_position(group_rank: List[GroupPositionModel]) -> List[GroupPosition]:
     return sorted(
-        [GroupPosition.from_instance(instance=group_position) for group_position in group_rank],
+        [GroupPosition.from_instance(group_position) for group_position in group_rank],
         key=lambda team: (
             team.points(),
             team.goals_difference(),
@@ -318,8 +316,8 @@ class Group:
     @strawberry.field
     def phase(self) -> "Phase":
         return Phase.from_instance(
+            self.instance.phase,
             db=self.db,
-            instance=self.instance.phase,
             user=self.user,
             lock_datetime=self.lock_datetime,
         )
@@ -327,7 +325,7 @@ class Group:
     @strawberry.field
     def score_bets(self) -> List["ScoreBet"]:
         return [
-            ScoreBet.from_instance(db=self.db, instance=score_bet, lock_datetime=self.lock_datetime)
+            ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
             for score_bet in (
                 self.db.query(ScoreBetModel)
                 .filter_by(user_id=self.user.id)
@@ -343,11 +341,7 @@ class Group:
     @strawberry.field
     def binary_bets(self) -> List["BinaryBet"]:
         return [
-            BinaryBet.from_instance(
-                db=self.db,
-                instance=binary_bet,
-                lock_datetime=self.lock_datetime,
-            )
+            BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
             for binary_bet in (
                 self.db.query(BinaryBetModel)
                 .filter_by(user_id=self.user.id)
@@ -363,8 +357,9 @@ class Group:
     @classmethod
     def from_instance(
         cls,
-        db: Session,
         instance: GroupModel,
+        *,
+        db: Session,
         user: UserModel,
         lock_datetime: pendulum.DateTime,
     ) -> "Group":
@@ -393,12 +388,7 @@ class Phase:
     @strawberry.field
     def groups(self) -> List[Group]:
         return [
-            Group.from_instance(
-                db=self.db,
-                instance=group,
-                user=self.user,
-                lock_datetime=self.lock_datetime,
-            )
+            Group.from_instance(group, db=self.db, user=self.user, lock_datetime=self.lock_datetime)
             for group in self.db.query(GroupModel)
             .filter_by(phase_id=self.instance.id)
             .order_by(
@@ -409,11 +399,7 @@ class Phase:
     @strawberry.field
     def binary_bets(self) -> List["BinaryBet"]:
         return [
-            BinaryBet.from_instance(
-                db=self.db,
-                instance=binary_bet,
-                lock_datetime=self.lock_datetime,
-            )
+            BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
             for binary_bet in self.db.query(BinaryBetModel)
             .filter_by(user_id=self.user.id)
             .join(BinaryBetModel.match)
@@ -427,7 +413,7 @@ class Phase:
     @strawberry.field
     def score_bets(self) -> List["ScoreBet"]:
         return [
-            ScoreBet.from_instance(db=self.db, instance=score_bet, lock_datetime=self.lock_datetime)
+            ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
             for score_bet in self.db.query(ScoreBetModel)
             .filter_by(user_id=self.user.id)
             .join(ScoreBetModel.match)
@@ -441,8 +427,9 @@ class Phase:
     @classmethod
     def from_instance(
         cls,
-        db: Session,
         instance: PhaseModel,
+        *,
+        db: Session,
         user: UserModel,
         lock_datetime: pendulum.DateTime,
     ) -> "Phase":
@@ -470,8 +457,9 @@ class ScoreBet:
     @classmethod
     def from_instance(
         cls,
-        db: "Session",
         instance: ScoreBetModel,
+        *,
+        db: "Session",
         lock_datetime: pendulum.DateTime,
     ) -> "ScoreBet":
         return cls(
@@ -479,24 +467,18 @@ class ScoreBet:
             id=instance.id,
             locked=is_locked(instance.user.name, lock_datetime),
             group=Group.from_instance(
+                instance.match.group,
                 db=db,
-                instance=instance.match.group,
                 user=instance.user,
                 lock_datetime=lock_datetime,
             ),
             team1=(
-                TeamWithScore.from_instance(
-                    instance=instance.match.team1,
-                    score=instance.score1,
-                )
+                TeamWithScore.from_instance(instance.match.team1, score=instance.score1)
                 if instance.match.team1
                 else None
             ),
             team2=(
-                TeamWithScore.from_instance(
-                    instance=instance.match.team2,
-                    score=instance.score2,
-                )
+                TeamWithScore.from_instance(instance.match.team2, score=instance.score2)
                 if instance.match.team2
                 else None
             ),
@@ -516,8 +498,9 @@ class BinaryBet:
     @classmethod
     def from_instance(
         cls,
-        db: "Session",
         instance: BinaryBetModel,
+        *,
+        db: "Session",
         lock_datetime: pendulum.DateTime,
     ) -> "BinaryBet":
         bet_results = instance.bet_from_is_one_won()
@@ -527,24 +510,18 @@ class BinaryBet:
             id=instance.id,
             locked=is_locked(instance.user.name, lock_datetime),
             group=Group.from_instance(
+                instance.match.group,
                 db=db,
-                instance=instance.match.group,
                 user=instance.user,
                 lock_datetime=lock_datetime,
             ),
             team1=(
-                TeamWithVictory.from_instance(
-                    instance=instance.match.team1,
-                    won=bet_results[0],
-                )
+                TeamWithVictory.from_instance(instance.match.team1, won=bet_results[0])
                 if instance.match.team1
                 else None
             ),
             team2=(
-                TeamWithVictory.from_instance(
-                    instance=instance.match.team2,
-                    won=bet_results[1],
-                )
+                TeamWithVictory.from_instance(instance.match.team2, won=bet_results[1])
                 if instance.match.team2
                 else None
             ),

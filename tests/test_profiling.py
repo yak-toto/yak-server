@@ -1,8 +1,12 @@
+import os
 from http import HTTPStatus
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import pytest
 from fastapi.testclient import TestClient
+
+from yak_server import create_app
 
 from .utils import get_random_string
 
@@ -53,3 +57,18 @@ def test_production_profiling(production_app_with_profiler: "FastAPI") -> None:
 
     assert response.status_code == HTTPStatus.CREATED
     assert "profiling-log-id" not in response.headers
+
+
+def test_profiling_without_yappi_installed(monkeypatch: pytest.MonkeyPatch) -> None:
+    os.environ["PROFILING"] = "1"
+    os.environ["DEBUG"] = "1"
+    monkeypatch.setattr("yak_server.helpers.profiling.yappi", None)
+
+    with pytest.raises(NotImplementedError) as exception:
+        create_app()
+
+    assert (
+        str(exception.value)
+        == "Profiling is not available without yappi installed. Either install it or disable"
+        " profiling."
+    )

@@ -23,6 +23,7 @@ def modify_score_bet_successfully(
 def modify_binary_bet_successfully(
     user_name: str,
     original_bet: "BinaryBetModel",
+    *,
     new_is_one_won: Optional[bool],
 ) -> str:
     return (
