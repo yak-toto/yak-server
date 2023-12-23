@@ -63,7 +63,9 @@ class EnvBuilder:
         # Select competition to load associated rules
         path = Path(__file__).parents[1] / "data"
 
-        available_competitions = sorted(competition.stem for competition in path.glob("*"))
+        available_competitions = sorted(
+            (competition.stem for competition in path.glob("*")), key=lambda x: x.split("_")[-1]
+        )
 
         for index, competition in enumerate(available_competitions, 1):
             print(f"{index} - {competition}")
@@ -107,7 +109,7 @@ class EnvBuilder:
 
 def write_env_file(env: dict, filename: str) -> None:
     Path(filename).write_text(
-        "\n".join([f"{env_var}={env_value}" for env_var, env_value in env.items()])
+        "".join([f"{env_var}={env_value}\n" for env_var, env_value in env.items()])
     )
 
 
