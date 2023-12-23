@@ -71,7 +71,7 @@ target-version = ['py37']
 preview = true
 
 [tool.coverage.run]
-branch = "true"
+branch = true
 
 [tool.coverage.report]
 omit = ["./yak_server/database/migrations/*"]
@@ -96,9 +96,10 @@ ignore = [
     "FA100",
     "COM812",
     "ISC001",
+    "CPY001",
 ]
 fix = true
-src = ["yak_server", "tests"]
+preview = true
 
 [tool.ruff.per-file-ignores]
 "yak_server/cli/*" = ["T20"]
@@ -106,9 +107,6 @@ src = ["yak_server", "tests"]
 "yak_server/helpers/errors.py" = ["S105"]
 "tests/*" = ["S101"]
 "scripts/*" = ["T201"]
-
-[tool.ruff.isort]
-known-first-party = ["yak_server"]
 
 [tool.pytest.ini_options]
 log_file = "yak_test.log"

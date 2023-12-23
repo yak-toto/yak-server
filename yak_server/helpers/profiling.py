@@ -4,18 +4,21 @@ from uuid import uuid4
 
 try:
     import yappi
-except ImportError as import_error:  # pragma: no cover
-    msg = (
-        "Profiling is not available without yappi installed. "
-        "Either install it or disable profiling."
-    )
-    raise ImportError(msg) from import_error
+except ImportError:  # pragma: no cover
+    yappi = None
 
 if TYPE_CHECKING:
     from fastapi import FastAPI, Request, Response
 
 
 def set_yappi_profiler(app: "FastAPI") -> None:
+    if yappi is None:
+        msg = (
+            "Profiling is not available without yappi installed. "
+            "Either install it or disable profiling."
+        )
+        raise NotImplementedError(msg)
+
     @app.middleware("http")
     async def profile_process_time(
         request: "Request",

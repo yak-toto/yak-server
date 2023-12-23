@@ -73,7 +73,7 @@ class Query:
         user = info.context.user
         settings = info.context.settings
 
-        return User.from_instance(db=db, instance=user, lock_datetime=settings.lock_datetime)
+        return User.from_instance(user, db=db, lock_datetime=settings.lock_datetime)
 
     @strawberry.field
     @is_authenticated
@@ -81,7 +81,7 @@ class Query:
         db = info.context.db
 
         return AllTeamsSuccessful(
-            teams=[Team.from_instance(instance=team) for team in db.query(TeamModel).all()],
+            teams=[Team.from_instance(team) for team in db.query(TeamModel).all()]
         )
 
     @strawberry.field
@@ -94,7 +94,7 @@ class Query:
         if not team_record:
             return TeamByIdNotFound(id=id)
 
-        return Team.from_instance(instance=team_record)
+        return Team.from_instance(team_record)
 
     @strawberry.field
     @is_authenticated
@@ -106,7 +106,7 @@ class Query:
         if not team_record:
             return TeamByCodeNotFound(code=code)
 
-        return Team.from_instance(instance=team_record)
+        return Team.from_instance(team_record)
 
     @strawberry.field
     @is_authenticated
@@ -120,11 +120,7 @@ class Query:
         if not score_bet_record:
             return ScoreBetNotFound(id=id)
 
-        return ScoreBet.from_instance(
-            db=db,
-            instance=score_bet_record,
-            lock_datetime=settings.lock_datetime,
-        )
+        return ScoreBet.from_instance(score_bet_record, db=db, lock_datetime=settings.lock_datetime)
 
     @strawberry.field
     @is_authenticated
@@ -139,9 +135,7 @@ class Query:
             return BinaryBetNotFound(id=id)
 
         return BinaryBet.from_instance(
-            db=db,
-            instance=binary_bet_record,
-            lock_datetime=settings.lock_datetime,
+            binary_bet_record, db=db, lock_datetime=settings.lock_datetime
         )
 
     @strawberry.field
@@ -154,8 +148,8 @@ class Query:
         return Groups(
             groups=[
                 Group.from_instance(
+                    group,
                     db=db,
-                    instance=group,
                     user=user,
                     lock_datetime=settings.lock_datetime,
                 )
@@ -176,8 +170,8 @@ class Query:
             return GroupByIdNotFound(id=id)
 
         return Group.from_instance(
+            group_record,
             db=db,
-            instance=group_record,
             user=user,
             lock_datetime=settings.lock_datetime,
         )
@@ -199,8 +193,8 @@ class Query:
             return GroupByCodeNotFound(code=code)
 
         return Group.from_instance(
+            group_record,
             db=db,
-            instance=group_record,
             user=user,
             lock_datetime=settings.lock_datetime,
         )
@@ -217,8 +211,8 @@ class Query:
         return Phases(
             phases=[
                 Phase.from_instance(
+                    phase,
                     db=db,
-                    instance=phase,
                     user=user,
                     lock_datetime=settings.lock_datetime,
                 )
@@ -239,8 +233,8 @@ class Query:
             return PhaseByIdNotFound(id=id)
 
         return Phase.from_instance(
+            phase_record,
             db=db,
-            instance=phase_record,
             user=user,
             lock_datetime=settings.lock_datetime,
         )
@@ -258,8 +252,8 @@ class Query:
             return PhaseByCodeNotFound(code=code)
 
         return Phase.from_instance(
+            phase_record,
             db=db,
-            instance=phase_record,
             user=user,
             lock_datetime=settings.lock_datetime,
         )
@@ -274,7 +268,7 @@ class Query:
         )
 
         return ScoreBoard(
-            users=[UserWithoutSensitiveInfo.from_instance(instance=user) for user in users],
+            users=[UserWithoutSensitiveInfo.from_instance(user) for user in users],
         )
 
     @strawberry.field
@@ -308,8 +302,8 @@ class Query:
             return GroupRank(
                 group_rank=send_group_position(group_rank),
                 group=Group.from_instance(
+                    group,
                     db=db,
-                    instance=group,
                     user=user,
                     lock_datetime=lock_datetime,
                 ),
@@ -357,8 +351,8 @@ class Query:
             return GroupRank(
                 group_rank=send_group_position(group_rank),
                 group=Group.from_instance(
+                    group,
                     db=db,
-                    instance=group,
                     user=user,
                     lock_datetime=lock_datetime,
                 ),

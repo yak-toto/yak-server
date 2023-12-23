@@ -1,6 +1,7 @@
 import re
 
 import pytest
+
 from scripts.compute_new_version import ReleaseType, compute_new_version
 
 

@@ -7,6 +7,19 @@ from starlette.config import Config
 from strawberry.fastapi import GraphQLRouter
 
 from .helpers.logging import setup_logging
+from .helpers.profiling import set_yappi_profiler
+from .v1.helpers.errors import set_exception_handler
+from .v1.routers import bets as bets_router
+from .v1.routers import binary_bets as binary_bets_router
+from .v1.routers import groups as groups_router
+from .v1.routers import phases as phases_router
+from .v1.routers import results as results_router
+from .v1.routers import rules as rules_router
+from .v1.routers import score_bets as score_bets_router
+from .v1.routers import teams as teams_router
+from .v1.routers import users as users_router
+from .v2 import get_schema
+from .v2.context import get_context
 
 logger = logging.getLogger(__name__)
 
@@ -29,16 +42,6 @@ def create_app() -> FastAPI:
     )
 
     # Include all routers
-    from .v1.routers import bets as bets_router
-    from .v1.routers import binary_bets as binary_bets_router
-    from .v1.routers import groups as groups_router
-    from .v1.routers import phases as phases_router
-    from .v1.routers import results as results_router
-    from .v1.routers import rules as rules_router
-    from .v1.routers import score_bets as score_bets_router
-    from .v1.routers import teams as teams_router
-    from .v1.routers import users as users_router
-
     v1_prefix = f"/{GLOBAL_ENDPOINT}/{VERSION1}"
 
     app.include_router(bets_router.router, prefix=v1_prefix)
@@ -52,14 +55,9 @@ def create_app() -> FastAPI:
     app.include_router(users_router.router, prefix=v1_prefix)
 
     # Set error handler
-    from .v1.helpers.errors import set_exception_handler
-
     set_exception_handler(app)
 
     # Register graphql endpoint
-    from .v2 import get_schema
-    from .v2.context import get_context
-
     if sys.version_info >= (3, 8):
         graphql_app = GraphQLRouter(
             get_schema(debug=app.debug),
@@ -94,8 +92,6 @@ def create_app() -> FastAPI:
     profiling = config("PROFILING", cast=bool, default=False)
 
     if app.debug and profiling:
-        from .helpers.profiling import set_yappi_profiler
-
         set_yappi_profiler(app)
 
     return app

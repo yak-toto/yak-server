@@ -111,8 +111,8 @@ class Mutation:
         logger.info(signed_up_successfully(user.name))
 
         return UserWithToken.from_instance(
+            user,
             db=db,
-            instance=user,
             lock_datetime=settings.lock_datetime,
             token=token,
         )
@@ -141,8 +141,8 @@ class Mutation:
         logger.info(logged_in_successfully(user.name))
 
         return UserWithToken.from_instance(
+            user,
             db=db,
-            instance=user,
             lock_datetime=settings.lock_datetime,
             token=token,
         )
@@ -152,7 +152,7 @@ class Mutation:
     def modify_binary_bet_result(
         self,
         id: UUID,
-        is_one_won: Optional[bool],
+        is_one_won: Optional[bool],  # noqa: FBT001
         info: Info[YakContext, None],
     ) -> ModifyBinaryBetResult:
         db = info.context.db
@@ -167,12 +167,12 @@ class Mutation:
         if not bet:
             return BinaryBetNotFoundForUpdate()
 
-        logger.info(modify_binary_bet_successfully(user.name, bet, is_one_won))
+        logger.info(modify_binary_bet_successfully(user.name, bet, new_is_one_won=is_one_won))
 
         bet.is_one_won = is_one_won
         db.commit()
 
-        return BinaryBet.from_instance(db=db, instance=bet, lock_datetime=settings.lock_datetime)
+        return BinaryBet.from_instance(bet, db=db, lock_datetime=settings.lock_datetime)
 
     @strawberry.mutation
     @is_authenticated
@@ -202,7 +202,7 @@ class Mutation:
             return NewScoreNegative(variable_name="$score2", score=score2)
 
         if score1 == bet.score1 and score2 == bet.score2:
-            return ScoreBet.from_instance(db=db, instance=bet, lock_datetime=settings.lock_datetime)
+            return ScoreBet.from_instance(bet, db=db, lock_datetime=settings.lock_datetime)
 
         db.execute(
             update(GroupPositionModel)
@@ -226,7 +226,7 @@ class Mutation:
         bet.score2 = score2
         db.commit()
 
-        return ScoreBet.from_instance(db=db, instance=bet, lock_datetime=settings.lock_datetime)
+        return ScoreBet.from_instance(bet, db=db, lock_datetime=settings.lock_datetime)
 
     @strawberry.mutation
     @is_authenticated
@@ -247,4 +247,4 @@ class Mutation:
         user.change_password(password)
         db.commit()
 
-        return UserWithoutSensitiveInfo.from_instance(instance=user)
+        return UserWithoutSensitiveInfo.from_instance(user)

@@ -49,7 +49,7 @@ QUERY_SCORE_BOARD = """
 """
 
 
-def put_finale_phase(client: TestClient, token: str, is_one_won: Optional[bool]) -> None:
+def put_finale_phase(client: TestClient, token: str, *, is_one_won: Optional[bool]) -> None:
     response_post_finale_phase_bets_admin = client.post(
         "/api/v1/rules/492345de-8d4a-45b6-8b94-d219f2b0c3e9",
         headers={"Authorization": f"Bearer {token}"},

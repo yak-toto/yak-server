@@ -162,7 +162,9 @@ def modify_binary_bet_by_id(
         raise BetNotFound(bet_id)
 
     logger.info(
-        modify_binary_bet_successfully(user.name, binary_bet, modify_binary_bet_in.is_one_won),
+        modify_binary_bet_successfully(
+            user.name, binary_bet, new_is_one_won=modify_binary_bet_in.is_one_won
+        ),
     )
 
     if "is_one_won" in modify_binary_bet_in.model_fields_set:
