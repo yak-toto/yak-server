@@ -21,11 +21,6 @@ repos:
         args: [--exit-non-zero-on-fix]
       - id: ruff-format
 
-  - repo: https://github.com/psf/black
-    rev: 23.12.1
-    hooks:
-      - id: black
-
   - repo: https://github.com/executablebooks/mdformat
     rev: 0.7.17
     hooks:
