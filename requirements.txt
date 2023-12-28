@@ -1,4 +1,5 @@
 -e .[all]
 -r requirements-tests.txt
-pre-commit >=2.17.0,<4.0.0
+pre-commit >=3.5.0
 ruff==0.1.9
+uvicorn[standard] >=0.25.0
