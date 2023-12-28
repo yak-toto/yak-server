@@ -1,12 +1,12 @@
 [build-system]
-requires = ["hatchling >= 1.13.0"]
+requires = ["hatchling >= 1.21.0"]
 build-backend = "hatchling.build"
 
 [project]
 name = "yak-server"
 description = "Football bet rest/graphql server"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = "MIT"
 authors = [{name = "Guillaume Le Pape", email = "gui.lepape25@gmail.com"}]
 keywords = ["mysql", "api", "rest", "graphql"]
@@ -22,7 +22,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -32,16 +31,16 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP",
 ]
 dependencies = [
-    "PyJWT >=2.6.0,<3.0.0",
-    "PyMySQL[rsa] >=1.0.2,<2.0.0",
-    "argon2-cffi >=21.3.0,<24.0.0",
-    "fastapi >=0.95.1,<0.106.0",
-    "typer ==0.9.0",
-    "sqlalchemy >=2.0.19,<3.0.0",
-    "sqlalchemy-utils ==0.41.1",
-    "pendulum >=2.1.2",
-    "pydantic-settings >=2.0.3",
-    "strawberry-graphql >=0.168.1,<0.218.0",
+    "PyJWT >=2.8.0",
+    "PyMySQL[rsa] >=1.1.0",
+    "argon2-cffi >=23.1.0",
+    "fastapi >=0.108.0",
+    "typer >=0.9.0",
+    "sqlalchemy >=2.0.23",
+    "sqlalchemy-utils >=0.41.1",
+    "pendulum >=3.0.0",
+    "pydantic-settings >=2.1.0",
+    "strawberry-graphql >=0.217.0",
 ]
 dynamic = ["version"]
 
@@ -51,9 +50,9 @@ Repository = "https://github.com/yak-toto/yak-server"
 
 [project.optional-dependencies]
 all = [
-    "beautifulsoup4[lxml] ==4.12.2",
-    "yappi >=1.5.1",
-    "alembic >=1.10.3,<2.0.0",
+    "beautifulsoup4[lxml] >=4.12.2",
+    "yappi >=1.6.0",
+    "alembic >=1.13.1",
 ]
 
 [project.scripts]
@@ -75,7 +74,7 @@ exclude_lines = ["if TYPE_CHECKING:", "pragma: no cover"]
 [tool.ruff]
 line-length = 100
 select = ["ALL"]
-target-version = "py37"
+target-version = "py38"
 ignore = [
     "D",
     "ANN101",  # missing annotation for self?

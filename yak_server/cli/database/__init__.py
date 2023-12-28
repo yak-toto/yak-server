@@ -29,17 +29,6 @@ try:
 except ImportError:  # pragma: no cover
     alembic = None  # type: ignore[assignment]
 
-try:
-    import bs4
-except ImportError:  # pragma: no cover
-    bs4 = None  # type: ignore[assignment]
-
-try:
-    import lxml
-except ImportError:  # pragma: no cover
-    lxml = None  # type: ignore[assignment]
-
-
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
