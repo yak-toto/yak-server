@@ -22,7 +22,7 @@ except ImportError:  # pragma: no cover
     bs4 = None  # type: ignore[assignment]
 
 try:
-    import lxml
+    import lxml  # noqa: S410
 except ImportError:  # pragma: no cover
     lxml = None  # type: ignore[assignment]
 
