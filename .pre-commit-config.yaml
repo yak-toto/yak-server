@@ -17,7 +17,7 @@ repos:
         args: [--branch, main]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.11
+    rev: v0.1.13
     hooks:
       - id: ruff
         args: [--exit-non-zero-on-fix]
@@ -35,7 +35,7 @@ repos:
         types: [yaml]
 
   - repo: https://github.com/seddonym/import-linter
-    rev: v1.12.1
+    rev: v2.0
     hooks:
       - id: import-linter
 
