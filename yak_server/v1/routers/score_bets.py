@@ -121,6 +121,7 @@ def create_score_bet(
         .where(
             GroupPositionModel.team_id == score_bet_in.team1.id,
             GroupPositionModel.user_id == user.id,
+            GroupPositionModel.need_recomputation.is_(False),
         ),
     )
     db.execute(
@@ -129,6 +130,7 @@ def create_score_bet(
         .where(
             GroupPositionModel.team_id == score_bet_in.team2.id,
             GroupPositionModel.user_id == user.id,
+            GroupPositionModel.need_recomputation.is_(False),
         ),
     )
 
@@ -199,6 +201,7 @@ def modify_score_bet(
         .where(
             GroupPositionModel.team_id == score_bet.match.team1_id,
             GroupPositionModel.user_id == user.id,
+            GroupPositionModel.need_recomputation.is_(False),
         ),
     )
     db.execute(
@@ -207,6 +210,7 @@ def modify_score_bet(
         .where(
             GroupPositionModel.team_id == score_bet.match.team2_id,
             GroupPositionModel.user_id == user.id,
+            GroupPositionModel.need_recomputation.is_(False),
         ),
     )
 
@@ -245,6 +249,7 @@ def delete_score_bet_by_id(
         .where(
             GroupPositionModel.team_id == score_bet.match.team1_id,
             GroupPositionModel.user_id == user.id,
+            GroupPositionModel.need_recomputation.is_(False),
         ),
     )
     db.execute(
@@ -253,6 +258,7 @@ def delete_score_bet_by_id(
         .where(
             GroupPositionModel.team_id == score_bet.match.team2_id,
             GroupPositionModel.user_id == user.id,
+            GroupPositionModel.need_recomputation.is_(False),
         ),
     )
 
