@@ -210,6 +210,7 @@ class Mutation:
             .where(
                 GroupPositionModel.team_id == bet.match.team1_id,
                 GroupPositionModel.user_id == user.id,
+                GroupPositionModel.need_recomputation.is_(False),
             ),
         )
         db.execute(
@@ -218,6 +219,7 @@ class Mutation:
             .where(
                 GroupPositionModel.team_id == bet.match.team2_id,
                 GroupPositionModel.user_id == user.id,
+                GroupPositionModel.need_recomputation.is_(False),
             ),
         )
         logger.info(modify_score_bet_successfully(user.name, bet, score1, score2))
