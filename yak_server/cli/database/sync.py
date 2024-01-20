@@ -70,7 +70,7 @@ class SyncOfficialResultsNotAvailableError(Exception):
     def __init__(self) -> None:
         super().__init__(
             "Synchronize official results is not available without beautifulsoup4 installed. "
-            "To enable it, please run: pip install beautifulsoup4[lxml]"
+            "To enable it, please run: pip install yak-server[sync]"
         )
 
 

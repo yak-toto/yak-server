@@ -15,7 +15,7 @@ def set_yappi_profiler(app: "FastAPI") -> None:
     if yappi is None:
         msg = (
             "Profiling is not available without yappi installed. "
-            "Either install it or disable profiling."
+            "Either install it with `pip install yak-server[profiling]` or disable profiling."
         )
         raise NotImplementedError(msg)
 

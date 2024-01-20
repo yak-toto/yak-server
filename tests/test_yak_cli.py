@@ -161,4 +161,7 @@ def test_db_migration_cli_with_alembic_missing(monkeypatch: "pytest.MonkeyPatch"
     result = runner.invoke(app, ["db", "migration"])
 
     assert result.exit_code == 0
-    assert "To enable migration using alembic, please run: pip install alembic" in result.output
+    assert (
+        "To enable migration using alembic, please run: pip install yak-server[db_migration]"
+        in result.output
+    )
