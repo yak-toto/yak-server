@@ -67,8 +67,7 @@ def test_profiling_without_yappi_installed(monkeypatch: pytest.MonkeyPatch) -> N
     with pytest.raises(NotImplementedError) as exception:
         create_app()
 
-    assert (
-        str(exception.value)
-        == "Profiling is not available without yappi installed. Either install it or disable"
-        " profiling."
+    assert str(exception.value) == (
+        "Profiling is not available without yappi installed."
+        " Either install it with `pip install yak-server[profiling]` or disable profiling."
     )

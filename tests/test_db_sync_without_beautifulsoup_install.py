@@ -15,5 +15,5 @@ def test_db_sync(monkeypatch: "pytest.MonkeyPatch") -> None:
     assert (
         str(exception.value)
         == "Synchronize official results is not available without beautifulsoup4 installed. "
-        "To enable it, please run: pip install beautifulsoup4[lxml]"
+        "To enable it, please run: pip install yak-server[sync]"
     )

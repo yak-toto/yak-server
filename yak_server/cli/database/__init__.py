@@ -205,7 +205,7 @@ def setup_migration() -> None:
 
     if alembic is None:
         print()
-        print("To enable migration using alembic, please run: pip install alembic")
+        print("To enable migration using alembic, please run: pip install yak-server[db_migration]")
 
 
 def compute_score_board() -> None:

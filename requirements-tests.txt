@@ -1,4 +1,4 @@
--e .[all]
+-e .[db_migration,profiling,sync]
 httpx >=0.26.0
 pytest >=7.4.3
 pytest-cov >=4.1.0
