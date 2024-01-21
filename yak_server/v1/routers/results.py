@@ -39,24 +39,6 @@ def retrieve_score_board(
     )
 
 
-@router.get("/results")
-def retrieve_user_results(
-    user: Annotated[UserModel, Depends(get_current_user)],
-    db: Annotated[Session, Depends(get_db)],
-) -> GenericOut[UserResult]:
-    rank = compute_rank(db, user.id)
-
-    if rank is None:
-        raise NoResultsForAdminUser
-
-    user_result = UserResult.from_instance(
-        user,
-        rank=rank,
-    )
-
-    return GenericOut(result=user_result)
-
-
 def compute_rank(db: Session, user_id: UUID) -> Optional[int]:
     subq = (
         db.query(
@@ -73,3 +55,21 @@ def compute_rank(db: Session, user_id: UUID) -> Optional[int]:
         return None
 
     return rank[0]
+
+
+@router.get("/results")
+def retrieve_user_results(
+    user: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> GenericOut[UserResult]:
+    rank = compute_rank(db, user.id)
+
+    if rank is None:
+        raise NoResultsForAdminUser
+
+    user_result = UserResult.from_instance(
+        user,
+        rank=rank,
+    )
+
+    return GenericOut(result=user_result)

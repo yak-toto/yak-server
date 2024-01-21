@@ -56,11 +56,11 @@ class UserWithoutSensitiveInfo:
     first_name: str
     last_name: str
 
+    result: Result
+
     @strawberry.field
     def full_name(self) -> str:
         return f"{self.first_name} {self.last_name}"
-
-    result: Result
 
     @classmethod
     def from_instance(cls, instance: UserModel) -> "UserWithoutSensitiveInfo":
@@ -69,115 +69,6 @@ class UserWithoutSensitiveInfo:
             first_name=instance.first_name,
             last_name=instance.last_name,
             result=Result.from_instance(instance),
-        )
-
-
-@strawberry.type
-class User:
-    instance: strawberry.Private[UserModel]
-    db: strawberry.Private[Session]
-    lock_datetime: strawberry.Private[pendulum.DateTime]
-
-    id: UUID
-    pseudo: str
-    first_name: str
-    last_name: str
-
-    @strawberry.field
-    def full_name(self) -> str:
-        return f"{self.first_name} {self.last_name}"
-
-    result: Result
-
-    @strawberry.field
-    def binary_bets(self) -> List["BinaryBet"]:
-        return [
-            BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
-            for binary_bet in self.db.query(BinaryBetModel)
-            .filter_by(user_id=self.instance.id)
-            .join(BinaryBetModel.match)
-            .join(MatchModel.group)
-            .order_by(GroupModel.index, MatchModel.index)
-        ]
-
-    @strawberry.field
-    def score_bets(self) -> List["ScoreBet"]:
-        return [
-            ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
-            for score_bet in self.db.query(ScoreBetModel)
-            .filter_by(user_id=self.instance.id)
-            .join(ScoreBetModel.match)
-            .join(MatchModel.group)
-            .order_by(GroupModel.index, MatchModel.index)
-        ]
-
-    @strawberry.field
-    def groups(self) -> List["Group"]:
-        return [
-            Group.from_instance(
-                group,
-                db=self.db,
-                user=self.instance,
-                lock_datetime=self.lock_datetime,
-            )
-            for group in self.db.query(GroupModel).order_by(GroupModel.index)
-        ]
-
-    @strawberry.field
-    def phases(self) -> List["Phase"]:
-        return [
-            Phase.from_instance(
-                phase,
-                db=self.db,
-                user=self.instance,
-                lock_datetime=self.lock_datetime,
-            )
-            for phase in self.db.query(PhaseModel).order_by(PhaseModel.index)
-        ]
-
-    @classmethod
-    def from_instance(
-        cls,
-        instance: UserModel,
-        *,
-        db: Session,
-        lock_datetime: pendulum.DateTime,
-    ) -> "User":
-        return cls(
-            instance=instance,
-            db=db,
-            lock_datetime=lock_datetime,
-            id=instance.id,
-            pseudo=instance.name,
-            first_name=instance.first_name,
-            last_name=instance.last_name,
-            result=Result.from_instance(instance),
-        )
-
-
-@strawberry.type
-class UserWithToken(User):
-    token: str
-
-    @classmethod
-    def from_instance(
-        cls,
-        instance: UserModel,
-        *,
-        db: Session,
-        lock_datetime: pendulum.DateTime,
-        token: str,
-    ) -> "UserWithToken":
-        return cls(
-            instance=instance,
-            db=db,
-            lock_datetime=lock_datetime,
-            id=instance.id,
-            pseudo=instance.name,
-            first_name=instance.first_name,
-            last_name=instance.last_name,
-            result=Result.from_instance(instance),
-            token=token,
         )
 
 
@@ -375,76 +266,6 @@ class Group:
 
 
 @strawberry.type
-class Phase:
-    db: strawberry.Private[Session]
-    instance: strawberry.Private[PhaseModel]
-    user: strawberry.Private[UserModel]
-    lock_datetime: strawberry.Private[pendulum.DateTime]
-
-    id: UUID
-    code: str
-    description: str
-
-    @strawberry.field
-    def groups(self) -> List[Group]:
-        return [
-            Group.from_instance(group, db=self.db, user=self.user, lock_datetime=self.lock_datetime)
-            for group in self.db.query(GroupModel)
-            .filter_by(phase_id=self.instance.id)
-            .order_by(
-                GroupModel.index,
-            )
-        ]
-
-    @strawberry.field
-    def binary_bets(self) -> List["BinaryBet"]:
-        return [
-            BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
-            for binary_bet in self.db.query(BinaryBetModel)
-            .filter_by(user_id=self.user.id)
-            .join(BinaryBetModel.match)
-            .join(MatchModel.group)
-            .filter(
-                GroupModel.phase_id == self.instance.id,
-            )
-            .order_by(GroupModel.index, MatchModel.index)
-        ]
-
-    @strawberry.field
-    def score_bets(self) -> List["ScoreBet"]:
-        return [
-            ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
-            for score_bet in self.db.query(ScoreBetModel)
-            .filter_by(user_id=self.user.id)
-            .join(ScoreBetModel.match)
-            .join(MatchModel.group)
-            .filter(
-                GroupModel.phase_id == self.instance.id,
-            )
-            .order_by(GroupModel.index, MatchModel.index)
-        ]
-
-    @classmethod
-    def from_instance(
-        cls,
-        instance: PhaseModel,
-        *,
-        db: Session,
-        user: UserModel,
-        lock_datetime: pendulum.DateTime,
-    ) -> "Phase":
-        return cls(
-            db=db,
-            instance=instance,
-            user=user,
-            lock_datetime=lock_datetime,
-            id=instance.id,
-            code=instance.code,
-            description=instance.description_fr,
-        )
-
-
-@strawberry.type
 class ScoreBet:
     instance: strawberry.Private[ScoreBetModel]
 
@@ -525,4 +346,183 @@ class BinaryBet:
                 if instance.match.team2_id is not None
                 else None
             ),
+        )
+
+
+@strawberry.type
+class Phase:
+    db: strawberry.Private[Session]
+    instance: strawberry.Private[PhaseModel]
+    user: strawberry.Private[UserModel]
+    lock_datetime: strawberry.Private[pendulum.DateTime]
+
+    id: UUID
+    code: str
+    description: str
+
+    @strawberry.field
+    def groups(self) -> List[Group]:
+        return [
+            Group.from_instance(group, db=self.db, user=self.user, lock_datetime=self.lock_datetime)
+            for group in self.db.query(GroupModel)
+            .filter_by(phase_id=self.instance.id)
+            .order_by(
+                GroupModel.index,
+            )
+        ]
+
+    @strawberry.field
+    def binary_bets(self) -> List["BinaryBet"]:
+        return [
+            BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
+            for binary_bet in self.db.query(BinaryBetModel)
+            .filter_by(user_id=self.user.id)
+            .join(BinaryBetModel.match)
+            .join(MatchModel.group)
+            .filter(
+                GroupModel.phase_id == self.instance.id,
+            )
+            .order_by(GroupModel.index, MatchModel.index)
+        ]
+
+    @strawberry.field
+    def score_bets(self) -> List["ScoreBet"]:
+        return [
+            ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
+            for score_bet in self.db.query(ScoreBetModel)
+            .filter_by(user_id=self.user.id)
+            .join(ScoreBetModel.match)
+            .join(MatchModel.group)
+            .filter(
+                GroupModel.phase_id == self.instance.id,
+            )
+            .order_by(GroupModel.index, MatchModel.index)
+        ]
+
+    @classmethod
+    def from_instance(
+        cls,
+        instance: PhaseModel,
+        *,
+        db: Session,
+        user: UserModel,
+        lock_datetime: pendulum.DateTime,
+    ) -> "Phase":
+        return cls(
+            db=db,
+            instance=instance,
+            user=user,
+            lock_datetime=lock_datetime,
+            id=instance.id,
+            code=instance.code,
+            description=instance.description_fr,
+        )
+
+
+@strawberry.type
+class User:
+    instance: strawberry.Private[UserModel]
+    db: strawberry.Private[Session]
+    lock_datetime: strawberry.Private[pendulum.DateTime]
+
+    id: UUID
+    pseudo: str
+    first_name: str
+    last_name: str
+
+    result: Result
+
+    @strawberry.field
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}"
+
+    @strawberry.field
+    def binary_bets(self) -> List["BinaryBet"]:
+        return [
+            BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
+            for binary_bet in self.db.query(BinaryBetModel)
+            .filter_by(user_id=self.instance.id)
+            .join(BinaryBetModel.match)
+            .join(MatchModel.group)
+            .order_by(GroupModel.index, MatchModel.index)
+        ]
+
+    @strawberry.field
+    def score_bets(self) -> List["ScoreBet"]:
+        return [
+            ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
+            for score_bet in self.db.query(ScoreBetModel)
+            .filter_by(user_id=self.instance.id)
+            .join(ScoreBetModel.match)
+            .join(MatchModel.group)
+            .order_by(GroupModel.index, MatchModel.index)
+        ]
+
+    @strawberry.field
+    def groups(self) -> List["Group"]:
+        return [
+            Group.from_instance(
+                group,
+                db=self.db,
+                user=self.instance,
+                lock_datetime=self.lock_datetime,
+            )
+            for group in self.db.query(GroupModel).order_by(GroupModel.index)
+        ]
+
+    @strawberry.field
+    def phases(self) -> List["Phase"]:
+        return [
+            Phase.from_instance(
+                phase,
+                db=self.db,
+                user=self.instance,
+                lock_datetime=self.lock_datetime,
+            )
+            for phase in self.db.query(PhaseModel).order_by(PhaseModel.index)
+        ]
+
+    @classmethod
+    def from_instance(
+        cls,
+        instance: UserModel,
+        *,
+        db: Session,
+        lock_datetime: pendulum.DateTime,
+    ) -> "User":
+        return cls(
+            instance=instance,
+            db=db,
+            lock_datetime=lock_datetime,
+            id=instance.id,
+            pseudo=instance.name,
+            first_name=instance.first_name,
+            last_name=instance.last_name,
+            result=Result.from_instance(instance),
+        )
+
+
+@strawberry.type
+class UserWithToken(User):
+    token: str
+
+    @classmethod
+    def from_instance(
+        cls,
+        instance: UserModel,
+        *,
+        db: Session,
+        lock_datetime: pendulum.DateTime,
+        token: str,
+    ) -> "UserWithToken":
+        return cls(
+            instance=instance,
+            db=db,
+            lock_datetime=lock_datetime,
+            id=instance.id,
+            pseudo=instance.name,
+            first_name=instance.first_name,
+            last_name=instance.last_name,
+            result=Result.from_instance(instance),
+            token=token,
         )

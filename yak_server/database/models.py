@@ -26,10 +26,6 @@ class UserModel(Base):
     first_name = sa.Column(sa.String(100), nullable=False)
     last_name = sa.Column(sa.String(100), nullable=False)
 
-    @hybrid_property
-    def full_name(self) -> str:
-        return f"{self.first_name} {self.last_name}"
-
     password = sa.Column(sa.String(100), nullable=False)
     number_match_guess = sa.Column(
         sa.Integer,
@@ -108,6 +104,10 @@ class UserModel(Base):
         self.first_name = first_name
         self.last_name = last_name
         self.password = ph.hash(password)
+
+    @hybrid_property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}"
 
     @classmethod
     def authenticate(cls, db: "Session", name: str, password: str) -> "UserModel":
@@ -283,18 +283,6 @@ class GroupPositionModel(Base):
         default=0,
     )
 
-    @hybrid_property
-    def played(self) -> int:
-        return self.won + self.drawn + self.lost
-
-    @hybrid_property
-    def goals_difference(self) -> int:
-        return self.goals_for - self.goals_against
-
-    @hybrid_property
-    def points(self) -> int:
-        return self.won * 3 + self.drawn
-
     need_recomputation = sa.Column(sa.Boolean, nullable=False, default=False)
 
     user_id = sa.Column(
@@ -315,3 +303,15 @@ class GroupPositionModel(Base):
         sa.ForeignKey("group.id"),
         nullable=False,
     )
+
+    @hybrid_property
+    def played(self) -> int:
+        return self.won + self.drawn + self.lost
+
+    @hybrid_property
+    def goals_difference(self) -> int:
+        return self.goals_for - self.goals_against
+
+    @hybrid_property
+    def points(self) -> int:
+        return self.won * 3 + self.drawn

@@ -73,6 +73,10 @@ class ResultForGroupRank:
     number_first_qualified_guess: int = 0
 
 
+def all_results_filled_in_group(group_result: list) -> bool:
+    return all(team.played == len(group_result) - 1 for team in group_result)
+
+
 def compute_results_for_group_rank(
     db: "Session",
     admin: UserModel,
@@ -112,6 +116,37 @@ def compute_results_for_group_rank(
                         result_groups[other_user.id].number_first_qualified_guess += 1
 
     return result_groups
+
+
+def team_from_group_code(user: UserModel, group_code: str) -> set:
+    return set(
+        chain(
+            *(
+                (bet.match.team1.id, bet.match.team2.id)
+                for bet in user.binary_bets.filter(GroupModel.code == group_code)
+                .join(BinaryBetModel.match)
+                .join(MatchModel.group)
+                if bet.match.team1_id is not None and bet.match.team2_id is not None
+            ),
+        ),
+    )
+
+
+def winner_from_user(user: UserModel) -> set:
+    finale_bet = next(
+        iter(
+            user.binary_bets.filter(GroupModel.code == "1")
+            .join(BinaryBetModel.match)
+            .join(MatchModel.group),
+        ),
+    )
+
+    if finale_bet.is_one_won is None:
+        return set()
+
+    return {
+        finale_bet.match.team1.id if finale_bet.is_one_won else finale_bet.match.team2.id,
+    }
 
 
 def compute_points(db: "Session", admin: UserModel, rule_config: RuleComputePoints) -> None:
@@ -182,38 +217,3 @@ def compute_points(db: "Session", admin: UserModel, rule_config: RuleComputePoin
         user.points += 200 * user.number_winner_guess
 
     db.commit()
-
-
-def all_results_filled_in_group(group_result: list) -> bool:
-    return all(team.played == len(group_result) - 1 for team in group_result)
-
-
-def team_from_group_code(user: UserModel, group_code: str) -> set:
-    return set(
-        chain(
-            *(
-                (bet.match.team1.id, bet.match.team2.id)
-                for bet in user.binary_bets.filter(GroupModel.code == group_code)
-                .join(BinaryBetModel.match)
-                .join(MatchModel.group)
-                if bet.match.team1_id is not None and bet.match.team2_id is not None
-            ),
-        ),
-    )
-
-
-def winner_from_user(user: UserModel) -> set:
-    finale_bet = next(
-        iter(
-            user.binary_bets.filter(GroupModel.code == "1")
-            .join(BinaryBetModel.match)
-            .join(MatchModel.group),
-        ),
-    )
-
-    if finale_bet.is_one_won is None:
-        return set()
-
-    return {
-        finale_bet.match.team1.id if finale_bet.is_one_won else finale_bet.match.team2.id,
-    }
