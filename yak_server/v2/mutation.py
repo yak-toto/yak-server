@@ -4,12 +4,10 @@ from uuid import UUID
 
 import pendulum
 import strawberry
-from sqlalchemy import update
 from strawberry.types import Info
 
 from yak_server.database.models import (
     BinaryBetModel,
-    GroupPositionModel,
     MatchModel,
     MatchReferenceModel,
     ScoreBetModel,
@@ -17,7 +15,7 @@ from yak_server.database.models import (
 )
 from yak_server.helpers.authentication import encode_bearer_token
 from yak_server.helpers.bet_locking import is_locked
-from yak_server.helpers.group_position import create_group_position
+from yak_server.helpers.group_position import create_group_position, set_recomputation_flag
 from yak_server.helpers.logging import (
     logged_in_successfully,
     modify_binary_bet_successfully,
@@ -204,24 +202,9 @@ class Mutation:
         if score1 == bet.score1 and score2 == bet.score2:
             return ScoreBet.from_instance(bet, db=db, lock_datetime=settings.lock_datetime)
 
-        db.execute(
-            update(GroupPositionModel)
-            .values(need_recomputation=True)
-            .where(
-                GroupPositionModel.team_id == bet.match.team1_id,
-                GroupPositionModel.user_id == user.id,
-                GroupPositionModel.need_recomputation.is_(False),
-            ),
-        )
-        db.execute(
-            update(GroupPositionModel)
-            .values(need_recomputation=True)
-            .where(
-                GroupPositionModel.team_id == bet.match.team2_id,
-                GroupPositionModel.user_id == user.id,
-                GroupPositionModel.need_recomputation.is_(False),
-            ),
-        )
+        set_recomputation_flag(db, bet.match.team1_id, user.id)
+        set_recomputation_flag(db, bet.match.team2_id, user.id)
+
         logger.info(modify_score_bet_successfully(user.name, bet, score1, score2))
 
         bet.score1 = score1
