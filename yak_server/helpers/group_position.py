@@ -1,9 +1,13 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, List
 
+from sqlalchemy import update
+
 from yak_server.database.models import GroupPositionModel, MatchModel, ScoreBetModel
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
     from sqlalchemy.orm import Session
 
     from yak_server.database.models import UserModel
@@ -132,4 +136,16 @@ def get_group_rank_with_code(
             team_result.goals_for,
         ),
         reverse=True,
+    )
+
+
+def set_recomputation_flag(db: "Session", team_id: "UUID", user_id: "UUID") -> None:
+    db.execute(
+        update(GroupPositionModel)
+        .values(need_recomputation=True)
+        .where(
+            GroupPositionModel.team_id == team_id,
+            GroupPositionModel.user_id == user_id,
+            GroupPositionModel.need_recomputation.is_(False),
+        ),
     )

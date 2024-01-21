@@ -8,18 +8,17 @@ else:
 
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
-from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from yak_server.database.models import (
-    GroupPositionModel,
     MatchModel,
     ScoreBetModel,
     UserModel,
 )
 from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.database import get_db
+from yak_server.helpers.group_position import set_recomputation_flag
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
 from yak_server.helpers.logging import modify_score_bet_successfully
 from yak_server.helpers.settings import Settings, get_settings
@@ -115,24 +114,8 @@ def create_score_bet(
         score2=score_bet_in.team2.score,
     )
 
-    db.execute(
-        update(GroupPositionModel)
-        .values(need_recomputation=True)
-        .where(
-            GroupPositionModel.team_id == score_bet_in.team1.id,
-            GroupPositionModel.user_id == user.id,
-            GroupPositionModel.need_recomputation.is_(False),
-        ),
-    )
-    db.execute(
-        update(GroupPositionModel)
-        .values(need_recomputation=True)
-        .where(
-            GroupPositionModel.team_id == score_bet_in.team2.id,
-            GroupPositionModel.user_id == user.id,
-            GroupPositionModel.need_recomputation.is_(False),
-        ),
-    )
+    set_recomputation_flag(db, score_bet_in.team1.id, user.id)
+    set_recomputation_flag(db, score_bet_in.team2.id, user.id)
 
     db.add(score_bet)
     db.commit()
@@ -195,24 +178,8 @@ def modify_score_bet(
         ),
     )
 
-    db.execute(
-        update(GroupPositionModel)
-        .values(need_recomputation=True)
-        .where(
-            GroupPositionModel.team_id == score_bet.match.team1_id,
-            GroupPositionModel.user_id == user.id,
-            GroupPositionModel.need_recomputation.is_(False),
-        ),
-    )
-    db.execute(
-        update(GroupPositionModel)
-        .values(need_recomputation=True)
-        .where(
-            GroupPositionModel.team_id == score_bet.match.team2_id,
-            GroupPositionModel.user_id == user.id,
-            GroupPositionModel.need_recomputation.is_(False),
-        ),
-    )
+    set_recomputation_flag(db, score_bet.match.team1_id, user.id)
+    set_recomputation_flag(db, score_bet.match.team2_id, user.id)
 
     score_bet.score1 = modify_score_bet_in.team1.score
     score_bet.score2 = modify_score_bet_in.team2.score
@@ -243,24 +210,8 @@ def delete_score_bet_by_id(
         lang=lang,
     )
 
-    db.execute(
-        update(GroupPositionModel)
-        .values(need_recomputation=True)
-        .where(
-            GroupPositionModel.team_id == score_bet.match.team1_id,
-            GroupPositionModel.user_id == user.id,
-            GroupPositionModel.need_recomputation.is_(False),
-        ),
-    )
-    db.execute(
-        update(GroupPositionModel)
-        .values(need_recomputation=True)
-        .where(
-            GroupPositionModel.team_id == score_bet.match.team2_id,
-            GroupPositionModel.user_id == user.id,
-            GroupPositionModel.need_recomputation.is_(False),
-        ),
-    )
+    set_recomputation_flag(db, score_bet.match.team1_id, user.id)
+    set_recomputation_flag(db, score_bet.match.team2_id, user.id)
 
     db.delete(score_bet)
     db.commit()
