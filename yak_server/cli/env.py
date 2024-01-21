@@ -23,6 +23,12 @@ class RuleNotDefinedError(Exception):
         super().__init__(f"Rule not defined: {rule_id}")
 
 
+def write_env_file(env: dict, filename: str) -> None:
+    Path(filename).write_text(
+        "".join([f"{env_var}={env_value}\n" for env_var, env_value in env.items()])
+    )
+
+
 class EnvBuilder:
     def __init__(self) -> None:
         self.env = {}
@@ -105,12 +111,6 @@ class EnvBuilder:
     def write(self) -> None:
         write_env_file(self.env, ".env")
         write_env_file(self.env_mysql, ".env.mysql")
-
-
-def write_env_file(env: dict, filename: str) -> None:
-    Path(filename).write_text(
-        "".join([f"{env_var}={env_value}\n" for env_var, env_value in env.items()])
-    )
 
 
 def init_env() -> None:
