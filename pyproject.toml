@@ -71,8 +71,12 @@ exclude_lines = ["if TYPE_CHECKING:", "pragma: no cover"]
 
 [tool.ruff]
 line-length = 100
-select = ["ALL"]
 target-version = "py38"
+fix = true
+preview = true
+
+[tool.ruff.lint]
+select = ["ALL"]
 ignore = [
     "D",
     "ANN101",  # missing annotation for self?
@@ -90,8 +94,6 @@ ignore = [
     "ISC001",
     "CPY001",
 ]
-fix = true
-preview = true
 
 [tool.ruff.lint.mccabe]
 max-complexity = 11
