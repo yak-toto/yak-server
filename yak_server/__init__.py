@@ -2,7 +2,7 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.config import Config
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from strawberry.fastapi import GraphQLRouter
 
 from .helpers.logging import setup_logging
@@ -29,12 +29,19 @@ VERSION2 = "v2"
 __version__ = "0.40.0"
 
 
+class Config(BaseSettings):
+    debug: bool = False
+    profiling: bool = False
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
+
+
 def create_app() -> FastAPI:
     # Initialize fastapi application
-    config = Config(".env")
+    config = Config()
 
     app = FastAPI(
-        debug=config("DEBUG", cast=bool, default=False),
+        debug=config.debug,
         docs_url=f"/{GLOBAL_ENDPOINT}/docs",
         redoc_url=f"/{GLOBAL_ENDPOINT}/redoc",
         openapi_url=f"/{GLOBAL_ENDPOINT}/openapi.json",
@@ -78,7 +85,7 @@ def create_app() -> FastAPI:
     setup_logging(debug=app.debug)
 
     # Set yappi profiler
-    profiling = config("PROFILING", cast=bool, default=False)
+    profiling = config.profiling
 
     if app.debug and profiling:
         set_yappi_profiler(app)
