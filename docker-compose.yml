@@ -1,0 +1,29 @@
+version: "3.3"
+
+x-environment: &environment
+  MYSQL_USER: root
+  MYSQL_PASSWORD: ""
+  MYSQL_DATABASE: yak_toto
+  MYSQL_ROOT_PASSWORD: ""
+  MYSQL_PORT: 3306
+
+services:
+  db:
+    image: mysql
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+    environment: *environment
+
+  backend:
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
+    environment: *environment
+    build:
+      context: .
+      dockerfile: docker/backend.dockerfile
+
+volumes:
+  db:
