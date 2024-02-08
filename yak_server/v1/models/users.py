@@ -18,6 +18,16 @@ class SignupOut(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class PasswordRequirementsOut(BaseModel):
+    minimum_length: int
+    uppercase: bool
+    lowercase: bool
+    digit: bool
+    no_space: bool
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class LoginIn(BaseModel):
     name: str
     password: str
