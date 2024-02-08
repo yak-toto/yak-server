@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Generator
 import pendulum
 import pymysql
 import pytest
-from starlette.testclient import TestClient
+from fastapi.testclient import TestClient
 
 from yak_server import create_app
 from yak_server.cli.database import create_database, delete_database, drop_database

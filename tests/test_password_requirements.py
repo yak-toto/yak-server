@@ -1,7 +1,10 @@
 import secrets
 import string
+from http import HTTPStatus
+from typing import TYPE_CHECKING
 
 import pytest
+from starlette.testclient import TestClient
 
 from yak_server.helpers.password_validator import (
     NoDigitError,
@@ -13,6 +16,9 @@ from yak_server.helpers.password_validator import (
 )
 
 from .utils import get_random_string
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 
 def test_valid_password() -> None:
@@ -70,3 +76,52 @@ def test_password_with_spaces() -> None:
         )
 
     assert str(exception.value) == "Password must not contain spaces."
+
+
+def test_password_requirements_v1(app_with_valid_jwt_config: "FastAPI") -> None:
+    client = TestClient(app_with_valid_jwt_config)
+
+    response = client.get("/api/v1/users/signup/password_requirements")
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        "ok": True,
+        "result": {
+            "minimum_length": 8,
+            "uppercase": True,
+            "lowercase": True,
+            "digit": True,
+            "no_space": True,
+        },
+    }
+
+
+def test_password_requirements_v2(app_with_valid_jwt_config: "FastAPI") -> None:
+    client = TestClient(app_with_valid_jwt_config)
+
+    query = """
+        query {
+            passwordRequirements {
+                minimumLength
+                uppercase
+                lowercase
+                digit
+                noSpace
+            }
+        }
+    """
+
+    response = client.post("/api/v2", json={"query": query})
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        "data": {
+            "passwordRequirements": {
+                "minimumLength": 8,
+                "uppercase": True,
+                "lowercase": True,
+                "digit": True,
+                "noSpace": True,
+            }
+        }
+    }

@@ -15,6 +15,7 @@ from yak_server.database.models import (
     UserModel,
 )
 from yak_server.helpers.group_position import compute_group_rank
+from yak_server.helpers.password_validator import PasswordRequirements
 
 from .bearer_authentication import is_authenticated
 from .context import YakContext
@@ -51,6 +52,7 @@ from .result import (
 from .schema import (
     BinaryBet,
     Group,
+    PasswordRequirementsResult,
     Phase,
     ScoreBet,
     Team,
@@ -74,6 +76,18 @@ class Query:
         settings = info.context.settings
 
         return User.from_instance(user, db=db, lock_datetime=settings.lock_datetime)
+
+    @strawberry.field
+    def password_requirements(self) -> PasswordRequirementsResult:
+        password_requirements = PasswordRequirements()
+
+        return PasswordRequirementsResult(
+            minimum_length=password_requirements.MINIMUM_LENGTH,
+            uppercase=password_requirements.UPPERCASE,
+            lowercase=password_requirements.LOWERCASE,
+            digit=password_requirements.DIGIT,
+            no_space=password_requirements.NO_SPACE,
+        )
 
     @strawberry.field
     @is_authenticated

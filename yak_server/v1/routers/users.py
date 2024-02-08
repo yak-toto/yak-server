@@ -25,7 +25,11 @@ from yak_server.helpers.logging import (
     modify_password_successfully,
     signed_up_successfully,
 )
-from yak_server.helpers.password_validator import PasswordRequirementsError, validate_password
+from yak_server.helpers.password_validator import (
+    PasswordRequirements,
+    PasswordRequirementsError,
+    validate_password,
+)
 from yak_server.helpers.settings import Settings, get_settings
 from yak_server.v1.helpers.auth import get_admin_user, get_current_user
 from yak_server.v1.helpers.errors import (
@@ -40,6 +44,7 @@ from yak_server.v1.models.users import (
     LoginIn,
     LoginOut,
     ModifyUserIn,
+    PasswordRequirementsOut,
     SignupIn,
     SignupOut,
 )
@@ -114,6 +119,21 @@ def signup(
                 secret_key=settings.jwt_secret_key,
             ),
         ),
+    )
+
+
+@router.get("/signup/password_requirements")
+def password_requirements() -> GenericOut[PasswordRequirementsOut]:
+    password_requirements = PasswordRequirements()
+
+    return GenericOut(
+        result=PasswordRequirementsOut(
+            minimum_length=password_requirements.MINIMUM_LENGTH,
+            uppercase=password_requirements.UPPERCASE,
+            lowercase=password_requirements.LOWERCASE,
+            digit=password_requirements.DIGIT,
+            no_space=password_requirements.NO_SPACE,
+        )
     )
 
 

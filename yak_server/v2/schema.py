@@ -526,3 +526,12 @@ class UserWithToken(User):
             result=Result.from_instance(instance),
             token=token,
         )
+
+
+@strawberry.type
+class PasswordRequirementsResult:
+    minimum_length: int
+    uppercase: bool
+    lowercase: bool
+    digit: bool
+    no_space: bool
