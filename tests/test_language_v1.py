@@ -26,7 +26,7 @@ def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.Monkey
     user_name = get_random_string(6)
     first_name = get_random_string(10)
     last_name = get_random_string(8)
-    password = get_random_string(5)
+    password = get_random_string(9)
 
     response_signup = client.post(
         "/api/v1/users/signup",

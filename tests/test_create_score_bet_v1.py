@@ -45,7 +45,7 @@ def test_create_score_bet(
             "name": get_random_string(6),
             "first_name": get_random_string(6),
             "last_name": get_random_string(6),
-            "password": get_random_string(6),
+            "password": get_random_string(100),
         },
     )
 

@@ -53,6 +53,14 @@ class BetNotFound(HTTPException):
         )
 
 
+class UnsatisfiedPasswordRequirements(HTTPException):
+    def __init__(self, detail: str) -> None:
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsatisfied password requirements. {detail}",
+        )
+
+
 class UserNotFound(HTTPException):
     def __init__(self, user_id: str) -> None:
         super().__init__(

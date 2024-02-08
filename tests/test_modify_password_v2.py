@@ -85,7 +85,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
                 "userName": admin_name,
                 "firstName": "admin",
                 "lastName": "admin",
-                "password": "admin",
+                "password": get_random_string(15),
             },
         },
     )

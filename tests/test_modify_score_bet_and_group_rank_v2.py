@@ -64,7 +64,7 @@ def test_modify_score_bet_and_group_rank(
                 "userName": get_random_string(6),
                 "firstName": get_random_string(6),
                 "lastName": get_random_string(6),
-                "password": get_random_string(6),
+                "password": get_random_string(15),
             },
         },
     )

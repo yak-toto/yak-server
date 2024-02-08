@@ -27,6 +27,9 @@ QUERY_SIGNUP = """
             ... on UserNameAlreadyExists {
                 message
             }
+            ... on UnsatisfiedPasswordRequirements {
+                message
+            }
         }
     }
 """
@@ -318,4 +321,30 @@ def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI") -> None:
                 "message": "Expired token, re-authentication required",
             },
         },
+    }
+
+
+def test_non_compliant_password(app_with_valid_jwt_config: "FastAPI") -> None:
+    client = TestClient(app_with_valid_jwt_config)
+
+    response_signup = client.post(
+        "/api/v2",
+        json={
+            "query": QUERY_SIGNUP,
+            "variables": {
+                "userName": get_random_string(3),
+                "firstName": get_random_string(2),
+                "lastName": get_random_string(8),
+                "password": get_random_string(6),
+            },
+        },
+    )
+
+    assert response_signup.json() == {
+        "data": {
+            "signupResult": {
+                "__typename": "UnsatisfiedPasswordRequirements",
+                "message": "Password is too short. Minimum size is 8.",
+            }
+        }
     }
