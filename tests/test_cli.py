@@ -34,7 +34,7 @@ def test_create_admin(app: "FastAPI") -> None:
     client = TestClient(app)
 
     # Success case : create admin using script and test login is OK
-    password_admin = get_random_string(6)
+    password_admin = get_random_string(10)
 
     create_admin(password_admin)
 
@@ -50,7 +50,7 @@ def test_create_admin(app: "FastAPI") -> None:
 
     # Error case : check an exception is raised
     # if signup call is KO (Here admin already exists in db)
-    password_admin = get_random_string(6)
+    password_admin = get_random_string(10)
 
     with pytest.raises(NameAlreadyExists):
         create_admin(password_admin)

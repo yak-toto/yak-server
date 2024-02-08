@@ -26,7 +26,7 @@ def test_debug_profiling(debug_app_with_profiler: "FastAPI") -> None:
             "name": user_name,
             "first_name": get_random_string(10),
             "last_name": get_random_string(12),
-            "password": get_random_string(6),
+            "password": get_random_string(18),
         },
     )
 
@@ -51,7 +51,7 @@ def test_production_profiling(production_app_with_profiler: "FastAPI") -> None:
             "name": user_name,
             "first_name": get_random_string(10),
             "last_name": get_random_string(12),
-            "password": get_random_string(6),
+            "password": get_random_string(19),
         },
     )
 

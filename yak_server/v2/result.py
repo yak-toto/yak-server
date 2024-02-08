@@ -303,8 +303,13 @@ class UserNameAlreadyExists:
         return name_already_exists_message(self.user_name)
 
 
+@strawberry.type
+class UnsatisfiedPasswordRequirements:
+    message: str
+
+
 SignupResult = Annotated[
-    Union[UserWithToken, UserNameAlreadyExists],
+    Union[UserWithToken, UserNameAlreadyExists, UnsatisfiedPasswordRequirements],
     strawberry.union("SignupResult"),
 ]
 

@@ -19,7 +19,7 @@ def test_valid_auth(app_with_valid_jwt_config: "FastAPI") -> None:
     user_name = get_random_string(6)
     first_name = get_random_string(6)
     last_name = get_random_string(6)
-    password = get_random_string(6)
+    password = get_random_string(8)
 
     # signup test
     response_signup = client.post(
@@ -93,7 +93,7 @@ def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
             "name": user_name,
             "first_name": get_random_string(10),
             "last_name": get_random_string(12),
-            "password": get_random_string(6),
+            "password": get_random_string(8),
         },
     )
     assert response_second_signup.status_code == HTTPStatus.UNAUTHORIZED
@@ -307,4 +307,25 @@ def test_invalid_login_body(client: "TestClient") -> None:
                 "url": ANY,
             },
         ],
+    }
+
+
+def test_non_compliant_password(client: "TestClient") -> None:
+    response_signup = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": get_random_string(2),
+            "first_name": get_random_string(2),
+            "last_name": get_random_string(8),
+            "password": get_random_string(6),
+        },
+    )
+
+    assert response_signup.status_code == HTTPStatus.BAD_REQUEST
+    assert response_signup.json() == {
+        "ok": False,
+        "error_code": HTTPStatus.BAD_REQUEST,
+        "description": (
+            "Unsatisfied password requirements. Password is too short. Minimum size is 8."
+        ),
     }

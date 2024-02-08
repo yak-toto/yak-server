@@ -26,7 +26,7 @@ def test_rule(app: "FastAPI", client: "TestClient") -> None:
             "name": get_random_string(6),
             "first_name": get_random_string(6),
             "last_name": get_random_string(6),
-            "password": get_random_string(6),
+            "password": get_random_string(13),
         },
     )
 

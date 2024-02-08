@@ -8,7 +8,12 @@ from fastapi.testclient import TestClient
 
 
 def get_random_string(length: int) -> str:
-    return "".join(secrets.choice(string.ascii_letters) for _ in range(length))
+    return (
+        secrets.choice(string.digits)
+        + secrets.choice(string.ascii_lowercase)
+        + secrets.choice(string.ascii_uppercase)
+        + "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(length - 3))
+    )
 
 
 @dataclass

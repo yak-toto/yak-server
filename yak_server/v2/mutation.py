@@ -22,6 +22,7 @@ from yak_server.helpers.logging import (
     modify_score_bet_successfully,
     signed_up_successfully,
 )
+from yak_server.helpers.password_validator import PasswordRequirementsError, validate_password
 
 from .bearer_authentication import (
     is_admin_authenticated,
@@ -40,6 +41,7 @@ from .result import (
     NewScoreNegative,
     ScoreBetNotFoundForUpdate,
     SignupResult,
+    UnsatisfiedPasswordRequirements,
     UserNameAlreadyExists,
     UserNotFound,
     UserWithoutSensitiveInfo,
@@ -71,6 +73,12 @@ class Mutation:
         existing_user = db.query(UserModel).filter_by(name=user_name).first()
         if existing_user:
             return UserNameAlreadyExists(user_name=user_name)
+
+        # Validate password
+        try:
+            validate_password(password)
+        except PasswordRequirementsError as password_requirements_error:
+            return UnsatisfiedPasswordRequirements(message=str(password_requirements_error))
 
         # Initialize user and integrate in db
         user = UserModel(

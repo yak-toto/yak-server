@@ -49,7 +49,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
     assert result.exit_code == 0
 
     # Check admin account creation
-    admin_password = get_random_string(7)
+    admin_password = get_random_string(9)
 
     result = runner.invoke(
         app,

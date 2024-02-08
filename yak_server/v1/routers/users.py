@@ -25,9 +25,15 @@ from yak_server.helpers.logging import (
     modify_password_successfully,
     signed_up_successfully,
 )
+from yak_server.helpers.password_validator import PasswordRequirementsError, validate_password
 from yak_server.helpers.settings import Settings, get_settings
 from yak_server.v1.helpers.auth import get_admin_user, get_current_user
-from yak_server.v1.helpers.errors import InvalidCredentials, NameAlreadyExists, UserNotFound
+from yak_server.v1.helpers.errors import (
+    InvalidCredentials,
+    NameAlreadyExists,
+    UnsatisfiedPasswordRequirements,
+    UserNotFound,
+)
 from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.users import (
     CurrentUserOut,
@@ -48,6 +54,14 @@ def signup_user(db: Session, signup_in: SignupIn) -> UserModel:
     existing_user = db.query(UserModel).filter_by(name=signup_in.name).first()
     if existing_user:
         raise NameAlreadyExists(signup_in.name)
+
+    # Validate password
+    try:
+        validate_password(signup_in.password)
+    except PasswordRequirementsError as password_requirements_error:
+        raise UnsatisfiedPasswordRequirements(
+            str(password_requirements_error)
+        ) from password_requirements_error
 
     # Initialize user and integrate in db
     user = UserModel(
