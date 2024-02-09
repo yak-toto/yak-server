@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, List
 from uuid import UUID
 
 import strawberry
+from sqlalchemy import and_
 from strawberry.types import Info
 
 from yak_server.database.models import (
@@ -129,7 +130,12 @@ class Query:
         user = info.context.user
         settings = info.context.settings
 
-        score_bet_record = db.query(ScoreBetModel).filter_by(id=id, user_id=user.id).first()
+        score_bet_record = (
+            db.query(ScoreBetModel)
+            .join(ScoreBetModel.match)
+            .filter(and_(ScoreBetModel.id == id, MatchModel.user_id == user.id))
+            .first()
+        )
 
         if not score_bet_record:
             return ScoreBetNotFound(id=id)
@@ -143,7 +149,12 @@ class Query:
         user = info.context.user
         settings = info.context.settings
 
-        binary_bet_record = db.query(BinaryBetModel).filter_by(id=id, user_id=user.id).first()
+        binary_bet_record = (
+            db.query(BinaryBetModel)
+            .join(BinaryBetModel.match)
+            .filter(and_(BinaryBetModel.id == id, MatchModel.user_id == user.id))
+            .first()
+        )
 
         if not binary_bet_record:
             return BinaryBetNotFound(id=id)
@@ -326,8 +337,10 @@ class Query:
         if not any(group_position.need_recomputation for group_position in group_rank):
             return send_response(db, user, group, group_rank, settings.lock_datetime)
 
-        score_bets = user.score_bets.filter(MatchModel.group_id == group.id).join(
-            ScoreBetModel.match,
+        score_bets = (
+            db.query(ScoreBetModel)
+            .join(ScoreBetModel.match)
+            .filter(and_(MatchModel.user_id == user.id, MatchModel.group_id == group.id))
         )
         group_rank = compute_group_rank(group_rank, score_bets)
         db.commit()
@@ -375,8 +388,10 @@ class Query:
         if not any(group_position.need_recomputation for group_position in group_rank):
             return send_response(db, user, group, group_rank, settings.lock_datetime)
 
-        score_bets = user.score_bets.filter(MatchModel.group_id == group.id).join(
-            ScoreBetModel.match,
+        score_bets = (
+            db.query(ScoreBetModel)
+            .join(ScoreBetModel.match)
+            .filter(and_(MatchModel.user_id == user.id, MatchModel.group_id == group.id))
         )
         group_rank = compute_group_rank(group_rank, score_bets)
         db.commit()

@@ -85,15 +85,20 @@ def signup_user(db: Session, signup_in: SignupIn) -> UserModel:
             team2_id=match_reference.team2_id,
             index=match_reference.index,
             group_id=match_reference.group_id,
+            user_id=user.id,
         )
         db.add(match)
         db.flush()
 
-        db.add(match_reference.bet_type_from_match.value(user_id=user.id, match_id=match.id))
+        db.add(match_reference.bet_type_from_match.value(match_id=match.id))
         db.flush()
 
     # Create group position records
-    db.add_all(create_group_position(db.query(ScoreBetModel).filter_by(user_id=user.id)))
+    db.add_all(
+        create_group_position(
+            db.query(ScoreBetModel).join(ScoreBetModel.match).filter_by(user_id=user.id)
+        )
+    )
     db.commit()
 
     logger.info(signed_up_successfully(user.name))

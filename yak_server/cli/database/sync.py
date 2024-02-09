@@ -178,9 +178,16 @@ def synchronize_official_results() -> None:
 
     for match in matches:
         score_bet = (
-            admin.score_bets.join(ScoreBetModel.match)
+            db.query(ScoreBetModel)
+            .join(ScoreBetModel.match)
             .join(MatchModel.group)
-            .filter(and_(GroupModel.index == match.group.index, MatchModel.index == match.index))
+            .filter(
+                and_(
+                    GroupModel.index == match.group.index,
+                    MatchModel.index == match.index,
+                    MatchModel.user_id == admin.id,
+                )
+            )
             .first()
         )
 
@@ -189,10 +196,17 @@ def synchronize_official_results() -> None:
             score_bet.score2 = match.team2.score
 
         binary_bet = (
-            admin.binary_bets.join(BinaryBetModel.match)
+            db.query(BinaryBetModel)
+            .join(BinaryBetModel.match)
             .join(MatchModel.group)
             .join(GroupModel.phase)
-            .filter(and_(GroupModel.index == match.group.index, MatchModel.index == match.index))
+            .filter(
+                and_(
+                    GroupModel.index == match.group.index,
+                    MatchModel.index == match.index,
+                    MatchModel.user_id == admin.id,
+                )
+            )
             .first()
         )
 

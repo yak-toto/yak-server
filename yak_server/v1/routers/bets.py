@@ -51,13 +51,17 @@ def retrieve_all_bets(
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[AllBetsResponse]:
     binary_bets = (
-        user.binary_bets.join(BinaryBetModel.match)
+        db.query(BinaryBetModel)
+        .join(BinaryBetModel.match)
+        .filter(MatchModel.user_id == user.id)
         .join(MatchModel.group)
         .order_by(GroupModel.index, MatchModel.index)
     )
 
     score_bets = (
-        user.score_bets.join(ScoreBetModel.match)
+        db.query(ScoreBetModel)
+        .join(ScoreBetModel.match)
+        .filter(MatchModel.user_id == user.id)
         .join(MatchModel.group)
         .order_by(GroupModel.index, MatchModel.index)
     )

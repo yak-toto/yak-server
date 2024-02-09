@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, List
 
-from sqlalchemy import update
+from sqlalchemy import and_, update
 
 from yak_server.database.models import GroupPositionModel, MatchModel, ScoreBetModel
 
@@ -23,7 +23,7 @@ def create_group_position(score_bets: List["ScoreBetModel"]) -> List[GroupPositi
             group_positions.append(
                 GroupPositionModel(
                     team_id=score_bet.match.team1_id,
-                    user_id=score_bet.user.id,
+                    user_id=score_bet.match.user.id,
                     group_id=score_bet.match.group.id,
                 ),
             )
@@ -33,7 +33,7 @@ def create_group_position(score_bets: List["ScoreBetModel"]) -> List[GroupPositi
             group_positions.append(
                 GroupPositionModel(
                     team_id=score_bet.match.team2_id,
-                    user_id=score_bet.user.id,
+                    user_id=score_bet.match.user.id,
                     group_id=score_bet.match.group.id,
                 ),
             )
@@ -122,7 +122,11 @@ def get_group_rank_with_code(
             reverse=True,
         )
 
-    score_bets = user.score_bets.filter(MatchModel.group_id == group_id).join(ScoreBetModel.match)
+    score_bets = (
+        db.query(ScoreBetModel)
+        .join(ScoreBetModel.match)
+        .filter(and_(MatchModel.user_id == user.id, MatchModel.group_id == group_id))
+    )
 
     group_rank = compute_group_rank(group_rank, score_bets)
 

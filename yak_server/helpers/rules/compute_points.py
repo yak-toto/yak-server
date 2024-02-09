@@ -40,7 +40,9 @@ class ResultForScoreBet:
 def compute_results_for_score_bet(db: "Session", admin: UserModel) -> List[ResultForScoreBet]:
     results: List[ResultForScoreBet] = []
 
-    for real_score in admin.score_bets:
+    for real_score in (
+        db.query(ScoreBetModel).join(ScoreBetModel.match).filter(MatchModel.user_id == admin.id)
+    ):
         result_for_score_bet = ResultForScoreBet()
 
         for user_score in (
@@ -48,7 +50,7 @@ def compute_results_for_score_bet(db: "Session", admin: UserModel) -> List[Resul
             .join(ScoreBetModel.match)
             .filter(
                 and_(
-                    ScoreBetModel.user_id != admin.id,
+                    MatchModel.user_id != admin.id,
                     MatchModel.index == real_score.match.index,
                     MatchModel.group_id == real_score.match.group_id,
                 ),
@@ -56,11 +58,13 @@ def compute_results_for_score_bet(db: "Session", admin: UserModel) -> List[Resul
         ):
             if user_score.is_same_results(real_score):
                 result_for_score_bet.number_correct_result += 1
-                result_for_score_bet.user_ids_found_correct_result.append(user_score.user_id)
+                result_for_score_bet.user_ids_found_correct_result.append(user_score.match.user_id)
 
                 if user_score.is_same_scores(real_score):
                     result_for_score_bet.number_correct_score += 1
-                    result_for_score_bet.user_ids_found_correct_score.append(user_score.user_id)
+                    result_for_score_bet.user_ids_found_correct_score.append(
+                        user_score.match.user_id
+                    )
 
         results.append(result_for_score_bet)
 
@@ -118,12 +122,14 @@ def compute_results_for_group_rank(
     return result_groups
 
 
-def team_from_group_code(user: UserModel, group_code: str) -> set:
+def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set:
     return set(
         chain(
             *(
                 (bet.match.team1.id, bet.match.team2.id)
-                for bet in user.binary_bets.filter(GroupModel.code == group_code)
+                for bet in db.query(BinaryBetModel)
+                .join(BinaryBetModel.match)
+                .filter(and_(MatchModel.user_id == user.id, GroupModel.code == group_code))
                 .join(BinaryBetModel.match)
                 .join(MatchModel.group)
                 if bet.match.team1_id is not None and bet.match.team2_id is not None
@@ -132,12 +138,13 @@ def team_from_group_code(user: UserModel, group_code: str) -> set:
     )
 
 
-def winner_from_user(user: UserModel) -> set:
+def winner_from_user(db: "Session", user: UserModel) -> set:
     finale_bet = next(
         iter(
-            user.binary_bets.filter(GroupModel.code == "1")
+            db.query(BinaryBetModel)
             .join(BinaryBetModel.match)
-            .join(MatchModel.group),
+            .join(MatchModel.group)
+            .filter(and_(MatchModel.user_id == user.id, GroupModel.code == "1"))
         ),
     )
 
@@ -160,10 +167,10 @@ def compute_points(db: "Session", admin: UserModel, rule_config: RuleComputePoin
         other_users,
     )
 
-    quarter_finals_team = team_from_group_code(admin, "4")
-    semi_finals_team = team_from_group_code(admin, "2")
-    final_team = team_from_group_code(admin, "1")
-    winner = winner_from_user(admin)
+    quarter_finals_team = team_from_group_code(db, admin, "4")
+    semi_finals_team = team_from_group_code(db, admin, "2")
+    final_team = team_from_group_code(db, admin, "1")
+    winner = winner_from_user(db, admin)
 
     numbers_of_players = other_users.count()
 
@@ -201,15 +208,15 @@ def compute_points(db: "Session", admin: UserModel, rule_config: RuleComputePoin
         user.points += user.number_first_qualified_guess * rule_config.first_team_qualified
 
         user.number_quarter_final_guess = len(
-            team_from_group_code(user, "4").intersection(quarter_finals_team),
+            team_from_group_code(db, user, "4").intersection(quarter_finals_team),
         )
         user.number_semi_final_guess = len(
-            team_from_group_code(user, "2").intersection(semi_finals_team),
+            team_from_group_code(db, user, "2").intersection(semi_finals_team),
         )
         user.number_final_guess = len(
-            team_from_group_code(user, "1").intersection(final_team),
+            team_from_group_code(db, user, "1").intersection(final_team),
         )
-        user.number_winner_guess = len(winner_from_user(user).intersection(winner))
+        user.number_winner_guess = len(winner_from_user(db, user).intersection(winner))
 
         user.points += 30 * user.number_quarter_final_guess
         user.points += 60 * user.number_semi_final_guess
