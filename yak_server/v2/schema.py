@@ -3,6 +3,7 @@ from uuid import UUID
 
 import pendulum
 import strawberry
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from yak_server.database.models import (
@@ -196,8 +197,10 @@ class Group:
         if not any(group_position.need_recomputation for group_position in group_rank):
             return send_group_position(group_rank)
 
-        score_bets = self.user.score_bets.filter(MatchModel.group_id == self.id).join(
-            ScoreBetModel.match,
+        score_bets = (
+            self.db.query(ScoreBetModel)
+            .join(ScoreBetModel.match)
+            .filter(and_(MatchModel.user_id == self.user.id, MatchModel.group_id == self.id))
         )
         group_rank = compute_group_rank(group_rank, score_bets)
         self.db.commit()
@@ -219,8 +222,8 @@ class Group:
             ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
             for score_bet in (
                 self.db.query(ScoreBetModel)
-                .filter_by(user_id=self.user.id)
                 .join(ScoreBetModel.match)
+                .filter_by(user_id=self.user.id)
                 .join(MatchModel.group)
                 .filter(
                     MatchModel.group_id == self.instance.id,
@@ -235,8 +238,8 @@ class Group:
             BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
             for binary_bet in (
                 self.db.query(BinaryBetModel)
-                .filter_by(user_id=self.user.id)
                 .join(BinaryBetModel.match)
+                .filter_by(user_id=self.user.id)
                 .join(MatchModel.group)
                 .filter(
                     MatchModel.group_id == self.instance.id,
@@ -286,11 +289,11 @@ class ScoreBet:
         return cls(
             instance=instance,
             id=instance.id,
-            locked=is_locked(instance.user.name, lock_datetime),
+            locked=is_locked(instance.match.user.name, lock_datetime),
             group=Group.from_instance(
                 instance.match.group,
                 db=db,
-                user=instance.user,
+                user=instance.match.user,
                 lock_datetime=lock_datetime,
             ),
             team1=(
@@ -329,11 +332,11 @@ class BinaryBet:
         return cls(
             instance=instance,
             id=instance.id,
-            locked=is_locked(instance.user.name, lock_datetime),
+            locked=is_locked(instance.match.user.name, lock_datetime),
             group=Group.from_instance(
                 instance.match.group,
                 db=db,
-                user=instance.user,
+                user=instance.match.user,
                 lock_datetime=lock_datetime,
             ),
             team1=(
@@ -376,8 +379,8 @@ class Phase:
         return [
             BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
             for binary_bet in self.db.query(BinaryBetModel)
-            .filter_by(user_id=self.user.id)
             .join(BinaryBetModel.match)
+            .filter_by(user_id=self.user.id)
             .join(MatchModel.group)
             .filter(
                 GroupModel.phase_id == self.instance.id,
@@ -390,8 +393,8 @@ class Phase:
         return [
             ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
             for score_bet in self.db.query(ScoreBetModel)
-            .filter_by(user_id=self.user.id)
             .join(ScoreBetModel.match)
+            .filter_by(user_id=self.user.id)
             .join(MatchModel.group)
             .filter(
                 GroupModel.phase_id == self.instance.id,
@@ -441,8 +444,8 @@ class User:
         return [
             BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
             for binary_bet in self.db.query(BinaryBetModel)
-            .filter_by(user_id=self.instance.id)
             .join(BinaryBetModel.match)
+            .filter_by(user_id=self.instance.id)
             .join(MatchModel.group)
             .order_by(GroupModel.index, MatchModel.index)
         ]
@@ -452,8 +455,8 @@ class User:
         return [
             ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
             for score_bet in self.db.query(ScoreBetModel)
-            .filter_by(user_id=self.instance.id)
             .join(ScoreBetModel.match)
+            .filter_by(user_id=self.instance.id)
             .join(MatchModel.group)
             .order_by(GroupModel.index, MatchModel.index)
         ]

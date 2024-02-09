@@ -8,6 +8,7 @@ else:
 
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
+from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -101,6 +102,7 @@ def create_score_bet(
         team2_id=score_bet_in.team2.id,
         index=score_bet_in.index,
         group_id=score_bet_in.group.id,
+        user_id=user.id,
     )
 
     db.add(match)
@@ -117,7 +119,6 @@ def create_score_bet(
 
     score_bet = ScoreBetModel(
         match_id=match.id,
-        user_id=user.id,
         score1=score_bet_in.team1.score,
         score2=score_bet_in.team2.score,
     )
@@ -140,7 +141,12 @@ def retrieve_score_bet_by_id(
     settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[ScoreBetResponse]:
-    score_bet = db.query(ScoreBetModel).filter_by(user_id=user.id, id=bet_id).first()
+    score_bet = (
+        db.query(ScoreBetModel)
+        .join(ScoreBetModel.match)
+        .filter(and_(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id))
+        .first()
+    )
 
     if not score_bet:
         raise BetNotFound(bet_id)
@@ -161,7 +167,11 @@ def modify_score_bet(
         raise LockedScoreBet
 
     score_bet = (
-        db.query(ScoreBetModel).filter_by(user_id=user.id, id=bet_id).with_for_update().first()
+        db.query(ScoreBetModel)
+        .join(ScoreBetModel.match)
+        .filter(and_(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id))
+        .with_for_update()
+        .first()
     )
 
     if not score_bet:
@@ -221,7 +231,12 @@ def delete_score_bet_by_id(
     if is_locked(user.name, settings.lock_datetime):
         raise LockedScoreBet
 
-    score_bet = db.query(ScoreBetModel).filter_by(user_id=user.id, id=bet_id).first()
+    score_bet = (
+        db.query(ScoreBetModel)
+        .join(ScoreBetModel.match)
+        .filter(and_(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id))
+        .first()
+    )
 
     if not score_bet:
         raise BetNotFound(bet_id)

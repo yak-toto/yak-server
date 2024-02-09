@@ -62,7 +62,7 @@ def compute_finale_phase_from_group_rank(
                 .filter(
                     and_(
                         MatchModel.index == index,
-                        BinaryBetModel.user_id == user.id,
+                        MatchModel.user_id == user.id,
                         MatchModel.group_id == first_phase_phase_group.id,
                     ),
                 )

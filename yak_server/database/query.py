@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, List, Tuple
 
+from sqlalchemy import and_
+
 from .models import BinaryBetModel, GroupModel, MatchModel, PhaseModel, ScoreBetModel
 
 if TYPE_CHECKING:
@@ -19,14 +21,16 @@ def bets_from_group_code(
         return None, [], []
 
     score_bets = (
-        user.score_bets.filter(MatchModel.group_id == group.id)
+        db.query(ScoreBetModel)
         .join(ScoreBetModel.match)
+        .filter(and_(MatchModel.user_id == user.id, MatchModel.group_id == group.id))
         .order_by(MatchModel.index)
     )
 
     binary_bets = (
-        user.binary_bets.filter(MatchModel.group_id == group.id)
+        db.query(BinaryBetModel)
         .join(BinaryBetModel.match)
+        .filter(and_(MatchModel.user_id == user.id, MatchModel.group_id == group.id))
         .order_by(MatchModel.index)
     )
 
@@ -46,16 +50,18 @@ def bets_from_phase_code(
     groups = db.query(GroupModel).filter_by(phase_id=phase.id).order_by(GroupModel.index)
 
     binary_bets = (
-        user.binary_bets.filter(GroupModel.phase_id == phase.id)
+        db.query(BinaryBetModel)
         .join(BinaryBetModel.match)
         .join(MatchModel.group)
+        .filter(and_(MatchModel.user_id == user.id, GroupModel.phase_id == phase.id))
         .order_by(GroupModel.index, MatchModel.index)
     )
 
     score_bets = (
-        user.score_bets.filter(GroupModel.phase_id == phase.id)
+        db.query(ScoreBetModel)
         .join(ScoreBetModel.match)
         .join(MatchModel.group)
+        .filter(and_(MatchModel.user_id == user.id, GroupModel.phase_id == phase.id))
         .order_by(GroupModel.index, MatchModel.index)
     )
 

@@ -8,6 +8,7 @@ else:
 
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
+from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -100,6 +101,7 @@ def create_binary_bet(
         team2_id=binary_bet_in.team2.id,
         index=binary_bet_in.index,
         group_id=binary_bet_in.group.id,
+        user_id=user.id,
     )
 
     db.add(match)
@@ -115,11 +117,7 @@ def create_binary_bet(
 
         raise GroupNotFound(group_id=binary_bet_in.group.id) from integrity_error
 
-    binary_bet = BinaryBetModel(
-        match_id=match.id,
-        user_id=user.id,
-        is_one_won=binary_bet_in.is_one_won,
-    )
+    binary_bet = BinaryBetModel(match_id=match.id, is_one_won=binary_bet_in.is_one_won)
 
     db.add(binary_bet)
     db.commit()
@@ -136,7 +134,12 @@ def retrieve_binary_bet_by_id(
     settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[BinaryBetResponse]:
-    binary_bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=bet_id).first()
+    binary_bet = (
+        db.query(BinaryBetModel)
+        .join(BinaryBetModel.match)
+        .filter(and_(MatchModel.user_id == user.id, BinaryBetModel.id == bet_id))
+        .first()
+    )
 
     if not binary_bet:
         raise BetNotFound(bet_id)
@@ -156,7 +159,12 @@ def modify_binary_bet_by_id(
     if is_locked(user.name, settings.lock_datetime):
         raise LockedBinaryBet
 
-    binary_bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=bet_id).first()
+    binary_bet = (
+        db.query(BinaryBetModel)
+        .join(BinaryBetModel.match)
+        .filter(and_(MatchModel.user_id == user.id, BinaryBetModel.id == bet_id))
+        .first()
+    )
 
     if not binary_bet:
         raise BetNotFound(bet_id)
@@ -210,7 +218,12 @@ def delete_binary_bet_by_id(
     if is_locked(user.name, settings.lock_datetime):
         raise LockedBinaryBet
 
-    binary_bet = db.query(BinaryBetModel).filter_by(user_id=user.id, id=bet_id).first()
+    binary_bet = (
+        db.query(BinaryBetModel)
+        .join(BinaryBetModel.match)
+        .filter(and_(MatchModel.user_id == user.id, BinaryBetModel.id == bet_id))
+        .first()
+    )
 
     if not binary_bet:
         raise BetNotFound(bet_id)

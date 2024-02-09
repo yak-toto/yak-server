@@ -75,7 +75,6 @@ class UserModel(Base):
         nullable=False,
         default=0,
     )
-
     points = sa.Column(
         sa.Float,
         CheckConstraint("points>=0"),
@@ -83,16 +82,8 @@ class UserModel(Base):
         default=0,
     )
 
-    score_bets = relationship(
-        "ScoreBetModel",
-        back_populates="user",
-        lazy="dynamic",
-        cascade="all, delete",
-        passive_deletes=True,
-    )
-
-    binary_bets = relationship(
-        "BinaryBetModel",
+    matches = relationship(
+        "MatchModel",
         back_populates="user",
         lazy="dynamic",
         cascade="all, delete",
@@ -134,14 +125,10 @@ class UserModel(Base):
 class ScoreBetModel(Base):
     __tablename__ = "score_bet"
     id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
-    user_id = sa.Column(
-        UUIDType(binary=False),
-        sa.ForeignKey("user.id", ondelete="CASCADE"),
-        nullable=False,
-    )
-    user = relationship("UserModel", back_populates="score_bets")
 
-    match_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("match.id"), nullable=False)
+    match_id = sa.Column(
+        UUIDType(binary=False), sa.ForeignKey("match.id", ondelete="CASCADE"), nullable=False
+    )
     match = relationship("MatchModel", back_populates="score_bets")
 
     score1 = sa.Column(sa.Integer, CheckConstraint("score1>=0"), default=None)
@@ -181,14 +168,10 @@ class ScoreBetModel(Base):
 class BinaryBetModel(Base):
     __tablename__ = "binary_bet"
     id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
-    user_id = sa.Column(
-        UUIDType(binary=False),
-        sa.ForeignKey("user.id", ondelete="CASCADE"),
-        nullable=False,
-    )
-    user = relationship("UserModel", back_populates="binary_bets")
 
-    match_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("match.id"), nullable=False)
+    match_id = sa.Column(
+        UUIDType(binary=False), sa.ForeignKey("match.id", ondelete="CASCADE"), nullable=False
+    )
     match = relationship("MatchModel", back_populates="binary_bets")
 
     is_one_won = sa.Column(sa.Boolean, default=None)
@@ -234,8 +217,25 @@ class MatchModel(Base):
     team2_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("team.id"), nullable=True)
     team2 = relationship("TeamModel", foreign_keys=team2_id)
 
-    score_bets = relationship("ScoreBetModel", back_populates="match")
-    binary_bets = relationship("BinaryBetModel", back_populates="match")
+    user_id = sa.Column(
+        UUIDType(binary=False), sa.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
+    user = relationship("UserModel", foreign_keys=user_id)
+
+    score_bets = relationship(
+        "ScoreBetModel",
+        back_populates="match",
+        lazy="dynamic",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
+    binary_bets = relationship(
+        "BinaryBetModel",
+        back_populates="match",
+        lazy="dynamic",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
 
 
 class TeamModel(Base):
