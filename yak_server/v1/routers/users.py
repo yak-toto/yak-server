@@ -12,6 +12,7 @@ from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from yak_server.database.models import (
+    LobbyModel,
     MatchModel,
     MatchReferenceModel,
     ScoreBetModel,
@@ -20,6 +21,7 @@ from yak_server.database.models import (
 from yak_server.helpers.authentication import encode_bearer_token
 from yak_server.helpers.database import get_db
 from yak_server.helpers.group_position import create_group_position
+from yak_server.helpers.lobby import generate_lobby_code
 from yak_server.helpers.logging import (
     logged_in_successfully,
     modify_password_successfully,
@@ -54,7 +56,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-def signup_user(db: Session, signup_in: SignupIn) -> UserModel:
+def signup_user(db: Session, signup_in: SignupIn, *, create_lobby: bool = False) -> UserModel:
     # Check existing user in db
     existing_user = db.query(UserModel).filter_by(name=signup_in.name).first()
     if existing_user:
@@ -68,15 +70,42 @@ def signup_user(db: Session, signup_in: SignupIn) -> UserModel:
             str(password_requirements_error)
         ) from password_requirements_error
 
-    # Initialize user and integrate in db
-    user = UserModel(
-        signup_in.name,
-        signup_in.first_name,
-        signup_in.last_name,
-        signup_in.password,
-    )
-    db.add(user)
-    db.flush()
+    if create_lobby is True:
+        # Create lobby
+        lobby = LobbyModel(code=generate_lobby_code())
+        db.add(lobby)
+        db.flush()
+
+        # Create owner
+        user = UserModel(
+            name=signup_in.name,
+            first_name=signup_in.first_name,
+            last_name=signup_in.last_name,
+            password=signup_in.password,
+            lobby_id=lobby.id,
+        )
+        user.lobby = lobby
+        lobby.owner = user
+
+        db.add_all((user, lobby))
+        db.flush()
+    else:
+        # Fetch lobby
+        lobby = db.query(LobbyModel).filter_by(code=signup_in.lobby.code).first()
+
+        if not lobby:
+            raise ValueError
+
+        # Initialize user and integrate in db
+        user = UserModel(
+            name=signup_in.name,
+            first_name=signup_in.first_name,
+            last_name=signup_in.last_name,
+            password=signup_in.password,
+            lobby_id=lobby.id,
+        )
+        db.add(user)
+        db.flush()
 
     # Initialize matches and bets and integrate in db
     for match_reference in db.query(MatchReferenceModel).all():

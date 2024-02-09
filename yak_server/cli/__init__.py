@@ -69,7 +69,7 @@ def make_db_app() -> typer.Typer:
     @db_app.command()
     def sync() -> None:
         """Synchronize official results and push them to admin with web
-        scraping the world cup wikipedia page"""
+        scraping the world cup wikipedia page."""
         synchronize_official_results()
 
     return db_app
