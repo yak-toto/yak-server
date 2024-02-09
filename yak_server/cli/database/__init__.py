@@ -11,6 +11,7 @@ from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
     GroupPositionModel,
+    LobbyModel,
     MatchModel,
     MatchReferenceModel,
     PhaseModel,
@@ -21,6 +22,7 @@ from yak_server.database.models import (
 from yak_server.helpers.logging import setup_logging
 from yak_server.helpers.rules.compute_points import compute_points as compute_points_func
 from yak_server.helpers.settings import get_settings
+from yak_server.v1.models.lobbies import LobbyIn
 from yak_server.v1.models.users import SignupIn
 from yak_server.v1.routers.users import signup_user
 
@@ -59,7 +61,14 @@ def create_admin(password: str) -> None:
     with SessionLocal() as db:
         _ = signup_user(
             db,
-            SignupIn(name="admin", first_name="admin", last_name="admin", password=password),
+            SignupIn(
+                name="admin",
+                first_name="admin",
+                last_name="admin",
+                password=password,
+                lobby=LobbyIn(code="DDDDDD"),
+            ),
+            create_lobby=True,
         )
 
 
@@ -176,6 +185,7 @@ def delete_database(app: "FastAPI") -> None:
         db.query(MatchReferenceModel).delete()
         db.query(MatchModel).delete()
         db.query(UserModel).delete()
+        db.query(LobbyModel).delete()
         db.query(GroupModel).delete()
         db.query(PhaseModel).delete()
         db.query(TeamModel).delete()

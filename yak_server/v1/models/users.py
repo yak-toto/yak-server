@@ -1,11 +1,15 @@
 from pydantic import UUID4, BaseModel, ConfigDict
 
+from .lobbies import LobbyIn
+
 
 class SignupIn(BaseModel):
     name: str
     first_name: str
     last_name: str
     password: str
+
+    lobby: LobbyIn
 
     model_config = ConfigDict(extra="forbid")
 

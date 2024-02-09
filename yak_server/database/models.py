@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import TYPE_CHECKING
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import sqlalchemy as sa
 from argon2 import PasswordHasher
@@ -19,14 +19,29 @@ if TYPE_CHECKING:
 ph = PasswordHasher()
 
 
+class LobbyModel(Base):
+    __tablename__ = "lobby"
+    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
+    code = sa.Column(sa.String(6), unique=True, nullable=False)
+    owner_id = sa.Column(
+        UUIDType(binary=False),
+        sa.ForeignKey("user.id", name="fk_question_correct_answer", ondelete="CASCADE"),
+        nullable=False,
+    )
+    owner = relationship("UserModel", foreign_keys=owner_id)
+
+
 class UserModel(Base):
     __tablename__ = "user"
     id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
     name = sa.Column(sa.String(100), unique=True, nullable=False)
     first_name = sa.Column(sa.String(100), nullable=False)
     last_name = sa.Column(sa.String(100), nullable=False)
-
     password = sa.Column(sa.String(100), nullable=False)
+
+    lobby_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("lobby.id"), nullable=False)
+    lobby = relationship("LobbyModel", foreign_keys=lobby_id)
+
     number_match_guess = sa.Column(
         sa.Integer,
         CheckConstraint("number_match_guess>=0"),
@@ -90,11 +105,14 @@ class UserModel(Base):
         passive_deletes=True,
     )
 
-    def __init__(self, name: str, first_name: str, last_name: str, password: str) -> None:
+    def __init__(
+        self, name: str, first_name: str, last_name: str, password: str, lobby_id: UUID
+    ) -> None:
         self.name = name
         self.first_name = first_name
         self.last_name = last_name
         self.password = ph.hash(password)
+        self.lobby_id = lobby_id
 
     @hybrid_property
     def full_name(self) -> str:
