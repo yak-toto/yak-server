@@ -1,4 +1,3 @@
-import logging
 import sys
 
 if sys.version_info >= (3, 9):
@@ -22,6 +21,7 @@ from yak_server.helpers.database import get_db
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
 from yak_server.helpers.logging import modify_binary_bet_successfully
 from yak_server.helpers.settings import Settings, get_settings
+from yak_server.logger import logger
 from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.errors import (
     BetNotFound,
@@ -39,8 +39,6 @@ from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.groups import GroupOut
 from yak_server.v1.models.phases import PhaseOut
 from yak_server.v1.models.teams import FlagOut, TeamWithWonOut
-
-logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/binary_bets", tags=["binary_bets"])
 

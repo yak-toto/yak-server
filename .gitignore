@@ -191,3 +191,5 @@ yak_server/cli/backup_files
 .deactivate.sh
 
 profiling/
+
+log/
