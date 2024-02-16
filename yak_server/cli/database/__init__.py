@@ -190,22 +190,36 @@ def drop_database(app: "FastAPI") -> None:
         Base.metadata.drop_all(bind=engine)
 
 
-def setup_migration() -> None:
-    alembic_ini_path = Path(__file__).parents[3] / "alembic.ini"
+def print_export_command(alembic_ini_path: Path) -> None:
+    print(f"export ALEMBIC_CONFIG={alembic_ini_path}")
 
-    print(
-        "To be able to run the database migration scripts, you need to run the following command:",
-    )
-    print(f"export ALEMBIC_CONFIG='{alembic_ini_path.resolve()}'")
-    print()
-    print(
-        "Follow this link for more informations: "
-        "https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file",
-    )
 
-    if alembic is None:
+def setup_migration(*, short: bool = False) -> None:
+    alembic_ini_path = (Path(__file__).parents[2] / "alembic.ini").resolve()
+
+    if not alembic_ini_path.exists():
+        alembic_ini_path = (Path(__file__).parents[3] / "alembic.ini").resolve()
+
+    if short is True:
+        print_export_command(alembic_ini_path)
+    else:
+        print(
+            "To be able to run the database migration scripts, "
+            "you need to run the following command:",
+        )
+        print_export_command(alembic_ini_path)
         print()
-        print("To enable migration using alembic, please run: pip install yak-server[db_migration]")
+        print(
+            "Follow this link for more informations: "
+            "https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file",
+        )
+
+        if alembic is None:
+            print()
+            print(
+                "To enable migration using alembic, please run: "
+                "pip install yak-server[db_migration]"
+            )
 
 
 def compute_score_board() -> None:

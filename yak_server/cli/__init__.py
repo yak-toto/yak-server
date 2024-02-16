@@ -1,3 +1,10 @@
+import sys
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
 import typer
 
 from yak_server import create_app
@@ -57,9 +64,9 @@ def make_db_app() -> typer.Typer:
         backup_database()
 
     @db_app.command()
-    def migration() -> None:
+    def migration(*, short: Annotated[bool, typer.Option("--short", "-s")] = False) -> None:
         """Help to run database migration scripts."""
-        setup_migration()
+        setup_migration(short=short)
 
     @db_app.command()
     def score_board() -> None:

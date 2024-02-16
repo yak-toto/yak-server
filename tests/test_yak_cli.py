@@ -155,6 +155,45 @@ def test_db_migration_cli_with_alembic_present() -> None:
     assert result.exit_code == 0
 
 
+def test_db_migration_cli_short_option() -> None:
+    result = runner.invoke(app, ["db", "migration", "--short"])
+
+    alembic_ini_path = (Path(__file__).parents[1] / "alembic.ini").resolve()
+
+    assert result.exit_code == 0
+    assert result.output == f"export ALEMBIC_CONFIG={alembic_ini_path}\n"
+
+    result_with_short_name = result = runner.invoke(app, ["db", "migration", "-s"])
+
+    assert result_with_short_name.exit_code == result.exit_code
+    assert result_with_short_name.output == result.output
+
+
+def test_db_migration_second_path(monkeypatch: "pytest.MonkeyPatch") -> None:
+    """
+    .
+    └── yak-server
+        └── yak_server
+            └── alembic.ini
+    """
+
+    with runner.isolated_filesystem():
+        yak_server_module = (Path.cwd() / "yak-server" / "yak_server").resolve()
+
+        python_file_path = yak_server_module / "cli" / "database" / "__init__.py"
+        alembic_ini_path = yak_server_module / "alembic.ini"
+
+        alembic_ini_path.parent.mkdir(parents=True)
+        alembic_ini_path.touch()
+
+        monkeypatch.setattr("yak_server.cli.database.__file__", str(python_file_path))
+
+        result = runner.invoke(app, ["db", "migration", "-s"])
+
+        assert result.exit_code == 0
+        assert result.output == f"export ALEMBIC_CONFIG={alembic_ini_path}\n"
+
+
 def test_db_migration_cli_with_alembic_missing(monkeypatch: "pytest.MonkeyPatch") -> None:
     monkeypatch.setattr("yak_server.cli.database.alembic", None)
 
