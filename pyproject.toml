@@ -59,14 +59,14 @@ yak = "yak_server.cli:app"
 [tool.hatch.version]
 path = "yak_server/__init__.py"
 
-[tool.hatch.build]
-include = ["yak_server", "alembic.ini"]
+[tool.hatch.build.targets.wheel.hooks.custom]
+path = "scripts/build_hooks.py"
 
 [tool.coverage.run]
 branch = true
 
 [tool.coverage.report]
-omit = ["./yak_server/database/migrations/*"]
+omit = ["yak_server/database/migrations/*", "scripts/build_hooks.py"]
 exclude_lines = ["if TYPE_CHECKING:", "pragma: no cover"]
 
 [tool.ruff]
