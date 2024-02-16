@@ -2,6 +2,8 @@ name: 🆙 Release
 
 on:
   workflow_dispatch:
+    branches:
+      - main
     inputs:
       release-type:
         type: choice
