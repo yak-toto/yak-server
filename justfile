@@ -10,7 +10,7 @@ install:
     pip install -r {{ justfile_directory() }}/requirements.txt
 
 test:
-    pytest
+    pytest -vv
 
 test-cov:
     pytest --cov={{ justfile_directory() }}/yak_server \
