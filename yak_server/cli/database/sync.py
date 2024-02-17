@@ -2,7 +2,6 @@ import warnings
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
-import httpx
 from sqlalchemy import and_
 
 from yak_server.database import SessionLocal
@@ -15,6 +14,11 @@ from yak_server.database.models import (
     UserModel,
 )
 from yak_server.helpers.settings import get_settings
+
+try:
+    import httpx
+except ImportError:  # pragma: no cover
+    httpx = None  # type: ignore[assignment]
 
 try:
     import bs4
@@ -69,8 +73,8 @@ def is_penalties(content: str) -> bool:
 class SyncOfficialResultsNotAvailableError(Exception):
     def __init__(self) -> None:
         super().__init__(
-            "Synchronize official results is not available without beautifulsoup4 installed. "
-            "To enable it, please run: pip install yak-server[sync]"
+            "Synchronize official results is not available without sync extra dependency"
+            " installed. To enable it, please run: pip install yak-server[sync]"
         )
 
 
@@ -155,7 +159,7 @@ def extract_matches_from_html(groups: List[GroupContainer]) -> List[Match]:
 
 
 def synchronize_official_results() -> None:
-    if bs4 is None or lxml is None:
+    if bs4 is None or lxml is None or httpx is None:
         raise SyncOfficialResultsNotAvailableError
 
     official_results_url = get_settings().official_results_url
