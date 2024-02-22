@@ -15,6 +15,7 @@ repos:
         args: [requirements-tests.txt, requirements.txt]
       - id: no-commit-to-branch
         args: [--branch, main]
+      - id: name-tests-test
 
   - repo: https://github.com/bwhmather/ssort
     rev: 0.12.4
