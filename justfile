@@ -16,6 +16,7 @@ test-cov:
     pytest --cov={{ justfile_directory() }}/yak_server \
       --cov={{ justfile_directory() }}/scripts \
       --cov={{ justfile_directory() }}/tests \
+      --cov={{ justfile_directory() }}/testing \
       --cov-report=xml \
       --cov-config={{ justfile_directory() }}/pyproject.toml \
       -vv

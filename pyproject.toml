@@ -103,6 +103,7 @@ max-complexity = 11
 "yak_server/database/migrations/*" = ["ANN001", "ANN201"]
 "yak_server/helpers/errors.py" = ["S105"]
 "tests/*" = ["S101"]
+"testing/*" = ["S101"]
 "scripts/*" = ["T201"]
 
 [tool.pytest.ini_options]
