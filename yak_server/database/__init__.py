@@ -7,10 +7,11 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 
 class MySQLSettings(BaseSettings):
-    user_name: str = ""
-    password: str = ""
-    port: int = 3306
-    db: str = ""
+    host: str
+    user_name: str
+    password: str
+    port: int
+    db: str
 
     model_config = SettingsConfigDict(
         env_file=".env.mysql",
@@ -26,12 +27,13 @@ def get_mysql_settings() -> MySQLSettings:
 
 def compute_database_uri(
     mysql_client: str,
+    mysql_host: str,
     mysql_user_name: str,
     mysql_password: str,
     mysql_port: int,
     mysql_db: str,
 ) -> str:
-    return f"mysql+{mysql_client}://{mysql_user_name}:{mysql_password}@127.0.0.1:{mysql_port}/{mysql_db}"
+    return f"mysql+{mysql_client}://{mysql_user_name}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_db}"
 
 
 mysql_settings = get_mysql_settings()
@@ -39,6 +41,7 @@ mysql_settings = get_mysql_settings()
 
 SQLALCHEMY_DATABASE_URL = compute_database_uri(
     pymysql.__name__,
+    mysql_settings.host,
     mysql_settings.user_name,
     mysql_settings.password,
     mysql_settings.port,
