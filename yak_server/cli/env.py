@@ -46,14 +46,16 @@ class EnvBuilder:
             self.env["PROFILING"] = 1 if profiling == YesOrNo.y else 0
 
     def setup_mysql_env(self) -> None:
+        host = typer.prompt("MYSQL HOST", default="127.0.0.1")
         user_name = typer.prompt("MYSQL USER NAME")
         password = typer.prompt("MYSQL PASSWORD", hide_input=True)
         port = typer.prompt("MYSQL PORT", type=int, default=3306)
         db = typer.prompt("MYSQL DB")
 
         # try to instance pydantic model to check if settings are ok
-        MySQLSettings(user_name=user_name, password=password, port=port, db=db)
+        MySQLSettings(host=host, user_name=user_name, password=password, port=port, db=db)
 
+        self.env_mysql["MYSQL_HOST"] = host
         self.env_mysql["MYSQL_USER_NAME"] = user_name
         self.env_mysql["MYSQL_PASSWORD"] = password
         self.env_mysql["MYSQL_PORT"] = port

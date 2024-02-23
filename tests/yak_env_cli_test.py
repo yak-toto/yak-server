@@ -12,6 +12,7 @@ runner = CliRunner()
 
 
 def test_yak_env_init() -> None:
+    host = get_random_string(10)
     user_name = get_random_string(15)
     password = get_random_string(250)
     port = randbelow(80000)
@@ -21,7 +22,7 @@ def test_yak_env_init() -> None:
         result = runner.invoke(
             app,
             ["env", "init"],
-            input=f"y\ny\n{user_name}\n{password}\n{port}\n{database}\n1800\n4\n",
+            input=f"y\ny\n{host}\n{user_name}\n{password}\n{port}\n{database}\n1800\n4\n",
         )
 
         assert result.exit_code == 0
@@ -42,6 +43,7 @@ def test_yak_env_init() -> None:
 
         env_mysql = dotenv_values(Path(".env.mysql"))
 
+        assert env_mysql["MYSQL_HOST"] == host
         assert env_mysql["MYSQL_USER_NAME"] == user_name
         assert env_mysql["MYSQL_PASSWORD"] == password
         assert env_mysql["MYSQL_PORT"] == str(port)
@@ -53,7 +55,7 @@ def test_yak_env_init_production() -> None:
         result = runner.invoke(
             app,
             ["env", "init"],
-            input="n\ny\ny\n3000\ndb\n1800\n1\n",
+            input="n\ny\nroot\ny\n3000\ndb\n1800\n1\n",
         )
 
         assert result.exit_code == 0
@@ -69,7 +71,7 @@ def test_yak_env_init_world_cup_2018() -> None:
         result = runner.invoke(
             app,
             ["env", "init"],
-            input="y\ny\nroot\ndddddddd\n\ndb\n1800\n3\n",
+            input="y\ny\nroot\nroot\ndddddddd\n\ndb\n1800\n3\n",
         )
 
         assert result.exit_code == 0

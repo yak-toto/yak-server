@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 def pytest_configure() -> None:
     connection = pymysql.connect(
-        host="127.0.0.1",
+        host=mysql_settings.host,
         user=mysql_settings.user_name,
         password=mysql_settings.password,
         port=mysql_settings.port,

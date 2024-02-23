@@ -30,6 +30,7 @@ def test_rule_not_defined(monkeypatch: pytest.MonkeyPatch) -> None:
 
         monkeypatch.setattr("yak_server.cli.env.__file__", Path("cli", "env.py"))
 
+        host = get_random_string(20)
         user_name = get_random_string(6)
         password = get_random_string(100)
         port = randbelow(10000)
@@ -38,7 +39,7 @@ def test_rule_not_defined(monkeypatch: pytest.MonkeyPatch) -> None:
         result = runner.invoke(
             app,
             ["env", "init"],
-            input=f"y\ny\n{user_name}\n{password}\n{port}\n{database}\n1800\n1\n",
+            input=f"y\ny\n{host}\n{user_name}\n{password}\n{port}\n{database}\n1800\n1\n",
         )
 
         assert result.exit_code == 1
