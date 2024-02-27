@@ -25,6 +25,10 @@ class TeamOut(BaseModel):
 
     @classmethod
     def from_instance(cls, team: "TeamModel", *, lang: Lang) -> "TeamOut":
+        team1 = team
+        if team1 is None:
+            pass
+
         return cls(
             id=team.id,
             code=team.code,
