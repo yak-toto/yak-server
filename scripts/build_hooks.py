@@ -18,4 +18,4 @@ class CopyAlembicIniBuildHook(BuildHookInterface):
     def finalize(self, version: str, build_data: dict[str, Any], artifact_path: str) -> None:  # noqa: ARG002
         root = Path(self.root)
 
-        (root / "yak_server" / "alembic.ini").unlink()
+        (root / "yak_server" / "alembic.ini").unlink(missing_ok=True)
