@@ -1,5 +1,3 @@
-import logging
-import traceback
 from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, Request, status
@@ -22,11 +20,10 @@ from yak_server.helpers.errors import (
     team_not_found_message,
     user_not_found_message,
 )
+from yak_server.logger import logger
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
-
-logger = logging.getLogger(__name__)
 
 
 class InvalidCredentials(HTTPException):
@@ -159,9 +156,7 @@ def set_exception_handler(app: "FastAPI") -> None:
 
     @app.exception_handler(Exception)
     def handle_exception(_: Request, exception: Exception) -> JSONResponse:  # pragma: no cover
-        # Return JSON instead of HTML for generic errors.
-        logger.error(traceback.format_exc())
-        logger.error(f"An unexpected exception occurs: {type(exception).__name__} {exception}")
+        logger.exception(exception, exc_info=(type(exception), exception, exception.__traceback__))
 
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

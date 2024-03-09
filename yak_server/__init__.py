@@ -1,10 +1,8 @@
-import logging
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from strawberry.fastapi import GraphQLRouter
 
+from .helpers.config import RootConfig
 from .helpers.logging import setup_logging
 from .helpers.profiling import set_yappi_profiler
 from .v1.helpers.errors import set_exception_handler
@@ -20,8 +18,6 @@ from .v1.routers import users as users_router
 from .v2 import get_schema
 from .v2.context import get_context
 
-logger = logging.getLogger(__name__)
-
 GLOBAL_ENDPOINT = "api"
 VERSION1 = "v1"
 VERSION2 = "v2"
@@ -29,19 +25,12 @@ VERSION2 = "v2"
 __version__ = "0.43.0"
 
 
-class Config(BaseSettings):
-    debug: bool = False
-    profiling: bool = False
-
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
-
-
 def create_app() -> FastAPI:
-    # Initialize fastapi application
-    config = Config()
+    root_config = RootConfig()
 
+    # Initialize fastapi application
     app = FastAPI(
-        debug=config.debug,
+        debug=root_config.debug,
         docs_url=f"/{GLOBAL_ENDPOINT}/docs",
         redoc_url=f"/{GLOBAL_ENDPOINT}/redoc",
         openapi_url=f"/{GLOBAL_ENDPOINT}/openapi.json",
@@ -85,9 +74,7 @@ def create_app() -> FastAPI:
     setup_logging(debug=app.debug)
 
     # Set yappi profiler
-    profiling = config.profiling
-
-    if app.debug and profiling:
+    if app.debug and root_config.profiling:
         set_yappi_profiler(app)
 
     return app

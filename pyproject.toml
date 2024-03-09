@@ -107,9 +107,6 @@ max-complexity = 11
 "scripts/*" = ["T201"]
 
 [tool.pytest.ini_options]
-log_file = "yak_test.log"
-# log_file_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-log_file_level = "INFO"
 env = [
     "MYSQL_DB=yak_toto_test",
     "PROFILING=0",

@@ -1,4 +1,3 @@
-import logging
 from typing import Optional
 from uuid import UUID
 
@@ -24,6 +23,7 @@ from yak_server.helpers.logging import (
     signed_up_successfully,
 )
 from yak_server.helpers.password_validator import PasswordRequirementsError, validate_password
+from yak_server.logger import logger
 
 from .bearer_authentication import (
     is_admin_authenticated,
@@ -52,8 +52,6 @@ from .schema import (
     ScoreBet,
     UserWithToken,
 )
-
-logger = logging.getLogger(__name__)
 
 
 @strawberry.type
