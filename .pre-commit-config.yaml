@@ -23,7 +23,7 @@ repos:
       - id: ssort
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.3.2
+    rev: v0.3.3
     hooks:
       - id: ruff
         args: [--exit-non-zero-on-fix]
