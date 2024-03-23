@@ -56,7 +56,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_modify_password.status_code == HTTPStatus.OK
     assert response_modify_password.json()["result"]["name"] == other_user_name
 
-    # Check login succesful with the new password
+    # Check successful login with the new password
     response_login_glepape = client.post(
         "/api/v1/users/login",
         json={"name": other_user_name, "password": new_password_other_user},

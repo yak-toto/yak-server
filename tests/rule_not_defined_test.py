@@ -15,16 +15,16 @@ runner = CliRunner()
 
 def test_rule_not_defined(monkeypatch: pytest.MonkeyPatch) -> None:
     with runner.isolated_filesystem():
-        competion_dir = Path("data", "fake_competition")
+        competition_dir = Path("data", "fake_competition")
 
-        rules_dir = competion_dir / "rules"
+        rules_dir = competition_dir / "rules"
         rules_dir.mkdir(parents=True)
 
         rule_id = uuid4()
 
         (rules_dir / f"{rule_id}.json").write_text(json.dumps({}))
 
-        (competion_dir / "config.ini").write_text(
+        (competition_dir / "config.ini").write_text(
             "[locking]\ndatetime = 2022-11-20T17:00:00.000000+01:00\n"
         )
 

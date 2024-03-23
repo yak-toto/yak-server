@@ -210,7 +210,7 @@ def setup_migration(*, short: bool = False) -> None:
         print_export_command(alembic_ini_path)
         print()
         print(
-            "Follow this link for more informations: "
+            "Follow this link for more information: "
             "https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file",
         )
 

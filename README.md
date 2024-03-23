@@ -15,7 +15,7 @@
 
 ### Database
 
-Install and start mysql server on port 3306. Add a database named `yak_toto`. In root folder, create a dotenv file named `.env` and fill your MySQL user name, password and database. When backend start, this configuration is automaticaly loaded.
+Install and start mysql server on port 3306. Add a database named `yak_toto`. In root folder, create a dotenv file named `.env` and fill your MySQL user name, password and database. When backend start, this configuration is automatically loaded.
 
 ```text
 MYSQL_USER_NAME=my_user_name
@@ -56,7 +56,7 @@ JWT_EXPIRATION_TIME=1800
 
 Also, automatic backup can be done through `yak_server/cli/backup_database` script. It can be run using `yak db backup`.
 
-Finally, fastapi needs some configuration to start. Last thing, for development environment, debug needs to be activated with a addditional environment variable:
+Finally, fastapi needs some configuration to start. Last thing, for development environment, debug needs to be activated with a additional environment variable:
 
 ```text
 DEBUG=1

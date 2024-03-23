@@ -50,3 +50,8 @@ repos:
     hooks:
       - id: pretty-format-toml
         args: [--autofix, --indent, "4", --trailing-commas, --no-sort]
+
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.18.2
+    hooks:
+      - id: typos

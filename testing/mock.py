@@ -8,7 +8,7 @@ else:
 
 import pendulum
 
-from testing.util import get_resources_path
+from .util import get_resources_path
 
 if TYPE_CHECKING:
     from yak_server.helpers.rules import Rules
