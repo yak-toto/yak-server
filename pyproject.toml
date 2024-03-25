@@ -35,12 +35,12 @@ dependencies = [
     "pymysql[rsa] ==1.1.0",
     "argon2-cffi ==23.1.0",
     "fastapi ==0.110.0",
-    "typer ==0.9.0",
-    "SQLAlchemy ==2.0.28",
-    "SQLAlchemy-Utils ==0.41.1",
+    "typer ==0.10.0",
+    "SQLAlchemy ==2.0.29",
+    "SQLAlchemy-Utils ==0.41.2",
     "pendulum ==3.0.0",
     "pydantic-settings ==2.2.1",
-    "strawberry-graphql ==0.220.0",
+    "strawberry-graphql ==0.221.1",
 ]
 dynamic = ["version"]
 
