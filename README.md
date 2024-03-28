@@ -30,14 +30,14 @@ You can also set MySQL port by adding `MYSQL_PORT=my_port` to `.env` file. If no
 Run your project in a Python env is highly recommend. You can use venv python module using the following command:
 
 ```bash
-python -m venv venv
-. venv/bin/activate
+uv venv
+. .venv/bin/activate
 ```
 
 Fetch all packages using pip with the following command:
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 Before starting the backend, add `JWT_SECRET_KEY` and `JWT_EXPIRATION_TIME` in `.env` same as the MySQL user name and password. As

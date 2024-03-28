@@ -1,3 +1,4 @@
+alias s := setup
 alias i := install
 alias t := test
 alias tc := test-cov
@@ -6,8 +7,14 @@ alias c := check
 alias f := fmt
 alias l := lint
 
+setup:
+    uv venv {{ justfile_directory() }}/.venv
+    . {{ justfile_directory() }}/.venv/bin/activate
+    just install
+    pre-commit install --install-hooks
+
 install:
-    pip install -r {{ justfile_directory() }}/requirements.txt
+    uv pip install -r {{ justfile_directory() }}/requirements.txt
 
 test:
     pytest -vv
