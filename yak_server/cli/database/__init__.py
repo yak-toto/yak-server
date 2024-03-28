@@ -1,5 +1,4 @@
 import json
-import logging
 import subprocess  # noqa: S404
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -18,9 +17,11 @@ from yak_server.database.models import (
     TeamModel,
     UserModel,
 )
+from yak_server.helpers.config import RootConfig
 from yak_server.helpers.logging import setup_logging
 from yak_server.helpers.rules.compute_points import compute_points as compute_points_func
 from yak_server.helpers.settings import get_settings
+from yak_server.logger import logger
 from yak_server.v1.models.users import SignupIn
 from yak_server.v1.routers.users import signup_user
 
@@ -31,8 +32,6 @@ except ImportError:  # pragma: no cover
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
-
-logger = logging.getLogger(__name__)
 
 
 class RecordDeletionInProductionError(Exception):
@@ -124,7 +123,9 @@ def initialize_database(app: "FastAPI") -> None:
 
 
 def backup_database() -> None:
-    setup_logging(debug=False)
+    root_config = RootConfig()
+
+    setup_logging(debug=root_config.debug)
 
     result = subprocess.run(
         [  # noqa: S603, S607

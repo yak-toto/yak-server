@@ -1,4 +1,3 @@
-import logging
 import sys
 
 if sys.version_info >= (3, 9):
@@ -23,6 +22,7 @@ from yak_server.helpers.group_position import set_recomputation_flag
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
 from yak_server.helpers.logging import modify_score_bet_successfully
 from yak_server.helpers.settings import Settings, get_settings
+from yak_server.logger import logger
 from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.errors import (
     BetNotFound,
@@ -40,8 +40,6 @@ from yak_server.v1.models.score_bets import (
     ScoreBetResponse,
 )
 from yak_server.v1.models.teams import FlagOut, TeamWithScoreOut
-
-logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/score_bets", tags=["score_bets"])
 

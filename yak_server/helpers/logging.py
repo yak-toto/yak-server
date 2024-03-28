@@ -1,4 +1,5 @@
-import logging
+import logging.config
+from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
@@ -50,8 +51,40 @@ def modify_password_successfully(user_name: str) -> str:
 
 
 def setup_logging(*, debug: bool) -> None:
-    logging.basicConfig(
-        filename="yak.log",
-        level=logging.DEBUG if debug else logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
+    log_dir = Path("log")
+    log_dir.mkdir(exist_ok=True)
+
+    filename = log_dir / "yak_server.log"
+    log_level = "DEBUG" if debug is True else "INFO"
+
+    logging_config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "filters": {},
+        "formatters": {
+            "simple": {"format": "%(levelname)s : %(message)s"},
+            "detailed": {
+                "format": "%(asctime)s - %(pathname)s:%(lineno)d - %(levelname)s - %(message)s",
+                "datefmt": "%Y-%m-%d %H:%M:%S%z",
+            },
+        },
+        "handlers": {
+            "stderr": {
+                "class": "logging.StreamHandler",
+                "level": "WARNING",
+                "formatter": "simple",
+                "stream": "ext://sys.stderr",
+            },
+            "file": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "level": log_level,
+                "formatter": "detailed",
+                "filename": filename,
+                "maxBytes": 10_485_760,  # 1 MB
+                "backupCount": 10,
+            },
+        },
+        "loggers": {"root": {"level": log_level, "handlers": ["stderr", "file"]}},
+    }
+
+    logging.config.dictConfig(logging_config)
