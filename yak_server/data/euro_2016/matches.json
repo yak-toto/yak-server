@@ -3,7 +3,7 @@
         "group_code": "A",
         "index": 1,
         "team1_code": "FR",
-        "team2_code": "RO",
+        "team2_code": "TO",
         "bet_type_from_match": "SCORE_BET"
     },
     {
@@ -16,7 +16,7 @@
     {
         "group_code": "A",
         "index": 3,
-        "team1_code": "RO",
+        "team1_code": "TO",
         "team2_code": "CH",
         "bet_type_from_match": "SCORE_BET"
     },
@@ -30,7 +30,7 @@
     {
         "group_code": "A",
         "index": 5,
-        "team1_code": "RO",
+        "team1_code": "TO",
         "team2_code": "AL",
         "bet_type_from_match": "SCORE_BET"
     },
