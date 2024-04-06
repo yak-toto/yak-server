@@ -10,20 +10,23 @@ from strawberry.types import Info
 from yak_server.database.models import (
     BinaryBetModel,
     MatchModel,
-    MatchReferenceModel,
     ScoreBetModel,
     UserModel,
 )
-from yak_server.helpers.authentication import encode_bearer_token
+from yak_server.helpers.authentication import (
+    NameAlreadyExistsError,
+    encode_bearer_token,
+    signup_user,
+)
 from yak_server.helpers.bet_locking import is_locked
-from yak_server.helpers.group_position import create_group_position, set_recomputation_flag
+from yak_server.helpers.group_position import set_recomputation_flag
 from yak_server.helpers.logging import (
     logged_in_successfully,
     modify_binary_bet_successfully,
     modify_score_bet_successfully,
     signed_up_successfully,
 )
-from yak_server.helpers.password_validator import PasswordRequirementsError, validate_password
+from yak_server.helpers.password_validator import PasswordRequirementsError
 
 from .bearer_authentication import (
     is_admin_authenticated,
@@ -70,55 +73,14 @@ class Mutation:
         db = info.context.db
         settings = info.context.settings
 
-        # Check existing user in db
-        existing_user = db.query(UserModel).filter_by(name=user_name).first()
-        if existing_user:
-            return UserNameAlreadyExists(user_name=user_name)
-
-        # Validate password
         try:
-            validate_password(password)
+            user = signup_user(
+                db, name=user_name, first_name=first_name, last_name=last_name, password=password
+            )
         except PasswordRequirementsError as password_requirements_error:
             return UnsatisfiedPasswordRequirements(message=str(password_requirements_error))
-
-        # Initialize user and integrate in db
-        user = UserModel(
-            name=user_name,
-            first_name=first_name,
-            last_name=last_name,
-            password=password,
-        )
-        db.add(user)
-        db.flush()
-
-        # Initialize matches and bets and integrate in db
-        for match_reference in db.query(MatchReferenceModel).all():
-            match = MatchModel(
-                team1_id=match_reference.team1_id,
-                team2_id=match_reference.team2_id,
-                index=match_reference.index,
-                group_id=match_reference.group_id,
-                user_id=user.id,
-            )
-            db.add(match)
-            db.flush()
-
-            db.add(match_reference.bet_type_from_match.value(match_id=match.id))
-            db.flush()
-
-        # Create group position records
-        db.add_all(
-            create_group_position(
-                db.query(ScoreBetModel).join(ScoreBetModel.match).filter_by(user_id=user.id)
-            )
-        )
-        db.commit()
-
-        token = encode_bearer_token(
-            sub=user.id,
-            expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
-            secret_key=settings.jwt_secret_key,
-        )
+        except NameAlreadyExistsError:
+            return UserNameAlreadyExists(user_name=user_name)
 
         logger.info(signed_up_successfully(user.name))
 
@@ -126,7 +88,11 @@ class Mutation:
             user,
             db=db,
             lock_datetime=settings.lock_datetime,
-            token=token,
+            token=encode_bearer_token(
+                sub=user.id,
+                expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
+                secret_key=settings.jwt_secret_key,
+            ),
         )
 
     @strawberry.mutation

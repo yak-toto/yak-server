@@ -21,7 +21,6 @@ from yak_server.database.models import (
 from yak_server.helpers.logging import setup_logging
 from yak_server.helpers.rules.compute_points import compute_points as compute_points_func
 from yak_server.helpers.settings import get_settings
-from yak_server.v1.models.users import SignupIn
 from yak_server.v1.routers.users import signup_user
 
 try:
@@ -57,10 +56,7 @@ def create_database() -> None:
 
 def create_admin(password: str) -> None:
     with SessionLocal() as db:
-        _ = signup_user(
-            db,
-            SignupIn(name="admin", first_name="admin", last_name="admin", password=password),
-        )
+        _ = signup_user(db, name="admin", first_name="admin", last_name="admin", password=password)
 
 
 def initialize_database(app: "FastAPI") -> None:
