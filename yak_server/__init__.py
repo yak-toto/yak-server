@@ -19,12 +19,14 @@ from .v1.routers.teams import router as teams_router
 from .v1.routers.users import router as users_router
 from .v2 import get_schema
 from .v2.context import get_context
+from .v3.endpoints import router as v3_router
 
 logger = logging.getLogger(__name__)
 
 GLOBAL_ENDPOINT = "api"
 VERSION1 = "v1"
 VERSION2 = "v2"
+VERSION3 = "v3"
 
 __version__ = "0.43.1"
 
@@ -71,6 +73,9 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(graphql_app, prefix=f"/{GLOBAL_ENDPOINT}/{VERSION2}", tags=["graphql"])
+
+    # Register version 3 endpoint
+    app.include_router(v3_router, prefix=f"/{GLOBAL_ENDPOINT}/{VERSION3}")
 
     # Set CORS
     app.add_middleware(
