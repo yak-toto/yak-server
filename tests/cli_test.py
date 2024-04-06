@@ -17,8 +17,8 @@ from yak_server.cli.database import (
     delete_database,
     drop_database,
 )
+from yak_server.helpers.authentication import NameAlreadyExistsError
 from yak_server.helpers.settings import get_settings
-from yak_server.v1.helpers.errors import NameAlreadyExists
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -51,7 +51,7 @@ def test_create_admin(app: "FastAPI") -> None:
     # if signup call is KO (Here admin already exists in db)
     password_admin = get_random_string(10)
 
-    with pytest.raises(NameAlreadyExists):
+    with pytest.raises(NameAlreadyExistsError):
         create_admin(password_admin)
 
 
