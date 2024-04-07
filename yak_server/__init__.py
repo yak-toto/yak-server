@@ -5,18 +5,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from strawberry.fastapi import GraphQLRouter
 
+from .helpers.exception_handler import set_exception_handler
 from .helpers.logging import setup_logging
 from .helpers.profiling import set_yappi_profiler
-from .v1.helpers.errors import set_exception_handler
-from .v1.routers import bets as bets_router
-from .v1.routers import binary_bets as binary_bets_router
-from .v1.routers import groups as groups_router
-from .v1.routers import phases as phases_router
-from .v1.routers import results as results_router
-from .v1.routers import rules as rules_router
-from .v1.routers import score_bets as score_bets_router
-from .v1.routers import teams as teams_router
-from .v1.routers import users as users_router
+from .v1.routers.bets import router as bets_router
+from .v1.routers.binary_bets import router as binary_bets_router
+from .v1.routers.groups import router as groups_router
+from .v1.routers.phases import router as phases_router
+from .v1.routers.results import router as results_router
+from .v1.routers.rules import router as rules_router
+from .v1.routers.score_bets import router as score_bets_router
+from .v1.routers.teams import router as teams_router
+from .v1.routers.users import router as users_router
 from .v2 import get_schema
 from .v2.context import get_context
 
@@ -50,15 +50,15 @@ def create_app() -> FastAPI:
     # Include all routers
     v1_prefix = f"/{GLOBAL_ENDPOINT}/{VERSION1}"
 
-    app.include_router(bets_router.router, prefix=v1_prefix)
-    app.include_router(binary_bets_router.router, prefix=v1_prefix)
-    app.include_router(groups_router.router, prefix=v1_prefix)
-    app.include_router(phases_router.router, prefix=v1_prefix)
-    app.include_router(results_router.router, prefix=v1_prefix)
-    app.include_router(rules_router.router, prefix=v1_prefix)
-    app.include_router(score_bets_router.router, prefix=v1_prefix)
-    app.include_router(teams_router.router, prefix=v1_prefix)
-    app.include_router(users_router.router, prefix=v1_prefix)
+    app.include_router(bets_router, prefix=v1_prefix)
+    app.include_router(binary_bets_router, prefix=v1_prefix)
+    app.include_router(groups_router, prefix=v1_prefix)
+    app.include_router(phases_router, prefix=v1_prefix)
+    app.include_router(results_router, prefix=v1_prefix)
+    app.include_router(rules_router, prefix=v1_prefix)
+    app.include_router(score_bets_router, prefix=v1_prefix)
+    app.include_router(teams_router, prefix=v1_prefix)
+    app.include_router(users_router, prefix=v1_prefix)
 
     # Set error handler
     set_exception_handler(app)

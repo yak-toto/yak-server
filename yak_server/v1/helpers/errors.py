@@ -1,11 +1,6 @@
 import logging
-import traceback
-from typing import TYPE_CHECKING
 
-from fastapi import HTTPException, Request, status
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi import status
 
 from yak_server.helpers.errors import (
     EXPIRED_TOKEN_MESSAGE,
@@ -22,14 +17,12 @@ from yak_server.helpers.errors import (
     team_not_found_message,
     user_not_found_message,
 )
-
-if TYPE_CHECKING:
-    from fastapi import FastAPI
+from yak_server.helpers.exception_handler import APIVersion1Error
 
 logger = logging.getLogger(__name__)
 
 
-class InvalidCredentials(HTTPException):
+class InvalidCredentials(APIVersion1Error):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -37,7 +30,7 @@ class InvalidCredentials(HTTPException):
         )
 
 
-class NameAlreadyExists(HTTPException):
+class NameAlreadyExists(APIVersion1Error):
     def __init__(self, name: str) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -45,7 +38,7 @@ class NameAlreadyExists(HTTPException):
         )
 
 
-class BetNotFound(HTTPException):
+class BetNotFound(APIVersion1Error):
     def __init__(self, bet_id: str) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -53,7 +46,7 @@ class BetNotFound(HTTPException):
         )
 
 
-class UnsatisfiedPasswordRequirements(HTTPException):
+class UnsatisfiedPasswordRequirements(APIVersion1Error):
     def __init__(self, detail: str) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -61,7 +54,7 @@ class UnsatisfiedPasswordRequirements(HTTPException):
         )
 
 
-class UserNotFound(HTTPException):
+class UserNotFound(APIVersion1Error):
     def __init__(self, user_id: str) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -69,7 +62,7 @@ class UserNotFound(HTTPException):
         )
 
 
-class UnauthorizedAccessToAdminAPI(HTTPException):
+class UnauthorizedAccessToAdminAPI(APIVersion1Error):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -77,7 +70,7 @@ class UnauthorizedAccessToAdminAPI(HTTPException):
         )
 
 
-class InvalidTeamId(HTTPException):
+class InvalidTeamId(APIVersion1Error):
     def __init__(self, team_id: str) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -85,7 +78,7 @@ class InvalidTeamId(HTTPException):
         )
 
 
-class TeamNotFound(HTTPException):
+class TeamNotFound(APIVersion1Error):
     def __init__(self, team_id: str) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -93,17 +86,17 @@ class TeamNotFound(HTTPException):
         )
 
 
-class LockedScoreBet(HTTPException):
+class LockedScoreBet(APIVersion1Error):
     def __init__(self) -> None:
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=LOCKED_SCORE_BET_MESSAGE)
 
 
-class LockedBinaryBet(HTTPException):
+class LockedBinaryBet(APIVersion1Error):
     def __init__(self) -> None:
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=LOCKED_BINARY_BET_MESSAGE)
 
 
-class NoResultsForAdminUser(HTTPException):
+class NoResultsForAdminUser(APIVersion1Error):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -111,7 +104,7 @@ class NoResultsForAdminUser(HTTPException):
         )
 
 
-class GroupNotFound(HTTPException):
+class GroupNotFound(APIVersion1Error):
     def __init__(self, group_id: str) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -119,7 +112,7 @@ class GroupNotFound(HTTPException):
         )
 
 
-class PhaseNotFound(HTTPException):
+class PhaseNotFound(APIVersion1Error):
     def __init__(self, phase_id: str) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -127,65 +120,19 @@ class PhaseNotFound(HTTPException):
         )
 
 
-class InvalidToken(HTTPException):
+class InvalidToken(APIVersion1Error):
     def __init__(self) -> None:
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=INVALID_TOKEN_MESSAGE)
 
 
-class ExpiredToken(HTTPException):
+class ExpiredToken(APIVersion1Error):
     def __init__(self) -> None:
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=EXPIRED_TOKEN_MESSAGE)
 
 
-class RuleNotFound(HTTPException):
+class RuleNotFound(APIVersion1Error):
     def __init__(self, rule_id: str) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=rule_not_found_message(rule_id),
-        )
-
-
-def set_exception_handler(app: "FastAPI") -> None:
-    @app.exception_handler(StarletteHTTPException)
-    def http_exception_handler(_: Request, http_exception: StarletteHTTPException) -> JSONResponse:
-        return JSONResponse(
-            status_code=http_exception.status_code,
-            content={
-                "ok": False,
-                "error_code": http_exception.status_code,
-                "description": http_exception.detail,
-            },
-        )
-
-    @app.exception_handler(Exception)
-    def handle_exception(_: Request, exception: Exception) -> JSONResponse:  # pragma: no cover
-        # Return JSON instead of HTML for generic errors.
-        logger.error(traceback.format_exc())
-        logger.error(f"An unexpected exception occurs: {type(exception).__name__} {exception}")
-
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "ok": False,
-                "error_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "description": (
-                    f"{type(exception).__name__}: {exception!s}"
-                    if app.debug
-                    else "Unexpected error"
-                ),
-            },
-        )
-
-    @app.exception_handler(RequestValidationError)
-    def request_validator_error_handler(
-        _: Request,
-        request_validator_error: RequestValidationError,
-    ) -> JSONResponse:
-        return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            content={
-                "ok": False,
-                "error_code": status.HTTP_422_UNPROCESSABLE_ENTITY,
-                "description": request_validator_error.errors(),
-            },
         )
