@@ -1,16 +1,27 @@
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
 import pendulum
+from fastapi import Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jwt import ExpiredSignatureError, PyJWTError
 from jwt import decode as jwt_decode
 from jwt import encode as jwt_encode
 from sqlalchemy.orm import Session
 
 from yak_server.database.models import MatchModel, MatchReferenceModel, ScoreBetModel, UserModel
 
-from .errors import name_already_exists_message
+from .database import get_db
+from .errors import (
+    ExpiredToken,
+    InvalidToken,
+    NameAlreadyExistsError,
+    UnauthorizedAccessToAdminAPI,
+    UserNotFound,
+)
 from .group_position import create_group_position
 from .password_validator import validate_password
+from .settings import Settings, get_settings
 
 
 def encode_bearer_token(
@@ -31,11 +42,6 @@ def encode_bearer_token(
 
 def decode_bearer_token(token: str, secret_key: str) -> dict[str, Any]:
     return jwt_decode(token, secret_key, algorithms=["HS512"])
-
-
-class NameAlreadyExistsError(Exception):
-    def __init__(self, name: str) -> None:
-        super().__init__(name_already_exists_message(name))
 
 
 def signup_user(
@@ -76,5 +82,47 @@ def signup_user(
         )
     )
     db.commit()
+
+    return user
+
+
+security = HTTPBearer(auto_error=False)
+
+
+def user_from_token(db: Session, secret_key: str, token: str) -> UserModel:
+    try:
+        data = decode_bearer_token(token, secret_key)
+    except ExpiredSignatureError as exc:
+        raise ExpiredToken from exc
+    except PyJWTError as exc:
+        raise InvalidToken from exc
+
+    user = db.query(UserModel).filter_by(id=data["sub"]).first()
+    if not user:
+        raise UserNotFound(data["sub"])
+
+    return user
+
+
+def get_current_user(
+    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    db: Annotated[Session, Depends(get_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> UserModel:
+    if token is None:
+        raise InvalidToken
+
+    return user_from_token(db, settings.jwt_secret_key, token.credentials)
+
+
+def get_admin_user(
+    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    db: Annotated[Session, Depends(get_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> UserModel:
+    user = get_current_user(token, db, settings)
+
+    if user.name != "admin":
+        raise UnauthorizedAccessToAdminAPI
 
     return user

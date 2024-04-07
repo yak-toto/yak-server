@@ -19,12 +19,14 @@ from .v1.routers import teams as teams_router
 from .v1.routers import users as users_router
 from .v2 import get_schema
 from .v2.context import get_context
+from .v3.endpoints import router as v3_router
 
 logger = logging.getLogger(__name__)
 
 GLOBAL_ENDPOINT = "api"
 VERSION1 = "v1"
 VERSION2 = "v2"
+VERSION3 = "v3"
 
 __version__ = "0.45.3"
 
@@ -89,5 +91,34 @@ def create_app() -> FastAPI:
 
     if app.debug and profiling:
         set_yappi_profiler(app)
+
+    return app
+
+
+def create_app_v3() -> FastAPI:
+    # Initialize fastapi application
+    config = Config()
+
+    app = FastAPI(
+        debug=config.debug,
+        docs_url=f"/{GLOBAL_ENDPOINT}/docs",
+        redoc_url=f"/{GLOBAL_ENDPOINT}/redoc",
+        openapi_url=f"/{GLOBAL_ENDPOINT}/openapi.json",
+    )
+
+    # Register version 3 endpoint
+    app.include_router(v3_router, prefix=f"/{GLOBAL_ENDPOINT}/{VERSION3}")
+
+    # Set error handler
+    set_exception_handler(app)
+
+    # Set CORS
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     return app
