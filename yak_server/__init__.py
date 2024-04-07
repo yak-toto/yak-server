@@ -5,9 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from strawberry.fastapi import GraphQLRouter
 
+from .helpers.exception_handler import set_exception_handler
 from .helpers.logging import setup_logging
 from .helpers.profiling import set_yappi_profiler
-from .v1.helpers.errors import set_exception_handler
+from .v1.helpers.errors import set_exception_handler as set_exception_handler_v1
 from .v1.routers import bets as bets_router
 from .v1.routers import binary_bets as binary_bets_router
 from .v1.routers import groups as groups_router
@@ -62,6 +63,7 @@ def create_app() -> FastAPI:
 
     # Set error handler
     set_exception_handler(app)
+    set_exception_handler_v1(app)
 
     # Register graphql endpoint
     graphql_app = GraphQLRouter(

@@ -105,6 +105,7 @@ max-complexity = 11
 "tests/*" = ["S101"]
 "testing/*" = ["S101"]
 "scripts/*" = ["T201"]
+"yak_server/v1/helpers/errors.py" = ["N818"]
 
 [tool.pytest.ini_options]
 log_file = "yak_test.log"
