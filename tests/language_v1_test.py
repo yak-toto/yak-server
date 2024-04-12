@@ -105,6 +105,7 @@ def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.Monkey
                 "input": "de",
                 "loc": ["query", "lang"],
                 "msg": "Input should be 'fr' or 'en'",
+                "url": "https://errors.pydantic.dev/2.7/v/enum",
             },
         ],
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
