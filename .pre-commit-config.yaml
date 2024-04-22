@@ -18,12 +18,12 @@ repos:
       - id: name-tests-test
 
   - repo: https://github.com/bwhmather/ssort
-    rev: 0.12.4
+    rev: 0.13.0
     hooks:
       - id: ssort
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.3.7
+    rev: v0.4.1
     hooks:
       - id: ruff
         args: [--exit-non-zero-on-fix]
@@ -52,6 +52,6 @@ repos:
         args: [--autofix, --indent, "4", --trailing-commas, --no-sort]
 
   - repo: https://github.com/crate-ci/typos
-    rev: v1.20.8
+    rev: v1.20.9
     hooks:
       - id: typos
