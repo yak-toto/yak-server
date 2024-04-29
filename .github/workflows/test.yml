@@ -17,6 +17,11 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        # for whatever reason, beautifulsoup does not find lxml with macos and python 3.8
+        # please uncomment when it's back
+        exclude:
+          - os: macos-latest
+            python-version: "3.8"
 
     name: Python ${{ matrix.python-version }} - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}

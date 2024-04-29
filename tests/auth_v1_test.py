@@ -261,14 +261,12 @@ def test_invalid_signup_body(client: "TestClient") -> None:
                     "last_name": last_name,
                     "passwor": password,
                 },
-                "url": ANY,
             },
             {
                 "type": "extra_forbidden",
                 "loc": ["body", "passwor"],
                 "msg": "Extra inputs are not permitted",
                 "input": password,
-                "url": ANY,
             },
         ],
     }
@@ -296,14 +294,12 @@ def test_invalid_login_body(client: "TestClient") -> None:
                 "loc": ["body", "name"],
                 "msg": "Field required",
                 "input": {"nme": user_name, "password": password},
-                "url": ANY,
             },
             {
                 "type": "extra_forbidden",
                 "loc": ["body", "nme"],
                 "msg": "Extra inputs are not permitted",
                 "input": user_name,
-                "url": ANY,
             },
         ],
     }
