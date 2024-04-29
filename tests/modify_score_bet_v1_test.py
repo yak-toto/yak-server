@@ -1,7 +1,6 @@
 from http import HTTPStatus
 from secrets import SystemRandom, randbelow
 from typing import TYPE_CHECKING
-from unittest.mock import ANY
 from uuid import uuid4
 
 import pendulum
@@ -148,7 +147,6 @@ def test_modify_score_bet(
                 "msg": "Input should be greater than or equal to 0",
                 "input": -1,
                 "ctx": {"ge": 0},
-                "url": ANY,
             },
         ],
     }
