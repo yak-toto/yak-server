@@ -23,7 +23,7 @@ repos:
       - id: ssort
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.1
+    rev: v0.4.2
     hooks:
       - id: ruff
         args: [--exit-non-zero-on-fix]
@@ -52,6 +52,6 @@ repos:
         args: [--autofix, --indent, "4", --trailing-commas, --no-sort]
 
   - repo: https://github.com/crate-ci/typos
-    rev: v1.20.9
+    rev: v1.20.10
     hooks:
       - id: typos
