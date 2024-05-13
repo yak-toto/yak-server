@@ -63,12 +63,12 @@ def initialize_database(app: "FastAPI") -> None:
     with SessionLocal() as db:
         data_folder = get_settings().data_folder
 
-        phases = json.loads(Path(data_folder, "phases.json").read_text())
+        phases = json.loads(Path(data_folder, "phases.json").read_text(encoding="utf-8"))
 
         db.add_all(PhaseModel(**phase) for phase in phases)
         db.flush()
 
-        groups = json.loads(Path(data_folder, "groups.json").read_text())
+        groups = json.loads(Path(data_folder, "groups.json").read_text(encoding="utf-8"))
 
         for group in groups:
             phase = db.query(PhaseModel).filter_by(code=group.pop("phase_code")).first()
@@ -77,7 +77,7 @@ def initialize_database(app: "FastAPI") -> None:
         db.add_all(GroupModel(**group) for group in groups)
         db.flush()
 
-        teams = json.loads(Path(data_folder, "teams.json").read_text())
+        teams = json.loads(Path(data_folder, "teams.json").read_text(encoding="utf-8"))
 
         for team in teams:
             team["flag_url"] = ""
@@ -92,7 +92,7 @@ def initialize_database(app: "FastAPI") -> None:
             )
             db.flush()
 
-        matches = json.loads(Path(data_folder, "matches.json").read_text())
+        matches = json.loads(Path(data_folder, "matches.json").read_text(encoding="utf-8"))
 
         for match in matches:
             team1_code = match.pop("team1_code")
