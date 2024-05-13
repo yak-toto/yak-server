@@ -25,7 +25,8 @@ class RuleNotDefinedError(Exception):
 
 def write_env_file(env: dict, filename: str) -> None:
     Path(filename).write_text(
-        "".join([f"{env_var}={env_value}\n" for env_var, env_value in env.items()])
+        "".join([f"{env_var}={env_value}\n" for env_var, env_value in env.items()]),
+        encoding="utf-8",
     )
 
 
