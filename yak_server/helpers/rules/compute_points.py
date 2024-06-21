@@ -140,7 +140,7 @@ def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> Set
     )
 
 
-def winner_from_user(db: "Session", user: UserModel) ->  Set[UUID]:
+def winner_from_user(db: "Session", user: UserModel) -> Set[UUID]:
     finale_bet = next(
         iter(
             db.query(BinaryBetModel)
