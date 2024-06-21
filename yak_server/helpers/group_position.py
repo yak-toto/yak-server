@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, List
 
 from sqlalchemy import and_, update
+from sqlalchemy.orm import Query
 
 from yak_server.database.models import GroupPositionModel, MatchModel, ScoreBetModel
 
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
     from yak_server.database.models import UserModel
 
 
-def create_group_position(score_bets: List["ScoreBetModel"]) -> List[GroupPositionModel]:
+def create_group_position(score_bets: "Query[ScoreBetModel]") -> List[GroupPositionModel]:
     team_ids = []
 
     group_positions = []
@@ -52,8 +53,8 @@ class GroupPosition:
 
 
 def compute_group_rank(
-    group_rank: List[GroupPositionModel],
-    score_bets: List["ScoreBetModel"],
+    group_rank: Query[GroupPositionModel],
+    score_bets: Query["ScoreBetModel"],
 ) -> List[GroupPositionModel]:
     new_group_position = {}
 
@@ -107,7 +108,7 @@ def compute_group_rank(
 def get_group_rank_with_code(
     db: "Session",
     user: "UserModel",
-    group_id: str,
+    group_id: "UUID",
 ) -> List[GroupPositionModel]:
     group_rank = db.query(GroupPositionModel).filter_by(group_id=group_id, user_id=user.id)
 
@@ -128,12 +129,12 @@ def get_group_rank_with_code(
         .filter(and_(MatchModel.user_id == user.id, MatchModel.group_id == group_id))
     )
 
-    group_rank = compute_group_rank(group_rank, score_bets)
+    group_rank_list = compute_group_rank(group_rank, score_bets)
 
     db.commit()
 
     return sorted(
-        group_rank,
+        group_rank_list,
         key=lambda team_result: (
             team_result.points,
             team_result.goals_difference,
