@@ -123,7 +123,7 @@ def backup_database() -> None:
     setup_logging(debug=False)
 
     result = subprocess.run(
-        [  # noqa: S603, S607
+        [  # noqa: S607
             "mysqldump",
             mysql_settings.db,
             "-u",
