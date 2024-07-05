@@ -106,9 +106,12 @@ max-complexity = 11
 "testing/*" = ["S101"]
 "scripts/*" = ["T201"]
 
+<<<<<<< HEAD
 [tool.ruff.lint.pylint]
 max-args = 6
 
+=======
+>>>>>>> d0d8fa5 (mypy)
 [tool.mypy]
 strict = true
 pretty = true
