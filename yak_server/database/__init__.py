@@ -3,7 +3,7 @@ from functools import lru_cache
 import pymysql
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 
 class MySQLSettings(BaseSettings):
@@ -51,4 +51,6 @@ SQLALCHEMY_DATABASE_URL = compute_database_uri(
 engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_recycle=7200, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    pass

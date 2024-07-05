@@ -1,6 +1,6 @@
 from enum import Enum
-from typing import TYPE_CHECKING
-from uuid import uuid4
+from typing import TYPE_CHECKING, Optional, Tuple, Union
+from uuid import UUID, uuid4
 
 import sqlalchemy as sa
 from argon2 import PasswordHasher
@@ -8,7 +8,7 @@ from argon2.exceptions import VerificationError
 from sqlalchemy import CheckConstraint
 from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy_utils import UUIDType
 
 from . import Base
@@ -21,61 +21,63 @@ ph = PasswordHasher()
 
 class UserModel(Base):
     __tablename__ = "user"
-    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
-    name = sa.Column(sa.String(100), unique=True, nullable=False)
-    first_name = sa.Column(sa.String(100), nullable=False)
-    last_name = sa.Column(sa.String(100), nullable=False)
+    id: Mapped[UUID] = mapped_column(
+        UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4
+    )
+    name: Mapped[str] = mapped_column(sa.String(100), unique=True, nullable=False)
+    first_name: Mapped[str] = mapped_column(sa.String(100), nullable=False)
+    last_name: Mapped[str] = mapped_column(sa.String(100), nullable=False)
 
-    password = sa.Column(sa.String(100), nullable=False)
-    number_match_guess = sa.Column(
+    password: Mapped[str] = mapped_column(sa.String(100), nullable=False)
+    number_match_guess: Mapped[int] = mapped_column(
         sa.Integer,
         CheckConstraint("number_match_guess>=0"),
         nullable=False,
         default=0,
     )
-    number_score_guess = sa.Column(
+    number_score_guess: Mapped[int] = mapped_column(
         sa.Integer,
         CheckConstraint("number_score_guess>=0"),
         nullable=False,
         default=0,
     )
-    number_qualified_teams_guess = sa.Column(
+    number_qualified_teams_guess: Mapped[int] = mapped_column(
         sa.Integer,
         CheckConstraint("number_qualified_teams_guess>=0"),
         nullable=False,
         default=0,
     )
-    number_first_qualified_guess = sa.Column(
+    number_first_qualified_guess: Mapped[int] = mapped_column(
         sa.Integer,
         CheckConstraint("number_first_qualified_guess>=0"),
         nullable=False,
         default=0,
     )
-    number_quarter_final_guess = sa.Column(
+    number_quarter_final_guess: Mapped[int] = mapped_column(
         sa.Integer,
         CheckConstraint("number_quarter_final_guess>=0"),
         nullable=False,
         default=0,
     )
-    number_semi_final_guess = sa.Column(
+    number_semi_final_guess: Mapped[int] = mapped_column(
         sa.Integer,
         CheckConstraint("number_semi_final_guess>=0"),
         nullable=False,
         default=0,
     )
-    number_final_guess = sa.Column(
+    number_final_guess: Mapped[int] = mapped_column(
         sa.Integer,
         CheckConstraint("number_final_guess>=0"),
         nullable=False,
         default=0,
     )
-    number_winner_guess = sa.Column(
+    number_winner_guess: Mapped[int] = mapped_column(
         sa.Integer,
         CheckConstraint("number_winner_guess>=0"),
         nullable=False,
         default=0,
     )
-    points = sa.Column(
+    points: Mapped[float] = mapped_column(
         sa.Float,
         CheckConstraint("points>=0"),
         nullable=False,
@@ -101,13 +103,11 @@ class UserModel(Base):
         return f"{self.first_name} {self.last_name}"
 
     @classmethod
-    def authenticate(cls, db: "Session", name: str, password: str) -> "UserModel":
+    def authenticate(cls, db: "Session", name: str, password: str) -> Optional["UserModel"]:
         user = db.query(cls).filter_by(name=name).first()
 
-        is_correct_username = bool(user)
-
         try:
-            if is_correct_username:
+            if user is not None:
                 ph.verify(user.password, password)
             else:
                 # verify password with itself to avoid timing attack
@@ -116,7 +116,7 @@ class UserModel(Base):
         except VerificationError:
             is_correct_password = False
 
-        return user if is_correct_username and is_correct_password else None
+        return user if user is not None and is_correct_password else None
 
     def change_password(self, new_password: str) -> None:
         self.password = ph.hash(new_password)
@@ -124,15 +124,21 @@ class UserModel(Base):
 
 class ScoreBetModel(Base):
     __tablename__ = "score_bet"
-    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
+    id: Mapped[UUID] = mapped_column(
+        UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4
+    )
 
-    match_id = sa.Column(
+    match_id: Mapped[UUID] = mapped_column(
         UUIDType(binary=False), sa.ForeignKey("match.id", ondelete="CASCADE"), nullable=False
     )
     match = relationship("MatchModel", back_populates="score_bets")
 
-    score1 = sa.Column(sa.Integer, CheckConstraint("score1>=0"), default=None)
-    score2 = sa.Column(sa.Integer, CheckConstraint("score2>=0"), default=None)
+    score1: Mapped[Optional[int]] = mapped_column(
+        sa.Integer, CheckConstraint("score1>=0"), default=None
+    )
+    score2: Mapped[Optional[int]] = mapped_column(
+        sa.Integer, CheckConstraint("score2>=0"), default=None
+    )
 
     def is_invalid(self) -> bool:
         return None in (self.score1, self.score2)
@@ -167,16 +173,18 @@ class ScoreBetModel(Base):
 
 class BinaryBetModel(Base):
     __tablename__ = "binary_bet"
-    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
+    id: Mapped[UUID] = mapped_column(
+        UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4
+    )
 
-    match_id = sa.Column(
+    match_id: Mapped[UUID] = mapped_column(
         UUIDType(binary=False), sa.ForeignKey("match.id", ondelete="CASCADE"), nullable=False
     )
     match = relationship("MatchModel", back_populates="binary_bets")
 
-    is_one_won = sa.Column(sa.Boolean, default=None)
+    is_one_won: Mapped[Optional[bool]] = mapped_column(sa.Boolean, default=None)
 
-    def bet_from_is_one_won(self) -> tuple:
+    def bet_from_is_one_won(self) -> Union[Tuple[bool, bool], Tuple[None, None]]:
         if self.is_one_won is None:
             return (None, None)
 
@@ -190,37 +198,53 @@ class BetMapping(Enum):
 
 class MatchReferenceModel(Base):
     __tablename__ = "match_reference"
-    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
+    id: Mapped[UUID] = mapped_column(
+        UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4
+    )
 
-    group_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("group.id"), nullable=False)
+    group_id: Mapped[UUID] = mapped_column(
+        UUIDType(binary=False), sa.ForeignKey("group.id"), nullable=False
+    )
 
-    index = sa.Column(sa.Integer, nullable=False)
+    index: Mapped[int] = mapped_column(sa.Integer, nullable=False)
 
-    team1_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("team.id"), nullable=True)
-    team2_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("team.id"), nullable=True)
+    team1_id: Mapped[Optional[UUID]] = mapped_column(
+        UUIDType(binary=False), sa.ForeignKey("team.id"), nullable=True
+    )
+    team2_id: Mapped[Optional[UUID]] = mapped_column(
+        UUIDType(binary=False), sa.ForeignKey("team.id"), nullable=True
+    )
 
-    bet_type_from_match = sa.Column(SqlEnum(BetMapping), nullable=False)
+    bet_type_from_match: Mapped[BetMapping] = mapped_column(SqlEnum(BetMapping), nullable=False)
 
 
 class MatchModel(Base):
     __tablename__ = "match"
-    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
+    id: Mapped[UUID] = mapped_column(
+        UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4
+    )
 
-    group_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("group.id"), nullable=False)
+    group_id: Mapped[UUID] = mapped_column(
+        UUIDType(binary=False), sa.ForeignKey("group.id"), nullable=False
+    )
     group = relationship("GroupModel", foreign_keys=group_id, backref="matches")
 
-    index = sa.Column(sa.Integer, nullable=False)
+    index: Mapped[int] = mapped_column(sa.Integer, nullable=False)
 
-    team1_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("team.id"), nullable=True)
-    team1 = relationship("TeamModel", foreign_keys=team1_id)
+    team1_id: Mapped[Optional[UUID]] = mapped_column(
+        UUIDType(binary=False), sa.ForeignKey("team.id"), nullable=True
+    )
+    team1: Mapped[Optional["TeamModel"]] = relationship("TeamModel", foreign_keys=team1_id)
 
-    team2_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("team.id"), nullable=True)
-    team2 = relationship("TeamModel", foreign_keys=team2_id)
+    team2_id: Mapped[Optional[UUID]] = mapped_column(
+        UUIDType(binary=False), sa.ForeignKey("team.id"), nullable=True
+    )
+    team2: Mapped[Optional["TeamModel"]] = relationship("TeamModel", foreign_keys=team2_id)
 
-    user_id = sa.Column(
+    user_id: Mapped[UUID] = mapped_column(
         UUIDType(binary=False), sa.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
-    user = relationship("UserModel", foreign_keys=user_id)
+    user: Mapped[UserModel] = relationship("UserModel", foreign_keys=user_id)
 
     score_bets = relationship(
         "ScoreBetModel",
@@ -240,65 +264,83 @@ class MatchModel(Base):
 
 class TeamModel(Base):
     __tablename__ = "team"
-    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
-    code = sa.Column(sa.String(10), unique=True, nullable=False)
-    description_fr = sa.Column(sa.String(100), unique=True, nullable=False)
-    description_en = sa.Column(sa.String(100), unique=True, nullable=False)
-    flag_url = sa.Column(sa.String(100), nullable=False)
-    internal_flag_url = sa.Column(sa.String(300), nullable=False)
+    id: Mapped[UUID] = mapped_column(
+        UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4
+    )
+    code: Mapped[str] = mapped_column(sa.String(10), unique=True, nullable=False)
+    description_fr: Mapped[str] = mapped_column(sa.String(100), unique=True, nullable=False)
+    description_en: Mapped[str] = mapped_column(sa.String(100), unique=True, nullable=False)
+    flag_url: Mapped[str] = mapped_column(sa.String(100), nullable=False)
+    internal_flag_url: Mapped[str] = mapped_column(sa.String(300), nullable=False)
 
 
 class GroupModel(Base):
     __tablename__ = "group"
-    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
-    code = sa.Column(sa.String(1), primary_key=True, unique=True, nullable=False)
-    description_fr = sa.Column(sa.String(100), unique=True, nullable=False)
-    description_en = sa.Column(sa.String(100), unique=True, nullable=False)
-    index = sa.Column(sa.Integer, nullable=False)
+    id: Mapped[UUID] = mapped_column(
+        UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4
+    )
+    code: Mapped[str] = mapped_column(sa.String(1), primary_key=True, unique=True, nullable=False)
+    description_fr: Mapped[str] = mapped_column(sa.String(100), unique=True, nullable=False)
+    description_en: Mapped[str] = mapped_column(sa.String(100), unique=True, nullable=False)
+    index: Mapped[int] = mapped_column(sa.Integer, nullable=False)
 
-    phase_id = sa.Column(UUIDType(binary=False), sa.ForeignKey("phase.id"), nullable=False)
-    phase = relationship("PhaseModel", backref="groups")
+    phase_id: Mapped[UUID] = mapped_column(
+        UUIDType(binary=False), sa.ForeignKey("phase.id"), nullable=False
+    )
+    phase: Mapped["PhaseModel"] = relationship("PhaseModel", backref="groups")
 
 
 class PhaseModel(Base):
     __tablename__ = "phase"
-    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
-    code = sa.Column(sa.String(10), primary_key=True, unique=True, nullable=False)
-    description_fr = sa.Column(sa.String(100), nullable=False)
-    description_en = sa.Column(sa.String(100), nullable=False)
-    index = sa.Column(sa.Integer, nullable=False)
+    id: Mapped[UUID] = mapped_column(
+        UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4
+    )
+    code: Mapped[str] = mapped_column(sa.String(10), primary_key=True, unique=True, nullable=False)
+    description_fr: Mapped[str] = mapped_column(sa.String(100), nullable=False)
+    description_en: Mapped[str] = mapped_column(sa.String(100), nullable=False)
+    index: Mapped[int] = mapped_column(sa.Integer, nullable=False)
 
 
 class GroupPositionModel(Base):
     __tablename__ = "group_position"
-    id = sa.Column(UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4)
-    won = sa.Column(sa.Integer, CheckConstraint("won>=0"), nullable=False, default=0)
-    drawn = sa.Column(sa.Integer, CheckConstraint("drawn>=0"), nullable=False, default=0)
-    lost = sa.Column(sa.Integer, CheckConstraint("lost>=0"), nullable=False, default=0)
-    goals_for = sa.Column(sa.Integer, CheckConstraint("goals_for>=0"), nullable=False, default=0)
-    goals_against = sa.Column(
+    id: Mapped[UUID] = mapped_column(
+        UUIDType(binary=False), primary_key=True, nullable=False, default=uuid4
+    )
+    won: Mapped[int] = mapped_column(
+        sa.Integer, CheckConstraint("won>=0"), nullable=False, default=0
+    )
+    drawn: Mapped[int] = mapped_column(
+        sa.Integer, CheckConstraint("drawn>=0"), nullable=False, default=0
+    )
+    lost: Mapped[int] = mapped_column(
+        sa.Integer, CheckConstraint("lost>=0"), nullable=False, default=0
+    )
+    goals_for: Mapped[int] = mapped_column(
+        sa.Integer, CheckConstraint("goals_for>=0"), nullable=False, default=0
+    )
+    goals_against: Mapped[int] = mapped_column(
         sa.Integer,
         CheckConstraint("goals_against>=0"),
         nullable=False,
         default=0,
     )
 
-    need_recomputation = sa.Column(sa.Boolean, nullable=False, default=False)
+    need_recomputation: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, default=False)
 
-    user_id = sa.Column(
+    user_id: Mapped[UUID] = mapped_column(
         UUIDType(binary=False),
         sa.ForeignKey("user.id", ondelete="CASCADE"),
         nullable=False,
     )
 
-    team_id = sa.Column(
+    team_id: Mapped[UUID] = mapped_column(
         UUIDType(binary=False),
         sa.ForeignKey("team.id"),
         nullable=False,
     )
     team = relationship("TeamModel")
 
-    group_id = sa.Column(
+    group_id: Mapped[UUID] = mapped_column(
         UUIDType(binary=False),
         sa.ForeignKey("group.id"),
         nullable=False,
