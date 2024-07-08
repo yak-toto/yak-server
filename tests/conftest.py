@@ -63,14 +63,14 @@ def client(app: "FastAPI") -> TestClient:
     return TestClient(app)
 
 
-@pytest.fixture()
+@pytest.fixture
 def production_app() -> "FastAPI":
     os.environ["DEBUG"] = "0"
 
     return create_app()
 
 
-@pytest.fixture()
+@pytest.fixture
 def debug_app_with_profiler() -> Generator["FastAPI", None, None]:
     os.environ["PROFILING"] = "1"
     os.environ["DEBUG"] = "1"
@@ -90,7 +90,7 @@ def debug_app_with_profiler() -> Generator["FastAPI", None, None]:
     app.dependency_overrides = {}
 
 
-@pytest.fixture()
+@pytest.fixture
 def production_app_with_profiler() -> Generator["FastAPI", None, None]:
     os.environ["PROFILING"] = "1"
     os.environ["DEBUG"] = "0"
@@ -110,7 +110,7 @@ def production_app_with_profiler() -> Generator["FastAPI", None, None]:
     app.dependency_overrides = {}
 
 
-@pytest.fixture()
+@pytest.fixture
 def app_with_valid_jwt_config(app: "FastAPI") -> Generator["FastAPI", None, None]:
     fake_jwt_secret_key = get_random_string(15)
 
@@ -125,7 +125,7 @@ def app_with_valid_jwt_config(app: "FastAPI") -> Generator["FastAPI", None, None
     app.dependency_overrides = {}
 
 
-@pytest.fixture()
+@pytest.fixture
 def app_with_null_jwt_expiration_time(app: "FastAPI") -> Generator["FastAPI", None, None]:
     fake_jwt_secret_key = get_random_string(15)
 
@@ -140,7 +140,7 @@ def app_with_null_jwt_expiration_time(app: "FastAPI") -> Generator["FastAPI", No
     app.dependency_overrides = {}
 
 
-@pytest.fixture()
+@pytest.fixture
 def app_with_lock_datetime_in_past(app: "FastAPI") -> Generator["FastAPI", None, None]:
     fake_jwt_secret_key = get_random_string(15)
 
