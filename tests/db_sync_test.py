@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 runner = CliRunner()
 
 
-@pytest.fixture()
+@pytest.fixture
 def app_with_valid_jwt_config_function_scope(app_with_valid_jwt_config: "FastAPI") -> "FastAPI":
     yield app_with_valid_jwt_config
 
