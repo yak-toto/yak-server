@@ -23,7 +23,7 @@ repos:
       - id: ssort
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.1
+    rev: v0.5.2
     hooks:
       - id: ruff
         args: [--exit-non-zero-on-fix]
@@ -46,12 +46,12 @@ repos:
       - id: import-linter
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.13.0
+    rev: v2.14.0
     hooks:
       - id: pretty-format-toml
         args: [--autofix, --indent, "4", --trailing-commas, --no-sort]
 
   - repo: https://github.com/crate-ci/typos
-    rev: v1.23.1
+    rev: typos-v0.10.26
     hooks:
       - id: typos
