@@ -173,7 +173,9 @@ def synchronize_official_results() -> None:
     groups = [
         GroupContainer(model=group, content=content.parent.parent)
         for group in db.query(GroupModel).order_by(GroupModel.index)
-        for content in soup.find("span", string=group.description_en, class_="mw-headline")
+        for content in soup.find(
+            "h3", id=group.description_en.replace(" ", "_"), string=group.description_en
+        )
     ]
 
     matches = extract_matches_from_html(groups)
