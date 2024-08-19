@@ -20,7 +20,7 @@ from yak_server.helpers.authentication import (
 )
 from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.group_position import set_recomputation_flag
-from yak_server.helpers.logging import (
+from yak_server.helpers.logging_helpers import (
     logged_in_successfully,
     modify_binary_bet_successfully,
     modify_score_bet_successfully,

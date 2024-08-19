@@ -18,7 +18,7 @@ from yak_server.database.models import (
     TeamModel,
     UserModel,
 )
-from yak_server.helpers.logging import setup_logging
+from yak_server.helpers.logging_helpers import setup_logging
 from yak_server.helpers.rules.compute_points import compute_points as compute_points_func
 from yak_server.helpers.settings import get_settings
 from yak_server.v1.routers.users import signup_user
