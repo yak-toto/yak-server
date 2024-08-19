@@ -18,7 +18,7 @@ from yak_server.helpers.authentication import (
     signup_user,
 )
 from yak_server.helpers.database import get_db
-from yak_server.helpers.logging import (
+from yak_server.helpers.logging_helpers import (
     logged_in_successfully,
     modify_password_successfully,
     signed_up_successfully,

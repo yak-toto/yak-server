@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from strawberry.fastapi import GraphQLRouter
 
-from .helpers.logging import setup_logging
+from .helpers.logging_helpers import setup_logging
 from .helpers.profiling import set_yappi_profiler
 from .v1.helpers.errors import set_exception_handler
 from .v1.routers import bets as bets_router
