@@ -1,6 +1,8 @@
 from functools import wraps
+from typing import Any, Callable, Union
 
 from jwt import ExpiredSignatureError, PyJWTError
+from mypy_extensions import KwArg, NamedArg, VarArg
 from strawberry.types import Info
 
 from yak_server.database.models import UserModel
@@ -12,9 +14,17 @@ from .result import ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI
 NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
 
 
-def is_authenticated(f):  # noqa: ANN001, ANN201
+def is_authenticated(
+    f: Callable[
+        [VarArg(Any), NamedArg(Info[YakContext, None], "info"), KwArg(Any)],
+        Any,
+    ],
+) -> Callable[
+    [VarArg(Any), NamedArg(Info[YakContext, None], "info"), KwArg(Any)],
+    Union[InvalidToken, ExpiredToken, None],
+]:
     @wraps(f)
-    def _verify(*args, info: Info[YakContext, None], **kwargs):
+    def _verify(*args: Any, info: Info[YakContext, None], **kwargs: Any) -> Any:
         auth_headers = info.context.request.headers.get("Authorization", "").split()
         db = info.context.db
         settings = info.context.settings
@@ -41,9 +51,14 @@ def is_authenticated(f):  # noqa: ANN001, ANN201
     return _verify
 
 
-def is_admin_authenticated(f):  # noqa: ANN001, ANN201
+def is_admin_authenticated(
+    f: Callable[
+        [VarArg(Any), NamedArg(Info[YakContext, None], "info"), KwArg(Any)],
+        Any,
+    ],
+) -> Callable[[VarArg(Any), NamedArg(Info[YakContext, None], "info"), KwArg(Any)], Any]:
     @wraps(f)
-    def _verify(*args, info: Info[YakContext, None], **kwargs):
+    def _verify(*args: Any, info: Info[YakContext, None], **kwargs: Any) -> Any:
         user = info.context.user
 
         if user.name != "admin":
