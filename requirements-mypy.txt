@@ -1,8 +1,8 @@
-mypy==1.5.1
-types-colorama==0.4.15.12
-types-psycopg2==2.9.21.11
-types-Pygments==2.16.0.0
+mypy==1.11.2
+types-colorama==0.4.15.20240311
+types-psycopg2==2.9.21.20240819
+types-Pygments==2.18.0.20240506
 types-PyJWT==1.7.1
-types-PyMySQL==1.1.0.1
-types-python-dateutil==2.8.19.14
-types-ujson==5.8.0.1
+types-PyMySQL==1.1.0.20240524
+types-python-dateutil==2.9.0.20240906
+types-ujson==5.10.0.20240515
