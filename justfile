@@ -39,3 +39,6 @@ fmt:
 
 lint:
     pre-commit run -a ruff
+
+docker:
+    docker-compose up -d --build
