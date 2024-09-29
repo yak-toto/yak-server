@@ -1,0 +1,27 @@
+version: "3"
+services:
+  db:
+    container_name: mydb
+    image: mysql:latest
+    ports:
+      - "28056:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db
+    stdin_open: true
+    tty: true
+  app:
+    container_name: myapp
+    build: ./
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_PASSWORD=root
+      - MYSQL_USER_NAME=root
+      - MYSQL_PORT=3306
+      - MYSQL_DB=db
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    stdin_open: true
+    tty: true
