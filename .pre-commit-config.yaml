@@ -30,7 +30,7 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.17
+    rev: 0.7.18
     hooks:
       - id: mdformat
 
@@ -41,7 +41,7 @@ repos:
         types: [yaml]
 
   - repo: https://github.com/seddonym/import-linter
-    rev: v2.0
+    rev: v2.1
     hooks:
       - id: import-linter
 
