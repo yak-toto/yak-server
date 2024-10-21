@@ -1,6 +1,6 @@
-mypy==1.11.2
+mypy==1.12.1
 types-colorama==0.4.15.20240311
-types-psycopg2==2.9.21.20240819
+types-psycopg2==2.9.21.20241019
 types-Pygments==2.18.0.20240506
 types-PyJWT==1.7.1
 types-PyMySQL==1.1.0.20240524
