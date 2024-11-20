@@ -1,5 +1,6 @@
+from collections.abc import Awaitable
 from pathlib import Path
-from typing import TYPE_CHECKING, Awaitable, Callable
+from typing import TYPE_CHECKING, Callable
 from uuid import uuid4
 
 try:

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from pydantic import UUID4, BaseModel
 
@@ -45,8 +45,8 @@ class GroupWithPhaseIdOut(BaseModel):
 
 
 class AllGroupsResponse(BaseModel):
-    phases: List[PhaseOut]
-    groups: List[GroupWithPhaseIdOut]
+    phases: list[PhaseOut]
+    groups: list[GroupWithPhaseIdOut]
 
 
 class GroupResponse(BaseModel):
@@ -56,4 +56,4 @@ class GroupResponse(BaseModel):
 
 class GroupsByPhaseCodeResponse(BaseModel):
     phase: PhaseOut
-    groups: List[GroupOut]
+    groups: list[GroupOut]

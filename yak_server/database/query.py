@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING
 
 from sqlalchemy import and_
 
@@ -14,7 +14,7 @@ def bets_from_group_code(
     db: "Session",
     user: "UserModel",
     group_code: str,
-) -> Tuple[GroupModel, List[ScoreBetModel], List[BinaryBetModel]]:
+) -> tuple[GroupModel, list[ScoreBetModel], list[BinaryBetModel]]:
     group = db.query(GroupModel).filter_by(code=group_code).first()
 
     if not group:
@@ -41,7 +41,7 @@ def bets_from_phase_code(
     db: "Session",
     user: "UserModel",
     phase_code: str,
-) -> Tuple[PhaseModel, List[GroupModel], List[ScoreBetModel], List[BinaryBetModel]]:
+) -> tuple[PhaseModel, list[GroupModel], list[ScoreBetModel], list[BinaryBetModel]]:
     phase = db.query(PhaseModel).filter_by(code=phase_code).first()
 
     if not phase:

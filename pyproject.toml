@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "yak-server"
 description = "Football bet rest/graphql server"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "MIT"
 authors = [{name = "Guillaume Le Pape", email = "gui.lepape25@gmail.com"}]
 keywords = ["mysql", "api", "rest", "graphql"]
@@ -22,11 +22,11 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
     "Topic :: Internet :: WWW/HTTP",
 ]
@@ -71,7 +71,7 @@ exclude_lines = ["if TYPE_CHECKING:", "pragma: no cover"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py38"
+target-version = "py39"
 fix = true
 preview = true
 

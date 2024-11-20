@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import strawberry
@@ -321,7 +321,7 @@ class Query:
             db: "Session",
             user: UserModel,
             group: GroupModel,
-            group_rank: List[GroupPositionModel],
+            group_rank: list[GroupPositionModel],
             lock_datetime: "pendulum.DateTime",
         ) -> GroupRank:
             return GroupRank(
@@ -372,7 +372,7 @@ class Query:
             db: "Session",
             user: UserModel,
             group: GroupModel,
-            group_rank: List[GroupPositionModel],
+            group_rank: list[GroupPositionModel],
             lock_datetime: "pendulum.DateTime",
         ) -> GroupRank:
             return GroupRank(

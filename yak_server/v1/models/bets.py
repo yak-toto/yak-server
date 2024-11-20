@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel
 
 from .binary_bets import BinaryBetOut, BinaryBetWithGroupIdOut
@@ -10,27 +8,27 @@ from .score_bets import ScoreBetOut, ScoreBetWithGroupIdOut
 
 
 class AllBetsResponse(BaseModel):
-    phases: List[PhaseOut]
-    groups: List[GroupWithPhaseIdOut]
-    score_bets: List[ScoreBetWithGroupIdOut]
-    binary_bets: List[BinaryBetWithGroupIdOut]
+    phases: list[PhaseOut]
+    groups: list[GroupWithPhaseIdOut]
+    score_bets: list[ScoreBetWithGroupIdOut]
+    binary_bets: list[BinaryBetWithGroupIdOut]
 
 
 class BetsByPhaseCodeResponse(BaseModel):
     phase: PhaseOut
-    groups: List[GroupOut]
-    score_bets: List[ScoreBetWithGroupIdOut]
-    binary_bets: List[BinaryBetWithGroupIdOut]
+    groups: list[GroupOut]
+    score_bets: list[ScoreBetWithGroupIdOut]
+    binary_bets: list[BinaryBetWithGroupIdOut]
 
 
 class BetsByGroupCodeResponse(BaseModel):
     phase: PhaseOut
     group: GroupOut
-    score_bets: List[ScoreBetOut]
-    binary_bets: List[BinaryBetOut]
+    score_bets: list[ScoreBetOut]
+    binary_bets: list[BinaryBetOut]
 
 
 class GroupRankResponse(BaseModel):
     phase: PhaseOut
     group: GroupOut
-    group_rank: List[GroupPositionOut]
+    group_rank: list[GroupPositionOut]

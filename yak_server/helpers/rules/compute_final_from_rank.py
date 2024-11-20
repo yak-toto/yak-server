@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 from sqlalchemy import and_
@@ -26,7 +26,7 @@ class Versus(BaseModel):
 class RuleComputeFinaleFromGroupRank(BaseModel):
     to_group: str
     from_phase: str
-    versus: List[Versus]
+    versus: list[Versus]
 
 
 def compute_finale_phase_from_group_rank(

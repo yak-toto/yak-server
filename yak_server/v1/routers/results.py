@@ -1,11 +1,5 @@
-import sys
-from typing import List, Optional
+from typing import Annotated, Optional
 from uuid import UUID
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import func
@@ -25,7 +19,7 @@ router = APIRouter(tags=["results"])
 def retrieve_score_board(
     _: Annotated[UserModel, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
-) -> GenericOut[List[UserResult]]:
+) -> GenericOut[list[UserResult]]:
     return GenericOut(
         result=[
             UserResult.from_instance(user, rank=rank)

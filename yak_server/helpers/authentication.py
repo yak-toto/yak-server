@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 from uuid import UUID
 
 import pendulum
@@ -29,7 +29,7 @@ def encode_bearer_token(
     )
 
 
-def decode_bearer_token(token: str, secret_key: str) -> Dict[str, Any]:
+def decode_bearer_token(token: str, secret_key: str) -> dict[str, Any]:
     return jwt_decode(token, secret_key, algorithms=["HS512"])
 
 

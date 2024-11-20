@@ -1,6 +1,7 @@
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from itertools import chain
-from typing import TYPE_CHECKING, Dict, Iterable, List
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -32,13 +33,13 @@ class RuleComputePoints(BaseModel):
 @dataclass
 class ResultForScoreBet:
     number_correct_result: int = 0
-    user_ids_found_correct_result: List[UUID] = field(default_factory=list)
+    user_ids_found_correct_result: list[UUID] = field(default_factory=list)
     number_correct_score: int = 0
-    user_ids_found_correct_score: List[UUID] = field(default_factory=list)
+    user_ids_found_correct_score: list[UUID] = field(default_factory=list)
 
 
-def compute_results_for_score_bet(db: "Session", admin: UserModel) -> List[ResultForScoreBet]:
-    results: List[ResultForScoreBet] = []
+def compute_results_for_score_bet(db: "Session", admin: UserModel) -> list[ResultForScoreBet]:
+    results: list[ResultForScoreBet] = []
 
     for real_score in (
         db.query(ScoreBetModel).join(ScoreBetModel.match).filter(MatchModel.user_id == admin.id)
@@ -82,11 +83,9 @@ def all_results_filled_in_group(group_result: list) -> bool:
 
 
 def compute_results_for_group_rank(
-    db: "Session",
-    admin: UserModel,
-    other_users: Iterable[UserModel],
-) -> Dict[UUID, ResultForGroupRank]:
-    result_groups: Dict[UUID, ResultForGroupRank] = {}
+    db: "Session", admin: UserModel, other_users: Iterable[UserModel]
+) -> dict[UUID, ResultForGroupRank]:
+    result_groups: dict[UUID, ResultForGroupRank] = {}
 
     for group in (
         db.query(GroupModel)
@@ -161,7 +160,7 @@ def compute_points(db: "Session", admin: UserModel, rule_config: RuleComputePoin
 
     other_users = db.query(UserModel).filter(UserModel.name != "admin")
 
-    result_groups: Dict[UUID, ResultForGroupRank] = compute_results_for_group_rank(
+    result_groups: dict[UUID, ResultForGroupRank] = compute_results_for_group_rank(
         db,
         admin,
         other_users,
