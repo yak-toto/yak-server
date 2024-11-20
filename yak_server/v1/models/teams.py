@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from pydantic import UUID4, BaseModel, NonNegativeInt
 
@@ -34,7 +34,7 @@ class TeamOut(BaseModel):
 
 
 class AllTeamsResponse(BaseModel):
-    teams: List[TeamOut]
+    teams: list[TeamOut]
 
 
 class OneTeamResponse(BaseModel):

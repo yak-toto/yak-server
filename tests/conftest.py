@@ -1,5 +1,6 @@
 import os
-from typing import TYPE_CHECKING, Generator
+from collections.abc import Generator
+from typing import TYPE_CHECKING
 
 import pendulum
 import pymysql

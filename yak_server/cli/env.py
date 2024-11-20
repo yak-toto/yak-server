@@ -2,7 +2,6 @@ import json
 import secrets
 from enum import Enum
 from pathlib import Path
-from typing import Dict
 from uuid import UUID
 
 import pendulum
@@ -88,7 +87,7 @@ class EnvBuilder:
         self.env["DATA_FOLDER"] = data_folder
 
         # Load rules in environment
-        rules_list: Dict[str, dict] = {}
+        rules_list: dict[str, dict] = {}
 
         for rule_file in Path(data_folder, "rules").glob("*.json"):
             rule_id = UUID(rule_file.stem)

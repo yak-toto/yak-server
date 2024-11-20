@@ -1,7 +1,7 @@
 from copy import copy
 from http import HTTPStatus
 from secrets import SystemRandom, randbelow
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 import pendulum
 
@@ -95,7 +95,7 @@ def test_group_rank_and_modify_score_bet(
 
     score_bets = response_group_by_bet.json()["result"]["score_bets"]
 
-    teams: Dict[str, Any] = {}
+    teams: dict[str, Any] = {}
 
     default_config = {
         "won": 0,

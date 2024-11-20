@@ -1,6 +1,6 @@
 import warnings
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from sqlalchemy import and_
 
@@ -31,7 +31,7 @@ except ImportError:  # pragma: no cover
     lxml = None  # type: ignore[assignment]
 
 
-def parse_score(content: str) -> Tuple[int, int]:
+def parse_score(content: str) -> tuple[int, int]:
     try:
         scores = next(next(content.children).children)
     except AttributeError:
@@ -104,7 +104,7 @@ class Match:
     team2: Team
 
 
-def extract_matches_from_html(groups: List[GroupContainer]) -> List[Match]:
+def extract_matches_from_html(groups: list[GroupContainer]) -> list[Match]:
     matches = []
 
     for index, group in enumerate(groups, start=1):

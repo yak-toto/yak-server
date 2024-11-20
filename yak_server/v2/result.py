@@ -1,11 +1,4 @@
-import sys
-from typing import List, Union
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
-
+from typing import Annotated, Union
 from uuid import UUID
 
 import strawberry
@@ -120,7 +113,7 @@ CurrentUserResult = Annotated[
 
 @strawberry.type
 class AllTeamsSuccessful:
-    teams: List[Team]
+    teams: list[Team]
 
 
 AllTeamsResult = Annotated[
@@ -195,7 +188,7 @@ BinaryBetResult = Annotated[
 
 @strawberry.type
 class Groups:
-    groups: List[Group]
+    groups: list[Group]
 
 
 AllGroupsResult = Annotated[
@@ -240,7 +233,7 @@ GroupByIdResult = Annotated[
 
 @strawberry.type
 class Phases:
-    phases: List[Phase]
+    phases: list[Phase]
 
 
 AllPhasesResult = Annotated[
@@ -283,7 +276,7 @@ PhaseByIdResult = Annotated[
 
 @strawberry.type
 class ScoreBoard:
-    users: List[UserWithoutSensitiveInfo]
+    users: list[UserWithoutSensitiveInfo]
 
 
 ScoreBoardResult = Annotated[
@@ -324,7 +317,7 @@ LoginResult = Annotated[Union[UserWithToken, InvalidCredentials], strawberry.uni
 
 @strawberry.type
 class GroupRank:
-    group_rank: List[GroupPosition]
+    group_rank: list[GroupPosition]
     group: Group
 
 

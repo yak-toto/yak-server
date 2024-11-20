@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
 
 import pendulum
@@ -164,7 +164,7 @@ class GroupPosition:
         )
 
 
-def send_group_position(group_rank: List[GroupPositionModel]) -> List[GroupPosition]:
+def send_group_position(group_rank: list[GroupPositionModel]) -> list[GroupPosition]:
     return sorted(
         [GroupPosition.from_instance(group_position) for group_position in group_rank],
         key=lambda team: (
@@ -188,7 +188,7 @@ class Group:
     description: str
 
     @strawberry.field
-    def group_rank(self) -> List[GroupPosition]:
+    def group_rank(self) -> list[GroupPosition]:
         group_rank = self.db.query(GroupPositionModel).filter_by(
             user_id=self.user.id,
             group_id=self.id,
@@ -217,7 +217,7 @@ class Group:
         )
 
     @strawberry.field
-    def score_bets(self) -> List["ScoreBet"]:
+    def score_bets(self) -> list["ScoreBet"]:
         return [
             ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
             for score_bet in (
@@ -233,7 +233,7 @@ class Group:
         ]
 
     @strawberry.field
-    def binary_bets(self) -> List["BinaryBet"]:
+    def binary_bets(self) -> list["BinaryBet"]:
         return [
             BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
             for binary_bet in (
@@ -364,7 +364,7 @@ class Phase:
     description: str
 
     @strawberry.field
-    def groups(self) -> List[Group]:
+    def groups(self) -> list[Group]:
         return [
             Group.from_instance(group, db=self.db, user=self.user, lock_datetime=self.lock_datetime)
             for group in self.db.query(GroupModel)
@@ -375,7 +375,7 @@ class Phase:
         ]
 
     @strawberry.field
-    def binary_bets(self) -> List["BinaryBet"]:
+    def binary_bets(self) -> list["BinaryBet"]:
         return [
             BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
             for binary_bet in self.db.query(BinaryBetModel)
@@ -389,7 +389,7 @@ class Phase:
         ]
 
     @strawberry.field
-    def score_bets(self) -> List["ScoreBet"]:
+    def score_bets(self) -> list["ScoreBet"]:
         return [
             ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
             for score_bet in self.db.query(ScoreBetModel)
@@ -440,7 +440,7 @@ class User:
         return f"{self.first_name} {self.last_name}"
 
     @strawberry.field
-    def binary_bets(self) -> List["BinaryBet"]:
+    def binary_bets(self) -> list["BinaryBet"]:
         return [
             BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
             for binary_bet in self.db.query(BinaryBetModel)
@@ -451,7 +451,7 @@ class User:
         ]
 
     @strawberry.field
-    def score_bets(self) -> List["ScoreBet"]:
+    def score_bets(self) -> list["ScoreBet"]:
         return [
             ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
             for score_bet in self.db.query(ScoreBetModel)
@@ -462,7 +462,7 @@ class User:
         ]
 
     @strawberry.field
-    def groups(self) -> List["Group"]:
+    def groups(self) -> list["Group"]:
         return [
             Group.from_instance(
                 group,
@@ -474,7 +474,7 @@ class User:
         ]
 
     @strawberry.field
-    def phases(self) -> List["Phase"]:
+    def phases(self) -> list["Phase"]:
         return [
             Phase.from_instance(
                 phase,

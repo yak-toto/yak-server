@@ -1,6 +1,5 @@
 import argparse
 from enum import Enum
-from typing import List
 
 
 class ReleaseType(Enum):
@@ -9,7 +8,7 @@ class ReleaseType(Enum):
     PATCH = "patch"
 
 
-def parse_version(version: str) -> List[int]:
+def parse_version(version: str) -> list[int]:
     parsed_version = [int(version_digit) for version_digit in version.split(".")]
 
     if len(parsed_version) != 3:

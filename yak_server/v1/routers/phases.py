@@ -1,10 +1,4 @@
-import sys
-from typing import List
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
+from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
@@ -26,7 +20,7 @@ def retrieve_all_phases(
     _: Annotated[UserModel, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
-) -> GenericOut[List[PhaseOut]]:
+) -> GenericOut[list[PhaseOut]]:
     return GenericOut(
         result=[
             PhaseOut.from_instance(phase, lang=lang)

@@ -1,4 +1,4 @@
-from functools import lru_cache
+from functools import cache
 
 import pymysql
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -20,7 +20,7 @@ class MySQLSettings(BaseSettings):
     )
 
 
-@lru_cache(maxsize=None)
+@cache
 def get_mysql_settings() -> MySQLSettings:
     return MySQLSettings()
 
