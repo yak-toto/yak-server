@@ -46,14 +46,14 @@ def validate_password(password: str) -> None:
     if len(password) < password_requirements.MINIMUM_LENGTH:
         raise TooShortError(password_requirements.MINIMUM_LENGTH)
 
-    if not re.search("[A-Z]", password) and password_requirements.UPPERCASE:
+    if not re.search(r"[A-Z]", password) and password_requirements.UPPERCASE:
         raise NoUpperCaseError
 
-    if not re.search("[a-z]", password) and password_requirements.LOWERCASE:
+    if not re.search(r"[a-z]", password) and password_requirements.LOWERCASE:
         raise NoLowerCaseError
 
-    if not re.search("[0-9]", password) and password_requirements.DIGIT:
+    if not re.search(r"[0-9]", password) and password_requirements.DIGIT:
         raise NoDigitError
 
-    if re.search(" ", password) and password_requirements.NO_SPACE:
+    if re.search(r" ", password) and password_requirements.NO_SPACE:
         raise SpaceError
