@@ -14,7 +14,7 @@ NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
 
 def is_authenticated(f):  # noqa: ANN001, ANN201
     @wraps(f)
-    def _verify(*args, info: Info[YakContext, None], **kwargs):
+    def _verify(*args, info: Info[YakContext, None], **kwargs):  # noqa: ANN002, ANN003, ANN202
         auth_headers = info.context.request.headers.get("Authorization", "").split()
         db = info.context.db
         settings = info.context.settings
@@ -43,7 +43,7 @@ def is_authenticated(f):  # noqa: ANN001, ANN201
 
 def is_admin_authenticated(f):  # noqa: ANN001, ANN201
     @wraps(f)
-    def _verify(*args, info: Info[YakContext, None], **kwargs):
+    def _verify(*args, info: Info[YakContext, None], **kwargs):  # noqa: ANN002, ANN003, ANN202
         user = info.context.user
 
         if user.name != "admin":

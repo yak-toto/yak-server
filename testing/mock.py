@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class MockSettings:
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         *,
         jwt_secret_key: Optional[str] = None,

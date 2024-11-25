@@ -135,7 +135,7 @@ class ScoreBetModel(Base):
     score2 = sa.Column(sa.Integer, CheckConstraint("score2>=0"), default=None)
 
     def is_invalid(self) -> bool:
-        return None in (self.score1, self.score2)
+        return None in {self.score1, self.score2}
 
     def is_valid(self) -> bool:
         return not self.is_invalid()
