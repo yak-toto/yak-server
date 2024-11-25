@@ -1,6 +1,8 @@
 import argparse
 from enum import Enum
 
+NUMBER_OF_DIGITS = 3
+
 
 class ReleaseType(Enum):
     MAJOR = "major"
@@ -11,7 +13,7 @@ class ReleaseType(Enum):
 def parse_version(version: str) -> list[int]:
     parsed_version = [int(version_digit) for version_digit in version.split(".")]
 
-    if len(parsed_version) != 3:
+    if len(parsed_version) != NUMBER_OF_DIGITS:
         msg = f"Incorrect version {parsed_version}. Expecting 3 digits."
         raise ValueError(msg)
 
