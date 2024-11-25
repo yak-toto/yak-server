@@ -79,14 +79,11 @@ preview = true
 select = ["ALL"]
 ignore = [
     "D",
-    "ANN101",  # missing annotation for self?
     "ANN002",
     "ANN003",
-    "ANN102",
     "ANN202",
     # shadowing builtins
     "A002",
-    "A003",
     "PLR",
     "G004",
     "FA100",
