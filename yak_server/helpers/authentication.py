@@ -1,16 +1,21 @@
-from typing import Any
-from uuid import UUID
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 import pendulum
 from jwt import decode as jwt_decode
 from jwt import encode as jwt_encode
-from sqlalchemy.orm import Session
 
 from yak_server.database.models import MatchModel, MatchReferenceModel, ScoreBetModel, UserModel
 
 from .errors import name_already_exists_message
 from .group_position import create_group_position
 from .password_validator import validate_password
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from sqlalchemy.orm import Session
 
 
 def encode_bearer_token(

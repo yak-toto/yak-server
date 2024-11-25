@@ -1,19 +1,22 @@
-from typing import TYPE_CHECKING, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from pydantic import UUID4, BaseModel, ConfigDict, PositiveInt
 
 from yak_server.helpers.language import Lang, get_language_description
 
-from .groups import GroupIn, GroupOut
-from .phases import PhaseOut
 from .teams import FlagOut, TeamIn, TeamModifyBinaryBetIn, TeamWithWonOut
 
 if TYPE_CHECKING:
     from yak_server.database.models import BinaryBetModel
 
+    from .groups import GroupIn, GroupOut
+    from .phases import PhaseOut
+
 
 class BinaryBetIn(BaseModel):
-    is_one_won: Optional[bool] = None
+    is_one_won: bool | None = None
     index: PositiveInt
     team1: TeamIn
     team2: TeamIn
@@ -23,17 +26,17 @@ class BinaryBetIn(BaseModel):
 class BinaryBetOut(BaseModel):
     id: UUID4
     locked: bool
-    team1: Optional[TeamWithWonOut] = None
-    team2: Optional[TeamWithWonOut] = None
+    team1: TeamWithWonOut | None = None
+    team2: TeamWithWonOut | None = None
 
     @classmethod
     def from_instance(
         cls,
-        binary_bet: "BinaryBetModel",
+        binary_bet: BinaryBetModel,
         *,
         locked: bool,
-        lang: "Lang",
-    ) -> "BinaryBetOut":
+        lang: Lang,
+    ) -> BinaryBetOut:
         return cls(
             id=binary_bet.id,
             locked=locked,
@@ -70,17 +73,17 @@ class BinaryBetWithGroupIdOut(BaseModel):
     id: UUID4
     locked: bool
     group: Group
-    team1: Optional[TeamWithWonOut] = None
-    team2: Optional[TeamWithWonOut] = None
+    team1: TeamWithWonOut | None = None
+    team2: TeamWithWonOut | None = None
 
     @classmethod
     def from_instance(
         cls,
-        binary_bet: "BinaryBetModel",
+        binary_bet: BinaryBetModel,
         *,
         locked: bool,
         lang: Lang,
-    ) -> "BinaryBetWithGroupIdOut":
+    ) -> BinaryBetWithGroupIdOut:
         return cls(
             id=binary_bet.id,
             locked=locked,
@@ -117,8 +120,8 @@ class BinaryBetResponse(BaseModel):
 
 
 class ModifyBinaryBetIn(BaseModel):
-    is_one_won: Optional[bool] = None
-    team1: Optional[TeamModifyBinaryBetIn] = None
-    team2: Optional[TeamModifyBinaryBetIn] = None
+    is_one_won: bool | None = None
+    team1: TeamModifyBinaryBetIn | None = None
+    team2: TeamModifyBinaryBetIn | None = None
 
     model_config = ConfigDict(extra="forbid")

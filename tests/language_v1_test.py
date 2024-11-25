@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
@@ -12,7 +14,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
+def test_group(app_with_valid_jwt_config: FastAPI, monkeypatch: pytest.MonkeyPatch) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     monkeypatch.setattr(

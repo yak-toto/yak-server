@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from uuid import uuid4
@@ -10,7 +12,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_modify_password(app_with_valid_jwt_config: FastAPI) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     admin_name = "admin"

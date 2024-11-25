@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from secrets import SystemRandom, randbelow
 from typing import TYPE_CHECKING
 
@@ -13,8 +15,8 @@ if TYPE_CHECKING:
 
 
 def test_modify_score_bet_and_group_rank(
-    app_with_valid_jwt_config: "FastAPI",
-    monkeypatch: "pytest.MonkeyPatch",
+    app_with_valid_jwt_config: FastAPI,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     client = TestClient(app_with_valid_jwt_config)
 

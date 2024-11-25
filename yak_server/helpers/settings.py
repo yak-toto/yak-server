@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 from functools import cache
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import pendulum
 from pydantic import HttpUrl, PlainValidator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from .rules import Rules
+if TYPE_CHECKING:
+    from .rules import Rules
 
 PendulumDateTime = Annotated[pendulum.DateTime, PlainValidator(pendulum.parse)]
 

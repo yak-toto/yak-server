@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
@@ -12,7 +14,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_valid_auth(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_valid_auth(app_with_valid_jwt_config: FastAPI) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(6)
@@ -61,7 +63,7 @@ def test_valid_auth(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_double_signup(app_with_valid_jwt_config: FastAPI) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(6)
@@ -103,7 +105,7 @@ def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_login_wrong_name(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_login_wrong_name(app_with_valid_jwt_config: FastAPI) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     response_login = client.post(
@@ -122,7 +124,7 @@ def test_login_wrong_name(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_login_wrong_password(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_login_wrong_password(app_with_valid_jwt_config: FastAPI) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(6)
@@ -152,7 +154,7 @@ def test_login_wrong_password(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_invalid_token(app_with_valid_jwt_config: FastAPI) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     response_signup = client.post(
@@ -191,7 +193,7 @@ def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_expired_token(app: "FastAPI", client: "TestClient") -> None:
+def test_expired_token(app: FastAPI, client: TestClient) -> None:
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = MockSettings(
@@ -229,7 +231,7 @@ def test_expired_token(app: "FastAPI", client: "TestClient") -> None:
     }
 
 
-def test_invalid_signup_body(client: "TestClient") -> None:
+def test_invalid_signup_body(client: TestClient) -> None:
     name = get_random_string(10)
     first_name = get_random_string(12)
     last_name = get_random_string(6)
@@ -272,7 +274,7 @@ def test_invalid_signup_body(client: "TestClient") -> None:
     }
 
 
-def test_invalid_login_body(client: "TestClient") -> None:
+def test_invalid_login_body(client: TestClient) -> None:
     user_name = get_random_string(6)
     password = get_random_string(10)
 
@@ -305,7 +307,7 @@ def test_invalid_login_body(client: "TestClient") -> None:
     }
 
 
-def test_non_compliant_password(client: "TestClient") -> None:
+def test_non_compliant_password(client: TestClient) -> None:
     response_signup = client.post(
         "/api/v1/users/signup",
         json={

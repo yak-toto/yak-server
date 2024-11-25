@@ -1,4 +1,6 @@
-from typing import TYPE_CHECKING, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from pydantic import UUID4, BaseModel, NonNegativeInt
 
@@ -14,7 +16,7 @@ class FlagOut(BaseModel):
 
 class TeamIn(BaseModel):
     id: UUID4
-    score: Optional[NonNegativeInt] = None
+    score: NonNegativeInt | None = None
 
 
 class TeamOut(BaseModel):
@@ -24,7 +26,7 @@ class TeamOut(BaseModel):
     flag: FlagOut
 
     @classmethod
-    def from_instance(cls, team: "TeamModel", *, lang: Lang) -> "TeamOut":
+    def from_instance(cls, team: TeamModel, *, lang: Lang) -> TeamOut:
         return cls(
             id=team.id,
             code=team.code,
@@ -46,7 +48,7 @@ class TeamWithWonOut(BaseModel):
     code: str
     description: str
     flag: FlagOut
-    won: Optional[bool] = None
+    won: bool | None = None
 
 
 class TeamWithScoreOut(BaseModel):
@@ -54,13 +56,13 @@ class TeamWithScoreOut(BaseModel):
     code: str
     description: str
     flag: FlagOut
-    score: Optional[NonNegativeInt] = None
+    score: NonNegativeInt | None = None
 
 
 class TeamModifyScoreBetIn(BaseModel):
-    id: Optional[UUID4] = None
-    score: Optional[NonNegativeInt] = None
+    id: UUID4 | None = None
+    score: NonNegativeInt | None = None
 
 
 class TeamModifyBinaryBetIn(BaseModel):
-    id: Optional[UUID4] = None
+    id: UUID4 | None = None

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from uuid import uuid4
@@ -15,7 +17,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_modify_partial_score_bet(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
+def test_modify_partial_score_bet(app: FastAPI, monkeypatch: pytest.MonkeyPatch) -> None:
     fake_jwt_secret_key = get_random_string(100)
 
     app.dependency_overrides[get_settings] = MockSettings(

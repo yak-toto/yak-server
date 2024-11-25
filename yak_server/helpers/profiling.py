@@ -1,4 +1,5 @@
-from collections.abc import Awaitable
+from __future__ import annotations
+
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 from uuid import uuid4
@@ -9,10 +10,12 @@ except ImportError:  # pragma: no cover
     yappi = None
 
 if TYPE_CHECKING:
+    from collections.abc import Awaitable
+
     from fastapi import FastAPI, Request, Response
 
 
-def set_yappi_profiler(app: "FastAPI") -> None:
+def set_yappi_profiler(app: FastAPI) -> None:
     if yappi is None:
         msg = (
             "Profiling is not available without yappi installed. "
@@ -22,9 +25,9 @@ def set_yappi_profiler(app: "FastAPI") -> None:
 
     @app.middleware("http")
     async def profile_process_time(
-        request: "Request",
-        call_next: Callable[["Request"], Awaitable["Response"]],
-    ) -> "Response":
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
+    ) -> Response:
         yappi.clear_stats()
         yappi.set_clock_type("cpu")
         yappi.start()

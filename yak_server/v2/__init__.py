@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import strawberry
 from graphql.validation import NoSchemaIntrospectionCustomRule
 from strawberry.extensions import (

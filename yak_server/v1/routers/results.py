@@ -1,16 +1,22 @@
-from typing import Annotated, Optional
-from uuid import UUID
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Annotated
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import func
-from sqlalchemy.orm import Session
 
 from yak_server.database.models import UserModel
-from yak_server.helpers.database import get_db
-from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.errors import NoResultsForAdminUser
 from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.results import UserResult
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from sqlalchemy.orm import Session
+
+    from yak_server.helpers.database import get_db
+    from yak_server.v1.helpers.auth import get_current_user
 
 router = APIRouter(tags=["results"])
 
@@ -33,7 +39,7 @@ def retrieve_score_board(
     )
 
 
-def compute_rank(db: Session, user_id: UUID) -> Optional[int]:
+def compute_rank(db: Session, user_id: UUID) -> int | None:
     subq = (
         db.query(
             UserModel,

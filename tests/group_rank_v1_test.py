@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
@@ -16,9 +18,9 @@ if TYPE_CHECKING:
 
 
 def test_group_rank(
-    app: "FastAPI",
-    client: "TestClient",
-    monkeypatch: "pytest.MonkeyPatch",
+    app: FastAPI,
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     fake_jwt_secret_key = get_random_string(100)
 

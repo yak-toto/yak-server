@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -13,7 +15,7 @@ if TYPE_CHECKING:
     from yak_server.database.models import UserModel
 
 
-def create_group_position(score_bets: list["ScoreBetModel"]) -> list[GroupPositionModel]:
+def create_group_position(score_bets: list[ScoreBetModel]) -> list[GroupPositionModel]:
     team_ids = []
 
     group_positions = []
@@ -53,7 +55,7 @@ class GroupPosition:
 
 def compute_group_rank(
     group_rank: list[GroupPositionModel],
-    score_bets: list["ScoreBetModel"],
+    score_bets: list[ScoreBetModel],
 ) -> list[GroupPositionModel]:
     new_group_position = {}
 
@@ -105,8 +107,8 @@ def compute_group_rank(
 
 
 def get_group_rank_with_code(
-    db: "Session",
-    user: "UserModel",
+    db: Session,
+    user: UserModel,
     group_id: str,
 ) -> list[GroupPositionModel]:
     group_rank = db.query(GroupPositionModel).filter_by(group_id=group_id, user_id=user.id)
@@ -143,7 +145,7 @@ def get_group_rank_with_code(
     )
 
 
-def set_recomputation_flag(db: "Session", team_id: "UUID", user_id: "UUID") -> None:
+def set_recomputation_flag(db: Session, team_id: UUID, user_id: UUID) -> None:
     db.execute(
         update(GroupPositionModel)
         .values(need_recomputation=True)

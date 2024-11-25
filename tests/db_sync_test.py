@@ -1,7 +1,8 @@
-from collections.abc import Generator
+from __future__ import annotations
+
 from dataclasses import dataclass
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pytest
 from fastapi.testclient import TestClient
@@ -13,6 +14,8 @@ from yak_server.cli import app as typer_app
 from yak_server.cli.database import delete_database, initialize_database
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from fastapi import FastAPI
 
 runner = CliRunner()
@@ -20,8 +23,8 @@ runner = CliRunner()
 
 @pytest.fixture
 def app_with_valid_jwt_config_function_scope(
-    app_with_valid_jwt_config: "FastAPI",
-) -> Generator["FastAPI", None, None]:
+    app_with_valid_jwt_config: FastAPI,
+) -> Generator[FastAPI, None, None]:
     yield app_with_valid_jwt_config
 
     delete_database(app_with_valid_jwt_config)
@@ -31,8 +34,8 @@ def app_with_valid_jwt_config_function_scope(
 class CompetitionData:
     url: str
     folder: str
-    excepted_score_bets: list[tuple[Optional[int], Optional[int]]]
-    excepted_binary_bets: list[Optional[bool]]
+    excepted_score_bets: list[tuple[int | None, int | None]]
+    excepted_binary_bets: list[bool | None]
 
 
 euro_2024_data = CompetitionData(
@@ -370,8 +373,8 @@ def idfn(value: CompetitionData) -> str:
     ids=idfn,
 )
 def test_db_sync(
-    app_with_valid_jwt_config_function_scope: "FastAPI",
-    monkeypatch: "pytest.MonkeyPatch",
+    app_with_valid_jwt_config_function_scope: FastAPI,
+    monkeypatch: pytest.MonkeyPatch,
     competition_data: CompetitionData,
 ) -> None:
     # Setup fastapi application and initialize database

@@ -1,16 +1,21 @@
-from typing import Annotated
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Annotated
 
 from fastapi import APIRouter, Depends
-from pydantic import UUID4
-from sqlalchemy.orm import Session
 
 from yak_server.database.models import PhaseModel, UserModel
-from yak_server.helpers.database import get_db
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang
-from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.errors import PhaseNotFound
 from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.phases import PhaseOut
+
+if TYPE_CHECKING:
+    from pydantic import UUID4
+    from sqlalchemy.orm import Session
+
+    from yak_server.helpers.database import get_db
+    from yak_server.v1.helpers.auth import get_current_user
 
 router = APIRouter(prefix="/phases", tags=["phases"])
 

@@ -1,8 +1,8 @@
-from collections.abc import Iterable
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from itertools import chain
 from typing import TYPE_CHECKING
-from uuid import UUID
 
 from pydantic import BaseModel
 from sqlalchemy import and_
@@ -18,6 +18,9 @@ from yak_server.database.models import (
 from yak_server.helpers.group_position import get_group_rank_with_code
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from uuid import UUID
+
     from sqlalchemy.orm import Session
 
 
@@ -38,7 +41,7 @@ class ResultForScoreBet:
     user_ids_found_correct_score: list[UUID] = field(default_factory=list)
 
 
-def compute_results_for_score_bet(db: "Session", admin: UserModel) -> list[ResultForScoreBet]:
+def compute_results_for_score_bet(db: Session, admin: UserModel) -> list[ResultForScoreBet]:
     results: list[ResultForScoreBet] = []
 
     for real_score in (
@@ -83,7 +86,7 @@ def all_results_filled_in_group(group_result: list) -> bool:
 
 
 def compute_results_for_group_rank(
-    db: "Session", admin: UserModel, other_users: Iterable[UserModel]
+    db: Session, admin: UserModel, other_users: Iterable[UserModel]
 ) -> dict[UUID, ResultForGroupRank]:
     result_groups: dict[UUID, ResultForGroupRank] = {}
 
@@ -121,7 +124,7 @@ def compute_results_for_group_rank(
     return result_groups
 
 
-def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set:
+def team_from_group_code(db: Session, user: UserModel, group_code: str) -> set:
     return set(
         chain(
             *(
@@ -137,7 +140,7 @@ def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set
     )
 
 
-def winner_from_user(db: "Session", user: UserModel) -> set:
+def winner_from_user(db: Session, user: UserModel) -> set:
     finale_bet = next(
         iter(
             db.query(BinaryBetModel)
@@ -155,7 +158,7 @@ def winner_from_user(db: "Session", user: UserModel) -> set:
     }
 
 
-def compute_points(db: "Session", admin: UserModel, rule_config: RuleComputePoints) -> None:
+def compute_points(db: Session, admin: UserModel, rule_config: RuleComputePoints) -> None:
     results = compute_results_for_score_bet(db, admin)
 
     other_users = db.query(UserModel).filter(UserModel.name != "admin")

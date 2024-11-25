@@ -1,10 +1,15 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from pydantic import BaseModel
 
-from .binary_bets import BinaryBetOut, BinaryBetWithGroupIdOut
-from .group_rank import GroupPositionOut
-from .groups import GroupOut, GroupWithPhaseIdOut
-from .phases import PhaseOut
-from .score_bets import ScoreBetOut, ScoreBetWithGroupIdOut
+if TYPE_CHECKING:
+    from .binary_bets import BinaryBetOut, BinaryBetWithGroupIdOut
+    from .group_rank import GroupPositionOut
+    from .groups import GroupOut, GroupWithPhaseIdOut
+    from .phases import PhaseOut
+    from .score_bets import ScoreBetOut, ScoreBetWithGroupIdOut
 
 
 class AllBetsResponse(BaseModel):

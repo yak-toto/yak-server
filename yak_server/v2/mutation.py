@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 import logging
-from typing import Optional
-from uuid import UUID
+from typing import TYPE_CHECKING
 
 import pendulum
 import strawberry
 from sqlalchemy import and_
-from strawberry.types import Info
 
 from yak_server.database.models import (
     BinaryBetModel,
@@ -32,7 +32,6 @@ from .bearer_authentication import (
     is_admin_authenticated,
     is_authenticated,
 )
-from .context import YakContext
 from .result import (
     BinaryBetNotFoundForUpdate,
     InvalidCredentials,
@@ -55,6 +54,13 @@ from .schema import (
     ScoreBet,
     UserWithToken,
 )
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from strawberry.types import Info
+
+    from .context import YakContext
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +136,7 @@ class Mutation:
     def modify_binary_bet_result(
         self,
         id: UUID,
-        is_one_won: Optional[bool],  # noqa: FBT001
+        is_one_won: bool | None,  # noqa: FBT001
         info: Info[YakContext, None],
     ) -> ModifyBinaryBetResult:
         db = info.context.db
@@ -162,8 +168,8 @@ class Mutation:
     def modify_score_bet_result(
         self,
         id: UUID,
-        score1: Optional[int],
-        score2: Optional[int],
+        score1: int | None,
+        score2: int | None,
         info: Info[YakContext, None],
     ) -> ModifyScoreBetResult:
         db = info.context.db

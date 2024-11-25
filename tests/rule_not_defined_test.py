@@ -1,14 +1,19 @@
+from __future__ import annotations
+
 import json
 from pathlib import Path
 from secrets import randbelow
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
-import pytest
 from typer.testing import CliRunner
 
 from testing.util import get_random_string
 from yak_server.cli import app
 from yak_server.cli.env import RuleNotDefinedError
+
+if TYPE_CHECKING:
+    import pytest
 
 runner = CliRunner()
 

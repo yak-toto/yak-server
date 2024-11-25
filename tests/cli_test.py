@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -24,7 +26,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_create_admin(app: "FastAPI") -> None:
+def test_create_admin(app: FastAPI) -> None:
     app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=20,
         jwt_secret_key=get_random_string(10),
@@ -55,12 +57,12 @@ def test_create_admin(app: "FastAPI") -> None:
         create_admin(password_admin)
 
 
-def test_delete_all_records(production_app: "FastAPI") -> None:
+def test_delete_all_records(production_app: FastAPI) -> None:
     with pytest.raises(RecordDeletionInProductionError):
         delete_database(production_app)
 
 
-def test_drop_all_tables(production_app: "FastAPI") -> None:
+def test_drop_all_tables(production_app: FastAPI) -> None:
     with pytest.raises(TableDropInProductionError):
         drop_database(production_app)
 

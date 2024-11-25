@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from logging.config import fileConfig
 
@@ -64,7 +66,6 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-
     with engine.connect() as connection:
         context.configure(
             connection=connection,

@@ -1,14 +1,12 @@
-from typing import Annotated
+from __future__ import annotations
 
-from fastapi import Depends
+from typing import TYPE_CHECKING, Annotated
+
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import ExpiredSignatureError, PyJWTError
-from sqlalchemy.orm import Session
 
 from yak_server.database.models import UserModel
 from yak_server.helpers.authentication import decode_bearer_token
-from yak_server.helpers.database import get_db
-from yak_server.helpers.settings import Settings, get_settings
 
 from .errors import (
     ExpiredToken,
@@ -16,6 +14,13 @@ from .errors import (
     UnauthorizedAccessToAdminAPI,
     UserNotFound,
 )
+
+if TYPE_CHECKING:
+    from fastapi import Depends
+    from sqlalchemy.orm import Session
+
+    from yak_server.helpers.database import get_db
+    from yak_server.helpers.settings import Settings, get_settings
 
 security = HTTPBearer(auto_error=False)
 

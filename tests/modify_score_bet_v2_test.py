@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from secrets import SystemRandom
 from typing import TYPE_CHECKING
 from uuid import uuid4
@@ -16,8 +18,8 @@ if TYPE_CHECKING:
 
 
 def test_modify_score_bet(
-    app_with_valid_jwt_config: "FastAPI",
-    monkeypatch: "pytest.MonkeyPatch",
+    app_with_valid_jwt_config: FastAPI,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     client = TestClient(app_with_valid_jwt_config)
 

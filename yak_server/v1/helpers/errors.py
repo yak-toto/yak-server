@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import traceback
 from typing import TYPE_CHECKING
@@ -145,7 +147,7 @@ class RuleNotFound(HTTPException):
         )
 
 
-def set_exception_handler(app: "FastAPI") -> None:
+def set_exception_handler(app: FastAPI) -> None:
     @app.exception_handler(StarletteHTTPException)
     def http_exception_handler(_: Request, http_exception: StarletteHTTPException) -> JSONResponse:
         return JSONResponse(

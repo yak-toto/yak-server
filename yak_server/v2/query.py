@@ -1,9 +1,9 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
-from uuid import UUID
 
 import strawberry
 from sqlalchemy import and_
-from strawberry.types import Info
 
 from yak_server.database.models import (
     BinaryBetModel,
@@ -19,7 +19,6 @@ from yak_server.helpers.group_position import compute_group_rank
 from yak_server.helpers.password_validator import PasswordRequirements
 
 from .bearer_authentication import is_authenticated
-from .context import YakContext
 from .result import (
     AllGroupsResult,
     AllPhasesResult,
@@ -63,8 +62,13 @@ from .schema import (
 )
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
     import pendulum
     from sqlalchemy.orm import Session
+    from strawberry.types import Info
+
+    from .context import YakContext
 
 
 @strawberry.type
@@ -318,11 +322,11 @@ class Query:
         )
 
         def send_response(
-            db: "Session",
+            db: Session,
             user: UserModel,
             group: GroupModel,
             group_rank: list[GroupPositionModel],
-            lock_datetime: "pendulum.DateTime",
+            lock_datetime: pendulum.DateTime,
         ) -> GroupRank:
             return GroupRank(
                 group_rank=send_group_position(group_rank),
@@ -369,11 +373,11 @@ class Query:
         )
 
         def send_response(
-            db: "Session",
+            db: Session,
             user: UserModel,
             group: GroupModel,
             group_rank: list[GroupPositionModel],
-            lock_datetime: "pendulum.DateTime",
+            lock_datetime: pendulum.DateTime,
         ) -> GroupRank:
             return GroupRank(
                 group_rank=send_group_position(group_rank),

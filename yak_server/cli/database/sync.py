@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import warnings
 from dataclasses import dataclass
-from typing import Optional
 
 from sqlalchemy import and_
 
@@ -93,7 +94,7 @@ class Group:
 class Team:
     score: int
     description: str
-    won: Optional[bool] = None
+    won: bool | None = None
 
 
 @dataclass

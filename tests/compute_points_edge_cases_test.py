@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
@@ -22,7 +24,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
+def test_compute_points(app: FastAPI, monkeypatch: pytest.MonkeyPatch) -> None:
     client = TestClient(app)
 
     app.dependency_overrides[get_settings] = MockSettings(

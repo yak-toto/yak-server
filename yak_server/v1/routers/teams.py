@@ -1,17 +1,22 @@
-from typing import Annotated
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Annotated
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
-from pydantic import UUID4
-from sqlalchemy.orm import Session
 
 from yak_server.database.models import TeamModel
-from yak_server.helpers.database import get_db
 from yak_server.helpers.format import is_iso_3166_1_alpha_2_code, is_uuid4
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang
 from yak_server.v1.helpers.errors import InvalidTeamId, TeamNotFound
 from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.teams import AllTeamsResponse, OneTeamResponse, TeamOut
+
+if TYPE_CHECKING:
+    from pydantic import UUID4
+    from sqlalchemy.orm import Session
+
+    from yak_server.helpers.database import get_db
 
 router = APIRouter(prefix="/teams", tags=["teams"])
 

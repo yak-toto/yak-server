@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from secrets import SystemRandom
 from typing import TYPE_CHECKING
@@ -18,9 +20,9 @@ if TYPE_CHECKING:
 
 
 def test_create_score_bet(
-    app: "FastAPI",
-    client: "TestClient",
-    monkeypatch: "pytest.MonkeyPatch",
+    app: FastAPI,
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     fake_jwt_secret_key = get_random_string(100)
 

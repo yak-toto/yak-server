@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pendulum
 from starlette.testclient import TestClient
@@ -48,7 +50,7 @@ QUERY_SCORE_BOARD = """
 """
 
 
-def put_finale_phase(client: TestClient, token: str, *, is_one_won: Optional[bool]) -> None:
+def put_finale_phase(client: TestClient, token: str, *, is_one_won: bool | None) -> None:
     response_post_finale_phase_bets_admin = client.post(
         "/api/v1/rules/492345de-8d4a-45b6-8b94-d219f2b0c3e9",
         headers={"Authorization": f"Bearer {token}"},
@@ -73,7 +75,7 @@ def put_finale_phase(client: TestClient, token: str, *, is_one_won: Optional[boo
     assert response_patch_finale_phase.status_code == HTTPStatus.OK
 
 
-def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
+def test_compute_points(app: FastAPI, monkeypatch: pytest.MonkeyPatch) -> None:
     client = TestClient(app)
 
     rules = Rules(

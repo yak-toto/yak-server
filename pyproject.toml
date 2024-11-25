@@ -78,22 +78,25 @@ preview = true
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
+    # docstring
     "D",
-    "ANN002",
-    "ANN003",
-    "ANN202",
-    # shadowing builtins
+    # shadow builtins
     "A002",
     "PLR",
+    # f-string logging
     "G004",
-    "FA100",
+    # copyright
+    "CPY001",
+    # formatter compatiblity
     "COM812",
     "ISC001",
-    "CPY001",
 ]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 11
+
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 "yak_server/cli/*" = ["T20"]

@@ -1,10 +1,10 @@
+from __future__ import annotations
+
 import logging
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import pendulum
 from fastapi import APIRouter, Depends, status
-from pydantic import UUID4
-from sqlalchemy.orm import Session
 
 from yak_server.database.models import UserModel
 from yak_server.helpers.authentication import (
@@ -12,7 +12,6 @@ from yak_server.helpers.authentication import (
     encode_bearer_token,
     signup_user,
 )
-from yak_server.helpers.database import get_db
 from yak_server.helpers.logging_helpers import (
     logged_in_successfully,
     modify_password_successfully,
@@ -22,8 +21,6 @@ from yak_server.helpers.password_validator import (
     PasswordRequirements,
     PasswordRequirementsError,
 )
-from yak_server.helpers.settings import Settings, get_settings
-from yak_server.v1.helpers.auth import get_admin_user, get_current_user
 from yak_server.v1.helpers.errors import (
     InvalidCredentials,
     NameAlreadyExists,
@@ -40,6 +37,14 @@ from yak_server.v1.models.users import (
     SignupIn,
     SignupOut,
 )
+
+if TYPE_CHECKING:
+    from pydantic import UUID4
+    from sqlalchemy.orm import Session
+
+    from yak_server.helpers.database import get_db
+    from yak_server.helpers.settings import Settings, get_settings
+    from yak_server.v1.helpers.auth import get_admin_user, get_current_user
 
 logger = logging.getLogger(__name__)
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
@@ -15,9 +17,9 @@ if TYPE_CHECKING:
 
 
 def test_delete_binary_bet(
-    app: "FastAPI",
-    client: "TestClient",
-    monkeypatch: "pytest.MonkeyPatch",
+    app: FastAPI,
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     fake_jwt_secret_key = get_random_string(100)
 

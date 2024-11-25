@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import os
-from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 import pendulum
@@ -15,6 +16,8 @@ from yak_server.database import mysql_settings
 from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from fastapi import FastAPI
 
 
@@ -34,7 +37,7 @@ def pytest_configure() -> None:
 
 
 @pytest.fixture(scope="session")
-def app_session() -> Generator["FastAPI", None, None]:
+def app_session() -> Generator[FastAPI, None, None]:
     # Create app and set TESTING config
     app = create_app()
     app.debug = True
@@ -49,7 +52,7 @@ def app_session() -> Generator["FastAPI", None, None]:
 
 
 @pytest.fixture(scope="module")
-def app(app_session: "FastAPI") -> Generator["FastAPI", None, None]:
+def app(app_session: FastAPI) -> Generator[FastAPI, None, None]:
     # Clean database before running test
     delete_database(app_session)
 
@@ -60,19 +63,19 @@ def app(app_session: "FastAPI") -> Generator["FastAPI", None, None]:
 
 
 @pytest.fixture(scope="module")
-def client(app: "FastAPI") -> TestClient:
+def client(app: FastAPI) -> TestClient:
     return TestClient(app)
 
 
 @pytest.fixture
-def production_app() -> "FastAPI":
+def production_app() -> FastAPI:
     os.environ["DEBUG"] = "0"
 
     return create_app()
 
 
 @pytest.fixture
-def debug_app_with_profiler() -> Generator["FastAPI", None, None]:
+def debug_app_with_profiler() -> Generator[FastAPI, None, None]:
     os.environ["PROFILING"] = "1"
     os.environ["DEBUG"] = "1"
     app = create_app()
@@ -92,7 +95,7 @@ def debug_app_with_profiler() -> Generator["FastAPI", None, None]:
 
 
 @pytest.fixture
-def production_app_with_profiler() -> Generator["FastAPI", None, None]:
+def production_app_with_profiler() -> Generator[FastAPI, None, None]:
     os.environ["PROFILING"] = "1"
     os.environ["DEBUG"] = "0"
     app = create_app()
@@ -112,7 +115,7 @@ def production_app_with_profiler() -> Generator["FastAPI", None, None]:
 
 
 @pytest.fixture
-def app_with_valid_jwt_config(app: "FastAPI") -> Generator["FastAPI", None, None]:
+def app_with_valid_jwt_config(app: FastAPI) -> Generator[FastAPI, None, None]:
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = MockSettings(
@@ -127,7 +130,7 @@ def app_with_valid_jwt_config(app: "FastAPI") -> Generator["FastAPI", None, None
 
 
 @pytest.fixture
-def app_with_null_jwt_expiration_time(app: "FastAPI") -> Generator["FastAPI", None, None]:
+def app_with_null_jwt_expiration_time(app: FastAPI) -> Generator[FastAPI, None, None]:
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = MockSettings(
@@ -142,7 +145,7 @@ def app_with_null_jwt_expiration_time(app: "FastAPI") -> Generator["FastAPI", No
 
 
 @pytest.fixture
-def app_with_lock_datetime_in_past(app: "FastAPI") -> Generator["FastAPI", None, None]:
+def app_with_lock_datetime_in_past(app: FastAPI) -> Generator[FastAPI, None, None]:
     fake_jwt_secret_key = get_random_string(15)
 
     app.dependency_overrides[get_settings] = MockSettings(

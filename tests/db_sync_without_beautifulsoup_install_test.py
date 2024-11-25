@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from yak_server.cli.database.sync import (
@@ -6,7 +8,7 @@ from yak_server.cli.database.sync import (
 )
 
 
-def test_db_sync(monkeypatch: "pytest.MonkeyPatch") -> None:
+def test_db_sync(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("yak_server.cli.database.sync.bs4", None)
 
     with pytest.raises(SyncOfficialResultsNotAvailableError) as exception:

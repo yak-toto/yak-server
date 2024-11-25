@@ -1,5 +1,6 @@
-from typing import Annotated, Union
-from uuid import UUID
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Annotated, Union
 
 import strawberry
 
@@ -30,6 +31,9 @@ from .schema import (
     UserWithoutSensitiveInfo,
     UserWithToken,
 )
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 
 @strawberry.type

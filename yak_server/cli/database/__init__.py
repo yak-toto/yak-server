@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import subprocess  # noqa: S404
@@ -59,7 +61,7 @@ def create_admin(password: str) -> None:
         _ = signup_user(db, name="admin", first_name="admin", last_name="admin", password=password)
 
 
-def initialize_database(app: "FastAPI") -> None:
+def initialize_database(app: FastAPI) -> None:
     with SessionLocal() as db:
         data_folder = get_settings().data_folder
 
@@ -161,7 +163,7 @@ def backup_database() -> None:
     logger.info(f"Backup done on {backup_datetime}")
 
 
-def delete_database(app: "FastAPI") -> None:
+def delete_database(app: FastAPI) -> None:
     if not app.debug:
         raise RecordDeletionInProductionError
 
@@ -178,7 +180,7 @@ def delete_database(app: "FastAPI") -> None:
         db.commit()
 
 
-def drop_database(app: "FastAPI") -> None:
+def drop_database(app: FastAPI) -> None:
     if not app.debug:
         raise TableDropInProductionError
 

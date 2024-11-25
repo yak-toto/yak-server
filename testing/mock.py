@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import sys
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -18,18 +20,18 @@ class MockSettings:
     def __init__(
         self,
         *,
-        jwt_secret_key: Optional[str] = None,
-        jwt_expiration_time: Optional[int] = None,
-        data_folder_relative: Optional[str] = None,
-        lock_datetime_shift: Optional[pendulum.Duration] = None,
-        rules: Optional["Rules"] = None,
-        base_correct_result: Optional[int] = None,
-        multiplying_factor_correct_result: Optional[int] = None,
-        base_correct_score: Optional[int] = None,
-        multiplying_factor_correct_score: Optional[int] = None,
-        team_qualified: Optional[int] = None,
-        first_team_qualified: Optional[int] = None,
-        official_results_url: Optional[str] = None,
+        jwt_secret_key: str | None = None,
+        jwt_expiration_time: int | None = None,
+        data_folder_relative: str | None = None,
+        lock_datetime_shift: pendulum.Duration | None = None,
+        rules: Rules | None = None,
+        base_correct_result: int | None = None,
+        multiplying_factor_correct_result: int | None = None,
+        base_correct_score: int | None = None,
+        multiplying_factor_correct_score: int | None = None,
+        team_qualified: int | None = None,
+        first_team_qualified: int | None = None,
+        official_results_url: str | None = None,
     ) -> None:
         self.jwt_secret_key = jwt_secret_key
         self.jwt_expiration_time = jwt_expiration_time

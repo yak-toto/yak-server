@@ -1,10 +1,9 @@
-from typing import Callable, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Callable
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
-
-from yak_server.database.models import UserModel
 
 from .compute_final_from_rank import (
     RuleComputeFinaleFromGroupRank,
@@ -13,20 +12,23 @@ from .compute_final_from_rank import (
 from .compute_points import RuleComputePoints
 from .compute_points import compute_points as compute_points_func
 
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
+    from yak_server.database.models import UserModel
+
 
 class Rules(BaseModel):
-    compute_finale_phase_from_group_rank: Optional[RuleComputeFinaleFromGroupRank] = None
-    compute_points: Optional[RuleComputePoints] = None
+    compute_finale_phase_from_group_rank: RuleComputeFinaleFromGroupRank | None = None
+    compute_points: RuleComputePoints | None = None
 
 
 class RuleMetadata:
     def __init__(
         self,
         *,
-        function: Union[
-            Callable[[Session, UserModel, RuleComputeFinaleFromGroupRank], None],
-            Callable[[Session, UserModel, RuleComputePoints], None],
-        ],
+        function: Callable[[Session, UserModel, RuleComputeFinaleFromGroupRank], None]
+        | Callable[[Session, UserModel, RuleComputePoints], None],
         attribute: str,
         required_admin: bool = False,
     ) -> None:

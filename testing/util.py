@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 import secrets
 import string
 from dataclasses import dataclass
 from http import HTTPStatus
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING
 
-from fastapi.testclient import TestClient
+if TYPE_CHECKING:
+    from fastapi.testclient import TestClient
 
 TESTING_PATH = Path(__file__).parent
 
@@ -28,14 +31,14 @@ class UserData:
     first_name: str
     last_name: str
     name: str
-    scores: list[Optional[tuple[Optional[int], Optional[int]]]]
+    scores: list[tuple[int | None, int | None] | None]
     token: str = ""
 
 
 def patch_score_bets(
     client: TestClient,
     token: str,
-    new_scores: list[Optional[tuple[Optional[int], Optional[int]]]],
+    new_scores: list[tuple[int | None, int | None] | None],
 ) -> None:
     response_get_all_bets = client.get("/api/v1/bets", headers={"Authorization": f"Bearer {token}"})
 

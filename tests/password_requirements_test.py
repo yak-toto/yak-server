@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import secrets
 import string
 from http import HTTPStatus
@@ -77,7 +79,7 @@ def test_password_with_spaces() -> None:
     assert str(exception.value) == "Password must not contain spaces."
 
 
-def test_password_requirements_v1(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_password_requirements_v1(app_with_valid_jwt_config: FastAPI) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     response = client.get("/api/v1/users/signup/password_requirements")
@@ -95,7 +97,7 @@ def test_password_requirements_v1(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_password_requirements_v2(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_password_requirements_v2(app_with_valid_jwt_config: FastAPI) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     query = """

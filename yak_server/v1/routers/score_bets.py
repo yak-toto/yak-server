@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 import logging
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 from fastapi import APIRouter, Depends
-from pydantic import UUID4
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
 
 from yak_server.database.models import (
     MatchModel,
@@ -13,12 +13,9 @@ from yak_server.database.models import (
     UserModel,
 )
 from yak_server.helpers.bet_locking import is_locked
-from yak_server.helpers.database import get_db
 from yak_server.helpers.group_position import set_recomputation_flag
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
 from yak_server.helpers.logging_helpers import modify_score_bet_successfully
-from yak_server.helpers.settings import Settings, get_settings
-from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.errors import (
     BetNotFound,
     GroupNotFound,
@@ -35,6 +32,14 @@ from yak_server.v1.models.score_bets import (
     ScoreBetResponse,
 )
 from yak_server.v1.models.teams import FlagOut, TeamWithScoreOut
+
+if TYPE_CHECKING:
+    from pydantic import UUID4
+    from sqlalchemy.orm import Session
+
+    from yak_server.helpers.database import get_db
+    from yak_server.helpers.settings import Settings, get_settings
+    from yak_server.v1.helpers.auth import get_current_user
 
 logger = logging.getLogger(__name__)
 

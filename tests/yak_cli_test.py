@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from http import HTTPStatus
 from pathlib import Path
@@ -17,7 +19,7 @@ if TYPE_CHECKING:
 runner = CliRunner()
 
 
-def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_cli(app_with_valid_jwt_config: FastAPI) -> None:
     # Check database drop
     result = runner.invoke(app, ["db", "drop"], env={"DEBUG": "1"})
 
@@ -168,14 +170,12 @@ def test_db_migration_cli_short_option() -> None:
     assert result_with_short_name.output == result.output
 
 
-def test_db_migration_second_path(monkeypatch: "pytest.MonkeyPatch") -> None:
-    """
-    .
+def test_db_migration_second_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    """.
     └── yak-server
         └── yak_server
             └── alembic.ini
     """
-
     with runner.isolated_filesystem():
         yak_server_module = (Path.cwd() / "yak-server" / "yak_server").resolve()
 
@@ -193,7 +193,7 @@ def test_db_migration_second_path(monkeypatch: "pytest.MonkeyPatch") -> None:
         assert result.output == f"export ALEMBIC_CONFIG={alembic_ini_path}\n"
 
 
-def test_db_migration_cli_with_alembic_missing(monkeypatch: "pytest.MonkeyPatch") -> None:
+def test_db_migration_cli_with_alembic_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("yak_server.cli.database.alembic", None)
 
     result = runner.invoke(app, ["db", "migration"])

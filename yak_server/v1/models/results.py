@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, NonNegativeInt, PositiveInt
@@ -22,7 +24,7 @@ class UserResult(BaseModel):
     points: float
 
     @classmethod
-    def from_instance(cls, user: "UserModel", *, rank: PositiveInt) -> "UserResult":
+    def from_instance(cls, user: UserModel, *, rank: PositiveInt) -> UserResult:
         return cls(
             rank=rank,
             first_name=user.first_name,

@@ -1,15 +1,18 @@
-from typing import TYPE_CHECKING, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from pydantic import UUID4, BaseModel, ConfigDict, PositiveInt
 
 from yak_server.helpers.language import Lang, get_language_description
 
-from .groups import GroupIn, GroupOut
-from .phases import PhaseOut
 from .teams import FlagOut, TeamIn, TeamModifyScoreBetIn, TeamWithScoreOut
 
 if TYPE_CHECKING:
     from yak_server.database.models import ScoreBetModel
+
+    from .groups import GroupIn, GroupOut
+    from .phases import PhaseOut
 
 
 class ScoreBetIn(BaseModel):
@@ -22,17 +25,17 @@ class ScoreBetIn(BaseModel):
 class ScoreBetOut(BaseModel):
     id: UUID4
     locked: bool
-    team1: Optional[TeamWithScoreOut] = None
-    team2: Optional[TeamWithScoreOut] = None
+    team1: TeamWithScoreOut | None = None
+    team2: TeamWithScoreOut | None = None
 
     @classmethod
     def from_instance(
         cls,
-        score_bet: "ScoreBetModel",
+        score_bet: ScoreBetModel,
         *,
         locked: bool,
         lang: Lang,
-    ) -> "ScoreBetOut":
+    ) -> ScoreBetOut:
         return cls(
             id=score_bet.id,
             locked=locked,
@@ -75,11 +78,11 @@ class ScoreBetWithGroupIdOut(BaseModel):
     @classmethod
     def from_instance(
         cls,
-        score_bet: "ScoreBetModel",
+        score_bet: ScoreBetModel,
         *,
         locked: bool,
         lang: Lang,
-    ) -> "ScoreBetWithGroupIdOut":
+    ) -> ScoreBetWithGroupIdOut:
         return cls(
             id=score_bet.id,
             locked=locked,
@@ -108,7 +111,7 @@ class ScoreBetResponse(BaseModel):
 
 
 class ModifyScoreBetIn(BaseModel):
-    team1: Optional[TeamModifyScoreBetIn] = None
-    team2: Optional[TeamModifyScoreBetIn] = None
+    team1: TeamModifyScoreBetIn | None = None
+    team2: TeamModifyScoreBetIn | None = None
 
     model_config = ConfigDict(extra="forbid")

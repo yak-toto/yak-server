@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from yak_server.database.models import BinaryBetModel, ScoreBetModel
@@ -7,9 +9,9 @@ if TYPE_CHECKING:
 
 def modify_score_bet_successfully(
     user_name: str,
-    original_bet: "ScoreBetModel",
-    new_score1: Optional[int],
-    new_score2: Optional[int],
+    original_bet: ScoreBetModel,
+    new_score1: int | None,
+    new_score2: int | None,
 ) -> str:
     return (
         f"{user_name} modify "
@@ -22,9 +24,9 @@ def modify_score_bet_successfully(
 
 def modify_binary_bet_successfully(
     user_name: str,
-    original_bet: "BinaryBetModel",
+    original_bet: BinaryBetModel,
     *,
-    new_is_one_won: Optional[bool],
+    new_is_one_won: bool | None,
 ) -> str:
     return (
         f"{user_name} modify "

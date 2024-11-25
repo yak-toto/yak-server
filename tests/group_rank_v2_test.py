@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
@@ -14,8 +16,8 @@ if TYPE_CHECKING:
 
 
 def test_group_rank(
-    app_with_valid_jwt_config: "FastAPI",
-    monkeypatch: "pytest.MonkeyPatch",
+    app_with_valid_jwt_config: FastAPI,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     client = TestClient(app_with_valid_jwt_config)
 

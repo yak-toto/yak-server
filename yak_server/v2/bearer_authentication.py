@@ -1,20 +1,26 @@
+from __future__ import annotations
+
 from functools import wraps
+from typing import TYPE_CHECKING
 
 from jwt import ExpiredSignatureError, PyJWTError
-from strawberry.types import Info
 
 from yak_server.database.models import UserModel
 from yak_server.helpers.authentication import decode_bearer_token
 
-from .context import YakContext
 from .result import ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI
+
+if TYPE_CHECKING:
+    from strawberry.types import Info
+
+    from .context import YakContext
 
 NUMBER_ELEMENTS_IN_AUTHORIZATION = 2
 
 
 def is_authenticated(f):  # noqa: ANN001, ANN201
     @wraps(f)
-    def _verify(*args, info: Info[YakContext, None], **kwargs):
+    def _verify(*args, info: Info[YakContext, None], **kwargs):  # noqa: ANN002, ANN003, ANN202
         auth_headers = info.context.request.headers.get("Authorization", "").split()
         db = info.context.db
         settings = info.context.settings
@@ -43,7 +49,7 @@ def is_authenticated(f):  # noqa: ANN001, ANN201
 
 def is_admin_authenticated(f):  # noqa: ANN001, ANN201
     @wraps(f)
-    def _verify(*args, info: Info[YakContext, None], **kwargs):
+    def _verify(*args, info: Info[YakContext, None], **kwargs):  # noqa: ANN002, ANN003, ANN202
         user = info.context.user
 
         if user.name != "admin":

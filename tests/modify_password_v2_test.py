@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
@@ -71,7 +73,7 @@ QUERY_MODIFY_USER = """
 """
 
 
-def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_modify_password(app_with_valid_jwt_config: FastAPI) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     # Create admin account
