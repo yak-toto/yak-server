@@ -1,6 +1,6 @@
 -e .[db_migration,profiling,sync]
 -r requirements-tests.txt
 pre-commit >=3.5.0
-ruff ==0.7.4
+ruff ==0.8.0
 ssort ==0.14.0
 uvicorn[standard] >=0.25.0
