@@ -69,8 +69,8 @@ class ScoreBetWithGroupIdOut(BaseModel):
     id: UUID4
     locked: bool
     group: Group
-    team1: TeamWithScoreOut
-    team2: TeamWithScoreOut
+    team1: Optional[TeamWithScoreOut] = None
+    team2: Optional[TeamWithScoreOut] = None
 
     @classmethod
     def from_instance(

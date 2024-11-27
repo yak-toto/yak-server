@@ -73,8 +73,9 @@ def compute_finale_phase_from_group_rank(
                 .first()
             )
 
-            binary_bet.match.team1_id = team1.id
-            binary_bet.match.team2_id = team2.id
+            if binary_bet is not None:
+                binary_bet.match.team1_id = team1.id
+                binary_bet.match.team2_id = team2.id
 
             db.flush()
 

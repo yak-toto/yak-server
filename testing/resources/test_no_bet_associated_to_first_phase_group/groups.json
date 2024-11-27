@@ -1,0 +1,16 @@
+[
+    {
+        "index": 1,
+        "code": "A",
+        "phase_code": "GROUP",
+        "description_fr": "Groupe A",
+        "description_en": "Group A"
+    },
+    {
+        "index": 2,
+        "code": "1",
+        "phase_code": "KNOCKOUT",
+        "description_fr": "Finale",
+        "description_en": "Final"
+    }
+]

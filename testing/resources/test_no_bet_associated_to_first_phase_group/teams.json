@@ -1,0 +1,14 @@
+[
+    {
+        "code": "HR",
+        "description_fr": "Croatie",
+        "description_en": "Croatia",
+        "internal_flag_url": "https://fake-team-flag_croatia.com"
+    },
+    {
+        "code": "FI",
+        "description_fr": "Finlande",
+        "description_en": "Finland",
+        "internal_flag_url": "https://fake-team-flag_finland.com"
+    }
+]

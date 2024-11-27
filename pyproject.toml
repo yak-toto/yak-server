@@ -113,7 +113,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.mccabe]
-max-complexity = 11
+max-complexity = 12
 
 [tool.ruff.lint.per-file-ignores]
 "yak_server/cli/*" = ["T20"]
