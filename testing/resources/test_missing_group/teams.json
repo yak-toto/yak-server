@@ -1,0 +1,14 @@
+[
+    {
+        "code": "AR",
+        "description_fr": "Argentine",
+        "description_en": "Argentina",
+        "internal_flag_url": "https://fake-team-flag_argentina.com"
+    },
+    {
+        "code": "MR",
+        "description_fr": "Mauritanie",
+        "description_en": "Mauritania",
+        "internal_flag_url": "https://fake-team-flag_mauritanie.com"
+    }
+]
