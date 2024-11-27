@@ -5,16 +5,20 @@ from unittest.mock import ANY
 
 import pendulum
 import pytest
+from fastapi import status
 from starlette.testclient import TestClient
 
 from testing.mock import MockSettings
 from testing.util import UserData, get_random_string, patch_score_bets
 from yak_server.cli.database import initialize_database
+from yak_server.database import build_local_session_maker
+from yak_server.database.models import UserModel
 from yak_server.helpers.rules import Rules
 from yak_server.helpers.rules.compute_final_from_rank import (
     RuleComputeFinaleFromGroupRank,
     Team,
     Versus,
+    compute_finale_phase_from_group_rank,
 )
 from yak_server.helpers.rules.compute_points import RuleComputePoints
 from yak_server.helpers.settings import get_settings
@@ -387,3 +391,28 @@ def test_compute_points(
             "points": 0.0,
         },
     ]
+
+
+def test_missing_first_phase_group(engine_for_test: "Engine") -> None:
+    to_group = "2"
+
+    rule = RuleComputeFinaleFromGroupRank(
+        to_group=to_group,
+        from_phase="GROUP",
+        versus=[
+            Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="B")),
+            Versus(team1=Team(rank=1, group="B"), team2=Team(rank=2, group="A")),
+        ],
+    )
+
+    local_session_maker = build_local_session_maker(engine_for_test)
+
+    user = UserModel(
+        name="fake_user", first_name="fake", last_name="user", password=get_random_string(150)
+    )
+
+    with local_session_maker() as db:
+        assert compute_finale_phase_from_group_rank(db, user, rule) == (
+            status.HTTP_404_NOT_FOUND,
+            "Group not found with code: 2",
+        )

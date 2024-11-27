@@ -1,0 +1,16 @@
+[
+    {
+        "group_code": "A",
+        "index": 2,
+        "team1_code": "BR",
+        "team2_code": "LA",
+        "bet_type_from_match": "SCORE_BET"
+    },
+    {
+        "group_code": "A",
+        "index": 1,
+        "team1_code": null,
+        "team2_code": null,
+        "bet_type_from_match": "SCORE_BET"
+    }
+]

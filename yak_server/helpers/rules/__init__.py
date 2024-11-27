@@ -24,8 +24,8 @@ class RuleMetadata:
         self,
         *,
         function: Union[
-            Callable[[Session, UserModel, RuleComputeFinaleFromGroupRank], None],
-            Callable[[Session, UserModel, RuleComputePoints], None],
+            Callable[[Session, UserModel, RuleComputeFinaleFromGroupRank], tuple[int, str]],
+            Callable[[Session, UserModel, RuleComputePoints], tuple[int, str]],
         ],
         attribute: str,
         required_admin: bool = False,
