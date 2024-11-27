@@ -2,13 +2,14 @@ import json
 from pathlib import Path
 from secrets import randbelow
 
+import pytest
 from dotenv import dotenv_values
 from typer.testing import CliRunner
 
 from testing.util import get_random_string
 from yak_server.cli import app
 
-runner = CliRunner()
+runner = CliRunner(mix_stderr=False)
 
 
 def test_yak_env_init() -> None:
@@ -81,3 +82,25 @@ def test_yak_env_init_world_cup_2018() -> None:
 
         assert env["RULES"] is not None
         assert json.loads(env["RULES"]) == {}
+
+
+def test_yak_env_init_invalid_lockdatetime(monkeypatch: pytest.MonkeyPatch) -> None:
+    with runner.isolated_filesystem() as tmpdir:
+        date = "2022-11-12"
+
+        (Path(tmpdir) / "data" / "competition0").mkdir(parents=True)
+        (Path(tmpdir) / "data" / "competition0" / "common.json").write_text(
+            json.dumps({"lock_datetime": date, "official_results_url": ""})
+        )
+
+        monkeypatch.setattr("yak_server.cli.env.__file__", (Path(tmpdir) / "e" / "e").resolve())
+
+        result = runner.invoke(
+            app,
+            ["env", "init"],
+            input="n\ny\nroot\ny\n3000\ndb\n1800\n1\n",
+            catch_exceptions=True,
+        )
+
+        assert result.exit_code == 1
+        assert str(result.exception) == f"lock_datetime is not a valid datetime: {date}"
