@@ -1,6 +1,7 @@
 from itertools import chain
 from typing import TYPE_CHECKING
 
+from fastapi import status
 from pydantic import BaseModel
 from sqlalchemy import and_
 
@@ -33,8 +34,11 @@ def compute_finale_phase_from_group_rank(
     db: "Session",
     user: "UserModel",
     rule_config: RuleComputeFinaleFromGroupRank,
-) -> None:
-    first_phase_phase_group = db.query(GroupModel).filter_by(code=rule_config.to_group).first()
+) -> tuple[int, str]:
+    first_phase_group = db.query(GroupModel).filter_by(code=rule_config.to_group).first()
+
+    if first_phase_group is None:
+        return status.HTTP_404_NOT_FOUND, f"Group not found with code: {rule_config.to_group}"
 
     groups_result = {
         group.code: get_group_rank_with_code(db, user, group.id)
@@ -63,15 +67,18 @@ def compute_finale_phase_from_group_rank(
                     and_(
                         MatchModel.index == index,
                         MatchModel.user_id == user.id,
-                        MatchModel.group_id == first_phase_phase_group.id,
+                        MatchModel.group_id == first_phase_group.id,
                     ),
                 )
                 .first()
             )
 
-            binary_bet.match.team1_id = team1.id
-            binary_bet.match.team2_id = team2.id
+            if binary_bet is not None:
+                binary_bet.match.team1_id = team1.id
+                binary_bet.match.team2_id = team2.id
 
             db.flush()
 
     db.commit()
+
+    return status.HTTP_200_OK, ""
