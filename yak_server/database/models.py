@@ -5,7 +5,8 @@ from uuid import UUID, uuid4
 import sqlalchemy as sa
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
-from sqlalchemy import CheckConstraint, DateTime, UniqueConstraint
+from pendulum import DateTime
+from sqlalchemy import CheckConstraint, UniqueConstraint
 from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.dialects.postgresql import UUID as DB_UUID

@@ -77,20 +77,31 @@ class MissingTeamDuringInitError(Exception):
         super().__init__(f"Error during database initialization: team_code={team_code} not found.")
 
 
+class MissingGroupDuringInitError(Exception):
+    def __init__(self, group_code: str) -> None:
+        super().__init__(
+            f"Error during database initialization: group_code={group_code} not found."
+        )
+
+
 def fetch_team_id(team_code: Optional[str], db: "Session") -> Optional[UUID]:
     if team_code is None:
         return None
 
-    team1 = db.query(TeamModel).filter_by(code=team_code).first()
+    team = db.query(TeamModel).filter_by(code=team_code).first()
 
-    if team1 is None:
+    if team is None:
         raise MissingTeamDuringInitError(team_code)
 
-    return team1.id
+    return team.id
 
 
 def fetch_group_id(group_code: str, db: "Session") -> UUID:
     group = db.query(GroupModel).filter_by(code=group_code).first()
+
+    if group is None:
+        raise MissingGroupDuringInitError(group_code)
+
     return group.id
 
 
@@ -140,6 +151,9 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
             db.flush()
 
             team_instance = db.query(TeamModel).filter_by(code=team["code"]).first()
+
+            if team_instance is None:  # pragma: no cover
+                raise MissingTeamDuringInitError(team_code=team["code"])
 
             update_flag_url_stmt = (
                 update(TeamModel)

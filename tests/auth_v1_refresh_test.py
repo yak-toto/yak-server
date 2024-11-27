@@ -157,7 +157,7 @@ def test_refresh_token_expired(app_with_null_jwt_refresh_expiration_time: "FastA
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    refresh_cookie = response_signup.cookies.get("refresh_token")
+    refresh_cookie = response_signup.cookies["refresh_token"]
 
     time.sleep(5)  # Wait for the refresh token to expire
 
@@ -194,7 +194,7 @@ def test_refresh_token_rotation(app_with_valid_jwt_config: "FastAPI") -> None:
 
     assert response.status_code == HTTPStatus.CREATED
 
-    cookies = {"refresh_token": client.cookies.get("refresh_token")}
+    cookies = {"refresh_token": client.cookies["refresh_token"]}
 
     # Refresh the token
     response = client.post("/api/v1/users/refresh")

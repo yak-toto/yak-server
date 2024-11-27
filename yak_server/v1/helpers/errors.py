@@ -6,6 +6,7 @@ from uuid import UUID
 from fastapi import HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from yak_server.helpers.errors import (
@@ -245,5 +246,20 @@ def set_exception_handler(app: "FastAPI") -> None:
                 "ok": False,
                 "error_code": status.HTTP_422_UNPROCESSABLE_ENTITY,
                 "description": errors,
+            },
+        )
+
+    @app.exception_handler(SQLAlchemyError)
+    def sql_alchemy_error_handler(_: Request, sql_alchemy_error: SQLAlchemyError) -> JSONResponse:
+        log_traceback(sql_alchemy_error)
+
+        logger.error(f"Database error: {type(sql_alchemy_error).__name__} {sql_alchemy_error}")
+
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={
+                "ok": False,
+                "error_code": status.HTTP_503_SERVICE_UNAVAILABLE,
+                "description": "Service Unavailable",
             },
         )

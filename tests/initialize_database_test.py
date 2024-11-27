@@ -5,6 +5,7 @@ import pytest
 from testing.mock import MockSettings
 from yak_server import create_app
 from yak_server.cli.database import (
+    MissingGroupDuringInitError,
     MissingPhaseDuringInitError,
     MissingTeamDuringInitError,
     initialize_database,
@@ -56,3 +57,17 @@ def test_missing_team2(monkeypatch: pytest.MonkeyPatch, engine_for_test: "Engine
         initialize_database(engine_for_test, app)
 
     assert str(exception.value) == "Error during database initialization: team_code=BR not found."
+
+
+def test_missing_group(monkeypatch: pytest.MonkeyPatch, engine_for_test: "Engine") -> None:
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        MockSettings(data_folder_relative="test_missing_group"),
+    )
+
+    app = create_app()
+
+    with pytest.raises(MissingGroupDuringInitError) as exception:
+        initialize_database(engine_for_test, app)
+
+    assert str(exception.value) == "Error during database initialization: group_code=A not found."

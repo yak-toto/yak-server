@@ -437,3 +437,55 @@ def test_group_rank(
         response_group_rank_response.json()["result"]["group_rank"],
         key=lambda group_position: group_position["team"]["code"],
     )
+
+
+def test_group_rank_team_not_defined(
+    app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        MockSettings(data_folder_relative="test_group_rank_team_not_defined"),
+    )
+
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
+
+    client = TestClient(app_with_valid_jwt_config)
+
+    response_signup = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": get_random_string(6),
+            "first_name": get_random_string(10),
+            "last_name": get_random_string(10),
+            "password": get_random_string(10),
+        },
+    )
+
+    assert response_signup.status_code == HTTPStatus.CREATED
+
+    access_token = response_signup.json()["result"]["access_token"]
+
+    response_retrieve_bets_group = client.get(
+        "/api/v1/bets/groups/A", headers={"Authorization": f"Bearer {access_token}"}
+    )
+
+    assert response_retrieve_bets_group.status_code == HTTPStatus.OK
+
+    bet_id = response_retrieve_bets_group.json()["result"]["score_bets"][1]["id"]
+
+    response_modify_score_bet = client.patch(
+        f"/api/v1/score_bets/{bet_id}",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={"team1": {"score": 2}, "team2": {"score": 0}},
+    )
+
+    assert response_modify_score_bet.status_code == HTTPStatus.OK
+
+    response_group_result_response = client.get(
+        "/api/v1/bets/groups/rank/A",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+
+    assert response_group_result_response.status_code == HTTPStatus.OK
