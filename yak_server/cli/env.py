@@ -22,6 +22,11 @@ class RuleNotDefinedError(Exception):
         super().__init__(f"Rule not defined: {rule_id}")
 
 
+class InvalidLockDatetimeError(Exception):
+    def __init__(self, raw_lock_datetime: str) -> None:
+        super().__init__(f"lock_datetime is not a valid datetime: {raw_lock_datetime}")
+
+
 def write_env_file(env: dict[str, Any], filename: str) -> None:
     Path(filename).write_text(
         "".join([f"{env_var}={env_value}\n" for env_var, env_value in env.items()]),
@@ -99,9 +104,13 @@ class EnvBuilder:
         # Load lock datetime
         common_settings = json.loads((data_folder / "common.json").read_text())
 
-        self.env["LOCK_DATETIME"] = pendulum.parse(
-            common_settings["lock_datetime"]
-        ).to_iso8601_string()
+        parsed_lock_datetime = pendulum.parse(common_settings["lock_datetime"], exact=True)
+
+        if not isinstance(parsed_lock_datetime, pendulum.DateTime):
+            raise InvalidLockDatetimeError(common_settings["lock_datetime"])
+
+        self.env["LOCK_DATETIME"] = parsed_lock_datetime.to_iso8601_string()
+
         self.env["OFFICIAL_RESULTS_URL"] = common_settings["official_results_url"]
 
     def write(self) -> None:
