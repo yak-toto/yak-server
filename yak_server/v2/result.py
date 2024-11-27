@@ -216,7 +216,7 @@ GroupByCodeResult = Annotated[
 
 @strawberry.type
 class GroupByIdNotFound:
-    id: strawberry.Private[str]
+    id: strawberry.Private[UUID]
 
     @strawberry.field
     def message(self) -> str:

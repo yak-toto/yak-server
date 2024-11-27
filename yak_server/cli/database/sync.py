@@ -14,6 +14,7 @@ from yak_server.database.models import (
     UserModel,
 )
 from yak_server.helpers.settings import get_settings
+from yak_server.v1.helpers.errors import NoAdminUser
 
 try:
     import httpx
@@ -182,6 +183,9 @@ def synchronize_official_results() -> None:
         matches = extract_matches_from_html(groups)
 
         admin = db.query(UserModel).filter_by(name="admin").first()
+
+        if admin is None:
+            raise NoAdminUser
 
         for match in matches:
             score_bet = (
