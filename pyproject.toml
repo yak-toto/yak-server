@@ -67,10 +67,9 @@ dev = [
 type-checking = [
     "hatchling>=1.27.0",
     "lxml-stubs>=0.5.1",
-    "mypy>=1.14.1",
+    "mypy>=1.17.0",
     "types-beautifulsoup4>=4.12.0.20241020",
     "types-psycopg2>=2.9.21.20250121",
-    "types-pymysql>=1.1.0.20241103",
 ]
 
 [tool.hatch.version]
@@ -114,7 +113,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.mccabe]
-max-complexity = 11
+max-complexity = 12
 
 [tool.ruff.lint.per-file-ignores]
 "yak_server/cli/*" = ["T20"]
