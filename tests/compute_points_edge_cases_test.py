@@ -416,3 +416,60 @@ def test_missing_first_phase_group(engine_for_test: "Engine") -> None:
             status.HTTP_404_NOT_FOUND,
             "Group not found with code: 2",
         )
+
+
+def test_no_bet_associated_to_first_phase_group(
+    app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        MockSettings(data_folder_relative="test_no_bet_associated_to_first_phase_group"),
+    )
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
+
+    client = TestClient(app_with_valid_jwt_config)
+
+    response = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": "fake_user",
+            "first_name": "fake",
+            "last_name": "user",
+            "password": get_random_string(15),
+        },
+    )
+
+    assert response.status_code == HTTPStatus.CREATED
+
+    user_id = response.json()["result"]["id"]
+    access_token = response.json()["result"]["access_token"]
+
+    response_get_all_bets = client.get(
+        "/api/v1/bets", headers={"Authorization": f"Bearer {access_token}"}
+    )
+    assert response_get_all_bets.status_code == HTTPStatus.OK
+    bet_id = response_get_all_bets.json()["result"]["score_bets"][0]["id"]
+
+    response = client.patch(
+        f"/api/v1/score_bets/{bet_id}",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={"team1": {"score": 4}, "team2": {"score": 2}},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+    local_session_maker = build_local_session_maker(engine_for_test)
+
+    rule = RuleComputeFinaleFromGroupRank(
+        to_group="1",
+        from_phase="GROUP",
+        versus=[Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="A"))],
+    )
+
+    with local_session_maker() as db:
+        user = db.query(UserModel).filter_by(id=user_id).first()
+
+        assert user is not None
+        assert compute_finale_phase_from_group_rank(db, user, rule) == (status.HTTP_200_OK, "")

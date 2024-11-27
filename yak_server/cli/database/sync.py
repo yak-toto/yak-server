@@ -136,6 +136,9 @@ def extract_matches_from_html(groups: list[GroupContainer]) -> list[Match]:
         for match_index, match_html in enumerate(matches_html, start=1):
             score1, score2 = parse_score(match_html.find("th", class_="fscore"))
 
+            if score1 is None or score2 is None:  # pragma: no cover
+                continue
+
             match = Match(
                 index=match_index,
                 group=Group(index=group.model.index),
@@ -239,5 +242,7 @@ def synchronize_official_results(engine: "Engine") -> None:
                         binary_bet.is_one_won = match.team1.won
                     else:
                         binary_bet.is_one_won = match.team1.score > match.team2.score
+                else:  # pragma: no cover
+                    pass
 
         db.commit()
