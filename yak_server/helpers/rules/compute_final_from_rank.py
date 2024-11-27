@@ -36,6 +36,9 @@ def compute_finale_phase_from_group_rank(
 ) -> None:
     first_phase_phase_group = db.query(GroupModel).filter_by(code=rule_config.to_group).first()
 
+    if first_phase_phase_group is None:
+        raise ValueError
+
     groups_result = {
         group.code: get_group_rank_with_code(db, user, group.id)
         for group in db.query(GroupModel)
@@ -69,8 +72,9 @@ def compute_finale_phase_from_group_rank(
                 .first()
             )
 
-            binary_bet.match.team1_id = team1.id
-            binary_bet.match.team2_id = team2.id
+            if binary_bet is not None:
+                binary_bet.match.team1_id = team1.id
+                binary_bet.match.team2_id = team2.id
 
             db.flush()
 

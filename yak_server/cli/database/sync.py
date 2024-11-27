@@ -136,6 +136,9 @@ def extract_matches_from_html(groups: list[GroupContainer]) -> list[Match]:
         for match_index, match_html in enumerate(matches_html, start=1):
             score1, score2 = parse_score(match_html.find("th", class_="fscore"))
 
+            if score1 is None or score2 is None:
+                continue
+
             match = Match(
                 index=match_index,
                 group=Group(index=group.model.index),
