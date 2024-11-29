@@ -88,7 +88,8 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
 
     list_datetime_backup = sorted(
         pendulum.from_format(
-            file.name.replace(".sql", "").replace("yak_toto_backup_", ""), "YYYYMMDD[T]HHmmssZZ"
+            file.name.removesuffix(".sql").removeprefix("yak_toto_backup_"),
+            "YYYYMMDD[T]HHmmssZZ",
         )
         for file in (Path(__file__).parents[1] / "yak_server" / "cli" / "backup_files").glob("*")
     )

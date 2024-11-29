@@ -4,7 +4,7 @@ from typing import Optional
 
 from sqlalchemy import and_
 
-from yak_server.database import SessionLocal
+from yak_server.database import build_local_session_maker
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
@@ -168,65 +168,70 @@ def synchronize_official_results() -> None:
 
     soup = bs4.BeautifulSoup(response.text, "lxml")
 
-    db = SessionLocal()
+    local_session_maker = build_local_session_maker()
 
-    groups = [
-        GroupContainer(model=group, content=content.parent.parent)
-        for group in db.query(GroupModel).order_by(GroupModel.index)
-        for content in soup.find(
-            "h3", id=group.description_en.replace(" ", "_"), string=group.description_en
-        )
-    ]
-
-    matches = extract_matches_from_html(groups)
-
-    admin = db.query(UserModel).filter_by(name="admin").first()
-
-    for match in matches:
-        score_bet = (
-            db.query(ScoreBetModel)
-            .join(ScoreBetModel.match)
-            .join(MatchModel.group)
-            .filter(
-                and_(
-                    GroupModel.index == match.group.index,
-                    MatchModel.index == match.index,
-                    MatchModel.user_id == admin.id,
-                )
+    with local_session_maker() as db:
+        groups = [
+            GroupContainer(model=group, content=content.parent.parent)
+            for group in db.query(GroupModel).order_by(GroupModel.index)
+            for content in soup.find(
+                "h3", id=group.description_en.replace(" ", "_"), string=group.description_en
             )
-            .first()
-        )
+        ]
 
-        if score_bet is not None:
-            score_bet.score1 = match.team1.score
-            score_bet.score2 = match.team2.score
+        matches = extract_matches_from_html(groups)
 
-        binary_bet = (
-            db.query(BinaryBetModel)
-            .join(BinaryBetModel.match)
-            .join(MatchModel.group)
-            .join(GroupModel.phase)
-            .filter(
-                and_(
-                    GroupModel.index == match.group.index,
-                    MatchModel.index == match.index,
-                    MatchModel.user_id == admin.id,
+        admin = db.query(UserModel).filter_by(name="admin").first()
+
+        for match in matches:
+            score_bet = (
+                db.query(ScoreBetModel)
+                .join(ScoreBetModel.match)
+                .join(MatchModel.group)
+                .filter(
+                    and_(
+                        GroupModel.index == match.group.index,
+                        MatchModel.index == match.index,
+                        MatchModel.user_id == admin.id,
+                    )
                 )
+                .first()
             )
-            .first()
-        )
 
-        if binary_bet is not None:
-            team1 = db.query(TeamModel).filter_by(description_en=match.team1.description).first()
-            team2 = db.query(TeamModel).filter_by(description_en=match.team2.description).first()
+            if score_bet is not None:
+                score_bet.score1 = match.team1.score
+                score_bet.score2 = match.team2.score
 
-            if team1 is not None and team2 is not None:
-                binary_bet.match.team1_id = team1.id
-                binary_bet.match.team2_id = team2.id
+            binary_bet = (
+                db.query(BinaryBetModel)
+                .join(BinaryBetModel.match)
+                .join(MatchModel.group)
+                .join(GroupModel.phase)
+                .filter(
+                    and_(
+                        GroupModel.index == match.group.index,
+                        MatchModel.index == match.index,
+                        MatchModel.user_id == admin.id,
+                    )
+                )
+                .first()
+            )
 
-                if match.team1.won is not None:
-                    binary_bet.is_one_won = match.team1.won
-                else:
-                    binary_bet.is_one_won = match.team1.score > match.team2.score
+            if binary_bet is not None:
+                team1 = (
+                    db.query(TeamModel).filter_by(description_en=match.team1.description).first()
+                )
+                team2 = (
+                    db.query(TeamModel).filter_by(description_en=match.team2.description).first()
+                )
 
-    db.commit()
+                if team1 is not None and team2 is not None:
+                    binary_bet.match.team1_id = team1.id
+                    binary_bet.match.team2_id = team2.id
+
+                    if match.team1.won is not None:
+                        binary_bet.is_one_won = match.team1.won
+                    else:
+                        binary_bet.is_one_won = match.team1.score > match.team2.score
+
+        db.commit()

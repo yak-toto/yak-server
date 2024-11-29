@@ -11,7 +11,7 @@ from testing.mock import MockSettings
 from testing.util import get_random_string
 from yak_server import create_app
 from yak_server.cli.database import create_database, delete_database, drop_database
-from yak_server.database import mysql_settings
+from yak_server.database import get_mysql_settings
 from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 
 
 def pytest_configure() -> None:
+    mysql_settings = get_mysql_settings()
+
     connection = pymysql.connect(
         host=mysql_settings.host,
         user=mysql_settings.user_name,
