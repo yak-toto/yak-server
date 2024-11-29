@@ -17,6 +17,7 @@ from yak_server.cli.database import (
     delete_database,
     drop_database,
 )
+from yak_server.database import MySQLSettings
 from yak_server.helpers.authentication import NameAlreadyExistsError
 from yak_server.helpers.settings import get_settings
 
@@ -70,7 +71,8 @@ def test_backup(monkeypatch: pytest.MonkeyPatch) -> None:
 
     list_datetime_backup = sorted(
         pendulum.from_format(
-            file.name.replace(".sql", "").replace("yak_toto_backup_", ""), "YYYYMMDD[T]HHmmssZZ"
+            file.name.removesuffix(".sql").removeprefix("yak_toto_backup_"),
+            "YYYYMMDD[T]HHmmssZZ",
         )
         for file in (Path(__file__).parents[1] / "yak_server" / "cli" / "backup_files").glob("*")
     )
@@ -79,7 +81,16 @@ def test_backup(monkeypatch: pytest.MonkeyPatch) -> None:
     assert pendulum.now("UTC") - list_datetime_backup[-1] <= pendulum.duration(seconds=2)
 
     # Check BackupError if password is incorrect
-    monkeypatch.setattr("yak_server.cli.database.mysql_settings.db", get_random_string(6))
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_mysql_settings",
+        lambda: MySQLSettings(
+            host="127.0.0.1",
+            user_name=get_random_string(5),
+            password=get_random_string(6),
+            port=1000,
+            db=get_random_string(3),
+        ),
+    )
 
     with pytest.raises(BackupError):
         backup_database()

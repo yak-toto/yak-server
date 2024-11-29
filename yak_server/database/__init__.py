@@ -2,8 +2,8 @@ from functools import cache
 
 import pymysql
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 
 class MySQLSettings(BaseSettings):
@@ -36,19 +36,23 @@ def compute_database_uri(
     return f"mysql+{mysql_client}://{mysql_user_name}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_db}"
 
 
-mysql_settings = get_mysql_settings()
+def build_engine() -> Engine:
+    mysql_settings = get_mysql_settings()
+
+    database_url = compute_database_uri(
+        pymysql.__name__,
+        mysql_settings.host,
+        mysql_settings.user_name,
+        mysql_settings.password,
+        mysql_settings.port,
+        mysql_settings.db,
+    )
+
+    return create_engine(database_url, pool_recycle=7200, pool_pre_ping=True)
 
 
-SQLALCHEMY_DATABASE_URL = compute_database_uri(
-    pymysql.__name__,
-    mysql_settings.host,
-    mysql_settings.user_name,
-    mysql_settings.password,
-    mysql_settings.port,
-    mysql_settings.db,
-)
+def build_local_session_maker() -> Session:
+    return sessionmaker(autocommit=False, autoflush=False, bind=build_engine())
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_recycle=7200, pool_pre_ping=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

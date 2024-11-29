@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pendulum
 
-from yak_server.database import Base, SessionLocal, engine, mysql_settings
+from yak_server.database import Base, build_engine, build_local_session_maker, get_mysql_settings
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
@@ -50,17 +50,23 @@ class BackupError(Exception):
 
 
 def create_database() -> None:
-    with SessionLocal():
-        Base.metadata.create_all(bind=engine)
+    local_session_maker = build_local_session_maker()
+
+    with local_session_maker():
+        Base.metadata.create_all(bind=build_engine())
 
 
 def create_admin(password: str) -> None:
-    with SessionLocal() as db:
+    local_session_maker = build_local_session_maker()
+
+    with local_session_maker() as db:
         _ = signup_user(db, name="admin", first_name="admin", last_name="admin", password=password)
 
 
 def initialize_database(app: "FastAPI") -> None:
-    with SessionLocal() as db:
+    local_session_maker = build_local_session_maker()
+
+    with local_session_maker() as db:
         data_folder = get_settings().data_folder
 
         phases = json.loads(Path(data_folder, "phases.json").read_text(encoding="utf-8"))
@@ -122,6 +128,8 @@ def initialize_database(app: "FastAPI") -> None:
 def backup_database() -> None:
     setup_logging(debug=False)
 
+    mysql_settings = get_mysql_settings()
+
     result = subprocess.run(  # noqa: S603
         [  # noqa: S607
             "mysqldump",
@@ -165,7 +173,9 @@ def delete_database(app: "FastAPI") -> None:
     if not app.debug:
         raise RecordDeletionInProductionError
 
-    with SessionLocal() as db:
+    local_session_maker = build_local_session_maker()
+
+    with local_session_maker() as db:
         db.query(GroupPositionModel).delete()
         db.query(ScoreBetModel).delete()
         db.query(BinaryBetModel).delete()
@@ -182,8 +192,10 @@ def drop_database(app: "FastAPI") -> None:
     if not app.debug:
         raise TableDropInProductionError
 
-    with SessionLocal():
-        Base.metadata.drop_all(bind=engine)
+    local_session_maker = build_local_session_maker()
+
+    with local_session_maker():
+        Base.metadata.drop_all(bind=build_engine())
 
 
 def print_export_command(alembic_ini_path: Path) -> None:
@@ -219,7 +231,9 @@ def setup_migration(*, short: bool = False) -> None:
 
 
 def compute_score_board() -> None:
-    with SessionLocal() as db:
+    local_session_maker = build_local_session_maker()
+
+    with local_session_maker() as db:
         admin = db.query(UserModel).filter_by(name="admin").first()
 
         rule_config = get_settings().rules.compute_points
