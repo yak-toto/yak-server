@@ -55,5 +55,5 @@ def validate_password(password: str) -> None:
     if not re.search(r"[0-9]", password) and password_requirements.DIGIT:
         raise NoDigitError
 
-    if re.search(r" ", password) and password_requirements.NO_SPACE:
+    if " " in password and password_requirements.NO_SPACE:
         raise SpaceError
