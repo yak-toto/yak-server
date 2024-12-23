@@ -1,4 +1,4 @@
-mypy==1.13.0
+mypy==1.14.0
 types-colorama==0.4.15.20240311
 types-psycopg2==2.9.21.20241019
 types-Pygments==2.18.0.20240506
