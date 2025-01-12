@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import TYPE_CHECKING, Annotated, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -11,6 +11,10 @@ from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.errors import NoResultsForAdminUser
 from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.results import UserResult
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
 
 router = APIRouter(tags=["results"])
 
@@ -43,7 +47,7 @@ def compute_rank(db: Session, user_id: UUID) -> Optional[int]:
         .subquery()
     )
 
-    rank = db.query(subq.c.rownum).filter(subq.c.id == user_id).first()
+    rank: Sequence[int] = db.query(subq.c.rownum).filter(subq.c.id == user_id).first()
 
     if not rank:
         return None

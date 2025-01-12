@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import and_, update
+from sqlalchemy.orm import Query
 
 from yak_server.database.models import GroupPositionModel, MatchModel, ScoreBetModel
 
@@ -13,13 +14,13 @@ if TYPE_CHECKING:
     from yak_server.database.models import UserModel
 
 
-def create_group_position(score_bets: list["ScoreBetModel"]) -> list[GroupPositionModel]:
+def create_group_position(score_bets: "Query[ScoreBetModel]") -> list[GroupPositionModel]:
     team_ids = []
 
     group_positions = []
 
     for score_bet in score_bets:
-        if score_bet.match.team1_id not in team_ids:
+        if score_bet.match.team1_id is not None and score_bet.match.team1_id not in team_ids:
             group_positions.append(
                 GroupPositionModel(
                     team_id=score_bet.match.team1_id,
@@ -29,7 +30,7 @@ def create_group_position(score_bets: list["ScoreBetModel"]) -> list[GroupPositi
             )
             team_ids.append(score_bet.match.team1_id)
 
-        if score_bet.match.team2_id not in team_ids:
+        if score_bet.match.team2_id is not None and score_bet.match.team2_id not in team_ids:
             group_positions.append(
                 GroupPositionModel(
                     team_id=score_bet.match.team2_id,
@@ -52,8 +53,7 @@ class GroupPosition:
 
 
 def compute_group_rank(
-    group_rank: list[GroupPositionModel],
-    score_bets: list["ScoreBetModel"],
+    group_rank: Query[GroupPositionModel], score_bets: Query["ScoreBetModel"]
 ) -> list[GroupPositionModel]:
     new_group_position = {}
 
@@ -105,9 +105,7 @@ def compute_group_rank(
 
 
 def get_group_rank_with_code(
-    db: "Session",
-    user: "UserModel",
-    group_id: str,
+    db: "Session", user: "UserModel", group_id: "UUID"
 ) -> list[GroupPositionModel]:
     group_rank = db.query(GroupPositionModel).filter_by(group_id=group_id, user_id=user.id)
 
@@ -128,12 +126,12 @@ def get_group_rank_with_code(
         .filter(and_(MatchModel.user_id == user.id, MatchModel.group_id == group_id))
     )
 
-    group_rank = compute_group_rank(group_rank, score_bets)
+    group_rank_list = compute_group_rank(group_rank, score_bets)
 
     db.commit()
 
     return sorted(
-        group_rank,
+        group_rank_list,
         key=lambda team_result: (
             team_result.points,
             team_result.goals_difference,
@@ -143,7 +141,7 @@ def get_group_rank_with_code(
     )
 
 
-def set_recomputation_flag(db: "Session", team_id: "UUID", user_id: "UUID") -> None:
+def set_recomputation_flag(db: "Session", team_id: Optional["UUID"], user_id: "UUID") -> None:
     db.execute(
         update(GroupPositionModel)
         .values(need_recomputation=True)

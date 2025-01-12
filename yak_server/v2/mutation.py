@@ -48,13 +48,8 @@ from .result import (
     UnsatisfiedPasswordRequirements,
     UserNameAlreadyExists,
     UserNotFound,
-    UserWithoutSensitiveInfo,
 )
-from .schema import (
-    BinaryBet,
-    ScoreBet,
-    UserWithToken,
-)
+from .schema import BinaryBet, ScoreBet, UserWithoutSensitiveInfo, UserWithToken
 
 logger = logging.getLogger(__name__)
 
