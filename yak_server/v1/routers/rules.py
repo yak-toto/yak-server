@@ -5,11 +5,11 @@ from pydantic import UUID4
 from sqlalchemy.orm import Session
 
 from yak_server.database.models import UserModel
+from yak_server.helpers.authentication import get_current_user
 from yak_server.helpers.database import get_db
+from yak_server.helpers.errors import RuleNotFound, UnauthorizedAccessToAdminAPI
 from yak_server.helpers.rules import RULE_MAPPING
 from yak_server.helpers.settings import Settings, get_settings
-from yak_server.v1.helpers.auth import get_current_user
-from yak_server.v1.helpers.errors import RuleNotFound, UnauthorizedAccessToAdminAPI
 from yak_server.v1.models.generic import GenericOut
 
 router = APIRouter(prefix="/rules", tags=["rules"])

@@ -18,7 +18,7 @@ from yak_server.cli.database import (
     drop_database,
 )
 from yak_server.database import MySQLSettings
-from yak_server.helpers.authentication import NameAlreadyExistsError
+from yak_server.helpers.errors import NameAlreadyExistsError
 from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
