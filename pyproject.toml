@@ -36,11 +36,11 @@ dependencies = [
     "argon2-cffi ==23.1.0",
     "fastapi ==0.115.6",
     "typer ==0.15.1",
-    "SQLAlchemy ==2.0.36",
+    "SQLAlchemy ==2.0.37",
     "SQLAlchemy-Utils ==0.41.2",
     "pendulum ==3.0.0",
     "pydantic-settings ==2.7.1",
-    "strawberry-graphql ==0.256.1",
+    "strawberry-graphql ==0.258.0",
 ]
 dynamic = ["version"]
 
