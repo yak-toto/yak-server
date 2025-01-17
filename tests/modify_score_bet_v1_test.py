@@ -24,7 +24,7 @@ def test_modify_score_bet(
     fake_jwt_secret_key = get_random_string(100)
 
     app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=10,
+        jwt_expiration_time=100,
         jwt_secret_key=fake_jwt_secret_key,
         lock_datetime_shift=pendulum.duration(minutes=10),
     )
@@ -92,7 +92,7 @@ def test_modify_score_bet(
 
     # Error case : check locked bet
     app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=10,
+        jwt_expiration_time=100,
         jwt_secret_key=fake_jwt_secret_key,
         lock_datetime_shift=-pendulum.duration(minutes=10),
     )
@@ -110,7 +110,7 @@ def test_modify_score_bet(
     }
 
     app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=10,
+        jwt_expiration_time=100,
         jwt_secret_key=fake_jwt_secret_key,
         lock_datetime_shift=pendulum.duration(minutes=10),
     )

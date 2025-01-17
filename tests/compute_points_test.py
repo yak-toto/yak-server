@@ -93,7 +93,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
     )
 
     app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=10,
+        jwt_expiration_time=100,
         jwt_secret_key=get_random_string(100),
         lock_datetime_shift=pendulum.duration(seconds=10),
         rules=rules,

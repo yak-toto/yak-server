@@ -185,7 +185,7 @@ def test_binary_bet(
 
     # Error case : locked binary bet
     app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=10,
+        jwt_expiration_time=100,
         jwt_secret_key=jwt_secret_key,
         lock_datetime_shift=-pendulum.duration(seconds=10),
     )
@@ -209,7 +209,7 @@ def test_binary_bet(
     }
 
     app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=10,
+        jwt_expiration_time=100,
         jwt_secret_key=jwt_secret_key,
         lock_datetime_shift=pendulum.duration(seconds=10),
     )

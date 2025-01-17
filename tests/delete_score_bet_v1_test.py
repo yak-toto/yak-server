@@ -23,7 +23,7 @@ def test_delete_score_bet(
 
     app.dependency_overrides[get_settings] = MockSettings(
         jwt_secret_key=fake_jwt_secret_key,
-        jwt_expiration_time=10,
+        jwt_expiration_time=100,
         lock_datetime_shift=pendulum.duration(minutes=10),
     )
 
@@ -89,7 +89,7 @@ def test_delete_score_bet(
     # Check bet locking
     app.dependency_overrides[get_settings] = MockSettings(
         lock_datetime_shift=-pendulum.duration(minutes=10),
-        jwt_expiration_time=10,
+        jwt_expiration_time=100,
         jwt_secret_key=fake_jwt_secret_key,
     )
 
