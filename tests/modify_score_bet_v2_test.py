@@ -215,7 +215,7 @@ def test_modify_score_bet(
 
     # Error case : check locked score bet
     app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=10,
+        jwt_expiration_time=100,
         jwt_secret_key=app_with_valid_jwt_config.dependency_overrides[
             get_settings
         ]().jwt_secret_key,

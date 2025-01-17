@@ -24,7 +24,7 @@ def test_group_rank(
 
     app.dependency_overrides[get_settings] = MockSettings(
         jwt_secret_key=fake_jwt_secret_key,
-        jwt_expiration_time=10,
+        jwt_expiration_time=100,
         lock_datetime_shift=pendulum.duration(minutes=10),
     )
 

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 def test_rule(app: "FastAPI", client: "TestClient") -> None:
     app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=10,
+        jwt_expiration_time=100,
         jwt_secret_key=get_random_string(100),
         rules=Rules(),
     )
