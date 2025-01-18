@@ -22,7 +22,7 @@ def test_yak_env_init() -> None:
         result = runner.invoke(
             app,
             ["env", "init"],
-            input=f"y\ny\n{host}\n{user_name}\n{password}\n{port}\n{database}\n1800\n4\n",
+            input=f"y\n{host}\n{user_name}\n{password}\n{port}\n{database}\n1800\n4\n",
         )
 
         assert result.exit_code == 0
@@ -30,7 +30,6 @@ def test_yak_env_init() -> None:
         env = dotenv_values(Path(".env"))
 
         assert env["DEBUG"] == "1"
-        assert env["PROFILING"] == "1"
         assert env["JWT_EXPIRATION_TIME"] == "1800"
         assert env["JWT_SECRET_KEY"] is not None
         assert len(env["JWT_SECRET_KEY"]) == 256
@@ -66,7 +65,6 @@ def test_yak_env_init_production() -> None:
         env = dotenv_values(Path(".env"))
 
         assert env["DEBUG"] == "0"
-        assert "PROFILING" not in env
 
 
 def test_yak_env_init_world_cup_2018() -> None:

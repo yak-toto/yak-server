@@ -3,21 +3,22 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 from uuid import uuid4
 
+from fastapi import FastAPI
+
+from yak_server import create_app as create_yak_app
+
 try:
     import yappi
 except ImportError:  # pragma: no cover
     yappi = None
 
 if TYPE_CHECKING:
-    from fastapi import FastAPI, Request, Response
+    from fastapi import Request, Response
 
 
 def set_yappi_profiler(app: "FastAPI") -> None:
     if yappi is None:
-        msg = (
-            "Profiling is not available without yappi installed. "
-            "Either install it with `pip install yak-server[profiling]` or disable profiling."
-        )
+        msg = "Profiling is not available without yappi installed."
         raise NotImplementedError(msg)
 
     @app.middleware("http")
@@ -33,7 +34,7 @@ def set_yappi_profiler(app: "FastAPI") -> None:
 
         yappi.stop()
 
-        folder_location = Path(__file__).parents[2] / "profiling"
+        folder_location = Path(__file__).parents[1] / "profiling"
         folder_location.mkdir(parents=True, exist_ok=True)
 
         profiling_log_id = uuid4()
@@ -45,3 +46,11 @@ def set_yappi_profiler(app: "FastAPI") -> None:
         response.headers["profiling-log-id"] = str(profiling_log_id)
 
         return response
+
+
+def create_app() -> FastAPI:
+    app = create_yak_app()
+
+    set_yappi_profiler(app)
+
+    return app

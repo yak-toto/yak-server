@@ -6,7 +6,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from strawberry.fastapi import GraphQLRouter
 
 from .helpers.logging_helpers import setup_logging
-from .helpers.profiling import set_yappi_profiler
 from .v1.helpers.errors import set_exception_handler
 from .v1.routers import bets as bets_router
 from .v1.routers import binary_bets as binary_bets_router
@@ -31,7 +30,6 @@ __version__ = "0.45.3"
 
 class Config(BaseSettings):
     debug: bool = False
-    profiling: bool = False
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
 
@@ -83,11 +81,5 @@ def create_app() -> FastAPI:
 
     # Declare logger configuration for yak server
     setup_logging(debug=app.debug)
-
-    # Set yappi profiler
-    profiling = config.profiling
-
-    if app.debug and profiling:
-        set_yappi_profiler(app)
 
     return app
