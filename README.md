@@ -80,10 +80,8 @@ Yak-server is using `pytest` to run tests.
 
 ## Profiling
 
-You can profile by adding this line in the `.env`
+You can run the application with profiler attached. To do so, please run the following command
 
-```text
-PROFILING=1
+```bash
+uvicorn --reload scripts.profiling:create_app --factory
 ```
-
-Be careful, you need to be in debug mode to activate the profiling. In production mode, adding the environment variable will have no impacts.

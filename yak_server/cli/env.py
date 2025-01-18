@@ -39,12 +39,6 @@ class EnvBuilder:
         self.debug = debug == YesOrNo.y
         self.env["DEBUG"] = 1 if self.debug else 0
 
-    def setup_profiling(self) -> None:
-        if self.debug:
-            profiling = typer.prompt("PROFILING (y/n)", type=YesOrNo)
-
-            self.env["PROFILING"] = 1 if profiling == YesOrNo.y else 0
-
     def setup_mysql_env(self) -> None:
         host = typer.prompt("MYSQL HOST", default="127.0.0.1")
         user_name = typer.prompt("MYSQL USER NAME")
@@ -117,7 +111,6 @@ class EnvBuilder:
 
 def init_env() -> None:
     env_builder = EnvBuilder()
-    env_builder.setup_profiling()
     env_builder.setup_mysql_env()
     env_builder.setup_jwt()
     env_builder.choose_competition()

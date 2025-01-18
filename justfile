@@ -3,6 +3,7 @@ alias i := install
 alias t := test
 alias tc := test-cov
 alias r := run
+alias rp := run_profiling
 alias c := check
 alias f := fmt
 alias l := lint
@@ -30,6 +31,9 @@ test-cov:
 
 run:
     uvicorn --reload --factory yak_server:create_app
+
+run_profiling:
+    uvicorn --reload --factory scripts.profiling:create_app
 
 check:
     pre-commit run -a

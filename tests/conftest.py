@@ -7,6 +7,7 @@ import pymysql
 import pytest
 from fastapi.testclient import TestClient
 
+from scripts.profiling import create_app as create_app_with_profiling
 from testing.mock import MockSettings
 from testing.util import get_random_string
 from yak_server import create_app
@@ -74,30 +75,8 @@ def production_app() -> "FastAPI":
 
 
 @pytest.fixture
-def debug_app_with_profiler() -> Generator["FastAPI", None, None]:
-    os.environ["PROFILING"] = "1"
-    os.environ["DEBUG"] = "1"
-    app = create_app()
-
-    app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=100,
-        jwt_secret_key=get_random_string(15),
-        lock_datetime_shift=pendulum.duration(minutes=10),
-    )
-
-    # Clean database before running test
-    create_database()
-
-    yield app
-
-    app.dependency_overrides = {}
-
-
-@pytest.fixture
-def production_app_with_profiler() -> Generator["FastAPI", None, None]:
-    os.environ["PROFILING"] = "1"
-    os.environ["DEBUG"] = "0"
-    app = create_app()
+def app_with_profiler() -> Generator["FastAPI", None, None]:
+    app = create_app_with_profiling()
 
     app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=100,
