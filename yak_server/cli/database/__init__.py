@@ -226,7 +226,7 @@ def setup_migration(*, short: bool = False) -> None:
             print()
             print(
                 "To enable migration using alembic, please run: "
-                "pip install yak-server[db_migration]"
+                "uv pip install yak-server[db_migration]"
             )
 
 

@@ -15,7 +15,7 @@ setup:
     pre-commit install --install-hooks
 
 install:
-    uv pip install -r {{ justfile_directory() }}/requirements.txt
+    uv sync --all-extras
 
 test:
     pytest -vv

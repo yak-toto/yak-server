@@ -55,6 +55,26 @@ sync = ["beautifulsoup4[lxml] ==4.12.3", "httpx ==0.28.1"]
 [project.scripts]
 yak = "yak_server.cli:app"
 
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pre-commit>=4.0.1",
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+    "pytest-env>=1.1.5",
+    "yappi>=1.6.10",
+]
+type-checking = [
+    "mypy>=1.14.1",
+    "types-colorama>=0.4.15.20240311",
+    "types-psycopg2>=2.9.21.20241019",
+    "types-pygments>=2.19.0.20250107",
+    "types-pyjwt>=1.7.1",
+    "types-pymysql>=1.1.0.20241103",
+    "types-python-dateutil>=2.9.0.20241206",
+    "types-ujson>=5.10.0.20240515",
+]
+
 [tool.hatch.version]
 path = "yak_server/__init__.py"
 

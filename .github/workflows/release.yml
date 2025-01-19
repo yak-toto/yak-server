@@ -19,13 +19,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.10"
+          python-version: 3.10
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Install hatch
-        run: pip install hatchling
+        run: uv tool install hatchling
 
       - name: Create commits
         id: create-commits
@@ -48,16 +50,9 @@ jobs:
       - name: Checkout code
         run: git checkout ${{ steps.create-commits.outputs.new-version }}
 
-      - name: Set up cache
-        uses: actions/cache@v4
-        id: cache
-        with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-publish
-
       - name: Install build dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: pip install build
+        run: uv tool install build
 
       - name: Build distribution
         run: python -m build

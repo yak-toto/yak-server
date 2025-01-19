@@ -74,7 +74,7 @@ class SyncOfficialResultsNotAvailableError(Exception):
     def __init__(self) -> None:
         super().__init__(
             "Synchronize official results is not available without sync extra dependency"
-            " installed. To enable it, please run: pip install yak-server[sync]"
+            " installed. To enable it, please run: uv pip install yak-server[sync]"
         )
 
 

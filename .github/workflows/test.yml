@@ -30,21 +30,15 @@ jobs:
           mysql-version: "8.0"
           root-password: ${{ secrets.MYSQL_PASSWORD }}
 
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        id: setup-python
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Set up cache
-        uses: actions/cache@v4
-        id: cache
-        with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml', 'requirements-tests.txt') }}-test-v03
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Install dependencies
-        run: pip install -r requirements-tests.txt
+        run: uv sync --all-extras
 
       - name: Run test
         env:
@@ -52,7 +46,7 @@ jobs:
           MYSQL_USER_NAME: root
           MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
           MYSQL_PORT: 3306
-        run: pytest --cov=yak_server --cov=scripts --cov=tests --cov=testing --cov-report=xml --cov-config=pyproject.toml -vv
+        run: uv run pytest --cov=yak_server --cov=scripts --cov=tests --cov=testing --cov-report=xml --cov-config=pyproject.toml -vv
         if: ${{ always() }}
 
       - name: Upload coverage reports to Codecov

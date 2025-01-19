@@ -14,5 +14,5 @@ def test_db_sync(monkeypatch: "pytest.MonkeyPatch") -> None:
 
     assert str(exception.value) == (
         "Synchronize official results is not available without sync extra dependency installed. "
-        "To enable it, please run: pip install yak-server[sync]"
+        "To enable it, please run: uv pip install yak-server[sync]"
     )
