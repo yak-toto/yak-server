@@ -141,3 +141,19 @@ def test_bets(app_with_lock_datetime_in_past: "FastAPI", monkeypatch: "pytest.Mo
             },
         },
     }
+
+    # Error case : authentication error
+    response_authentication_error = client.post(
+        "/api/v2",
+        headers={"Authorization": "Bearer llllllllllllll"},
+        json={"query": query_score_bet, "variables": {"scoreBetId": score_bet_ids[0]}},
+    )
+
+    assert response_authentication_error.json() == {
+        "data": {
+            "scoreBetResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token, authentication required",
+            }
+        }
+    }

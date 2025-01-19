@@ -364,6 +364,22 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
         },
     }
 
+    # Error case : authentication error
+    response_score_board_unauthorized = client.post(
+        "/api/v2",
+        json={"query": QUERY_SCORE_BOARD},
+        headers={"Authorization": f"Bearer {get_random_string(100)}"},
+    )
+
+    assert response_score_board_unauthorized.json() == {
+        "data": {
+            "scoreBoardResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token, authentication required",
+            }
+        }
+    }
+
     # Success case : check user GET /results call
     get_results_response = client.get(
         "/api/v1/results",

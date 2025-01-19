@@ -184,3 +184,18 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
         "__typename": "UserNotFound",
         "message": f"User not found: {invalid_user_id}",
     }
+
+    # Error case : invalid token
+    response_modify_password = client.post(
+        "/api/v2",
+        headers={"Authorization": f"Bearer {get_random_string(250)}"},
+        json={
+            "query": QUERY_MODIFY_USER,
+            "variables": {"id": user_id, "password": new_password_other_user},
+        },
+    )
+
+    assert response_modify_password.json()["data"]["modifyUserResult"] == {
+        "__typename": "InvalidToken",
+        "message": "Invalid token, authentication required",
+    }

@@ -64,36 +64,36 @@ def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.Monkey
     auth_token = response_signup.json()["data"]["signupResult"]["token"]
 
     # Success case : Get all groups
-    response_all_groups = client.post(
-        "/api/v2",
-        headers={"Authorization": f"Bearer {auth_token}"},
-        json={
-            "query": """
-                query {
-                    allGroupsResult {
-                        __typename
-                        ... on Groups {
-                            groups {
-                                id
-                                description
-                                code
-                                phase {
-                                    id
-                                    code
-                                    description
-                                }
-                            }
-                        }
-                        ... on InvalidToken {
-                            message
-                        }
-                        ... on ExpiredToken {
-                            message
+    query_all_groups = """
+        query {
+            allGroupsResult {
+                __typename
+                ... on Groups {
+                    groups {
+                        id
+                        description
+                        code
+                        phase {
+                            id
+                            code
+                            description
                         }
                     }
                 }
-            """,
-        },
+                ... on InvalidToken {
+                    message
+                }
+                ... on ExpiredToken {
+                    message
+                }
+            }
+        }
+    """
+
+    response_all_groups = client.post(
+        "/api/v2",
+        headers={"Authorization": f"Bearer {auth_token}"},
+        json={"query": query_all_groups},
     )
 
     assert response_all_groups.json()["data"]["allGroupsResult"] == {
@@ -112,6 +112,21 @@ def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.Monkey
         ],
     }
 
+    # Error case : authentication error
+    response_all_groups_with_invalid_token = client.post(
+        "/api/v2",
+        headers={"Authorization": "Bearer 5555"},
+        json={"query": query_all_groups},
+    )
+
+    assert response_all_groups_with_invalid_token.json() == {
+        "data": {
+            "allGroupsResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token, authentication required",
+            }
+        }
+    }
     query_group_by_code = """
         query Root($code: ID!) {
             groupByCodeResult(code: $code) {
@@ -222,6 +237,20 @@ def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.Monkey
 
     group_id = response_group_by_code.json()["data"]["groupByCodeResult"]["id"]
 
+    # Error case : authentication error
+    response_group_by_code_with_invalid_token = client.post(
+        "/api/v2", json={"query": query_group_by_code, "variables": {"code": "A"}}
+    )
+
+    assert response_group_by_code_with_invalid_token.json() == {
+        "data": {
+            "groupByCodeResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token, authentication required",
+            }
+        }
+    }
+
     # Error case : check invalid code
     invalid_group_code = "B"
 
@@ -296,4 +325,20 @@ def test_group(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.Monkey
                 "message": f"Group not found: {invalid_group_id}",
             },
         },
+    }
+
+    # Error case : authentication error
+    response_group_by_id_with_invalid_token = client.post(
+        "/api/v2",
+        headers={"Authorization": "Bearer 5555"},
+        json={"query": query_by_id, "variables": {"id": group_id}},
+    )
+
+    assert response_group_by_id_with_invalid_token.json() == {
+        "data": {
+            "groupByIdResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token, authentication required",
+            }
+        }
     }

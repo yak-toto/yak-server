@@ -127,6 +127,7 @@ max-complexity = 11
 
 [tool.ruff.lint.pylint]
 max-args = 6
+max-returns = 7
 
 [tool.mypy]
 strict = true

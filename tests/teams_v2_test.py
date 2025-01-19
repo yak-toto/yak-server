@@ -250,6 +250,26 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.Monkey
         },
     }
 
+    response_authentication_error = client.post(
+        "/api/v2",
+        json={
+            "query": team_by_id_query,
+            "variables": {
+                "teamId": invalid_team_id,
+            },
+        },
+        headers={"Authorization": f"Bearer {auth_token[:-1]}"},
+    )
+
+    assert response_authentication_error.json() == {
+        "data": {
+            "teamByIdResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token, authentication required",
+            }
+        }
+    }
+
     team_by_code_query = """
         query Root($teamCode: String!) {
             teamByCodeResult(code: $teamCode) {
@@ -316,4 +336,23 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.Monkey
                 "message": "Team not found: NA",
             },
         },
+    }
+
+    response_authentication_error = client.post(
+        "/api/v2",
+        json={
+            "query": team_by_code_query,
+            "variables": {
+                "teamCode": "NO",
+            },
+        },
+    )
+
+    assert response_authentication_error.json() == {
+        "data": {
+            "teamByCodeResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token, authentication required",
+            }
+        }
     }

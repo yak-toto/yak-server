@@ -162,6 +162,25 @@ def test_binary_bet(
         },
     }
 
+    # Error case : authentication error
+
+    response_modify_binary_bet_error_auth = client.post(
+        "/api/v2",
+        json={
+            "query": mutation_modify_binary_bet,
+            "variables": {"id": bet_id, "isOneWon": is_one_won},
+        },
+    )
+
+    assert response_modify_binary_bet_error_auth.json() == {
+        "data": {
+            "modifyBinaryBetResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token, authentication required",
+            }
+        }
+    }
+
     # Error case : Modify with invalid id
     invalid_bet_id = str(uuid4())
 
@@ -287,6 +306,20 @@ def test_binary_bet(
             "binaryBetResult": {
                 "__typename": "BinaryBetNotFound",
                 "message": f"Binary bet not found: {invalid_bet_id}",
+            },
+        },
+    }
+
+    # Error case : authentication error
+    response_retrieve_binary_bet = client.post(
+        "/api/v2", json={"query": query_binary_bet, "variables": {"id": bet_id}}
+    )
+
+    assert response_retrieve_binary_bet.json() == {
+        "data": {
+            "binaryBetResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token, authentication required",
             },
         },
     }
