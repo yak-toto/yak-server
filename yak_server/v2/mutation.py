@@ -28,10 +28,7 @@ from yak_server.helpers.logging_helpers import (
 )
 from yak_server.helpers.password_validator import PasswordRequirementsError
 
-from .bearer_authentication import (
-    is_admin_authenticated,
-    is_authenticated,
-)
+from .bearer_authentication import authentify, authentify_admin
 from .context import YakContext
 from .result import (
     BinaryBetNotFoundForUpdate,
@@ -126,15 +123,19 @@ class Mutation:
         )
 
     @strawberry.mutation
-    @is_authenticated
     def modify_binary_bet_result(
         self,
         id: UUID,
         is_one_won: Optional[bool],  # noqa: FBT001
         info: Info[YakContext, None],
     ) -> ModifyBinaryBetResult:
+        result = authentify(info.context)
+
+        if not isinstance(result, UserModel):
+            return result
+
         db = info.context.db
-        user = info.context.user
+        user = result
         settings = info.context.settings
 
         bet = (
@@ -158,7 +159,6 @@ class Mutation:
         return BinaryBet.from_instance(bet, db=db, lock_datetime=settings.lock_datetime)
 
     @strawberry.mutation
-    @is_authenticated
     def modify_score_bet_result(
         self,
         id: UUID,
@@ -166,8 +166,13 @@ class Mutation:
         score2: Optional[int],
         info: Info[YakContext, None],
     ) -> ModifyScoreBetResult:
+        result = authentify(info.context)
+
+        if not isinstance(result, UserModel):
+            return result
+
         db = info.context.db
-        user = info.context.user
+        user = result
         settings = info.context.settings
 
         bet = (
@@ -204,14 +209,17 @@ class Mutation:
         return ScoreBet.from_instance(bet, db=db, lock_datetime=settings.lock_datetime)
 
     @strawberry.mutation
-    @is_authenticated
-    @is_admin_authenticated
     def modify_user_result(
         self,
         id: UUID,
         password: str,
         info: Info[YakContext, None],
     ) -> ModifyUserResult:
+        result = authentify_admin(info.context)
+
+        if not isinstance(result, UserModel):
+            return result
+
         db = info.context.db
 
         user = db.query(UserModel).filter_by(id=id).first()

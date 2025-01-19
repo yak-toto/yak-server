@@ -67,80 +67,78 @@ def test_phase(
     token = response_signup.json()["data"]["signupResult"]["token"]
 
     # Check retrieve all phases
-    response_all_phases = client.post(
-        "/api/v2",
-        headers={"Authorization": f"Bearer {token}"},
-        json={
-            "query": """
-                query {
-                    allPhasesResult {
-                        __typename
-                        ... on Phases {
-                            phases {
-                                id
-                                code
+    query_all_phases = """
+        query {
+            allPhasesResult {
+                __typename
+                ... on Phases {
+                    phases {
+                        id
+                        code
+                        description
+                        binaryBets {
+                            team1 {
                                 description
-                                binaryBets {
-                                    team1 {
-                                        description
-                                        won
-                                    }
-                                    team2 {
-                                        description
-                                        won
-                                    }
-                                }
-                                scoreBets {
-                                    team1 {
-                                        description
-                                        score
-                                    }
-                                    team2 {
-                                        description
-                                        score
-                                    }
-                                }
-                                groups {
-                                    id
+                                won
+                            }
+                            team2 {
+                                description
+                                won
+                            }
+                        }
+                        scoreBets {
+                            team1 {
+                                description
+                                score
+                            }
+                            team2 {
+                                description
+                                score
+                            }
+                        }
+                        groups {
+                            id
+                            description
+                            code
+                            scoreBets {
+                                id
+                                locked
+                                team1 {
+                                    score
                                     description
-                                    code
-                                    scoreBets {
-                                        id
-                                        locked
-                                        team1 {
-                                            score
-                                            description
-                                        }
-                                        team2 {
-                                            score
-                                            description
-                                        }
-                                    }
-                                    binaryBets {
-                                        id
-                                        locked
-                                        team1 {
-                                            won
-                                            description
-                                        }
-                                        team2 {
-                                            won
-                                            description
-                                        }
-                                    }
+                                }
+                                team2 {
+                                    score
+                                    description
+                                }
+                            }
+                            binaryBets {
+                                id
+                                locked
+                                team1 {
+                                    won
+                                    description
+                                }
+                                team2 {
+                                    won
+                                    description
                                 }
                             }
                         }
-                        ... on InvalidToken {
-                            message
-                        }
-                        ... on ExpiredToken {
-                            message
-                        }
                     }
                 }
-            """,
-        },
+                ... on InvalidToken {
+                    message
+                }
+                ... on ExpiredToken {
+                    message
+                }
+            }
+        }
+    """
+
+    response_all_phases = client.post(
+        "/api/v2", headers={"Authorization": f"Bearer {token}"}, json={"query": query_all_phases}
     )
 
     assert response_all_phases.json() == {
@@ -249,6 +247,18 @@ def test_phase(
         },
     }
 
+    # Error case : authentication error
+    response_error_auth_all_phases = client.post("/api/v2", json={"query": query_all_phases})
+
+    assert response_error_auth_all_phases.json() == {
+        "data": {
+            "allPhasesResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token, authentication required",
+            }
+        }
+    }
+
     # Success case : Retrieve phase by id
     query_phase_by_id = """query Root($phaseId: UUID!) {
         phaseByIdResult(id: $phaseId) {
@@ -314,6 +324,24 @@ def test_phase(
         },
     }
 
+    # Error case : authentication error
+    response_authentication_error = client.post(
+        "/api/v2",
+        headers={"Authorization": f"Bearer {get_random_string(5)}"},
+        json={
+            "query": query_phase_by_id,
+            "variables": {"phaseId": phase_id},
+        },
+    )
+
+    assert response_authentication_error.json() == {
+        "data": {
+            "phaseByIdResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token, authentication required",
+            }
+        }
+    }
     # Success case : Fetch phase by code
     query_phase_by_code = """query Root($phaseCode: String!) {
         phaseByCodeResult(code: $phaseCode) {
@@ -371,4 +399,20 @@ def test_phase(
                 "message": f"Phase not found: {invalid_phase_code}",
             },
         },
+    }
+
+    # Error case : authentication error
+    response_authentication_error = client.post(
+        "/api/v2",
+        headers={"Authorization": f"Bearer {get_random_string(5)}"},
+        json={"query": query_phase_by_code, "variables": {"phaseCode": phase_code}},
+    )
+
+    assert response_authentication_error.json() == {
+        "data": {
+            "phaseByCodeResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token, authentication required",
+            }
+        }
     }

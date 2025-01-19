@@ -147,6 +147,29 @@ def test_modify_score_bet(
     assert new_bet["team2"]["score"] == score2
     assert new_bet["team1"]["flag"]["url"] == f"/api/v1/teams/{new_bet['team1']['id']}/flag"
 
+    # Error case : authentication token is invalid
+    response_modify_bet_auth_error = client.post(
+        "/api/v2",
+        headers={"Authorization": "InvalidKey llllllllllllllll"},
+        json={
+            "query": query_modify_score_bet,
+            "variables": {
+                "id": score_bet_ids[0],
+                "score1": score1,
+                "score2": score2,
+            },
+        },
+    )
+
+    assert response_modify_bet_auth_error.json() == {
+        "data": {
+            "modifyScoreBetResult": {
+                "__typename": "InvalidToken",
+                "message": "Invalid token, authentication required",
+            }
+        }
+    }
+
     # Error case : check NewScoreNegative error is send back if one of score is negative
     score1 = 5
     score2 = -1
