@@ -34,10 +34,10 @@ uv venv
 . .venv/bin/activate
 ```
 
-Fetch all packages using pip with the following command:
+Fetch all packages using uv with the following command:
 
 ```bash
-uv pip install -r requirements.txt
+uv pip install -e .
 ```
 
 Before starting the backend, add `JWT_SECRET_KEY` and `JWT_EXPIRATION_TIME` in `.env` same as the MySQL user name and password. As

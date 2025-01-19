@@ -11,8 +11,6 @@ repos:
         args: [--autofix, --indent, "4", --no-sort-keys]
       - id: check-yaml
       - id: check-merge-conflict
-      - id: requirements-txt-fixer
-        args: [requirements-tests.txt, requirements.txt]
       - id: no-commit-to-branch
         args: [--branch, main]
       - id: name-tests-test
