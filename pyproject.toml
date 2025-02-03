@@ -34,7 +34,7 @@ dependencies = [
     "PyJWT ==2.10.1",
     "pymysql[rsa] ==1.1.1",
     "argon2-cffi ==23.1.0",
-    "fastapi ==0.115.7",
+    "fastapi ==0.115.8",
     "typer ==0.15.1",
     "SQLAlchemy ==2.0.37",
     "SQLAlchemy-Utils ==0.41.2",
@@ -50,7 +50,7 @@ Repository = "https://github.com/yak-toto/yak-server"
 
 [project.optional-dependencies]
 db_migration = ["alembic ==1.14.1"]
-sync = ["beautifulsoup4[lxml] ==4.12.3", "httpx ==0.28.1"]
+sync = ["beautifulsoup4[lxml] ==4.13.0", "httpx ==0.28.1"]
 
 [project.scripts]
 yak = "yak_server.cli:app"
