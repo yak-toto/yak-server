@@ -9,21 +9,14 @@
 ## Requisites
 
 - Ubuntu 22.04
-- MySQL 8.0.30
+- Postgres 17.2
 
 ## How to build the project
 
 ### Database
 
-Install and start mysql server on port 3306. Add a database named `yak_toto`. In root folder, create a dotenv file named `.env` and fill your MySQL user name, password and database. When backend start, this configuration is automatically loaded.
-
-```text
-MYSQL_USER_NAME=my_user_name
-MYSQL_PASSWORD=my_password
-MYSQL_DB=my_database_name
-```
-
-You can also set MySQL port by adding `MYSQL_PORT=my_port` to `.env` file. If not set, it will be 3306 by default.
+To setup a database, run `yak env init`. This will ask you to fill different configuration in order build env file.
+Once done, you can run a docker script to start postgres database.
 
 ### Backend
 
@@ -40,7 +33,7 @@ Fetch all packages using uv with the following command:
 uv pip install -e .
 ```
 
-Before starting the backend, add `JWT_SECRET_KEY` and `JWT_EXPIRATION_TIME` in `.env` same as the MySQL user name and password. As
+Before starting the backend, add `JWT_SECRET_KEY` and `JWT_EXPIRATION_TIME` in `.env` same as the Postgres user name and password. As
 login system is using JSON Web Token, a secret key is required and an expiration time (in seconds). To generate one, you can use the python built-in `secrets` module.
 
 ```py
@@ -73,8 +66,6 @@ uvicorn --reload yak_server:create_app --factory
 To run local testing, you can use the script `create_database.py`, `initialize_database.py` and `create_admin.py` located in `yak_server/cli` folder. To select, set `COMPETITION` environment variable in `.env`. It will read data from `yak_server/data/{COMPETITION}/`.
 
 ### Testing
-
-To set up test, please add a MySQL database named `yak_toto_test`. It will contain all the records created during unit tests. This database is cleaned everytime you run test. That's why a different database is created to avoid deleting records you use for your local testing.
 
 Yak-server is using `pytest` to run tests.
 

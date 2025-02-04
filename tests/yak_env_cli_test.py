@@ -43,13 +43,13 @@ def test_yak_env_init() -> None:
         assert env["RULES"] is not None
         assert len(json.loads(env["RULES"])) == 2
 
-        env_mysql = dotenv_values(Path(".env.mysql"))
+        env_db = dotenv_values(Path(".env.db"))
 
-        assert env_mysql["MYSQL_HOST"] == host
-        assert env_mysql["MYSQL_USER_NAME"] == user_name
-        assert env_mysql["MYSQL_PASSWORD"] == password
-        assert env_mysql["MYSQL_PORT"] == str(port)
-        assert env_mysql["MYSQL_DB"] == database
+        assert env_db["POSTGRES_HOST"] == host
+        assert env_db["POSTGRES_USER_NAME"] == user_name
+        assert env_db["POSTGRES_PASSWORD"] == password
+        assert env_db["POSTGRES_PORT"] == str(port)
+        assert env_db["POSTGRES_DB"] == database
 
 
 def test_yak_env_init_production() -> None:

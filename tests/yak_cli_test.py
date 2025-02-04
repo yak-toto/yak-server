@@ -81,22 +81,6 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
     auth_token = response_login.json()["result"]["token"]
     user_id = response_login.json()["result"]["id"]
 
-    # Check backup command
-    result = runner.invoke(app, ["db", "backup"])
-
-    assert result.exit_code == 0
-
-    list_datetime_backup = sorted(
-        pendulum.from_format(
-            file.name.removesuffix(".sql").removeprefix("yak_toto_backup_"),
-            "YYYYMMDD[T]HHmmssZZ",
-        )
-        for file in (Path(__file__).parents[1] / "yak_server" / "cli" / "backup_files").glob("*")
-    )
-
-    # Check that most recent backup file has been created less than 2 seconds ago
-    assert pendulum.now("UTC") - list_datetime_backup[-1] <= pendulum.duration(seconds=2)
-
     # Check records deletion
     result = runner.invoke(app, ["db", "delete"], env={**os.environ, "DEBUG": "1"})
 

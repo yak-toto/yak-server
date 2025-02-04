@@ -1,12 +1,9 @@
 import json
 import logging
-import subprocess  # noqa: S404
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import pendulum
-
-from yak_server.database import Base, build_engine, build_local_session_maker, get_mysql_settings
+from yak_server.database import Base, build_engine, build_local_session_maker
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
@@ -18,7 +15,6 @@ from yak_server.database.models import (
     TeamModel,
     UserModel,
 )
-from yak_server.helpers.logging_helpers import setup_logging
 from yak_server.helpers.rules.compute_points import compute_points as compute_points_func
 from yak_server.helpers.settings import get_settings
 from yak_server.v1.routers.users import signup_user
@@ -42,11 +38,6 @@ class RecordDeletionInProductionError(Exception):
 class TableDropInProductionError(Exception):
     def __init__(self) -> None:
         super().__init__("Trying to drop database tables in production using script. DO NOT DO IT.")
-
-
-class BackupError(Exception):
-    def __init__(self, description: str) -> None:
-        super().__init__(f"Error during backup. {description}")
 
 
 def create_database() -> None:
@@ -123,50 +114,6 @@ def initialize_database(app: "FastAPI") -> None:
         db.flush()
 
         db.commit()
-
-
-def backup_database() -> None:
-    setup_logging(debug=False)
-
-    mysql_settings = get_mysql_settings()
-
-    result = subprocess.run(  # noqa: S603
-        [  # noqa: S607
-            "mysqldump",
-            mysql_settings.db,
-            "-u",
-            mysql_settings.user_name,
-            "-P",
-            str(mysql_settings.port),
-            "--protocol=tcp",
-            f"--password={mysql_settings.password}",
-        ],
-        capture_output=True,
-        encoding="utf-8",
-        check=False,
-    )
-
-    backup_datetime = pendulum.now("UTC")
-
-    if result.returncode:
-        error_message = (
-            f"Something went wrong when backup on {backup_datetime}: "
-            f"{result.stderr.replace(mysql_settings.password, '********')}"
-        )
-
-        logger.error(error_message)
-
-        raise BackupError(error_message)
-
-    backup_location = Path(__file__).parents[1] / "backup_files"
-    backup_location.mkdir(exist_ok=True)
-
-    file_path = (
-        backup_location / f"yak_toto_backup_{backup_datetime.format('YYYYMMDD[T]HHmmssZZ')}.sql"
-    )
-
-    file_path.write_text(result.stdout)
-    logger.info(f"Backup done on {backup_datetime}")
 
 
 def delete_database(app: "FastAPI") -> None:

@@ -21,14 +21,24 @@ jobs:
     name: Python ${{ matrix.python-version }} - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
+    env:
+      username: ci
+      password: test
+      database: test
+      port: 6522
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up MySQL
-        uses: shogo82148/actions-setup-mysql@v1.42.0
+      - name: Set up Postgres
+        uses: ikalnytskyi/action-setup-postgres@v7
         with:
-          mysql-version: "8.0"
-          root-password: ${{ secrets.MYSQL_PASSWORD }}
+          username: ${{ env.username }}
+          password: ${{ env.password }}
+          database: ${{ env.database }}
+          port: ${{ env.port }}
+          postgres-version: "14"
+          ssl: true
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -42,10 +52,11 @@ jobs:
 
       - name: Run test
         env:
-          MYSQL_HOST: 127.0.0.1
-          MYSQL_USER_NAME: root
-          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-          MYSQL_PORT: 3306
+          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_USER_NAME: ${{ env.username }}
+          POSTGRES_PASSWORD: ${{ env.password }}
+          POSTGRES_PORT: ${{ env.port }}
+          POSTGRES_DB: ${{ env.database }}
         run: uv run pytest --cov=yak_server --cov=scripts --cov=tests --cov=testing --cov-report=xml --cov-config=pyproject.toml -vv
         if: ${{ always() }}
 

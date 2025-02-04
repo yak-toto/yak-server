@@ -104,10 +104,10 @@ def create_score_bet(
     try:
         db.flush()
     except IntegrityError as integrity_error:
-        if "FOREIGN KEY (`team1_id`)" in str(integrity_error):
+        if f"(team1_id)=({score_bet_in.team1.id})" in str(integrity_error):
             raise TeamNotFound(team_id=score_bet_in.team1.id) from integrity_error
 
-        if "FOREIGN KEY (`team2_id`)" in str(integrity_error):
+        if f"(team2_id)=({score_bet_in.team2.id})" in str(integrity_error):
             raise TeamNotFound(team_id=score_bet_in.team2.id) from integrity_error
 
         raise GroupNotFound(group_id=score_bet_in.group.id) from integrity_error
