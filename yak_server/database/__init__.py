@@ -1,12 +1,12 @@
 from functools import cache
 
-import pymysql
+import psycopg2
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 
-class MySQLSettings(BaseSettings):
+class PostgresSettings(BaseSettings):
     host: str
     user_name: str
     password: str
@@ -14,38 +14,33 @@ class MySQLSettings(BaseSettings):
     db: str
 
     model_config = SettingsConfigDict(
-        env_file=".env.mysql",
+        env_file=".env.db",
         env_file_encoding="utf-8",
-        env_prefix="mysql_",
+        env_prefix="postgres_",
     )
 
 
 @cache
-def get_mysql_settings() -> MySQLSettings:
-    return MySQLSettings()
+def get_postgres_settings() -> PostgresSettings:
+    return PostgresSettings()
 
 
 def compute_database_uri(
-    mysql_client: str,
-    mysql_host: str,
-    mysql_user_name: str,
-    mysql_password: str,
-    mysql_port: int,
-    mysql_db: str,
+    client: str, host: str, user_name: str, password: str, port: int, db: str
 ) -> str:
-    return f"mysql+{mysql_client}://{mysql_user_name}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_db}"
+    return f"postgresql+{client}://{user_name}:{password}@{host}:{port}/{db}"
 
 
 def build_engine() -> Engine:
-    mysql_settings = get_mysql_settings()
+    postgres_settings = get_postgres_settings()
 
     database_url = compute_database_uri(
-        pymysql.__name__,
-        mysql_settings.host,
-        mysql_settings.user_name,
-        mysql_settings.password,
-        mysql_settings.port,
-        mysql_settings.db,
+        psycopg2.__name__,
+        postgres_settings.host,
+        postgres_settings.user_name,
+        postgres_settings.password,
+        postgres_settings.port,
+        postgres_settings.db,
     )
 
     return create_engine(database_url, pool_recycle=7200, pool_pre_ping=True)

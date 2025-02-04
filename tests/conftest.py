@@ -1,18 +1,20 @@
+import contextlib
 import os
 from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 import pendulum
-import pymysql
+import psycopg2
 import pytest
 from fastapi.testclient import TestClient
+from psycopg2 import sql
 
 from scripts.profiling import create_app as create_app_with_profiling
 from testing.mock import MockSettings
 from testing.util import get_random_string
 from yak_server import create_app
 from yak_server.cli.database import create_database, delete_database, drop_database
-from yak_server.database import get_mysql_settings
+from yak_server.database import get_postgres_settings
 from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
@@ -20,20 +22,24 @@ if TYPE_CHECKING:
 
 
 def pytest_configure() -> None:
-    mysql_settings = get_mysql_settings()
+    db_settings = get_postgres_settings()
 
-    connection = pymysql.connect(
-        host=mysql_settings.host,
-        user=mysql_settings.user_name,
-        password=mysql_settings.password,
-        port=mysql_settings.port,
+    connection = psycopg2.connect(
+        host=db_settings.host,
+        user=db_settings.user_name,
+        password=db_settings.password,
+        port=db_settings.port,
+        dbname="postgres",  # System database
     )
+    connection.autocommit = True  # Required to create a database
 
-    with connection:
-        with connection.cursor() as cursor:
-            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {mysql_settings.db}")
+    cursor = connection.cursor()
 
-        connection.commit()
+    with contextlib.suppress(psycopg2.errors.DuplicateDatabase):
+        cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(db_settings.db)))
+
+    cursor.close()
+    connection.close()
 
 
 @pytest.fixture(scope="session")

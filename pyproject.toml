@@ -9,7 +9,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
 authors = [{name = "Guillaume Le Pape", email = "gui.lepape25@gmail.com"}]
-keywords = ["mysql", "api", "rest", "graphql"]
+keywords = ["postgresql", "api", "rest", "graphql"]
 classifiers = [
     "Operating System :: Unix",
     "Environment :: Web Environment",
@@ -32,7 +32,7 @@ classifiers = [
 ]
 dependencies = [
     "PyJWT ==2.10.1",
-    "pymysql[rsa] ==1.1.1",
+    "psycopg2-binary>=2.9.10",
     "argon2-cffi ==23.1.0",
     "fastapi ==0.115.8",
     "typer ==0.15.1",
@@ -70,7 +70,6 @@ type-checking = [
     "types-psycopg2>=2.9.21.20241019",
     "types-pygments>=2.19.0.20250107",
     "types-pyjwt>=1.7.1",
-    "types-pymysql>=1.1.0.20241103",
     "types-python-dateutil>=2.9.0.20241206",
     "types-ujson>=5.10.0.20240515",
 ]
@@ -146,10 +145,7 @@ ignore_missing_imports = true
 log_file = "yak_test.log"
 # log_file_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 log_file_level = "INFO"
-env = [
-    "MYSQL_DB=yak_toto_test",
-    "PROFILING=0",
-]
+env = ["POSTGRES_DB=test"]
 
 [tool.importlinter]
 root_package = "yak_server"

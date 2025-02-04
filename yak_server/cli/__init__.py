@@ -5,7 +5,6 @@ import typer
 from yak_server import create_app
 
 from .database import (
-    backup_database,
     compute_score_board,
     create_admin,
     create_database,
@@ -52,11 +51,6 @@ def make_db_app() -> typer.Typer:
     ) -> None:
         """Create admin account in database."""
         create_admin(password)
-
-    @db_app.command()
-    def backup() -> None:
-        """Backup database in a sql file."""
-        backup_database()
 
     @db_app.command()
     def migration(*, short: Annotated[bool, typer.Option("--short", "-s")] = False) -> None:

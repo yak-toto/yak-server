@@ -7,7 +7,7 @@ from uuid import UUID
 import pendulum
 import typer
 
-from yak_server.database import MySQLSettings
+from yak_server.database import PostgresSettings
 from yak_server.helpers.rules import RULE_MAPPING
 from yak_server.helpers.settings import Rules
 
@@ -32,28 +32,28 @@ def write_env_file(env: dict, filename: str) -> None:
 class EnvBuilder:
     def __init__(self) -> None:
         self.env = {}
-        self.env_mysql = {}
+        self.env_db = {}
 
         debug = typer.prompt("DEBUG (y/n)", type=YesOrNo)
 
         self.debug = debug == YesOrNo.y
         self.env["DEBUG"] = 1 if self.debug else 0
 
-    def setup_mysql_env(self) -> None:
-        host = typer.prompt("MYSQL HOST", default="127.0.0.1")
-        user_name = typer.prompt("MYSQL USER NAME")
-        password = typer.prompt("MYSQL PASSWORD", hide_input=True)
-        port = typer.prompt("MYSQL PORT", type=int, default=3306)
-        db = typer.prompt("MYSQL DB")
+    def setup_db_env(self) -> None:
+        host = typer.prompt("POSTGRES HOST", default="127.0.0.1")
+        user_name = typer.prompt("POSTGRES USER NAME")
+        password = typer.prompt("POSTGRES PASSWORD", hide_input=True)
+        port = typer.prompt("POSTGRES PORT", type=int, default=5432)
+        db = typer.prompt("POSTGRES DB")
 
-        # try to instance pydantic model to check if settings are ok
-        MySQLSettings(host=host, user_name=user_name, password=password, port=port, db=db)
+        # try to instantiate pydantic model to check if settings are ok
+        PostgresSettings(host=host, user_name=user_name, password=password, port=port, db=db)
 
-        self.env_mysql["MYSQL_HOST"] = host
-        self.env_mysql["MYSQL_USER_NAME"] = user_name
-        self.env_mysql["MYSQL_PASSWORD"] = password
-        self.env_mysql["MYSQL_PORT"] = port
-        self.env_mysql["MYSQL_DB"] = db
+        self.env_db["POSTGRES_HOST"] = host
+        self.env_db["POSTGRES_USER_NAME"] = user_name
+        self.env_db["POSTGRES_PASSWORD"] = password
+        self.env_db["POSTGRES_PORT"] = port
+        self.env_db["POSTGRES_DB"] = db
 
     def setup_jwt(self) -> None:
         jwt_expiration_time = typer.prompt("JWT_EXPIRATION_TIME")
@@ -106,12 +106,12 @@ class EnvBuilder:
 
     def write(self) -> None:
         write_env_file(self.env, ".env")
-        write_env_file(self.env_mysql, ".env.mysql")
+        write_env_file(self.env_db, ".env.db")
 
 
 def init_env() -> None:
     env_builder = EnvBuilder()
-    env_builder.setup_mysql_env()
+    env_builder.setup_db_env()
     env_builder.setup_jwt()
     env_builder.choose_competition()
 
