@@ -2,9 +2,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 
-from yak_server.database.models import UserModel
+from yak_server.database.models3 import UserModel
 from yak_server.helpers.database import get_db
 from yak_server.helpers.rules import RULE_MAPPING
 from yak_server.helpers.settings import Settings, get_settings

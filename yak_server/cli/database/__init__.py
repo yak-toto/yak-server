@@ -3,8 +3,11 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from yak_server.database import Base, build_engine, build_local_session_maker
-from yak_server.database.models import (
+from sqlalchemy import delete
+from sqlmodel import Session, SQLModel, select
+
+from yak_server.database import build_engine
+from yak_server.database.models3 import (
     BinaryBetModel,
     GroupModel,
     GroupPositionModel,
@@ -41,38 +44,33 @@ class TableDropInProductionError(Exception):
 
 
 def create_database() -> None:
-    local_session_maker = build_local_session_maker()
-
-    with local_session_maker():
-        Base.metadata.create_all(bind=build_engine())
+    SQLModel.metadata.create_all(bind=build_engine())
 
 
 def create_admin(password: str) -> None:
-    local_session_maker = build_local_session_maker()
-
-    with local_session_maker() as db:
+    with Session(build_engine()) as db:
         _ = signup_user(db, name="admin", first_name="admin", last_name="admin", password=password)
 
 
 def initialize_database(app: "FastAPI") -> None:
-    local_session_maker = build_local_session_maker()
-
-    with local_session_maker() as db:
+    with Session(build_engine()) as session:
         data_folder = get_settings().data_folder
 
         phases = json.loads(Path(data_folder, "phases.json").read_text(encoding="utf-8"))
 
-        db.add_all(PhaseModel(**phase) for phase in phases)
-        db.flush()
+        session.add_all(PhaseModel(**phase) for phase in phases)
+        session.flush()
 
         groups = json.loads(Path(data_folder, "groups.json").read_text(encoding="utf-8"))
 
         for group in groups:
-            phase = db.query(PhaseModel).filter_by(code=group.pop("phase_code")).first()
+            phase = session.exec(
+                select(PhaseModel).where(PhaseModel.code == group.pop("phase_code"))
+            ).first()
             group["phase_id"] = phase.id
 
-        db.add_all(GroupModel(**group) for group in groups)
-        db.flush()
+        session.add_all(GroupModel(**group) for group in groups)
+        session.flush()
 
         teams = json.loads(Path(data_folder, "teams.json").read_text(encoding="utf-8"))
 
@@ -80,14 +78,14 @@ def initialize_database(app: "FastAPI") -> None:
             team["flag_url"] = ""
 
             team_instance = TeamModel(**team)
-            db.add(team_instance)
-            db.flush()
+            session.add(team_instance)
+            session.flush()
 
             team_instance.flag_url = app.url_path_for(
                 "retrieve_team_flag_by_id",
                 team_id=team_instance.id,
             )
-            db.flush()
+            session.flush()
 
         matches = json.loads(Path(data_folder, "matches.json").read_text(encoding="utf-8"))
 
@@ -98,51 +96,48 @@ def initialize_database(app: "FastAPI") -> None:
             if team1_code is None:
                 match["team1_id"] = None
             else:
-                team1 = db.query(TeamModel).filter_by(code=team1_code).first()
+                team1 = session.exec(select(TeamModel).where(TeamModel.code == team1_code)).first()
                 match["team1_id"] = team1.id
 
             if team2_code is None:
                 match["team2_id"] = None
             else:
-                team2 = db.query(TeamModel).filter_by(code=team2_code).first()
+                team2 = session.exec(select(TeamModel).where(TeamModel.code == team2_code)).first()
                 match["team2_id"] = team2.id
 
-            group = db.query(GroupModel).filter_by(code=match.pop("group_code")).first()
+            group = session.exec(
+                select(GroupModel).where(GroupModel.code == match.pop("group_code"))
+            ).first()
             match["group_id"] = group.id
 
-        db.add_all(MatchReferenceModel(**match) for match in matches)
-        db.flush()
+        session.add_all(MatchReferenceModel(**match) for match in matches)
+        session.flush()
 
-        db.commit()
+        session.commit()
 
 
 def delete_database(app: "FastAPI") -> None:
     if not app.debug:
         raise RecordDeletionInProductionError
 
-    local_session_maker = build_local_session_maker()
-
-    with local_session_maker() as db:
-        db.query(GroupPositionModel).delete()
-        db.query(ScoreBetModel).delete()
-        db.query(BinaryBetModel).delete()
-        db.query(MatchReferenceModel).delete()
-        db.query(MatchModel).delete()
-        db.query(UserModel).delete()
-        db.query(GroupModel).delete()
-        db.query(PhaseModel).delete()
-        db.query(TeamModel).delete()
-        db.commit()
+    with Session(build_engine()) as session:
+        session.exec(delete(GroupPositionModel))
+        session.exec(delete(ScoreBetModel))
+        session.exec(delete(BinaryBetModel))
+        session.exec(delete(MatchReferenceModel))
+        session.exec(delete(MatchModel))
+        session.exec(delete(UserModel))
+        session.exec(delete(GroupModel))
+        session.exec(delete(PhaseModel))
+        session.exec(delete(TeamModel))
+        session.commit()
 
 
 def drop_database(app: "FastAPI") -> None:
     if not app.debug:
         raise TableDropInProductionError
 
-    local_session_maker = build_local_session_maker()
-
-    with local_session_maker():
-        Base.metadata.drop_all(bind=build_engine())
+    SQLModel.metadata.drop_all(bind=build_engine())
 
 
 def print_export_command(alembic_ini_path: Path) -> None:
@@ -178,11 +173,9 @@ def setup_migration(*, short: bool = False) -> None:
 
 
 def compute_score_board() -> None:
-    local_session_maker = build_local_session_maker()
-
-    with local_session_maker() as db:
-        admin = db.query(UserModel).filter_by(name="admin").first()
+    with Session(build_engine()) as session:
+        admin = session.exec(select(UserModel).where(UserModel.name == "admin")).first()
 
         rule_config = get_settings().rules.compute_points
 
-        compute_points_func(db, admin, rule_config)
+        compute_points_func(session, admin, rule_config)

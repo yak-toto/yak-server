@@ -2,8 +2,9 @@ from functools import cache
 
 import psycopg2
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from sqlalchemy import Engine, create_engine
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy import Engine
+from sqlalchemy.orm import declarative_base
+from sqlmodel import create_engine
 
 
 class PostgresSettings(BaseSettings):
@@ -34,7 +35,7 @@ def compute_database_uri(
 def build_engine() -> Engine:
     postgres_settings = get_postgres_settings()
 
-    database_url = compute_database_uri(
+    database_uri = compute_database_uri(
         psycopg2.__name__,
         postgres_settings.host,
         postgres_settings.user_name,
@@ -43,11 +44,7 @@ def build_engine() -> Engine:
         postgres_settings.db,
     )
 
-    return create_engine(database_url, pool_recycle=7200, pool_pre_ping=True)
-
-
-def build_local_session_maker() -> Session:
-    return sessionmaker(autocommit=False, autoflush=False, bind=build_engine())
+    return create_engine(database_uri, pool_recycle=7200, pool_pre_ping=True)
 
 
 Base = declarative_base()

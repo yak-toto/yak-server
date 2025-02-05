@@ -2,10 +2,10 @@ import warnings
 from dataclasses import dataclass
 from typing import Optional
 
-from sqlalchemy import and_
+from sqlmodel import Session, and_, select
 
-from yak_server.database import build_local_session_maker
-from yak_server.database.models import (
+from yak_server.database import build_engine
+from yak_server.database.models3 import (
     BinaryBetModel,
     GroupModel,
     MatchModel,
@@ -18,7 +18,7 @@ from yak_server.helpers.settings import get_settings
 try:
     import httpx
 except ImportError:  # pragma: no cover
-    httpx = None  # type: ignore[assignment]
+    httpx = None  # type: ignore[assignment]e
 
 try:
     import bs4
@@ -168,12 +168,10 @@ def synchronize_official_results() -> None:
 
     soup = bs4.BeautifulSoup(response.text, "lxml")
 
-    local_session_maker = build_local_session_maker()
-
-    with local_session_maker() as db:
+    with Session(build_engine()) as session:
         groups = [
             GroupContainer(model=group, content=content.parent.parent)
-            for group in db.query(GroupModel).order_by(GroupModel.index)
+            for group in session.exec(select(GroupModel).order_by(GroupModel.index))
             for content in soup.find(
                 "h3", id=group.description_en.replace(" ", "_"), string=group.description_en
             )
@@ -181,49 +179,38 @@ def synchronize_official_results() -> None:
 
         matches = extract_matches_from_html(groups)
 
-        admin = db.query(UserModel).filter_by(name="admin").first()
+        admin = session.exec(select(UserModel).where(UserModel.name == "admin")).first()
 
         for match in matches:
-            score_bet = (
-                db.query(ScoreBetModel)
-                .join(ScoreBetModel.match)
-                .join(MatchModel.group)
-                .filter(
-                    and_(
-                        GroupModel.index == match.group.index,
-                        MatchModel.index == match.index,
-                        MatchModel.user_id == admin.id,
-                    )
+            score_bet = session.exec(
+                select(ScoreBetModel, MatchModel, GroupModel).where(
+                    GroupModel.index == match.group.index,
+                    MatchModel.index == match.index,
+                    MatchModel.user_id == admin.id,
                 )
-                .first()
-            )
+            ).first()
 
             if score_bet is not None:
                 score_bet.score1 = match.team1.score
                 score_bet.score2 = match.team2.score
 
-            binary_bet = (
-                db.query(BinaryBetModel)
-                .join(BinaryBetModel.match)
-                .join(MatchModel.group)
-                .join(GroupModel.phase)
-                .filter(
+            binary_bet = session.exec(
+                select(BinaryBetModel, MatchModel, GroupModel).where(
                     and_(
                         GroupModel.index == match.group.index,
                         MatchModel.index == match.index,
                         MatchModel.user_id == admin.id,
                     )
                 )
-                .first()
-            )
+            ).first()
 
             if binary_bet is not None:
-                team1 = (
-                    db.query(TeamModel).filter_by(description_en=match.team1.description).first()
-                )
-                team2 = (
-                    db.query(TeamModel).filter_by(description_en=match.team2.description).first()
-                )
+                team1 = session.exec(
+                    select(TeamModel).where(TeamModel.description_en == match.team1.description)
+                ).first()
+                team2 = session.exec(
+                    select(TeamModel).where(TeamModel.description_en == match.team2.description)
+                ).first()
 
                 if team1 is not None and team2 is not None:
                     binary_bet.match.team1_id = team1.id
@@ -234,4 +221,4 @@ def synchronize_official_results() -> None:
                     else:
                         binary_bet.is_one_won = match.team1.score > match.team2.score
 
-        db.commit()
+        session.commit()

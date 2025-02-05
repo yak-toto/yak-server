@@ -1,9 +1,9 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
-from yak_server.database.models import (
+from yak_server.database.models3 import (
     BinaryBetModel,
     GroupModel,
     MatchModel,
@@ -45,24 +45,28 @@ def retrieve_all_bets(
     settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[AllBetsResponse]:
-    binary_bets = (
-        db.query(BinaryBetModel)
-        .join(BinaryBetModel.match)
-        .filter(MatchModel.user_id == user.id)
-        .join(MatchModel.group)
+    binary_bets = db.exec(
+        select(BinaryBetModel)
         .order_by(GroupModel.index, MatchModel.index)
+        .where(
+            BinaryBetModel.match_id == MatchModel.id,
+            MatchModel.group_id == GroupModel.id,
+            MatchModel.user_id == user.id,
+        )
     )
 
-    score_bets = (
-        db.query(ScoreBetModel)
-        .join(ScoreBetModel.match)
-        .filter(MatchModel.user_id == user.id)
-        .join(MatchModel.group)
+    score_bets = db.exec(
+        select(ScoreBetModel)
         .order_by(GroupModel.index, MatchModel.index)
+        .where(
+            ScoreBetModel.match_id == MatchModel.id,
+            MatchModel.group_id == GroupModel.id,
+            MatchModel.user_id == user.id,
+        )
     )
 
-    groups = db.query(GroupModel).order_by(GroupModel.index)
-    phases = db.query(PhaseModel).order_by(PhaseModel.index)
+    groups = db.exec(select(GroupModel).order_by(GroupModel.index))
+    phases = db.exec(select(PhaseModel).order_by(PhaseModel.index))
 
     return GenericOut(
         result=AllBetsResponse(

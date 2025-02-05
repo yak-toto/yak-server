@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends
 from pydantic import UUID4
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 
-from yak_server.database.models import (
+from yak_server.database.models3 import (
     BinaryBetModel,
     MatchModel,
     UserModel,

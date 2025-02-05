@@ -2,15 +2,15 @@ from itertools import chain
 from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
-from sqlalchemy import and_
+from sqlmodel import Session, select
 
-from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, PhaseModel
+from yak_server.database.models3 import BinaryBetModel, GroupModel, MatchModel, PhaseModel
 from yak_server.helpers.group_position import get_group_rank_with_code
 
 if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
+    from sqlmodel import Session
 
-    from yak_server.database.models import UserModel
+    from yak_server.database.models3 import UserModel
 
 
 class Team(BaseModel):
@@ -30,18 +30,22 @@ class RuleComputeFinaleFromGroupRank(BaseModel):
 
 
 def compute_finale_phase_from_group_rank(
-    db: "Session",
+    session: "Session",
     user: "UserModel",
     rule_config: RuleComputeFinaleFromGroupRank,
 ) -> None:
-    first_phase_phase_group = db.query(GroupModel).filter_by(code=rule_config.to_group).first()
+    first_phase_phase_group = session.exec(
+        select(GroupModel).where(GroupModel.code == rule_config.to_group)
+    ).first()
 
     groups_result = {
-        group.code: get_group_rank_with_code(db, user, group.id)
-        for group in db.query(GroupModel)
-        .join(GroupModel.phase)
-        .filter(
-            PhaseModel.code == rule_config.from_phase,
+        group.code: get_group_rank_with_code(session, user, group.id)
+        for group in session.exec(
+            select(GroupModel)
+            .join(GroupModel.phase)
+            .where(
+                PhaseModel.code == rule_config.from_phase,
+            )
         )
     }
 
@@ -56,22 +60,19 @@ def compute_finale_phase_from_group_rank(
             team1 = groups_result[match_config.team1.group][match_config.team1.rank - 1].team
             team2 = groups_result[match_config.team2.group][match_config.team2.rank - 1].team
 
-            binary_bet = (
-                db.query(BinaryBetModel)
+            binary_bet = session.exec(
+                select(BinaryBetModel)
                 .join(BinaryBetModel.match)
-                .filter(
-                    and_(
-                        MatchModel.index == index,
-                        MatchModel.user_id == user.id,
-                        MatchModel.group_id == first_phase_phase_group.id,
-                    ),
+                .where(
+                    MatchModel.index == index,
+                    MatchModel.user_id == user.id,
+                    MatchModel.group_id == first_phase_phase_group.id,
                 )
-                .first()
-            )
+            ).first()
 
             binary_bet.match.team1_id = team1.id
             binary_bet.match.team2_id = team2.id
 
-            db.flush()
+            session.flush()
 
-    db.commit()
+    session.commit()

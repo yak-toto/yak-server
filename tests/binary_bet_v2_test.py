@@ -99,7 +99,7 @@ def test_binary_bet(
         mutation Root($id: UUID!, $isOneWon: Boolean) {
             modifyBinaryBetResult(id: $id, isOneWon: $isOneWon) {
                 __typename
-                ... on BinaryBet {
+                ... on BinaryBetModel {
                     id
                     group {
                         description
@@ -147,7 +147,7 @@ def test_binary_bet(
     assert response_modify_binary_bet.json() == {
         "data": {
             "modifyBinaryBetResult": {
-                "__typename": "BinaryBet",
+                "__typename": "BinaryBetModel",
                 "group": {"description": "Groupe A", "phase": {"description": "Phase de groupes"}},
                 "id": bet_id,
                 "team1": {
@@ -238,7 +238,7 @@ def test_binary_bet(
         query getBinaryBet($id: UUID!) {
             binaryBetResult(id: $id) {
                 __typename
-                ... on BinaryBet {
+                ... on BinaryBetModel {
                     id
                     group {
                         description
@@ -277,7 +277,7 @@ def test_binary_bet(
     assert response_retrieve_binary_bet.json() == {
         "data": {
             "binaryBetResult": {
-                "__typename": "BinaryBet",
+                "__typename": "BinaryBetModel",
                 "group": {"description": "Groupe A", "phase": {"description": "Phase de groupes"}},
                 "id": bet_id,
                 "team1": {

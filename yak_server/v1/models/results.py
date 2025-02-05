@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from pydantic import BaseModel, NonNegativeInt, PositiveInt
 
 if TYPE_CHECKING:
-    from yak_server.database.models import UserModel
+    from yak_server.database.models3 import UserModel
 
 
 class UserResult(BaseModel):

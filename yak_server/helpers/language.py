@@ -2,7 +2,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
-    from yak_server.database.models import GroupModel, PhaseModel, TeamModel
+    from yak_server.database.models3 import GroupModel, PhaseModel, TeamModel
 
 
 class Lang(str, Enum):

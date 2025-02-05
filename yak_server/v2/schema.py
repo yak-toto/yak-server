@@ -4,9 +4,9 @@ from uuid import UUID
 import pendulum
 import strawberry
 from sqlalchemy import and_
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
-from yak_server.database.models import (
+from yak_server.database.models3 import (
     BinaryBetModel,
     GroupModel,
     GroupPositionModel,
@@ -369,9 +369,7 @@ class Phase:
             Group.from_instance(group, db=self.db, user=self.user, lock_datetime=self.lock_datetime)
             for group in self.db.query(GroupModel)
             .filter_by(phase_id=self.instance.id)
-            .order_by(
-                GroupModel.index,
-            )
+            .order_by(GroupModel.index)
         ]
 
     @strawberry.field
@@ -382,9 +380,7 @@ class Phase:
             .join(BinaryBetModel.match)
             .filter_by(user_id=self.user.id)
             .join(MatchModel.group)
-            .filter(
-                GroupModel.phase_id == self.instance.id,
-            )
+            .filter(GroupModel.phase_id == self.instance.id)
             .order_by(GroupModel.index, MatchModel.index)
         ]
 
@@ -443,22 +439,22 @@ class User:
     def binary_bets(self) -> list["BinaryBet"]:
         return [
             BinaryBet.from_instance(binary_bet, db=self.db, lock_datetime=self.lock_datetime)
-            for binary_bet in self.db.query(BinaryBetModel)
-            .join(BinaryBetModel.match)
-            .filter_by(user_id=self.instance.id)
-            .join(MatchModel.group)
-            .order_by(GroupModel.index, MatchModel.index)
+            for binary_bet, _, _ in self.db.exec(
+                select(BinaryBetModel, MatchModel, GroupModel)
+                .where(MatchModel.user_id == self.instance.id)
+                .order_by(GroupModel.index, MatchModel.index)
+            )
         ]
 
     @strawberry.field
     def score_bets(self) -> list["ScoreBet"]:
         return [
             ScoreBet.from_instance(score_bet, db=self.db, lock_datetime=self.lock_datetime)
-            for score_bet in self.db.query(ScoreBetModel)
-            .join(ScoreBetModel.match)
-            .filter_by(user_id=self.instance.id)
-            .join(MatchModel.group)
-            .order_by(GroupModel.index, MatchModel.index)
+            for score_bet, _, _ in self.db.exec(
+                select(ScoreBetModel, MatchModel, GroupModel)
+                .where(MatchModel.user_id == self.instance.id)
+                .order_by(GroupModel.index, MatchModel.index)
+            )
         ]
 
     @strawberry.field
@@ -470,7 +466,7 @@ class User:
                 user=self.instance,
                 lock_datetime=self.lock_datetime,
             )
-            for group in self.db.query(GroupModel).order_by(GroupModel.index)
+            for group in self.db.exec(select(GroupModel).order_by(GroupModel.index))
         ]
 
     @strawberry.field
@@ -482,7 +478,7 @@ class User:
                 user=self.instance,
                 lock_datetime=self.lock_datetime,
             )
-            for phase in self.db.query(PhaseModel).order_by(PhaseModel.index)
+            for phase in self.db.exec(select(PhaseModel).order_by(PhaseModel.index))
         ]
 
     @classmethod

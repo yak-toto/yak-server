@@ -3,15 +3,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
-from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
-from yak_server.database.models import (
-    MatchModel,
-    ScoreBetModel,
-    UserModel,
-)
+from yak_server.database.models3 import MatchModel, ScoreBetModel, UserModel
 from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.database import get_db
 from yak_server.helpers.group_position import set_recomputation_flag
@@ -131,19 +126,20 @@ def create_score_bet(
 @router.get("/{bet_id}")
 def retrieve_score_bet_by_id(
     bet_id: UUID4,
-    db: Annotated[Session, Depends(get_db)],
+    session: Annotated[Session, Depends(get_db)],
     user: Annotated[UserModel, Depends(get_current_user)],
     settings: Annotated[Settings, Depends(get_settings)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[ScoreBetResponse]:
-    score_bet = (
-        db.query(ScoreBetModel)
-        .join(ScoreBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id))
-        .first()
-    )
+    score_bet = session.exec(
+        select(ScoreBetModel).where(
+            ScoreBetModel.match_id == MatchModel.id,
+            MatchModel.user_id == user.id,
+            ScoreBetModel.id == bet_id,
+        )
+    ).first()
 
-    if not score_bet:
+    if score_bet is None:
         raise BetNotFound(bet_id)
 
     return send_response(score_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
@@ -161,16 +157,16 @@ def modify_score_bet(
     if is_locked(user.name, settings.lock_datetime):
         raise LockedScoreBet
 
-    score_bet = (
-        db.query(ScoreBetModel)
-        .join(ScoreBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id))
+    result = db.exec(
+        select(ScoreBetModel, MatchModel)
+        .where(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id)
         .with_for_update()
-        .first()
-    )
+    ).first()
 
-    if not score_bet:
+    if result is None:
         raise BetNotFound(bet_id)
+
+    score_bet, _ = result
 
     logger.info(
         modify_score_bet_successfully(
@@ -226,12 +222,11 @@ def delete_score_bet_by_id(
     if is_locked(user.name, settings.lock_datetime):
         raise LockedScoreBet
 
-    score_bet = (
-        db.query(ScoreBetModel)
+    score_bet = db.exec(
+        select(ScoreBetModel)
         .join(ScoreBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id))
-        .first()
-    )
+        .where(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id)
+    ).first()
 
     if not score_bet:
         raise BetNotFound(bet_id)

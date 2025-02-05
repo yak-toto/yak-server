@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 from strawberry.fastapi import BaseContext
 
 from yak_server.helpers.database import get_db

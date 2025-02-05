@@ -2,7 +2,7 @@ import logging
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from yak_server.database.models import BinaryBetModel, ScoreBetModel
+    from yak_server.database.models3 import BinaryBetModel, ScoreBetModel
 
 
 def modify_score_bet_successfully(

@@ -3,9 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 from pydantic import UUID4
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 
-from yak_server.database.models import TeamModel
+from yak_server.database.models3 import TeamModel
 from yak_server.helpers.database import get_db
 from yak_server.helpers.format import is_iso_3166_1_alpha_2_code, is_uuid4
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang

@@ -9,7 +9,7 @@ from .phases import PhaseOut
 from .teams import FlagOut, TeamIn, TeamModifyScoreBetIn, TeamWithScoreOut
 
 if TYPE_CHECKING:
-    from yak_server.database.models import ScoreBetModel
+    from yak_server.database.models3 import ScoreBetModel
 
 
 class ScoreBetIn(BaseModel):
@@ -85,14 +85,14 @@ class ScoreBetWithGroupIdOut(BaseModel):
             locked=locked,
             group=Group(id=score_bet.match.group_id),
             team1=TeamWithScoreOut(
-                id=score_bet.match.team1.id,
+                id=score_bet.match.team1_id,
                 code=score_bet.match.team1.code,
                 description=get_language_description(score_bet.match.team1, lang),
                 score=score_bet.score1,
                 flag=FlagOut(url=score_bet.match.team1.flag_url),
             ),
             team2=TeamWithScoreOut(
-                id=score_bet.match.team2.id,
+                id=score_bet.match.team2_id,
                 code=score_bet.match.team2.code,
                 description=get_language_description(score_bet.match.team2, lang),
                 score=score_bet.score2,

@@ -4,9 +4,9 @@ from typing import Annotated
 import pendulum
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
-from yak_server.database.models import UserModel
+from yak_server.database.models3 import UserModel
 from yak_server.helpers.authentication import (
     NameAlreadyExistsError,
     encode_bearer_token,
@@ -126,8 +126,9 @@ def modify_user(
     db: Annotated[Session, Depends(get_db)],
     _: Annotated[UserModel, Depends(get_admin_user)],
 ) -> GenericOut[CurrentUserOut]:
-    user = db.query(UserModel).filter_by(id=user_id).first()
-    if not user:
+    user = db.exec(select(UserModel).where(UserModel.id == user_id)).first()
+
+    if user is None:
         raise UserNotFound(user_id)
 
     user.change_password(modify_user_in.password)

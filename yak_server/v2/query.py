@@ -5,7 +5,7 @@ import strawberry
 from sqlalchemy import and_
 from strawberry.types import Info
 
-from yak_server.database.models import (
+from yak_server.database.models3 import (
     BinaryBetModel,
     GroupModel,
     GroupPositionModel,
@@ -64,7 +64,7 @@ from .schema import (
 
 if TYPE_CHECKING:
     import pendulum
-    from sqlalchemy.orm import Session
+    from sqlmodel import Session
 
 
 @strawberry.type

@@ -4,9 +4,9 @@ from uuid import UUID
 import pendulum
 from jwt import decode as jwt_decode
 from jwt import encode as jwt_encode
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
-from yak_server.database.models import MatchModel, MatchReferenceModel, ScoreBetModel, UserModel
+from yak_server.database.models3 import MatchModel, MatchReferenceModel, UserModel
 
 from .errors import name_already_exists_message
 from .group_position import create_group_position
@@ -39,23 +39,24 @@ class NameAlreadyExistsError(Exception):
 
 
 def signup_user(
-    db: Session, name: str, first_name: str, last_name: str, password: str
+    session: Session, name: str, first_name: str, last_name: str, password: str
 ) -> UserModel:
     # Check existing user in db
-    existing_user = db.query(UserModel).filter_by(name=name).first()
-    if existing_user:
+    existing_user = session.exec(select(UserModel).where(UserModel.name == name)).first()
+
+    if existing_user is not None:
         raise NameAlreadyExistsError(name)
 
     # Validate password
     validate_password(password)
 
     # Initialize user and integrate in db
-    user = UserModel(name, first_name, last_name, password)
-    db.add(user)
-    db.flush()
+    user = UserModel(name=name, first_name=first_name, last_name=last_name, password=password)
+    session.add(user)
+    session.flush()
 
     # Initialize matches and bets and integrate in db
-    for match_reference in db.query(MatchReferenceModel).all():
+    for match_reference in session.exec(select(MatchReferenceModel)).all():
         match = MatchModel(
             team1_id=match_reference.team1_id,
             team2_id=match_reference.team2_id,
@@ -63,18 +64,14 @@ def signup_user(
             group_id=match_reference.group_id,
             user_id=user.id,
         )
-        db.add(match)
-        db.flush()
+        session.add(match)
+        session.flush()
 
-        db.add(match_reference.bet_type_from_match.value(match_id=match.id))
-        db.flush()
+        session.add(match_reference.bet_type_from_match.value(match_id=match.id))
+        session.flush()
 
     # Create group position records
-    db.add_all(
-        create_group_position(
-            db.query(ScoreBetModel).join(ScoreBetModel.match).filter_by(user_id=user.id)
-        )
-    )
-    db.commit()
+    session.add_all(create_group_position(session, user.id))
+    session.commit()
 
     return user

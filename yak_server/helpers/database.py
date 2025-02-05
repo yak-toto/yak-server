@@ -1,15 +1,13 @@
 from collections.abc import Generator
 
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 
-from yak_server.database import build_local_session_maker
+from yak_server.database import build_engine
 
 
 def get_db() -> Generator[Session, None, None]:
-    local_session_maker = build_local_session_maker()
-
-    with local_session_maker() as db:
+    with Session(build_engine()) as session:
         try:
-            yield db
+            yield session
         finally:
-            db.close()
+            session.close()

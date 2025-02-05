@@ -7,7 +7,7 @@ import strawberry
 from sqlalchemy import and_
 from strawberry.types import Info
 
-from yak_server.database.models import (
+from yak_server.database.models3 import (
     BinaryBetModel,
     MatchModel,
     ScoreBetModel,
@@ -47,11 +47,7 @@ from .result import (
     UserNotFound,
     UserWithoutSensitiveInfo,
 )
-from .schema import (
-    BinaryBet,
-    ScoreBet,
-    UserWithToken,
-)
+from .schema import BinaryBet, ScoreBet, UserWithToken
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +98,7 @@ class Mutation:
         db = info.context.db
         settings = info.context.settings
 
-        user = UserModel.authenticate(db=db, name=user_name, password=password)
+        user = UserModel.authenticate(session=db, name=user_name, password=password)
 
         if not user:
             return InvalidCredentials()

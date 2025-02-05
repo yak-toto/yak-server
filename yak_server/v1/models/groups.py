@@ -7,7 +7,7 @@ from yak_server.helpers.language import Lang, get_language_description
 from .phases import PhaseOut
 
 if TYPE_CHECKING:
-    from yak_server.database.models import GroupModel
+    from yak_server.database.models3 import GroupModel
 
 
 class GroupIn(BaseModel):

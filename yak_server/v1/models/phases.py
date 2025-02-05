@@ -5,7 +5,7 @@ from pydantic import UUID4, BaseModel
 from yak_server.helpers.language import Lang, get_language_description
 
 if TYPE_CHECKING:
-    from yak_server.database.models import PhaseModel
+    from yak_server.database.models3 import PhaseModel
 
 
 class PhaseOut(BaseModel):

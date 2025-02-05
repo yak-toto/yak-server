@@ -5,7 +5,7 @@ from pydantic import BaseModel, NonNegativeInt
 from .teams import TeamOut
 
 if TYPE_CHECKING:
-    from yak_server.database.models import GroupPositionModel
+    from yak_server.database.models3 import GroupPositionModel
     from yak_server.helpers.language import Lang
 
 

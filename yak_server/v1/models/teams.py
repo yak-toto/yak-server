@@ -5,7 +5,7 @@ from pydantic import UUID4, BaseModel, NonNegativeInt
 from yak_server.helpers.language import Lang, get_language_description
 
 if TYPE_CHECKING:
-    from yak_server.database.models import TeamModel
+    from yak_server.database.models3 import TeamModel
 
 
 class FlagOut(BaseModel):

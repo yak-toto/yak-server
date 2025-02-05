@@ -2,14 +2,15 @@ from typing import TYPE_CHECKING, Union
 
 from fastapi import Request
 from jwt import ExpiredSignatureError, PyJWTError
+from sqlmodel import select
 
-from yak_server.database.models import UserModel
+from yak_server.database.models3 import UserModel
 from yak_server.helpers.authentication import decode_bearer_token
 
 from .result import ExpiredToken, InvalidToken, UnauthorizedAccessToAdminAPI
 
 if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
+    from sqlmodel import Session
 
     from yak_server.v2.context import YakContext
 
@@ -33,7 +34,7 @@ def _authentify(
     except PyJWTError:
         return InvalidToken()
 
-    user = db.query(UserModel).filter_by(id=data["sub"]).first()
+    user = db.exec(select(UserModel).where(UserModel.id == data["sub"])).first()
 
     if user is None:
         return InvalidToken()

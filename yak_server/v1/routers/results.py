@@ -3,9 +3,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 
-from yak_server.database.models import UserModel
+from yak_server.database.models3 import UserModel
 from yak_server.helpers.database import get_db
 from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.errors import NoResultsForAdminUser

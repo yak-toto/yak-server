@@ -9,7 +9,7 @@ from .phases import PhaseOut
 from .teams import FlagOut, TeamIn, TeamModifyBinaryBetIn, TeamWithWonOut
 
 if TYPE_CHECKING:
-    from yak_server.database.models import BinaryBetModel
+    from yak_server.database.models3 import BinaryBetModel
 
 
 class BinaryBetIn(BaseModel):
