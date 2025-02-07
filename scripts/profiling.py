@@ -10,7 +10,8 @@ from yak_server import create_app as create_yak_app
 try:
     import yappi
 except ImportError:  # pragma: no cover
-    yappi = None
+    # Very common pattern for optional dependency imports
+    yappi = None  # type: ignore[assignment]
 
 if TYPE_CHECKING:
     from fastapi import Request, Response

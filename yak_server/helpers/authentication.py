@@ -29,7 +29,7 @@ def encode_bearer_token(
     )
 
 
-def decode_bearer_token(token: str, secret_key: str) -> dict[str, Any]:
+def decode_bearer_token(token: str, secret_key: str) -> Any:  # noqa: ANN401
     return jwt_decode(token, secret_key, algorithms=["HS512"])
 
 

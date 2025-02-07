@@ -45,13 +45,8 @@ from .result import (
     UnsatisfiedPasswordRequirements,
     UserNameAlreadyExists,
     UserNotFound,
-    UserWithoutSensitiveInfo,
 )
-from .schema import (
-    BinaryBet,
-    ScoreBet,
-    UserWithToken,
-)
+from .schema import BinaryBet, ScoreBet, UserWithoutSensitiveInfo, UserWithToken
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +76,7 @@ class Mutation:
 
         logger.info(signed_up_successfully(user.name))
 
-        return UserWithToken.from_instance(
+        return UserWithToken.from_instance_and_token(
             user,
             db=db,
             lock_datetime=settings.lock_datetime,
@@ -115,7 +110,7 @@ class Mutation:
 
         logger.info(logged_in_successfully(user.name))
 
-        return UserWithToken.from_instance(
+        return UserWithToken.from_instance_and_token(
             user,
             db=db,
             lock_datetime=settings.lock_datetime,

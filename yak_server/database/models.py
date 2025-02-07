@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
 import sqlalchemy as sa
@@ -7,11 +7,9 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
 from sqlalchemy import CheckConstraint
 from sqlalchemy import Enum as SqlEnum
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID as DB_UUID
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import relationship
-
-from . import Base
+from sqlalchemy.orm import DeclarativeBase, relationship
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -19,9 +17,13 @@ if TYPE_CHECKING:
 ph = PasswordHasher()
 
 
+class Base(DeclarativeBase):
+    pass
+
+
 class UserModel(Base):
     __tablename__ = "user"
-    id = sa.Column(UUID(), primary_key=True, nullable=False, default=uuid4)
+    id = sa.Column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
     name = sa.Column(sa.String(100), unique=True, nullable=False)
     first_name = sa.Column(sa.String(100), nullable=False)
     last_name = sa.Column(sa.String(100), nullable=False)
@@ -101,13 +103,11 @@ class UserModel(Base):
         return f"{self.first_name} {self.last_name}"
 
     @classmethod
-    def authenticate(cls, db: "Session", name: str, password: str) -> "UserModel":
+    def authenticate(cls, db: "Session", name: str, password: str) -> Optional["UserModel"]:
         user = db.query(cls).filter_by(name=name).first()
 
-        is_correct_username = bool(user)
-
         try:
-            if is_correct_username:
+            if user is not None:
                 ph.verify(user.password, password)
             else:
                 # verify password with itself to avoid timing attack
@@ -116,7 +116,7 @@ class UserModel(Base):
         except VerificationError:
             is_correct_password = False
 
-        return user if is_correct_username and is_correct_password else None
+        return user if user and is_correct_password else None
 
     def change_password(self, new_password: str) -> None:
         self.password = ph.hash(new_password)
@@ -124,9 +124,9 @@ class UserModel(Base):
 
 class ScoreBetModel(Base):
     __tablename__ = "score_bet"
-    id = sa.Column(UUID(), primary_key=True, nullable=False, default=uuid4)
+    id = sa.Column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
 
-    match_id = sa.Column(UUID(), sa.ForeignKey("match.id", ondelete="CASCADE"), nullable=False)
+    match_id = sa.Column(DB_UUID(), sa.ForeignKey("match.id", ondelete="CASCADE"), nullable=False)
     match = relationship("MatchModel", back_populates="score_bets")
 
     score1 = sa.Column(sa.Integer, CheckConstraint("score1>=0"), default=None)
@@ -165,9 +165,9 @@ class ScoreBetModel(Base):
 
 class BinaryBetModel(Base):
     __tablename__ = "binary_bet"
-    id = sa.Column(UUID(), primary_key=True, nullable=False, default=uuid4)
+    id = sa.Column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
 
-    match_id = sa.Column(UUID(), sa.ForeignKey("match.id", ondelete="CASCADE"), nullable=False)
+    match_id = sa.Column(DB_UUID(), sa.ForeignKey("match.id", ondelete="CASCADE"), nullable=False)
     match = relationship("MatchModel", back_populates="binary_bets")
 
     is_one_won = sa.Column(sa.Boolean, default=None)
@@ -186,34 +186,34 @@ class BetMapping(Enum):
 
 class MatchReferenceModel(Base):
     __tablename__ = "match_reference"
-    id = sa.Column(UUID(), primary_key=True, nullable=False, default=uuid4)
+    id = sa.Column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
 
-    group_id = sa.Column(UUID(), sa.ForeignKey("group.id"), nullable=False)
+    group_id = sa.Column(DB_UUID(), sa.ForeignKey("group.id"), nullable=False)
 
     index = sa.Column(sa.Integer, nullable=False)
 
-    team1_id = sa.Column(UUID(), sa.ForeignKey("team.id"), nullable=True)
-    team2_id = sa.Column(UUID(), sa.ForeignKey("team.id"), nullable=True)
+    team1_id = sa.Column(DB_UUID(), sa.ForeignKey("team.id"), nullable=True)
+    team2_id = sa.Column(DB_UUID(), sa.ForeignKey("team.id"), nullable=True)
 
     bet_type_from_match = sa.Column(SqlEnum(BetMapping), nullable=False)
 
 
 class MatchModel(Base):
     __tablename__ = "match"
-    id = sa.Column(UUID(), primary_key=True, nullable=False, default=uuid4)
+    id = sa.Column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
 
-    group_id = sa.Column(UUID(), sa.ForeignKey("group.id"), nullable=False)
+    group_id = sa.Column(DB_UUID(), sa.ForeignKey("group.id"), nullable=False)
     group = relationship("GroupModel", foreign_keys=group_id, backref="matches")
 
     index = sa.Column(sa.Integer, nullable=False)
 
-    team1_id = sa.Column(UUID(), sa.ForeignKey("team.id"), nullable=True)
+    team1_id = sa.Column(DB_UUID(), sa.ForeignKey("team.id"), nullable=True)
     team1 = relationship("TeamModel", foreign_keys=team1_id)
 
-    team2_id = sa.Column(UUID(), sa.ForeignKey("team.id"), nullable=True)
+    team2_id = sa.Column(DB_UUID(), sa.ForeignKey("team.id"), nullable=True)
     team2 = relationship("TeamModel", foreign_keys=team2_id)
 
-    user_id = sa.Column(UUID(), sa.ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    user_id = sa.Column(DB_UUID(), sa.ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     user = relationship("UserModel", foreign_keys=user_id)
 
     score_bets = relationship(
@@ -234,7 +234,7 @@ class MatchModel(Base):
 
 class TeamModel(Base):
     __tablename__ = "team"
-    id = sa.Column(UUID(), primary_key=True, nullable=False, default=uuid4)
+    id = sa.Column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
     code = sa.Column(sa.String(10), unique=True, nullable=False)
     description_fr = sa.Column(sa.String(100), unique=True, nullable=False)
     description_en = sa.Column(sa.String(100), unique=True, nullable=False)
@@ -244,19 +244,19 @@ class TeamModel(Base):
 
 class GroupModel(Base):
     __tablename__ = "group"
-    id = sa.Column(UUID(), primary_key=True, nullable=False, default=uuid4)
+    id = sa.Column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
     code = sa.Column(sa.String(1), unique=True, nullable=False)
     description_fr = sa.Column(sa.String(100), unique=True, nullable=False)
     description_en = sa.Column(sa.String(100), unique=True, nullable=False)
     index = sa.Column(sa.Integer, nullable=False)
 
-    phase_id = sa.Column(UUID(), sa.ForeignKey("phase.id"), nullable=False)
+    phase_id = sa.Column(DB_UUID(), sa.ForeignKey("phase.id"), nullable=False)
     phase = relationship("PhaseModel", backref="groups")
 
 
 class PhaseModel(Base):
     __tablename__ = "phase"
-    id = sa.Column(UUID(), primary_key=True, nullable=False, default=uuid4)
+    id = sa.Column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
     code = sa.Column(sa.String(10), unique=True, nullable=False)
     description_fr = sa.Column(sa.String(100), nullable=False)
     description_en = sa.Column(sa.String(100), nullable=False)
@@ -265,7 +265,7 @@ class PhaseModel(Base):
 
 class GroupPositionModel(Base):
     __tablename__ = "group_position"
-    id = sa.Column(UUID(), primary_key=True, nullable=False, default=uuid4)
+    id = sa.Column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
     won = sa.Column(sa.Integer, CheckConstraint("won>=0"), nullable=False, default=0)
     drawn = sa.Column(sa.Integer, CheckConstraint("drawn>=0"), nullable=False, default=0)
     lost = sa.Column(sa.Integer, CheckConstraint("lost>=0"), nullable=False, default=0)
@@ -280,20 +280,20 @@ class GroupPositionModel(Base):
     need_recomputation = sa.Column(sa.Boolean, nullable=False, default=False)
 
     user_id = sa.Column(
-        UUID(),
+        DB_UUID(),
         sa.ForeignKey("user.id", ondelete="CASCADE"),
         nullable=False,
     )
 
     team_id = sa.Column(
-        UUID(),
+        DB_UUID(),
         sa.ForeignKey("team.id"),
         nullable=False,
     )
     team = relationship("TeamModel")
 
     group_id = sa.Column(
-        UUID(),
+        DB_UUID(),
         sa.ForeignKey("group.id"),
         nullable=False,
     )

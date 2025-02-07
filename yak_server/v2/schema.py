@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from typing import Optional
 from uuid import UUID
 
@@ -99,7 +100,13 @@ class Team:
 
 
 @strawberry.type
-class TeamWithScore(Team):
+class TeamWithScore:
+    instance: strawberry.Private[TeamModel]
+
+    id: UUID
+    code: str
+    description: str
+    flag: Flag
     score: Optional[int]
 
     @classmethod
@@ -115,7 +122,13 @@ class TeamWithScore(Team):
 
 
 @strawberry.type
-class TeamWithVictory(Team):
+class TeamWithVictory:
+    instance: strawberry.Private[TeamModel]
+
+    id: UUID
+    code: str
+    description: str
+    flag: Flag
     won: Optional[bool]
 
     @classmethod
@@ -164,13 +177,14 @@ class GroupPosition:
         )
 
 
-def send_group_position(group_rank: list[GroupPositionModel]) -> list[GroupPosition]:
+def send_group_position(group_rank: Iterable[GroupPositionModel]) -> list[GroupPosition]:
     return sorted(
         [GroupPosition.from_instance(group_position) for group_position in group_rank],
-        key=lambda team: (
-            team.points(),
-            team.goals_difference(),
-            team.goals_for,
+        key=lambda group_position: (
+            # Due to : https://github.com/strawberry-graphql/strawberry/issues/2021
+            group_position.points(),  # type: ignore[call-arg]
+            group_position.goals_difference(),  # type: ignore[call-arg]
+            group_position.goals_for,
         ),
         reverse=True,
     )
@@ -202,10 +216,10 @@ class Group:
             .join(ScoreBetModel.match)
             .filter(and_(MatchModel.user_id == self.user.id, MatchModel.group_id == self.id))
         )
-        group_rank = compute_group_rank(group_rank, score_bets)
+        result_group_rank = compute_group_rank(group_rank, score_bets)
         self.db.commit()
 
-        return send_group_position(group_rank)
+        return send_group_position(result_group_rank)
 
     @strawberry.field
     def phase(self) -> "Phase":
@@ -298,12 +312,12 @@ class ScoreBet:
             ),
             team1=(
                 TeamWithScore.from_instance(instance.match.team1, score=instance.score1)
-                if instance.match.team1_id is not None
+                if instance.match.team1 is not None
                 else None
             ),
             team2=(
                 TeamWithScore.from_instance(instance.match.team2, score=instance.score2)
-                if instance.match.team2_id is not None
+                if instance.match.team2 is not None
                 else None
             ),
         )
@@ -341,12 +355,12 @@ class BinaryBet:
             ),
             team1=(
                 TeamWithVictory.from_instance(instance.match.team1, won=bet_results[0])
-                if instance.match.team1_id is not None
+                if instance.match.team1 is not None
                 else None
             ),
             team2=(
                 TeamWithVictory.from_instance(instance.match.team2, won=bet_results[1])
-                if instance.match.team2_id is not None
+                if instance.match.team2 is not None
                 else None
             ),
         )
@@ -510,7 +524,7 @@ class UserWithToken(User):
     token: str
 
     @classmethod
-    def from_instance(
+    def from_instance_and_token(
         cls,
         instance: UserModel,
         *,

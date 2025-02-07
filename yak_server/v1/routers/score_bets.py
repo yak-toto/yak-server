@@ -62,7 +62,7 @@ def send_response(
                         flag=FlagOut(url=score_bet.match.team1.flag_url),
                         score=score_bet.score1,
                     )
-                    if score_bet.match.team1_id is not None
+                    if score_bet.match.team1 is not None
                     else None
                 ),
                 team2=(
@@ -73,7 +73,7 @@ def send_response(
                         flag=FlagOut(url=score_bet.match.team2.flag_url),
                         score=score_bet.score2,
                     )
-                    if score_bet.match.team2_id is not None
+                    if score_bet.match.team2 is not None
                     else None
                 ),
             ),
@@ -189,7 +189,9 @@ def modify_score_bet(
                 db.flush()
             except IntegrityError as integrity_error:
                 db.rollback()
-                raise TeamNotFound(modify_score_bet_in.team1.id) from integrity_error
+                # team1.id is not None due to: "id" in modify_score_bet_in.team1.model_fields_set
+                # being true
+                raise TeamNotFound(modify_score_bet_in.team1.id) from integrity_error  # type: ignore[arg-type]
 
         if "score" in modify_score_bet_in.team1.model_fields_set:
             score_bet.score1 = modify_score_bet_in.team1.score
@@ -202,7 +204,9 @@ def modify_score_bet(
                 db.flush()
             except IntegrityError as integrity_error:
                 db.rollback()
-                raise TeamNotFound(modify_score_bet_in.team2.id) from integrity_error
+                # team2.id is not None due to: "id" in modify_score_bet_in.team2.model_fields_set
+                # being true
+                raise TeamNotFound(modify_score_bet_in.team2.id) from integrity_error  # type: ignore[arg-type]
 
         if "score" in modify_score_bet_in.team2.model_fields_set:
             score_bet.score2 = modify_score_bet_in.team2.score

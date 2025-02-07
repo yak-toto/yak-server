@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,7 +18,7 @@ from .v1.routers import score_bets as score_bets_router
 from .v1.routers import teams as teams_router
 from .v1.routers import users as users_router
 from .v2 import get_schema
-from .v2.context import get_context
+from .v2.context import YakContext, get_context
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +63,7 @@ def create_app() -> FastAPI:
     set_exception_handler(app)
 
     # Register graphql endpoint
-    graphql_app = GraphQLRouter(
+    graphql_app = GraphQLRouter[YakContext, Any](
         get_schema(debug=app.debug),
         graphql_ide="apollo-sandbox" if app.debug is True else None,
         context_getter=get_context,

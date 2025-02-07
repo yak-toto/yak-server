@@ -366,59 +366,56 @@ def test_group_rank(
     assert sorted(
         response_group_rank_response.json()["result"]["group_rank"],
         key=lambda group_position: group_position["team"]["code"],
-    ) == sorted(
-        [
-            {
-                "team": {
-                    "id": ANY,
-                    "code": "IM",
-                    "description": "Île de Man",
-                    "flag": {"url": ANY},
-                },
-                "won": 0,
-                "drawn": 0,
-                "lost": 0,
-                "goals_for": 0,
-                "goals_against": 0,
-                "goals_difference": 0,
-                "played": 0,
-                "points": 0,
+    ) == [
+        {
+            "team": {
+                "id": ANY,
+                "code": "FR",
+                "description": "France",
+                "flag": {"url": ANY},
             },
-            {
-                "team": {
-                    "id": ANY,
-                    "code": "FR",
-                    "description": "France",
-                    "flag": {"url": ANY},
-                },
-                "won": 0,
-                "drawn": 0,
-                "lost": 0,
-                "goals_for": 0,
-                "goals_against": 0,
-                "goals_difference": 0,
-                "played": 0,
-                "points": 0,
+            "won": 0,
+            "drawn": 0,
+            "lost": 0,
+            "goals_for": 0,
+            "goals_against": 0,
+            "goals_difference": 0,
+            "played": 0,
+            "points": 0,
+        },
+        {
+            "team": {
+                "id": ANY,
+                "code": "IE",
+                "description": "Irlande",
+                "flag": {"url": ANY},
             },
-            {
-                "team": {
-                    "id": ANY,
-                    "code": "IE",
-                    "description": "Irlande",
-                    "flag": {"url": ANY},
-                },
-                "won": 0,
-                "drawn": 0,
-                "lost": 0,
-                "goals_for": 0,
-                "goals_against": 0,
-                "goals_difference": 0,
-                "played": 0,
-                "points": 0,
+            "won": 0,
+            "drawn": 0,
+            "lost": 0,
+            "goals_for": 0,
+            "goals_against": 0,
+            "goals_difference": 0,
+            "played": 0,
+            "points": 0,
+        },
+        {
+            "team": {
+                "id": ANY,
+                "code": "IM",
+                "description": "Île de Man",
+                "flag": {"url": ANY},
             },
-        ],
-        key=lambda group_position: group_position["team"]["code"],  # type: ignore[index]
-    )
+            "won": 0,
+            "drawn": 0,
+            "lost": 0,
+            "goals_for": 0,
+            "goals_against": 0,
+            "goals_difference": 0,
+            "played": 0,
+            "points": 0,
+        },
+    ]
 
     response_patch_bet = client.patch(
         f"/api/v1/score_bets/{response_all_bets.json()['result']['score_bets'][0]['id']}",
