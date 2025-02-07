@@ -61,7 +61,7 @@ def send_response(
                         flag=FlagOut(url=binary_bet.match.team1.flag_url),
                         won=binary_bet.bet_from_is_one_won()[0],
                     )
-                    if binary_bet.match.team1_id is not None
+                    if binary_bet.match.team1 is not None
                     else None
                 ),
                 team2=(
@@ -72,7 +72,7 @@ def send_response(
                         flag=FlagOut(url=binary_bet.match.team2.flag_url),
                         won=binary_bet.bet_from_is_one_won()[1],
                     )
-                    if binary_bet.match.team2_id is not None
+                    if binary_bet.match.team2 is not None
                     else None
                 ),
             ),
@@ -183,7 +183,9 @@ def modify_binary_bet_by_id(
             db.flush()
         except IntegrityError as integrity_error:
             db.rollback()
-            raise TeamNotFound(modify_binary_bet_in.team1.id) from integrity_error
+            # team1.id is not None due to: "id" in modify_binary_bet_in.team1.model_fields_set
+            # being true
+            raise TeamNotFound(modify_binary_bet_in.team1.id) from integrity_error  # type: ignore[arg-type]
 
     if (
         modify_binary_bet_in.team2 is not None
@@ -195,7 +197,9 @@ def modify_binary_bet_by_id(
             db.flush()
         except IntegrityError as integrity_error:
             db.rollback()
-            raise TeamNotFound(modify_binary_bet_in.team2.id) from integrity_error
+            # team2.id is not None due to: "id" in modify_binary_bet_in.team2.model_fields_set
+            # being true
+            raise TeamNotFound(modify_binary_bet_in.team2.id) from integrity_error  # type: ignore[arg-type]
 
     db.commit()
 

@@ -44,7 +44,7 @@ class ScoreBetOut(BaseModel):
                     score=score_bet.score1,
                     flag=FlagOut(url=score_bet.match.team1.flag_url),
                 )
-                if score_bet.match.team1_id is not None
+                if score_bet.match.team1 is not None
                 else None
             ),
             team2=(
@@ -55,7 +55,7 @@ class ScoreBetOut(BaseModel):
                     score=score_bet.score2,
                     flag=FlagOut(url=score_bet.match.team2.flag_url),
                 )
-                if score_bet.match.team2_id is not None
+                if score_bet.match.team2 is not None
                 else None
             ),
         )
@@ -84,19 +84,27 @@ class ScoreBetWithGroupIdOut(BaseModel):
             id=score_bet.id,
             locked=locked,
             group=Group(id=score_bet.match.group_id),
-            team1=TeamWithScoreOut(
-                id=score_bet.match.team1.id,
-                code=score_bet.match.team1.code,
-                description=get_language_description(score_bet.match.team1, lang),
-                score=score_bet.score1,
-                flag=FlagOut(url=score_bet.match.team1.flag_url),
+            team1=(
+                TeamWithScoreOut(
+                    id=score_bet.match.team1.id,
+                    code=score_bet.match.team1.code,
+                    description=get_language_description(score_bet.match.team1, lang),
+                    score=score_bet.score1,
+                    flag=FlagOut(url=score_bet.match.team1.flag_url),
+                )
+                if score_bet.match.team1
+                else None
             ),
-            team2=TeamWithScoreOut(
-                id=score_bet.match.team2.id,
-                code=score_bet.match.team2.code,
-                description=get_language_description(score_bet.match.team2, lang),
-                score=score_bet.score2,
-                flag=FlagOut(url=score_bet.match.team2.flag_url),
+            team2=(
+                TeamWithScoreOut(
+                    id=score_bet.match.team2.id,
+                    code=score_bet.match.team2.code,
+                    description=get_language_description(score_bet.match.team2, lang),
+                    score=score_bet.score2,
+                    flag=FlagOut(url=score_bet.match.team2.flag_url),
+                )
+                if score_bet.match.team2
+                else None
             ),
         )
 

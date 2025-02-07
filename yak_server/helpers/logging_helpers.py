@@ -13,7 +13,8 @@ def modify_score_bet_successfully(
 ) -> str:
     return (
         f"{user_name} modify "
-        f"{original_bet.match.team1.description_en}-{original_bet.match.team2.description_en} "
+        f"{original_bet.match.team1.description_en if original_bet.match.team1 else None}"
+        f"-{original_bet.match.team2.description_en if original_bet.match.team2 else None} "
         f"in {original_bet.match.group.description_en} "
         f"from {original_bet.score1}-{original_bet.score2} "
         f"to {new_score1}-{new_score2}"

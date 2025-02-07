@@ -4,10 +4,11 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+from hatchling.builders.config import BuilderConfigBound
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 
 
-class CopyAlembicIniBuildHook(BuildHookInterface):
+class CopyAlembicIniBuildHook(BuildHookInterface[BuilderConfigBound]):
     PLUGIN_NAME = "copy-alembic-ini"
 
     def initialize(self, version: str, build_data: dict[str, Any]) -> None:  # noqa: ARG002

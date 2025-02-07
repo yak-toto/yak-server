@@ -1,4 +1,6 @@
 from functools import partial
+from typing import Union
+from uuid import UUID
 
 INVALID_CREDENTIALS_MESSAGE = "Invalid credentials"
 UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE = "Unauthorized access to admin API"
@@ -12,7 +14,7 @@ def name_already_exists_message(user_name: str) -> str:
     return f"Name already exists: {user_name}"
 
 
-def generic_not_found_message(id: str, resource_name: str) -> str:
+def generic_not_found_message(id: Union[UUID, str], resource_name: str) -> str:
     return f"{resource_name} not found: {id}"
 
 

@@ -18,16 +18,19 @@ from yak_server.helpers.settings import get_settings
 try:
     import httpx
 except ImportError:  # pragma: no cover
+    # Very common pattern for optional dependency imports
     httpx = None  # type: ignore[assignment]
 
 try:
     import bs4
 except ImportError:  # pragma: no cover
+    # Very common pattern for optional dependency imports
     bs4 = None  # type: ignore[assignment]
 
 try:
     import lxml
 except ImportError:  # pragma: no cover
+    # Very common pattern for optional dependency imports
     lxml = None  # type: ignore[assignment]
 
 

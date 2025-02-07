@@ -3,8 +3,9 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from yak_server.database import Base, build_engine, build_local_session_maker
+from yak_server.database import build_engine, build_local_session_maker
 from yak_server.database.models import (
+    Base,
     BinaryBetModel,
     GroupModel,
     GroupPositionModel,
@@ -15,13 +16,14 @@ from yak_server.database.models import (
     TeamModel,
     UserModel,
 )
+from yak_server.helpers.authentication import signup_user
 from yak_server.helpers.rules.compute_points import compute_points as compute_points_func
 from yak_server.helpers.settings import get_settings
-from yak_server.v1.routers.users import signup_user
 
 try:
     import alembic
 except ImportError:  # pragma: no cover
+    # Very common pattern for optional dependency imports
     alembic = None  # type: ignore[assignment]
 
 if TYPE_CHECKING:
