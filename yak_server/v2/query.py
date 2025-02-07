@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -378,7 +379,7 @@ class Query:
             db: "Session",
             user: UserModel,
             group: GroupModel,
-            group_rank: list[GroupPositionModel],
+            group_rank: Iterable[GroupPositionModel],
             lock_datetime: "pendulum.DateTime",
         ) -> GroupRank:
             return GroupRank(
@@ -399,10 +400,10 @@ class Query:
             .join(ScoreBetModel.match)
             .filter(and_(MatchModel.user_id == user.id, MatchModel.group_id == group.id))
         )
-        group_rank = compute_group_rank(group_rank, score_bets)
+        group_rank_result = compute_group_rank(group_rank, score_bets)
         db.commit()
 
-        return send_response(db, user, group, group_rank, settings.lock_datetime)
+        return send_response(db, user, group, group_rank_result, settings.lock_datetime)
 
     @strawberry.field
     def group_rank_by_id_result(
@@ -433,7 +434,7 @@ class Query:
             db: "Session",
             user: UserModel,
             group: GroupModel,
-            group_rank: list[GroupPositionModel],
+            group_rank: Iterable[GroupPositionModel],
             lock_datetime: "pendulum.DateTime",
         ) -> GroupRank:
             return GroupRank(
@@ -454,7 +455,7 @@ class Query:
             .join(ScoreBetModel.match)
             .filter(and_(MatchModel.user_id == user.id, MatchModel.group_id == group.id))
         )
-        group_rank = compute_group_rank(group_rank, score_bets)
+        group_rank_result = compute_group_rank(group_rank, score_bets)
         db.commit()
 
-        return send_response(db, user, group, group_rank, settings.lock_datetime)
+        return send_response(db, user, group, group_rank_result, settings.lock_datetime)

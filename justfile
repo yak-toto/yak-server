@@ -25,7 +25,7 @@ test-cov:
       --cov={{ justfile_directory() }}/scripts \
       --cov={{ justfile_directory() }}/tests \
       --cov={{ justfile_directory() }}/testing \
-      --cov-report=xml \
+      --cov-report=html \
       --cov-config={{ justfile_directory() }}/pyproject.toml \
       -vv
 

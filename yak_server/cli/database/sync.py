@@ -34,7 +34,7 @@ except ImportError:  # pragma: no cover
     lxml = None  # type: ignore[assignment]
 
 
-def parse_score(content: str) -> tuple[int, int]:
+def parse_score(content: str) -> tuple[Optional[int], Optional[int]]:
     try:
         scores = next(next(content.children).children)
     except AttributeError:

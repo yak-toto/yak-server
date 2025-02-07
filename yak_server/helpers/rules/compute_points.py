@@ -20,6 +20,8 @@ from yak_server.helpers.group_position import get_group_rank_with_code
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
+    from yak_server.database.models import GroupPositionModel
+
 
 class RuleComputePoints(BaseModel):
     base_correct_result: int
@@ -78,7 +80,7 @@ class ResultForGroupRank:
     number_first_qualified_guess: int = 0
 
 
-def all_results_filled_in_group(group_result: list) -> bool:
+def all_results_filled_in_group(group_result: list["GroupPositionModel"]) -> bool:
     return all(team.played == len(group_result) - 1 for team in group_result)
 
 
@@ -87,13 +89,7 @@ def compute_results_for_group_rank(
 ) -> dict[UUID, ResultForGroupRank]:
     result_groups: dict[UUID, ResultForGroupRank] = {}
 
-    for group in (
-        db.query(GroupModel)
-        .join(GroupModel.phase)
-        .filter(
-            PhaseModel.code == "GROUP",
-        )
-    ):
+    for group in db.query(GroupModel).join(GroupModel.phase).filter(PhaseModel.code == "GROUP"):
         group_result_admin = get_group_rank_with_code(db, admin, group.id)
 
         if all_results_filled_in_group(group_result_admin):
@@ -121,11 +117,11 @@ def compute_results_for_group_rank(
     return result_groups
 
 
-def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set:
+def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set[UUID]:
     return set(
         chain(
             *(
-                (bet.match.team1.id, bet.match.team2.id)
+                (bet.match.team1_id, bet.match.team2_id)
                 for bet in db.query(BinaryBetModel)
                 .join(BinaryBetModel.match)
                 .filter(and_(MatchModel.user_id == user.id, GroupModel.code == group_code))
@@ -137,7 +133,7 @@ def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set
     )
 
 
-def winner_from_user(db: "Session", user: UserModel) -> set:
+def winner_from_user(db: "Session", user: UserModel) -> set[UUID]:
     finale_bet = next(
         iter(
             db.query(BinaryBetModel)
@@ -147,7 +143,11 @@ def winner_from_user(db: "Session", user: UserModel) -> set:
         ),
     )
 
-    if finale_bet.is_one_won is None:
+    if (
+        finale_bet.is_one_won is None
+        or finale_bet.match.team1 is None
+        or finale_bet.match.team2 is None
+    ):
         return set()
 
     return {
