@@ -4,6 +4,7 @@ from unittest.mock import ANY
 from uuid import uuid4
 
 import pendulum
+from starlette.testclient import TestClient
 
 from testing.mock import MockSettings
 from testing.util import get_random_string
@@ -13,28 +14,22 @@ from yak_server.helpers.settings import get_settings
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
-    from starlette.testclient import TestClient
+    from sqlalchemy import Engine
 
 
 def test_binary_bet(
-    app: "FastAPI",
-    client: "TestClient",
+    app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
     monkeypatch: "pytest.MonkeyPatch",
 ) -> None:
-    fake_jwt_secret_key = get_random_string(100)
-
-    app.dependency_overrides[get_settings] = MockSettings(
-        jwt_secret_key=fake_jwt_secret_key,
-        jwt_expiration_time=100,
-        lock_datetime_shift=pendulum.duration(minutes=10),
-    )
-
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_binary_bet"),
     )
 
-    initialize_database(app)
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
+
+    client = TestClient(app_with_valid_jwt_config)
 
     response_signup = client.post(
         "/api/v1/users/signup",
@@ -90,10 +85,8 @@ def test_binary_bet(
     }
 
     # Error case : locked bet
-    app.dependency_overrides[get_settings] = MockSettings(
-        lock_datetime_shift=-pendulum.duration(minutes=10),
-        jwt_expiration_time=100,
-        jwt_secret_key=fake_jwt_secret_key,
+    app_with_valid_jwt_config.dependency_overrides[get_settings]().set_lock_datetime(
+        -pendulum.duration(minutes=10)
     )
 
     response_lock_bet = client.patch(
@@ -109,10 +102,8 @@ def test_binary_bet(
         "description": "Cannot modify binary bet, lock date is exceeded",
     }
 
-    app.dependency_overrides[get_settings] = MockSettings(
-        lock_datetime_shift=pendulum.duration(minutes=10),
-        jwt_expiration_time=100,
-        jwt_secret_key=fake_jwt_secret_key,
+    app_with_valid_jwt_config.dependency_overrides[get_settings]().set_lock_datetime(
+        pendulum.duration(minutes=10)
     )
 
     # Error case : Invalid input
@@ -261,4 +252,4 @@ def test_binary_bet(
     assert response_invalid_team2_id.status_code == HTTPStatus.NOT_FOUND
     assert response_invalid_team2_id.json()["description"] == f"Team not found: {invalid_team_id}"
 
-    app.dependency_overrides = {}
+    app_with_valid_jwt_config.dependency_overrides.clear()

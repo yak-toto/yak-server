@@ -11,10 +11,12 @@ from yak_server.cli.database import initialize_database
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 
 def test_group_rank(
     app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
     monkeypatch: "pytest.MonkeyPatch",
 ) -> None:
     client = TestClient(app_with_valid_jwt_config)
@@ -23,7 +25,7 @@ def test_group_rank(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_compute_points_v1"),
     )
-    initialize_database(app_with_valid_jwt_config)
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     response_signup = client.post(
         "/api/v2",

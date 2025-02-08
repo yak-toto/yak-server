@@ -3,34 +3,31 @@ from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pendulum
+from starlette.testclient import TestClient
 
 from testing.mock import MockSettings
 from testing.util import get_random_string
 from yak_server.cli.database import initialize_database
-from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
-    from starlette.testclient import TestClient
+    from sqlalchemy import Engine
 
 
-def test_bets(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyPatch") -> None:
-    fake_jwt_secret_key = get_random_string(100)
-
-    app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=100,
-        jwt_secret_key=fake_jwt_secret_key,
-        lock_datetime_shift=-pendulum.duration(minutes=10),
-    )
-
+def test_bets(
+    app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_modify_bet_v2"),
     )
 
-    initialize_database(app)
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
+
+    client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(10)
     first_name = get_random_string(5)
@@ -84,7 +81,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyP
             },
             "score_bet": {
                 "id": ANY,
-                "locked": True,
+                "locked": False,
                 "team1": {
                     "code": "HR",
                     "description": "Croatie",
@@ -145,7 +142,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyP
                 {
                     "group": {"id": ANY},
                     "id": ANY,
-                    "locked": True,
+                    "locked": False,
                     "team1": {
                         "code": "HR",
                         "description": "Croatie",
@@ -164,7 +161,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyP
                 {
                     "group": {"id": ANY},
                     "id": ANY,
-                    "locked": True,
+                    "locked": False,
                     "team1": {
                         "code": "NA",
                         "description": "Namibie",
@@ -183,7 +180,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyP
                 {
                     "group": {"id": ANY},
                     "id": ANY,
-                    "locked": True,
+                    "locked": False,
                     "team1": {
                         "code": "HR",
                         "description": "Croatie",
@@ -202,7 +199,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyP
                 {
                     "group": {"id": ANY},
                     "id": ANY,
-                    "locked": True,
+                    "locked": False,
                     "team1": {
                         "code": "FI",
                         "description": "Finlande",
@@ -221,7 +218,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyP
                 {
                     "group": {"id": ANY},
                     "id": ANY,
-                    "locked": True,
+                    "locked": False,
                     "team1": {
                         "code": "HR",
                         "description": "Croatie",
@@ -240,7 +237,7 @@ def test_bets(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyP
                 {
                     "group": {"id": ANY},
                     "id": ANY,
-                    "locked": True,
+                    "locked": False,
                     "team1": {
                         "code": "FI",
                         "description": "Finlande",

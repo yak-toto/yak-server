@@ -3,38 +3,31 @@ from http import HTTPStatus
 from secrets import SystemRandom, randbelow
 from typing import TYPE_CHECKING, Any
 
-import pendulum
+from starlette.testclient import TestClient
 
 from testing.mock import MockSettings
 from testing.util import get_random_string
 from yak_server.cli.database import initialize_database
-from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
-    from starlette.testclient import TestClient
+    from sqlalchemy import Engine
 
 
 def test_group_rank_and_modify_score_bet(
-    app: "FastAPI",
-    client: "TestClient",
+    app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
     monkeypatch: "pytest.MonkeyPatch",
 ) -> None:
-    fake_jwt_secret_key = get_random_string(100)
-
-    app.dependency_overrides[get_settings] = MockSettings(
-        jwt_secret_key=fake_jwt_secret_key,
-        jwt_expiration_time=100,
-        lock_datetime_shift=pendulum.duration(minutes=10),
-    )
-
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_modify_bet_v2"),
     )
 
-    initialize_database(app)
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
+
+    client = TestClient(app_with_valid_jwt_config)
 
     # Signup user
     response_signup = client.post(

@@ -1,7 +1,9 @@
+from collections.abc import Generator
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Optional
 
 import pendulum
+import pytest
 from starlette.testclient import TestClient
 from typer.testing import CliRunner
 
@@ -19,8 +21,8 @@ from yak_server.helpers.rules.compute_points import RuleComputePoints
 from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
-    import pytest
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 QUERY_SCORE_BOARD = """
     query {
@@ -73,9 +75,10 @@ def put_finale_phase(client: TestClient, token: str, *, is_one_won: Optional[boo
     assert response_patch_finale_phase.status_code == HTTPStatus.OK
 
 
-def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
-    client = TestClient(app)
-
+@pytest.fixture
+def app_and_rules_for_compute_points(
+    app_with_valid_jwt_config: "FastAPI",
+) -> Generator[tuple["FastAPI", Rules], None, None]:
     rules = Rules(
         compute_finale_phase_from_group_rank=RuleComputeFinaleFromGroupRank(
             to_group="1",
@@ -92,7 +95,7 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
         ),
     )
 
-    app.dependency_overrides[get_settings] = MockSettings(
+    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=100,
         jwt_secret_key=get_random_string(100),
         lock_datetime_shift=pendulum.duration(seconds=10),
@@ -105,11 +108,25 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
         first_team_qualified=20,
     )
 
+    yield app_with_valid_jwt_config, rules
+
+    app_with_valid_jwt_config.dependency_overrides.clear()
+
+
+def test_compute_points(
+    app_and_rules_for_compute_points: tuple["FastAPI", Rules],
+    engine_for_test: "Engine",
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
+    app, rules = app_and_rules_for_compute_points
+
+    client = TestClient(app)
+
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_compute_points_v1"),
     )
-    initialize_database(app)
+    initialize_database(engine_for_test, app)
 
     # Signup admin
     admin = UserData(

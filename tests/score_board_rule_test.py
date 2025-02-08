@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 import pytest
 
 from testing.mock import MockSettings
@@ -9,15 +11,20 @@ from yak_server.cli.database import (
 )
 from yak_server.helpers.rules import Rules
 
+if TYPE_CHECKING:
+    from sqlalchemy import Engine
 
-def test_score_board_rule_not_defined(monkeypatch: pytest.MonkeyPatch) -> None:
+
+def test_score_board_rule_not_defined(
+    monkeypatch: pytest.MonkeyPatch, engine_for_test_with_delete: "Engine"
+) -> None:
     monkeypatch.setattr("yak_server.cli.database.get_settings", MockSettings(rules=Rules()))
 
     password_admin = get_random_string(10)
 
-    create_admin(password_admin)
+    create_admin(password_admin, engine_for_test_with_delete)
 
     with pytest.raises(ComputePointsRuleNotDefinedError) as exception:
-        compute_score_board()
+        compute_score_board(engine_for_test_with_delete)
 
     assert str(exception.value) == "Compute points rule is not defined."

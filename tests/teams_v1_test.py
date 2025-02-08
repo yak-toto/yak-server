@@ -4,22 +4,30 @@ from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
 
+from starlette.testclient import TestClient
+
 from testing.mock import MockSettings
 from yak_server.cli.database import initialize_database
 
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
-    from starlette.testclient import TestClient
+    from sqlalchemy import Engine
 
 
-def test_teams(app: "FastAPI", client: "TestClient", monkeypatch: "pytest.MonkeyPatch") -> None:
+def test_teams(
+    app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_teams_v1"),
     )
 
-    initialize_database(app)
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
+
+    client = TestClient(app_with_valid_jwt_config)
 
     # Fetch all the teams
     response_get_all_teams = client.get("api/v1/teams")

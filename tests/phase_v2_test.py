@@ -11,10 +11,12 @@ from yak_server.cli.database import initialize_database
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 
 def test_phase(
     app_with_lock_datetime_in_past: "FastAPI",
+    engine_for_test: "Engine",
     monkeypatch: "pytest.MonkeyPatch",
 ) -> None:
     client = TestClient(app_with_lock_datetime_in_past)
@@ -23,7 +25,7 @@ def test_phase(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_matches_db"),
     )
-    initialize_database(app_with_lock_datetime_in_past)
+    initialize_database(engine_for_test, app_with_lock_datetime_in_past)
 
     # Signup one random user
     user_name = get_random_string(6)

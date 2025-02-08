@@ -10,10 +10,12 @@ from yak_server.cli.database import initialize_database
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 
 def test_modify_score_bet_and_group_rank(
     app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
     monkeypatch: "pytest.MonkeyPatch",
 ) -> None:
     client = TestClient(app_with_valid_jwt_config)
@@ -22,7 +24,7 @@ def test_modify_score_bet_and_group_rank(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_modify_score_bet_and_group_rank"),
     )
-    initialize_database(app_with_valid_jwt_config)
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     query_signup = """
         mutation Root(

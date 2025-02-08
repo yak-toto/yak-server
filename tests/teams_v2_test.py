@@ -12,16 +12,21 @@ from yak_server.cli.database import initialize_database
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 
-def test_teams(app_with_valid_jwt_config: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
+def test_teams(
+    app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_teams_v1"),
     )
-    initialize_database(app_with_valid_jwt_config)
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     user_name = get_random_string(6)
     first_name = get_random_string(10)

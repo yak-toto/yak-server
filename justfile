@@ -15,7 +15,7 @@ setup:
     pre-commit install --install-hooks
 
 install:
-    uv sync --all-extras
+    uv sync --all-extras --all-groups
 
 test:
     pytest -vv
