@@ -42,18 +42,20 @@ def pytest_configure() -> None:
     connection.close()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def app_session() -> Generator["FastAPI", None, None]:
-    # Create app and set TESTING config
     app = create_app()
     app.debug = True
 
-    # Clean database before running test
+    # Always drop database before running test session
+    drop_database(app)
+
+    # Always create database before running test session
     create_database()
 
     yield app
 
-    # Clean database after running test
+    # Always drop database atfer running test session
     drop_database(app)
 
 
