@@ -21,7 +21,7 @@ def encode_bearer_token(
     return jwt_encode(
         {
             "sub": str(sub),
-            "iat": pendulum.now("UTC"),
+            "nbf": pendulum.now("UTC") - pendulum.duration(seconds=3),
             "exp": pendulum.now("UTC") + expiration_time,
         },
         secret_key,

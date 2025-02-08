@@ -2,22 +2,16 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
-from testing.mock import MockSettings
+from starlette.testclient import TestClient
+
 from testing.util import get_random_string
-from yak_server.helpers.rules import Rules
-from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
-    from starlette.testclient import TestClient
 
 
-def test_rule(app: "FastAPI", client: "TestClient") -> None:
-    app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=100,
-        jwt_secret_key=get_random_string(100),
-        rules=Rules(),
-    )
+def test_rule(app_with_empty_rules: "FastAPI") -> None:
+    client = TestClient(app_with_empty_rules)
 
     response_signup = client.post(
         "/api/v1/users/signup",

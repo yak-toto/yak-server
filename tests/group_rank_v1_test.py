@@ -2,38 +2,31 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
 
-import pendulum
+from starlette.testclient import TestClient
 
 from testing.mock import MockSettings
 from testing.util import get_random_string
 from yak_server.cli.database import initialize_database
-from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
-    from starlette.testclient import TestClient
+    from sqlalchemy import Engine
 
 
 def test_group_rank(
-    app: "FastAPI",
-    client: "TestClient",
+    app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
     monkeypatch: "pytest.MonkeyPatch",
 ) -> None:
-    fake_jwt_secret_key = get_random_string(100)
-
-    app.dependency_overrides[get_settings] = MockSettings(
-        jwt_secret_key=fake_jwt_secret_key,
-        jwt_expiration_time=100,
-        lock_datetime_shift=pendulum.duration(minutes=10),
-    )
-
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_compute_points_v1"),
     )
 
-    initialize_database(app)
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
+
+    client = TestClient(app_with_valid_jwt_config)
 
     response_signup = client.post(
         "/api/v1/users/signup",
@@ -366,56 +359,60 @@ def test_group_rank(
     assert sorted(
         response_group_rank_response.json()["result"]["group_rank"],
         key=lambda group_position: group_position["team"]["code"],
-    ) == [
-        {
-            "team": {
-                "id": ANY,
-                "code": "FR",
-                "description": "France",
-                "flag": {"url": ANY},
+    ) == sorted(
+        [
+            {
+                "team": {
+                    "id": ANY,
+                    "code": "FR",
+                    "description": "France",
+                    "flag": {"url": ANY},
+                },
+                "won": 0,
+                "drawn": 0,
+                "lost": 0,
+                "goals_for": 0,
+                "goals_against": 0,
+                "goals_difference": 0,
+                "played": 0,
+                "points": 0,
             },
-            "won": 0,
-            "drawn": 0,
-            "lost": 0,
-            "goals_for": 0,
-            "goals_against": 0,
-            "goals_difference": 0,
-            "played": 0,
-            "points": 0,
-        },
-        {
-            "team": {
-                "id": ANY,
-                "code": "IE",
-                "description": "Irlande",
-                "flag": {"url": ANY},
+            {
+                "team": {
+                    "id": ANY,
+                    "code": "IE",
+                    "description": "Irlande",
+                    "flag": {"url": ANY},
+                },
+                "won": 0,
+                "drawn": 0,
+                "lost": 0,
+                "goals_for": 0,
+                "goals_against": 0,
+                "goals_difference": 0,
+                "played": 0,
+                "points": 0,
             },
-            "won": 0,
-            "drawn": 0,
-            "lost": 0,
-            "goals_for": 0,
-            "goals_against": 0,
-            "goals_difference": 0,
-            "played": 0,
-            "points": 0,
-        },
-        {
-            "team": {
-                "id": ANY,
-                "code": "IM",
-                "description": "Île de Man",
-                "flag": {"url": ANY},
+            {
+                "team": {
+                    "id": ANY,
+                    "code": "IM",
+                    "description": "Île de Man",
+                    "flag": {"url": ANY},
+                },
+                "won": 0,
+                "drawn": 0,
+                "lost": 0,
+                "goals_for": 0,
+                "goals_against": 0,
+                "goals_difference": 0,
+                "played": 0,
+                "points": 0,
             },
-            "won": 0,
-            "drawn": 0,
-            "lost": 0,
-            "goals_for": 0,
-            "goals_against": 0,
-            "goals_difference": 0,
-            "played": 0,
-            "points": 0,
-        },
-    ]
+        ],
+        # I know that the order is not important but I want to be sure that the test is consistent
+        key=lambda group_position: group_position["team"]["code"],  # type: ignore[index]
+    )
 
     response_patch_bet = client.patch(
         f"/api/v1/score_bets/{response_all_bets.json()['result']['score_bets'][0]['id']}",
@@ -433,4 +430,10 @@ def test_group_rank(
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    assert response_group_rank_response_1.json() == response_group_rank_response.json()
+    assert sorted(
+        response_group_rank_response_1.json()["result"]["group_rank"],
+        key=lambda group_position: group_position["team"]["code"],
+    ) == sorted(
+        response_group_rank_response.json()["result"]["group_rank"],
+        key=lambda group_position: group_position["team"]["code"],
+    )

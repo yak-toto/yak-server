@@ -13,10 +13,12 @@ from yak_server.helpers.settings import get_settings
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 
 def test_modify_score_bet(
     app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
     monkeypatch: "pytest.MonkeyPatch",
 ) -> None:
     client = TestClient(app_with_valid_jwt_config)
@@ -25,7 +27,7 @@ def test_modify_score_bet(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_modify_bet_v2"),
     )
-    initialize_database(app_with_valid_jwt_config)
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     user_name = get_random_string(10)
     first_name = get_random_string(5)

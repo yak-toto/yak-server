@@ -3,6 +3,7 @@ from typing import Annotated
 import typer
 
 from yak_server import create_app
+from yak_server.database import build_engine
 
 from .database import (
     compute_score_board,
@@ -25,32 +26,37 @@ def make_db_app() -> typer.Typer:
     @db_app.command()
     def create() -> None:
         """Create all database tables."""
-        create_database()
+        engine = build_engine()
+        create_database(engine)
 
     @db_app.command()
     def init() -> None:
         """Initialize database."""
         app = create_app()
-        initialize_database(app)
+        engine = build_engine()
+        initialize_database(engine, app)
 
     @db_app.command()
     def drop() -> None:
         """Drop all tables."""
         app = create_app()
-        drop_database(app)
+        engine = build_engine()
+        drop_database(engine, debug=app.debug)
 
     @db_app.command()
     def delete() -> None:
         """Delete all records."""
         app = create_app()
-        delete_database(app)
+        engine = build_engine()
+        delete_database(engine, debug=app.debug)
 
     @db_app.command()
     def admin(
         password: str = typer.Option(..., prompt=True, confirmation_prompt=True, hide_input=True),
     ) -> None:
         """Create admin account in database."""
-        create_admin(password)
+        engine = build_engine()
+        create_admin(password, engine)
 
     @db_app.command()
     def migration(*, short: Annotated[bool, typer.Option("--short", "-s")] = False) -> None:
@@ -60,13 +66,15 @@ def make_db_app() -> typer.Typer:
     @db_app.command()
     def score_board() -> None:
         """Compute score board."""
-        compute_score_board()
+        engine = build_engine()
+        compute_score_board(engine)
 
     @db_app.command()
     def sync() -> None:
         """Synchronize official results and push them to admin with web
         scraping the world cup wikipedia page"""
-        synchronize_official_results()
+        engine = build_engine()
+        synchronize_official_results(engine)
 
     return db_app
 

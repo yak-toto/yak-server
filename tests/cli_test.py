@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 import pytest
 from starlette.testclient import TestClient
 
-from testing.mock import MockSettings
 from testing.util import get_random_string
 from yak_server.cli.database import (
     RecordDeletionInProductionError,
@@ -14,24 +13,19 @@ from yak_server.cli.database import (
     drop_database,
 )
 from yak_server.helpers.authentication import NameAlreadyExistsError
-from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 
-def test_create_admin(app: "FastAPI") -> None:
-    app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=100,
-        jwt_secret_key=get_random_string(10),
-    )
-
-    client = TestClient(app)
+def test_create_admin(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
+    client = TestClient(app_with_valid_jwt_config)
 
     # Success case : create admin using script and test login is OK
     password_admin = get_random_string(10)
 
-    create_admin(password_admin)
+    create_admin(password_admin, engine_for_test)
 
     response_login = client.post(
         "/api/v1/users/login",
@@ -48,14 +42,14 @@ def test_create_admin(app: "FastAPI") -> None:
     password_admin = get_random_string(10)
 
     with pytest.raises(NameAlreadyExistsError):
-        create_admin(password_admin)
+        create_admin(password_admin, engine_for_test)
 
 
-def test_delete_all_records(production_app: "FastAPI") -> None:
+def test_delete_all_records(engine_for_test: "Engine") -> None:
     with pytest.raises(RecordDeletionInProductionError):
-        delete_database(production_app)
+        delete_database(engine_for_test, debug=False)
 
 
-def test_drop_all_tables(production_app: "FastAPI") -> None:
+def test_drop_all_tables(engine_for_test: "Engine") -> None:
     with pytest.raises(TableDropInProductionError):
-        drop_database(production_app)
+        drop_database(engine_for_test, debug=False)

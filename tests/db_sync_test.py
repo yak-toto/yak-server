@@ -1,4 +1,3 @@
-from collections.abc import Generator
 from dataclasses import dataclass
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Optional
@@ -10,21 +9,13 @@ from typer.testing import CliRunner
 from testing.mock import MockSettings
 from testing.util import get_random_string
 from yak_server.cli import app as typer_app
-from yak_server.cli.database import delete_database, initialize_database
+from yak_server.cli.database import initialize_database
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 runner = CliRunner()
-
-
-@pytest.fixture
-def app_with_valid_jwt_config_function_scope(
-    app_with_valid_jwt_config: "FastAPI",
-) -> Generator["FastAPI", None, None]:
-    yield app_with_valid_jwt_config
-
-    delete_database(app_with_valid_jwt_config)
 
 
 @dataclass
@@ -370,7 +361,8 @@ def idfn(value: CompetitionData) -> str:
     ids=idfn,
 )
 def test_db_sync(
-    app_with_valid_jwt_config_function_scope: "FastAPI",
+    app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
     monkeypatch: "pytest.MonkeyPatch",
     competition_data: CompetitionData,
 ) -> None:
@@ -383,10 +375,10 @@ def test_db_sync(
         ),
     )
 
-    initialize_database(app_with_valid_jwt_config_function_scope)
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     # Signup admin user
-    client = TestClient(app_with_valid_jwt_config_function_scope)
+    client = TestClient(app_with_valid_jwt_config)
 
     response_signup = client.post(
         "/api/v1/users/signup",

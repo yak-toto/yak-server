@@ -51,5 +51,8 @@ class MockSettings:
         self.first_team_qualified = first_team_qualified
         self.official_results_url = official_results_url
 
+    def set_lock_datetime(self, lock_datetime_shift: pendulum.Duration) -> None:
+        self.lock_datetime = pendulum.now() + lock_datetime_shift
+
     def __call__(self) -> Self:
         return self

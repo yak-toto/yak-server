@@ -9,10 +9,10 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_no_schema_introspection_in_production(production_app: "FastAPI") -> None:
-    client = TestClient(production_app)
+def test_no_schema_introspection_in_production(production_app_session: "FastAPI") -> None:
+    client = TestClient(production_app_session)
 
-    production_app.dependency_overrides[get_settings] = MockSettings()
+    production_app_session.dependency_overrides[get_settings] = MockSettings()
 
     response = client.post(
         "/api/v2",

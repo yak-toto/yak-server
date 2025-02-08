@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 import pytest
 
 from testing.mock import MockSettings
@@ -8,8 +10,11 @@ from yak_server.cli.database import (
     initialize_database,
 )
 
+if TYPE_CHECKING:
+    from sqlalchemy import Engine
 
-def test_missing_phase(monkeypatch: pytest.MonkeyPatch) -> None:
+
+def test_missing_phase(monkeypatch: pytest.MonkeyPatch, engine_for_test: "Engine") -> None:
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_missing_phase"),
@@ -18,14 +23,14 @@ def test_missing_phase(monkeypatch: pytest.MonkeyPatch) -> None:
     app = create_app()
 
     with pytest.raises(MissingPhaseDuringInitError) as exception:
-        initialize_database(app)
+        initialize_database(engine_for_test, app)
 
     assert (
         str(exception.value) == "Error during database initialization: phase_code=GROUP not found."
     )
 
 
-def test_missing_team1(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_missing_team1(monkeypatch: pytest.MonkeyPatch, engine_for_test: "Engine") -> None:
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_missing_team1"),
@@ -34,12 +39,12 @@ def test_missing_team1(monkeypatch: pytest.MonkeyPatch) -> None:
     app = create_app()
 
     with pytest.raises(MissingTeamDuringInitError) as exception:
-        initialize_database(app)
+        initialize_database(engine_for_test, app)
 
     assert str(exception.value) == "Error during database initialization: team_code=AD not found."
 
 
-def test_missing_team2(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_missing_team2(monkeypatch: pytest.MonkeyPatch, engine_for_test: "Engine") -> None:
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_missing_team2"),
@@ -48,6 +53,6 @@ def test_missing_team2(monkeypatch: pytest.MonkeyPatch) -> None:
     app = create_app()
 
     with pytest.raises(MissingTeamDuringInitError) as exception:
-        initialize_database(app)
+        initialize_database(engine_for_test, app)
 
     assert str(exception.value) == "Error during database initialization: team_code=BR not found."

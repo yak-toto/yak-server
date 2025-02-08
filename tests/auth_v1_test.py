@@ -4,9 +4,7 @@ from unittest.mock import ANY
 
 from starlette.testclient import TestClient
 
-from testing.mock import MockSettings
 from testing.util import get_random_string
-from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -191,13 +189,8 @@ def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_expired_token(app: "FastAPI", client: "TestClient") -> None:
-    fake_jwt_secret_key = get_random_string(15)
-
-    app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=0,
-        jwt_secret_key=fake_jwt_secret_key,
-    )
+def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI") -> None:
+    client = TestClient(app_with_null_jwt_expiration_time)
 
     user_name = get_random_string(6)
     password = get_random_string(15)
@@ -229,11 +222,13 @@ def test_expired_token(app: "FastAPI", client: "TestClient") -> None:
     }
 
 
-def test_invalid_signup_body(client: "TestClient") -> None:
+def test_invalid_signup_body(app_with_valid_jwt_config: "FastAPI") -> None:
     name = get_random_string(10)
     first_name = get_random_string(12)
     last_name = get_random_string(6)
     password = get_random_string(5)
+
+    client = TestClient(app_with_valid_jwt_config)
 
     # Try to signup with invalid body
     response_signup = client.post(
@@ -272,9 +267,11 @@ def test_invalid_signup_body(client: "TestClient") -> None:
     }
 
 
-def test_invalid_login_body(client: "TestClient") -> None:
+def test_invalid_login_body(app_with_valid_jwt_config: "FastAPI") -> None:
     user_name = get_random_string(6)
     password = get_random_string(10)
+
+    client = TestClient(app_with_valid_jwt_config)
 
     response_login = client.post(
         "/api/v1/users/login",
@@ -305,7 +302,9 @@ def test_invalid_login_body(client: "TestClient") -> None:
     }
 
 
-def test_non_compliant_password(client: "TestClient") -> None:
+def test_non_compliant_password(app_with_valid_jwt_config: "FastAPI") -> None:
+    client = TestClient(app_with_valid_jwt_config)
+
     response_signup = client.post(
         "/api/v1/users/signup",
         json={

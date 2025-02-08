@@ -11,9 +11,14 @@ from yak_server.cli.database import initialize_database
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 
-def test_bets(app_with_lock_datetime_in_past: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
+def test_bets(
+    app_with_lock_datetime_in_past: "FastAPI",
+    engine_for_test: "Engine",
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
     client = TestClient(app_with_lock_datetime_in_past)
 
     monkeypatch.setattr(
@@ -21,7 +26,7 @@ def test_bets(app_with_lock_datetime_in_past: "FastAPI", monkeypatch: "pytest.Mo
         MockSettings(data_folder_relative="test_modify_bet_v2"),
     )
 
-    initialize_database(app_with_lock_datetime_in_past)
+    initialize_database(engine_for_test, app_with_lock_datetime_in_past)
 
     user_name = get_random_string(10)
     first_name = get_random_string(5)

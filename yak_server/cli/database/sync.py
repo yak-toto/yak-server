@@ -1,6 +1,6 @@
 import warnings
 from dataclasses import dataclass
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import and_
 
@@ -14,6 +14,9 @@ from yak_server.database.models import (
     UserModel,
 )
 from yak_server.helpers.settings import get_settings
+
+if TYPE_CHECKING:
+    from sqlalchemy import Engine
 
 try:
     import httpx
@@ -161,7 +164,7 @@ def extract_matches_from_html(groups: list[GroupContainer]) -> list[Match]:
     return matches
 
 
-def synchronize_official_results() -> None:
+def synchronize_official_results(engine: "Engine") -> None:
     if bs4 is None or lxml is None or httpx is None:
         raise SyncOfficialResultsNotAvailableError
 
@@ -171,7 +174,7 @@ def synchronize_official_results() -> None:
 
     soup = bs4.BeautifulSoup(response.text, "lxml")
 
-    local_session_maker = build_local_session_maker()
+    local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
         groups = [

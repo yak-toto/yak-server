@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from yak_server.database import build_engine, build_local_session_maker
+from yak_server.database import build_local_session_maker
 from yak_server.database.models import (
     Base,
     BinaryBetModel,
@@ -28,6 +28,7 @@ except ImportError:  # pragma: no cover
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 logger = logging.getLogger(__name__)
 
@@ -42,15 +43,12 @@ class TableDropInProductionError(Exception):
         super().__init__("Trying to drop database tables in production using script. DO NOT DO IT.")
 
 
-def create_database() -> None:
-    local_session_maker = build_local_session_maker()
-
-    with local_session_maker():
-        Base.metadata.create_all(bind=build_engine())
+def create_database(engine: "Engine") -> None:
+    Base.metadata.create_all(bind=engine)
 
 
-def create_admin(password: str) -> None:
-    local_session_maker = build_local_session_maker()
+def create_admin(password: str, engine: "Engine") -> None:
+    local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
         _ = signup_user(db, name="admin", first_name="admin", last_name="admin", password=password)
@@ -68,8 +66,8 @@ class MissingTeamDuringInitError(Exception):
         super().__init__(f"Error during database initialization: team_code={team_code} not found.")
 
 
-def initialize_database(app: "FastAPI") -> None:
-    local_session_maker = build_local_session_maker()
+def initialize_database(engine: "Engine", app: "FastAPI") -> None:
+    local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
         data_folder = get_settings().data_folder
@@ -144,11 +142,11 @@ def initialize_database(app: "FastAPI") -> None:
         db.commit()
 
 
-def delete_database(app: "FastAPI") -> None:
-    if not app.debug:
+def delete_database(engine: "Engine", *, debug: bool) -> None:
+    if debug is False:
         raise RecordDeletionInProductionError
 
-    local_session_maker = build_local_session_maker()
+    local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
         db.query(GroupPositionModel).delete()
@@ -163,14 +161,11 @@ def delete_database(app: "FastAPI") -> None:
         db.commit()
 
 
-def drop_database(app: "FastAPI") -> None:
-    if not app.debug:
+def drop_database(engine: "Engine", *, debug: bool) -> None:
+    if debug is False:
         raise TableDropInProductionError
 
-    local_session_maker = build_local_session_maker()
-
-    with local_session_maker():
-        Base.metadata.drop_all(bind=build_engine())
+    Base.metadata.drop_all(bind=engine)
 
 
 def print_export_command(alembic_ini_path: Path) -> None:
@@ -210,8 +205,8 @@ class ComputePointsRuleNotDefinedError(Exception):
         super().__init__("Compute points rule is not defined.")
 
 
-def compute_score_board() -> None:
-    local_session_maker = build_local_session_maker()
+def compute_score_board(engine: "Engine") -> None:
+    local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
         admin = db.query(UserModel).filter_by(name="admin").first()

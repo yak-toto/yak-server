@@ -149,6 +149,19 @@ class RuleNotFound(HTTPException):
 def set_exception_handler(app: "FastAPI") -> None:
     @app.exception_handler(StarletteHTTPException)
     def http_exception_handler(_: Request, http_exception: StarletteHTTPException) -> JSONResponse:
+        for frame in traceback.format_list(traceback.extract_tb(http_exception.__traceback__)):
+            logger.info(frame)
+
+        if http_exception.__cause__:
+            for frame in traceback.format_list(
+                traceback.extract_tb(http_exception.__cause__.__traceback__)
+            ):
+                logger.info(frame)
+
+        logger.info(
+            f"An expected exception occurs: {type(http_exception).__name__} {http_exception}"
+        )
+
         return JSONResponse(
             status_code=http_exception.status_code,
             content={

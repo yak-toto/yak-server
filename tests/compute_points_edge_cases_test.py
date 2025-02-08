@@ -1,8 +1,10 @@
+from collections.abc import Generator
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
 
 import pendulum
+import pytest
 from starlette.testclient import TestClient
 
 from testing.mock import MockSettings
@@ -18,14 +20,15 @@ from yak_server.helpers.rules.compute_points import RuleComputePoints
 from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
-    import pytest
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 
-def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> None:
-    client = TestClient(app)
-
-    app.dependency_overrides[get_settings] = MockSettings(
+@pytest.fixture
+def app_with_rules_and_score_board_config(
+    app_with_valid_jwt_config: "FastAPI",
+) -> Generator["FastAPI", None, None]:
+    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=100,
         jwt_secret_key=get_random_string(100),
         lock_datetime_shift=pendulum.duration(minutes=10),
@@ -55,11 +58,23 @@ def test_compute_points(app: "FastAPI", monkeypatch: "pytest.MonkeyPatch") -> No
         first_team_qualified=20,
     )
 
+    yield app_with_valid_jwt_config
+
+    app_with_valid_jwt_config.dependency_overrides.clear()
+
+
+def test_compute_points(
+    app_with_rules_and_score_board_config: "FastAPI",
+    engine_for_test: "Engine",
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
+    client = TestClient(app_with_rules_and_score_board_config)
+
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_compute_points_edge_cases_v1"),
     )
-    initialize_database(app)
+    initialize_database(engine_for_test, app_with_rules_and_score_board_config)
 
     admin = UserData(
         name="admin",

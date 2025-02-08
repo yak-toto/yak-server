@@ -13,21 +13,21 @@ from yak_server.helpers.settings import get_settings
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 
 def test_binary_bet(
     app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
     monkeypatch: "pytest.MonkeyPatch",
 ) -> None:
     client = TestClient(app_with_valid_jwt_config)
-
-    jwt_secret_key = app_with_valid_jwt_config.dependency_overrides[get_settings]().jwt_secret_key
 
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_binary_bet"),
     )
-    initialize_database(app_with_valid_jwt_config)
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     user_name = get_random_string(10)
     password = get_random_string(30)
@@ -203,10 +203,8 @@ def test_binary_bet(
     }
 
     # Error case : locked binary bet
-    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=100,
-        jwt_secret_key=jwt_secret_key,
-        lock_datetime_shift=-pendulum.duration(seconds=10),
+    app_with_valid_jwt_config.dependency_overrides[get_settings]().set_lock_datetime(
+        -pendulum.duration(seconds=10)
     )
 
     response_modify_locked_binary_bet = client.post(
@@ -227,10 +225,8 @@ def test_binary_bet(
         },
     }
 
-    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=100,
-        jwt_secret_key=jwt_secret_key,
-        lock_datetime_shift=pendulum.duration(seconds=10),
+    app_with_valid_jwt_config.dependency_overrides[get_settings]().set_lock_datetime(
+        pendulum.duration(seconds=10)
     )
 
     # Success case : Retrieve one binary bet

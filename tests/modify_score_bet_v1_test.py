@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import pendulum
+from fastapi.testclient import TestClient
 
 from testing.mock import MockSettings
 from testing.util import get_random_string
@@ -13,33 +14,27 @@ from yak_server.helpers.settings import get_settings
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
-    from starlette.testclient import TestClient
+    from sqlalchemy import Engine
 
 
 def test_modify_score_bet(
-    app: "FastAPI",
-    client: "TestClient",
+    app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
     monkeypatch: "pytest.MonkeyPatch",
 ) -> None:
-    fake_jwt_secret_key = get_random_string(100)
-
-    app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=100,
-        jwt_secret_key=fake_jwt_secret_key,
-        lock_datetime_shift=pendulum.duration(minutes=10),
-    )
-
     monkeypatch.setattr(
         "yak_server.cli.database.get_settings",
         MockSettings(data_folder_relative="test_modify_bet_v2"),
     )
 
-    initialize_database(app)
+    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     user_name = get_random_string(10)
     first_name = get_random_string(5)
     last_name = get_random_string(8)
     password = get_random_string(15)
+
+    client = TestClient(app_with_valid_jwt_config)
 
     response_signup = client.post(
         "/api/v1/users/signup",
@@ -91,10 +86,8 @@ def test_modify_score_bet(
     assert response_patch_no_updates.json()["result"]["score_bet"]["team2"]["score"] == score2
 
     # Error case : check locked bet
-    app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=100,
-        jwt_secret_key=fake_jwt_secret_key,
-        lock_datetime_shift=-pendulum.duration(minutes=10),
+    app_with_valid_jwt_config.dependency_overrides[get_settings]().set_lock_datetime(
+        -pendulum.duration(minutes=10)
     )
 
     response_locked_bet = client.patch(
@@ -109,10 +102,8 @@ def test_modify_score_bet(
         "description": "Cannot modify score bet, lock date is exceeded",
     }
 
-    app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=100,
-        jwt_secret_key=fake_jwt_secret_key,
-        lock_datetime_shift=pendulum.duration(minutes=10),
+    app_with_valid_jwt_config.dependency_overrides[get_settings]().set_lock_datetime(
+        pendulum.duration(minutes=10)
     )
 
     # Error case : check bet not found
