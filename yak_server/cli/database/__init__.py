@@ -56,6 +56,18 @@ def create_admin(password: str) -> None:
         _ = signup_user(db, name="admin", first_name="admin", last_name="admin", password=password)
 
 
+class MissingPhaseDuringInitError(Exception):
+    def __init__(self, phase_code: str) -> None:
+        super().__init__(
+            f"Error during database initialization: phase_code={phase_code} not found."
+        )
+
+
+class MissingTeamDuringInitError(Exception):
+    def __init__(self, team_code: str) -> None:
+        super().__init__(f"Error during database initialization: team_code={team_code} not found.")
+
+
 def initialize_database(app: "FastAPI") -> None:
     local_session_maker = build_local_session_maker()
 
@@ -70,7 +82,13 @@ def initialize_database(app: "FastAPI") -> None:
         groups = json.loads(Path(data_folder, "groups.json").read_text(encoding="utf-8"))
 
         for group in groups:
-            phase = db.query(PhaseModel).filter_by(code=group.pop("phase_code")).first()
+            phase_code = group.pop("phase_code")
+
+            phase = db.query(PhaseModel).filter_by(code=phase_code).first()
+
+            if phase is None:
+                raise MissingPhaseDuringInitError(phase_code)
+
             group["phase_id"] = phase.id
 
         db.add_all(GroupModel(**group) for group in groups)
@@ -101,12 +119,20 @@ def initialize_database(app: "FastAPI") -> None:
                 match["team1_id"] = None
             else:
                 team1 = db.query(TeamModel).filter_by(code=team1_code).first()
+
+                if team1 is None:
+                    raise MissingTeamDuringInitError(team1_code)
+
                 match["team1_id"] = team1.id
 
             if team2_code is None:
                 match["team2_id"] = None
             else:
                 team2 = db.query(TeamModel).filter_by(code=team2_code).first()
+
+                if team2 is None:
+                    raise MissingTeamDuringInitError(team2_code)
+
                 match["team2_id"] = team2.id
 
             group = db.query(GroupModel).filter_by(code=match.pop("group_code")).first()
@@ -179,6 +205,11 @@ def setup_migration(*, short: bool = False) -> None:
             )
 
 
+class ComputePointsRuleNotDefinedError(Exception):
+    def __init__(self) -> None:
+        super().__init__("Compute points rule is not defined.")
+
+
 def compute_score_board() -> None:
     local_session_maker = build_local_session_maker()
 
@@ -186,5 +217,8 @@ def compute_score_board() -> None:
         admin = db.query(UserModel).filter_by(name="admin").first()
 
         rule_config = get_settings().rules.compute_points
+
+        if rule_config is None:
+            raise ComputePointsRuleNotDefinedError
 
         compute_points_func(db, admin, rule_config)
