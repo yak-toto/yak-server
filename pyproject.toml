@@ -37,7 +37,6 @@ dependencies = [
     "fastapi ==0.115.8",
     "typer ==0.15.1",
     "SQLAlchemy ==2.0.38",
-    "SQLAlchemy-Utils ==0.41.2",
     "pendulum ==3.0.0",
     "pydantic-settings ==2.7.1",
     "strawberry-graphql ==0.259.0",
@@ -62,16 +61,16 @@ dev = [
     "pytest>=8.3.4",
     "pytest-cov>=6.0.0",
     "pytest-env>=1.1.5",
+    "types-psycopg2>=2.9.21.20250121",
+    "uvicorn>=0.34.0",
     "yappi>=1.6.10",
 ]
 type-checking = [
+    "hatchling>=1.27.0",
+    "lxml-stubs>=0.5.1",
     "mypy>=1.14.1",
-    "types-colorama>=0.4.15.20240311",
-    "types-psycopg2>=2.9.21.20241019",
-    "types-pygments>=2.19.0.20250107",
-    "types-pyjwt>=1.7.1",
-    "types-python-dateutil>=2.9.0.20241206",
-    "types-ujson>=5.10.0.20240515",
+    "types-beautifulsoup4>=4.12.0.20241020",
+    "types-pymysql>=1.1.0.20241103",
 ]
 
 [tool.hatch.version]
@@ -132,14 +131,10 @@ max-returns = 7
 strict = true
 pretty = true
 plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin", "strawberry.ext.mypy_plugin"]
-
-[[tool.mypy.overrides]]
-module = "sqlalchemy_utils"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "yappi"
-ignore_missing_imports = true
+exclude = '''(?x)(
+    ^yak_server/database/migrations/.*?\.py$|
+    ^yak_server/cli/database/sync.py$
+)'''
 
 [tool.pytest.ini_options]
 log_file = "yak_test.log"
