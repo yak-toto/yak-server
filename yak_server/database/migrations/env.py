@@ -1,10 +1,14 @@
 import logging
 from logging.config import fileConfig
+from typing import TYPE_CHECKING
 
 from alembic import context
 
-from yak_server.database import engine
+from yak_server.database import build_engine
 from yak_server.database.models import Base
+
+if TYPE_CHECKING:
+    from sqlalchemy.sql.schema import MetaData
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -12,11 +16,14 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-fileConfig(config.config_file_name)
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
 logger = logging.getLogger("alembic.env")
 
 
-def get_engine_url():
+def get_engine_url() -> str:
+    engine = build_engine()
+
     try:
         return engine.url.render_as_string(hide_password=False).replace("%", "%%")
     except AttributeError:
@@ -32,13 +39,11 @@ config.set_main_option("sqlalchemy.url", get_engine_url())
 # ... etc.
 
 
-def get_metadata():
-    if hasattr(Base, "metadatas"):
-        return Base.metadatas[None]
+def get_metadata() -> "MetaData":
     return Base.metadata
 
 
-def run_migrations_offline():
+def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
     This configures the context with just a URL
@@ -57,13 +62,14 @@ def run_migrations_offline():
         context.run_migrations()
 
 
-def run_migrations_online():
+def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
     and associate a connection with the context.
 
     """
+    engine = build_engine()
 
     with engine.connect() as connection:
         context.configure(
