@@ -78,6 +78,14 @@ class UnauthorizedAccessToAdminAPI(HTTPException):
         )
 
 
+class NoAdminUser(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No admin user found",
+        )
+
+
 class InvalidTeamId(HTTPException):
     def __init__(self, team_id: str) -> None:
         super().__init__(

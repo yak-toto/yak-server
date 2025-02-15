@@ -72,7 +72,7 @@ class EnvBuilder:
         for index, competition in enumerate(available_competitions, 1):
             print(f"{index} - {competition}")
 
-        competition_choice = typer.prompt("Choose your competition", type=int)
+        competition_choice: int = typer.prompt("Choose your competition", type=int)
 
         competition = available_competitions[competition_choice - 1]
         self.env["COMPETITION"] = competition
@@ -81,7 +81,7 @@ class EnvBuilder:
         self.env["DATA_FOLDER"] = data_folder
 
         # Load rules in environment
-        rules_list: dict[str, dict] = {}
+        rules_list: dict[str, Any] = {}
 
         for rule_file in Path(data_folder, "rules").glob("*.json"):
             rule_id = UUID(rule_file.stem)

@@ -10,6 +10,7 @@ from yak_server.cli.database import (
     create_admin,
 )
 from yak_server.helpers.rules import Rules
+from yak_server.v1.helpers.errors import NoAdminUser
 
 if TYPE_CHECKING:
     from sqlalchemy import Engine
@@ -28,3 +29,10 @@ def test_score_board_rule_not_defined(
         compute_score_board(engine_for_test_with_delete)
 
     assert str(exception.value) == "Compute points rule is not defined."
+
+
+def test_score_board_rule_admin_user_not_found(engine_for_test_with_delete: "Engine") -> None:
+    with pytest.raises(NoAdminUser) as exception:
+        compute_score_board(engine_for_test_with_delete)
+
+    assert str(exception.value) == "401: No admin user found"
