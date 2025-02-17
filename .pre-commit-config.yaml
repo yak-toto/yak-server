@@ -50,6 +50,6 @@ repos:
         args: [--autofix, --indent, "4", --trailing-commas, --no-sort]
 
   - repo: https://github.com/crate-ci/typos
-    rev: typos-dict-v0.12.4
+    rev: typos-dict-v0.12.5
     hooks:
       - id: typos
