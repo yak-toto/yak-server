@@ -34,12 +34,12 @@ dependencies = [
     "PyJWT ==2.10.1",
     "psycopg2-binary>=2.9.10",
     "argon2-cffi ==23.1.0",
-    "fastapi ==0.115.8",
-    "typer ==0.15.1",
+    "fastapi ==0.115.11",
+    "typer ==0.15.2",
     "SQLAlchemy ==2.0.38",
     "pendulum ==3.0.0",
-    "pydantic-settings ==2.8.0",
-    "strawberry-graphql ==0.260.2",
+    "pydantic-settings ==2.8.1",
+    "strawberry-graphql ==0.261.1",
 ]
 dynamic = ["version"]
 
