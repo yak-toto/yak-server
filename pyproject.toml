@@ -36,10 +36,10 @@ dependencies = [
     "argon2-cffi ==23.1.0",
     "fastapi ==0.115.12",
     "typer ==0.15.2",
-    "SQLAlchemy ==2.0.39",
+    "SQLAlchemy ==2.0.40",
     "pendulum ==3.0.0",
     "pydantic-settings ==2.8.1",
-    "strawberry-graphql ==0.262.5",
+    "strawberry-graphql ==0.262.6",
 ]
 dynamic = ["version"]
 
@@ -48,7 +48,7 @@ Homepage = "https://github.com/yak-toto/yak-server"
 Repository = "https://github.com/yak-toto/yak-server"
 
 [project.optional-dependencies]
-db_migration = ["alembic ==1.15.1"]
+db_migration = ["alembic ==1.15.2"]
 sync = ["beautifulsoup4[lxml] ==4.13.3", "httpx ==0.28.1"]
 
 [project.scripts]
