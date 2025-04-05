@@ -133,12 +133,9 @@ def test_modify_score_bet(
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
         "description": [
             {
-                "type": "greater_than_equal",
-                "loc": ["body", "team1", "score"],
-                "msg": "Input should be greater than or equal to 0",
-                "input": -1,
-                "ctx": {"ge": 0},
-            },
+                "error": "Input should be greater than or equal to 0",
+                "field": "body -> team1 -> score",
+            }
         ],
     }
 

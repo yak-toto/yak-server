@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from yak_server.database.models import (
@@ -29,7 +29,7 @@ from yak_server.v1.models.bets import (
     GroupRankResponse,
 )
 from yak_server.v1.models.binary_bets import BinaryBetOut, BinaryBetWithGroupIdOut
-from yak_server.v1.models.generic import GenericOut
+from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.group_rank import GroupPositionOut
 from yak_server.v1.models.groups import GroupOut, GroupWithPhaseIdOut
 from yak_server.v1.models.phases import PhaseOut
@@ -38,7 +38,13 @@ from yak_server.v1.models.score_bets import ScoreBetOut, ScoreBetWithGroupIdOut
 router = APIRouter(prefix="/bets", tags=["bets"])
 
 
-@router.get("/")
+@router.get(
+    "/",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+    },
+)
 def retrieve_all_bets(
     user: Annotated[UserModel, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
@@ -88,7 +94,14 @@ def retrieve_all_bets(
     )
 
 
-@router.get("/phases/{phase_code}")
+@router.get(
+    "/phases/{phase_code}",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+    },
+)
 def retrieve_bets_by_phase_code(
     phase_code: str,
     user: Annotated[UserModel, Depends(get_current_user)],
@@ -125,7 +138,14 @@ def retrieve_bets_by_phase_code(
     )
 
 
-@router.get("/groups/{group_code}")
+@router.get(
+    "/groups/{group_code}",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+    },
+)
 def retrieve_bets_by_group_code(
     group_code: str,
     user: Annotated[UserModel, Depends(get_current_user)],
@@ -162,7 +182,14 @@ def retrieve_bets_by_group_code(
     )
 
 
-@router.get("/groups/rank/{group_code}")
+@router.get(
+    "/groups/rank/{group_code}",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+    },
+)
 def retrieve_group_rank_by_code(
     group_code: str,
     user: Annotated[UserModel, Depends(get_current_user)],

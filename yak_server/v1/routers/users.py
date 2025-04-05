@@ -30,7 +30,7 @@ from yak_server.v1.helpers.errors import (
     UnsatisfiedPasswordRequirements,
     UserNotFound,
 )
-from yak_server.v1.models.generic import GenericOut
+from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.users import (
     CurrentUserOut,
     LoginIn,
@@ -46,7 +46,15 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.post("/signup", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/signup",
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"model": ErrorOut},
+        status.HTTP_409_CONFLICT: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+    },
+)
 def signup(
     signup_in: SignupIn,
     db: Annotated[Session, Depends(get_db)],
@@ -78,7 +86,10 @@ def signup(
     )
 
 
-@router.get("/signup/password_requirements")
+@router.get(
+    "/signup/password_requirements",
+    responses={status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut}},
+)
 def password_requirements() -> GenericOut[PasswordRequirementsOut]:
     password_requirements = PasswordRequirements()
 
@@ -93,7 +104,15 @@ def password_requirements() -> GenericOut[PasswordRequirementsOut]:
     )
 
 
-@router.post("/login", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/login",
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_409_CONFLICT: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+    },
+)
 def login(
     login_in: LoginIn,
     db: Annotated[Session, Depends(get_db)],
@@ -119,7 +138,15 @@ def login(
     )
 
 
-@router.patch("/{user_id}")
+@router.patch(
+    "/{user_id}",
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"model": ErrorOut},
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+    },
+)
 def modify_user(
     user_id: UUID4,
     modify_user_in: ModifyUserIn,
@@ -127,6 +154,7 @@ def modify_user(
     _: Annotated[UserModel, Depends(get_admin_user)],
 ) -> GenericOut[CurrentUserOut]:
     user = db.query(UserModel).filter_by(id=user_id).first()
+
     if not user:
         raise UserNotFound(user_id)
 
@@ -139,7 +167,13 @@ def modify_user(
     return GenericOut(result=CurrentUserOut.model_validate(user))
 
 
-@router.get("/current")
+@router.get(
+    "/current",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+    },
+)
 def current_user(
     user: Annotated[UserModel, Depends(get_current_user)],
 ) -> GenericOut[CurrentUserOut]:
