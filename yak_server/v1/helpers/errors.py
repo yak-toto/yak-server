@@ -154,17 +154,22 @@ class RuleNotFound(HTTPException):
         )
 
 
+def log_traceback(exception: Exception) -> None:
+    """
+    Log the traceback of an exception.
+    """
+    for frame in traceback.format_list(traceback.extract_tb(exception.__traceback__)):
+        logger.info(frame)
+
+    if exception.__cause__:
+        for frame in traceback.format_list(traceback.extract_tb(exception.__cause__.__traceback__)):
+            logger.info(frame)
+
+
 def set_exception_handler(app: "FastAPI") -> None:
     @app.exception_handler(StarletteHTTPException)
     def http_exception_handler(_: Request, http_exception: StarletteHTTPException) -> JSONResponse:
-        for frame in traceback.format_list(traceback.extract_tb(http_exception.__traceback__)):
-            logger.info(frame)
-
-        if http_exception.__cause__:
-            for frame in traceback.format_list(
-                traceback.extract_tb(http_exception.__cause__.__traceback__)
-            ):
-                logger.info(frame)
+        log_traceback(http_exception)
 
         logger.info(
             f"An expected exception occurs: {type(http_exception).__name__} {http_exception}"
@@ -203,6 +208,13 @@ def set_exception_handler(app: "FastAPI") -> None:
         _: Request,
         request_validator_error: RequestValidationError,
     ) -> JSONResponse:
+        log_traceback(request_validator_error)
+
+        logger.info(
+            "An validation error occurs: "
+            f"{type(request_validator_error).__name__} {request_validator_error}"
+        )
+
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={
