@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
@@ -25,7 +25,7 @@ from yak_server.v1.helpers.errors import (
     LockedScoreBet,
     TeamNotFound,
 )
-from yak_server.v1.models.generic import GenericOut
+from yak_server.v1.models.generic import ErrorOut, GenericOut
 from yak_server.v1.models.groups import GroupOut
 from yak_server.v1.models.phases import PhaseOut
 from yak_server.v1.models.score_bets import (
@@ -81,7 +81,14 @@ def send_response(
     )
 
 
-@router.post("/")
+@router.post(
+    "/",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ErrorOut},
+    },
+)
 def create_score_bet(
     score_bet_in: ScoreBetIn,
     db: Annotated[Session, Depends(get_db)],

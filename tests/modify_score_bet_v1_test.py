@@ -1,3 +1,4 @@
+import json
 from http import HTTPStatus
 from secrets import SystemRandom, randbelow
 from typing import TYPE_CHECKING
@@ -131,7 +132,7 @@ def test_modify_score_bet(
     assert response_new_score_negative.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
-        "description": [
+        "description": json.dumps([
             {
                 "type": "greater_than_equal",
                 "loc": ["body", "team1", "score"],
@@ -139,7 +140,7 @@ def test_modify_score_bet(
                 "input": -1,
                 "ctx": {"ge": 0},
             },
-        ],
+        ]),
     }
 
     # Patch second bet

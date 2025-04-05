@@ -44,6 +44,7 @@ def create_app() -> FastAPI:
         docs_url=f"/{GLOBAL_ENDPOINT}/docs",
         redoc_url=f"/{GLOBAL_ENDPOINT}/redoc",
         openapi_url=f"/{GLOBAL_ENDPOINT}/openapi.json",
+        version=__version__,
     )
 
     # Include all routers
