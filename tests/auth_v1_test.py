@@ -93,10 +93,10 @@ def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
             "password": get_random_string(8),
         },
     )
-    assert response_second_signup.status_code == HTTPStatus.UNAUTHORIZED
+    assert response_second_signup.status_code == HTTPStatus.CONFLICT
     assert response_second_signup.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": HTTPStatus.CONFLICT,
         "description": f"Name already exists: {user_name}",
     }
 
@@ -246,23 +246,8 @@ def test_invalid_signup_body(app_with_valid_jwt_config: "FastAPI") -> None:
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
         "description": [
-            {
-                "type": "missing",
-                "loc": ["body", "password"],
-                "msg": "Field required",
-                "input": {
-                    "name": name,
-                    "first_name": first_name,
-                    "last_name": last_name,
-                    "passwor": password,
-                },
-            },
-            {
-                "type": "extra_forbidden",
-                "loc": ["body", "passwor"],
-                "msg": "Extra inputs are not permitted",
-                "input": password,
-            },
+            {"field": "body -> password", "error": "Field required"},
+            {"field": "body -> passwor", "error": "Extra inputs are not permitted"},
         ],
     }
 
@@ -286,18 +271,8 @@ def test_invalid_login_body(app_with_valid_jwt_config: "FastAPI") -> None:
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
         "description": [
-            {
-                "type": "missing",
-                "loc": ["body", "name"],
-                "msg": "Field required",
-                "input": {"nme": user_name, "password": password},
-            },
-            {
-                "type": "extra_forbidden",
-                "loc": ["body", "nme"],
-                "msg": "Extra inputs are not permitted",
-                "input": user_name,
-            },
+            {"field": "body -> name", "error": "Field required"},
+            {"field": "body -> nme", "error": "Extra inputs are not permitted"},
         ],
     }
 

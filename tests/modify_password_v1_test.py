@@ -89,18 +89,8 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
         "description": [
-            {
-                "type": "missing",
-                "loc": ["body", "password"],
-                "msg": "Field required",
-                "input": {"name": other_user_name},
-            },
-            {
-                "type": "extra_forbidden",
-                "loc": ["body", "name"],
-                "msg": "Extra inputs are not permitted",
-                "input": other_user_name,
-            },
+            {"field": "body -> password", "error": "Field required"},
+            {"field": "body -> name", "error": "Extra inputs are not permitted"},
         ],
     }
 

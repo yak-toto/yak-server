@@ -103,15 +103,7 @@ def test_group(
 
     assert response_german_lang.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     assert response_german_lang.json() == {
-        "description": [
-            {
-                "ctx": {"expected": "'fr' or 'en'"},
-                "type": "enum",
-                "input": "de",
-                "loc": ["query", "lang"],
-                "msg": "Input should be 'fr' or 'en'",
-            },
-        ],
+        "description": [{"field": "query -> lang", "error": "Input should be 'fr' or 'en'"}],
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
         "ok": False,
     }

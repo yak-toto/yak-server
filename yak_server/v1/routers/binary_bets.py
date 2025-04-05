@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
@@ -30,7 +30,7 @@ from yak_server.v1.models.binary_bets import (
     BinaryBetResponse,
     ModifyBinaryBetIn,
 )
-from yak_server.v1.models.generic import GenericOut
+from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.groups import GroupOut
 from yak_server.v1.models.phases import PhaseOut
 from yak_server.v1.models.teams import FlagOut, TeamWithWonOut
@@ -80,7 +80,14 @@ def send_response(
     )
 
 
-@router.post("/")
+@router.post(
+    "/",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+    },
+)
 def create_binary_bet(
     binary_bet_in: BinaryBetIn,
     db: Annotated[Session, Depends(get_db)],
@@ -121,7 +128,14 @@ def create_binary_bet(
     return send_response(binary_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
 
 
-@router.get("/{bet_id}")
+@router.get(
+    "/{bet_id}",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+    },
+)
 def retrieve_binary_bet_by_id(
     bet_id: UUID4,
     db: Annotated[Session, Depends(get_db)],
@@ -142,7 +156,14 @@ def retrieve_binary_bet_by_id(
     return send_response(binary_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
 
 
-@router.patch("/{bet_id}")
+@router.patch(
+    "/{bet_id}",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+    },
+)
 def modify_binary_bet_by_id(
     bet_id: UUID4,
     modify_binary_bet_in: ModifyBinaryBetIn,
@@ -206,7 +227,14 @@ def modify_binary_bet_by_id(
     return send_response(binary_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
 
 
-@router.delete("/{bet_id}")
+@router.delete(
+    "/{bet_id}",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+    },
+)
 def delete_binary_bet_by_id(
     bet_id: UUID4,
     db: Annotated[Session, Depends(get_db)],
