@@ -3,6 +3,7 @@ from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, ConfigDict
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from strawberry.fastapi import GraphQLRouter
 
@@ -35,6 +36,12 @@ class Config(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
 
 
+class VersionOut(BaseModel):
+    version: str
+
+    model_config = ConfigDict(extra="forbid")
+
+
 def create_app() -> FastAPI:
     # Initialize fastapi application
     config = Config()
@@ -61,6 +68,10 @@ def create_app() -> FastAPI:
     app.include_router(score_bets_router.router, prefix=v1_prefix)
     app.include_router(teams_router.router, prefix=v1_prefix)
     app.include_router(users_router.router, prefix=v1_prefix)
+
+    @app.get(f"/{GLOBAL_ENDPOINT}/version")
+    def version() -> VersionOut:
+        return VersionOut(version=__version__)
 
     # Set error handler
     set_exception_handler(app)
