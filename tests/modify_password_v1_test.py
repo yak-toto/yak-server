@@ -1,3 +1,4 @@
+import json
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from uuid import uuid4
@@ -88,7 +89,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_wrong_input.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
-        "description": [
+        "description": json.dumps([
             {
                 "type": "missing",
                 "loc": ["body", "password"],
@@ -101,7 +102,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
                 "msg": "Extra inputs are not permitted",
                 "input": other_user_name,
             },
-        ],
+        ]),
     }
 
     # Check call is rejected if user_id is invalid

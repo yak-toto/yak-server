@@ -1,3 +1,4 @@
+import json
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
@@ -93,10 +94,10 @@ def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
             "password": get_random_string(8),
         },
     )
-    assert response_second_signup.status_code == HTTPStatus.UNAUTHORIZED
+    assert response_second_signup.status_code == HTTPStatus.CONFLICT
     assert response_second_signup.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": HTTPStatus.CONFLICT,
         "description": f"Name already exists: {user_name}",
     }
 
@@ -245,7 +246,7 @@ def test_invalid_signup_body(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_signup.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
-        "description": [
+        "description": json.dumps([
             {
                 "type": "missing",
                 "loc": ["body", "password"],
@@ -263,7 +264,7 @@ def test_invalid_signup_body(app_with_valid_jwt_config: "FastAPI") -> None:
                 "msg": "Extra inputs are not permitted",
                 "input": password,
             },
-        ],
+        ]),
     }
 
 
@@ -285,7 +286,7 @@ def test_invalid_login_body(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_login.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
-        "description": [
+        "description": json.dumps([
             {
                 "type": "missing",
                 "loc": ["body", "name"],
@@ -298,7 +299,7 @@ def test_invalid_login_body(app_with_valid_jwt_config: "FastAPI") -> None:
                 "msg": "Extra inputs are not permitted",
                 "input": user_name,
             },
-        ],
+        ]),
     }
 
 

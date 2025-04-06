@@ -1,3 +1,4 @@
+import json
 import logging
 import traceback
 from typing import TYPE_CHECKING, Union
@@ -41,7 +42,7 @@ class InvalidCredentials(HTTPException):
 class NameAlreadyExists(HTTPException):
     def __init__(self, name: str) -> None:
         super().__init__(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_409_CONFLICT,
             detail=name_already_exists_message(name),
         )
 
@@ -187,7 +188,8 @@ def set_exception_handler(app: "FastAPI") -> None:
     @app.exception_handler(Exception)
     def handle_exception(_: Request, exception: Exception) -> JSONResponse:  # pragma: no cover
         # Return JSON instead of HTML for generic errors.
-        logger.error(traceback.format_exc())
+        log_traceback(exception)
+
         logger.error(f"An unexpected exception occurs: {type(exception).__name__} {exception}")
 
         return JSONResponse(
@@ -220,6 +222,6 @@ def set_exception_handler(app: "FastAPI") -> None:
             content={
                 "ok": False,
                 "error_code": status.HTTP_422_UNPROCESSABLE_ENTITY,
-                "description": request_validator_error.errors(),
+                "description": json.dumps(request_validator_error.errors()),
             },
         )

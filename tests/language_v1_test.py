@@ -1,3 +1,4 @@
+import json
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
@@ -103,15 +104,15 @@ def test_group(
 
     assert response_german_lang.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     assert response_german_lang.json() == {
-        "description": [
+        "description": json.dumps([
             {
-                "ctx": {"expected": "'fr' or 'en'"},
                 "type": "enum",
-                "input": "de",
                 "loc": ["query", "lang"],
                 "msg": "Input should be 'fr' or 'en'",
+                "input": "de",
+                "ctx": {"expected": "'fr' or 'en'"},
             },
-        ],
+        ]),
         "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
         "ok": False,
     }
