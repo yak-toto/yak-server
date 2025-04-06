@@ -1,3 +1,4 @@
+import json
 from typing import Annotated
 
 import typer
@@ -88,6 +89,13 @@ def make_env_typer() -> typer.Typer:
         init_env()
 
     return env_typer
+
+
+@app.command()
+def openapi() -> None:
+    """Print the openapi.json file."""
+    app = create_app()
+    typer.echo(json.dumps(app.openapi()))
 
 
 app.add_typer(make_db_app(), name="db")
