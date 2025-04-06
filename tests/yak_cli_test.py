@@ -1,3 +1,4 @@
+import json
 import os
 from http import HTTPStatus
 from pathlib import Path
@@ -8,6 +9,7 @@ from starlette.testclient import TestClient
 from typer.testing import CliRunner
 
 from testing.util import get_random_string
+from yak_server import __version__
 from yak_server.cli import app
 
 if TYPE_CHECKING:
@@ -188,3 +190,20 @@ def test_db_migration_cli_with_alembic_missing(monkeypatch: "pytest.MonkeyPatch"
         "To enable migration using alembic, please run: uv pip install yak-server[db_migration]"
         in result.output
     )
+
+
+def test_get_openapi_spec() -> None:
+    """
+    Test that the OpenAPI spec is generated correctly.
+    """
+
+    result = runner.invoke(app, ["openapi"])
+
+    assert result.exit_code == 0
+
+    openapi_spec = json.loads(result.output)
+
+    assert openapi_spec["openapi"] == "3.1.0"
+    assert openapi_spec["info"]["version"] == __version__
+    assert "paths" in openapi_spec
+    assert "components" in openapi_spec
