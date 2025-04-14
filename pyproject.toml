@@ -39,7 +39,7 @@ dependencies = [
     "SQLAlchemy ==2.0.40",
     "pendulum ==3.0.0",
     "pydantic-settings ==2.8.1",
-    "strawberry-graphql ==0.263.2",
+    "strawberry-graphql ==0.264.0",
 ]
 dynamic = ["version"]
 
