@@ -47,7 +47,7 @@ def send_response(
     locked: bool,
     lang: Lang,
 ) -> GenericOut[ScoreBetResponse]:
-    return GenericOut(
+    return GenericOut[ScoreBetResponse](
         result=ScoreBetResponse(
             phase=PhaseOut.from_instance(score_bet.match.group.phase, lang=lang),
             group=GroupOut.from_instance(score_bet.match.group, lang=lang),

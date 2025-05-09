@@ -21,7 +21,7 @@ def retrieve_all_teams(
     db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[AllTeamsResponse]:
-    return GenericOut(
+    return GenericOut[AllTeamsResponse](
         result=AllTeamsResponse(
             teams=[TeamOut.from_instance(team, lang=lang) for team in db.query(TeamModel).all()],
         ),
@@ -44,7 +44,9 @@ def retrieve_team_by_id(
     if not team:
         raise TeamNotFound(team_id)
 
-    return GenericOut(result=OneTeamResponse(team=TeamOut.from_instance(team, lang=lang)))
+    return GenericOut[OneTeamResponse](
+        result=OneTeamResponse(team=TeamOut.from_instance(team, lang=lang))
+    )
 
 
 @router.get("/{team_id}/flag")

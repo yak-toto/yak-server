@@ -64,7 +64,7 @@ def retrieve_all_bets(
     groups = db.query(GroupModel).order_by(GroupModel.index)
     phases = db.query(PhaseModel).order_by(PhaseModel.index)
 
-    return GenericOut(
+    return GenericOut[AllBetsResponse](
         result=AllBetsResponse(
             phases=[PhaseOut.from_instance(phase, lang=lang) for phase in phases],
             groups=[GroupWithPhaseIdOut.from_instance(group, lang=lang) for group in groups],
@@ -101,7 +101,7 @@ def retrieve_bets_by_phase_code(
     if not phase:
         raise PhaseNotFound(phase_code)
 
-    return GenericOut(
+    return GenericOut[BetsByPhaseCodeResponse](
         result=BetsByPhaseCodeResponse(
             phase=PhaseOut.from_instance(phase, lang=lang),
             groups=[GroupOut.from_instance(group, lang=lang) for group in groups],
@@ -138,7 +138,7 @@ def retrieve_bets_by_group_code(
     if not group:
         raise GroupNotFound(group_code)
 
-    return GenericOut(
+    return GenericOut[BetsByGroupCodeResponse](
         result=BetsByGroupCodeResponse(
             phase=PhaseOut.from_instance(group.phase, lang=lang),
             group=GroupOut.from_instance(group, lang=lang),
@@ -176,7 +176,7 @@ def retrieve_group_rank_by_code(
 
     group_rank = get_group_rank_with_code(db, user, group.id)
 
-    return GenericOut(
+    return GenericOut[GroupRankResponse](
         result=GroupRankResponse(
             phase=PhaseOut.from_instance(group.phase, lang=lang),
             group=GroupOut.from_instance(group, lang=lang),

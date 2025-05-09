@@ -65,7 +65,7 @@ def signup(
 
     logger.info(signed_up_successfully(user.name))
 
-    return GenericOut(
+    return GenericOut[SignupOut](
         result=SignupOut(
             id=user.id,
             name=user.name,
@@ -82,7 +82,7 @@ def signup(
 def password_requirements() -> GenericOut[PasswordRequirementsOut]:
     password_requirements = PasswordRequirements()
 
-    return GenericOut(
+    return GenericOut[PasswordRequirementsOut](
         result=PasswordRequirementsOut(
             minimum_length=password_requirements.MINIMUM_LENGTH,
             uppercase=password_requirements.UPPERCASE,
@@ -106,7 +106,7 @@ def login(
 
     logger.info(logged_in_successfully(user.name))
 
-    return GenericOut(
+    return GenericOut[LoginOut](
         result=LoginOut(
             id=user.id,
             name=user.name,
