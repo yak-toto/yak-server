@@ -9,7 +9,7 @@ from typer.testing import CliRunner
 from testing.util import get_random_string
 from yak_server.cli import app
 
-runner = CliRunner(mix_stderr=False)
+runner = CliRunner()
 
 
 def test_yak_env_init() -> None:
