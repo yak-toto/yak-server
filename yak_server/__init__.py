@@ -26,7 +26,7 @@ GLOBAL_ENDPOINT = "api"
 VERSION1 = "v1"
 VERSION2 = "v2"
 
-__version__ = "0.49.1"
+__version__ = "0.49.2"
 
 
 class Config(BaseSettings):
