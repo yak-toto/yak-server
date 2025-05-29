@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling >= 1.21.0"]
+requires = ["hatchling >= 1.27.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -41,7 +41,7 @@ dependencies = [
     "pydantic-settings ==2.9.1",
     "strawberry-graphql ==0.270.2",
 ]
-dynamic = ["version"]
+version = "0.49.2"
 
 [project.urls]
 Homepage = "https://github.com/yak-toto/yak-server"
