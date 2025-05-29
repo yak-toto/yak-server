@@ -1,6 +1,7 @@
 import json
 import os
 from http import HTTPStatus
+from importlib.metadata import version
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -9,7 +10,6 @@ from starlette.testclient import TestClient
 from typer.testing import CliRunner
 
 from testing.util import get_random_string
-from yak_server import __version__
 from yak_server.cli import app
 
 if TYPE_CHECKING:
@@ -204,6 +204,6 @@ def test_get_openapi_spec() -> None:
     openapi_spec = json.loads(result.output)
 
     assert openapi_spec["openapi"] == "3.1.0"
-    assert openapi_spec["info"]["version"] == __version__
+    assert openapi_spec["info"]["version"] == version("yak-server")
     assert "paths" in openapi_spec
     assert "components" in openapi_spec

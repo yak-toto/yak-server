@@ -9,19 +9,17 @@ alias f := fmt
 alias l := lint
 
 setup:
-    uv venv {{ justfile_directory() }}/.venv
-    . {{ justfile_directory() }}/.venv/bin/activate
     just install
-    pre-commit install --install-hooks
+    uv run pre-commit install --install-hooks
 
 install:
     uv sync --all-extras --all-groups
 
 test:
-    pytest -vv
+    uv run pytest -vv
 
 test-cov:
-    pytest --cov={{ justfile_directory() }}/yak_server \
+    uv run pytest --cov={{ justfile_directory() }}/yak_server \
       --cov={{ justfile_directory() }}/scripts \
       --cov={{ justfile_directory() }}/tests \
       --cov={{ justfile_directory() }}/testing \
@@ -30,16 +28,16 @@ test-cov:
       -vv
 
 run:
-    uvicorn --reload --factory yak_server:create_app
+    uv run uvicorn --reload --factory yak_server:create_app
 
 run_profiling:
-    uvicorn --reload --factory scripts.profiling:create_app
+    uv run uvicorn --reload --factory scripts.profiling:create_app
 
 check:
-    pre-commit run -a
+    uv run pre-commit run -a
 
 fmt:
-    pre-commit run -a ruff-format
+    uv run pre-commit run -a ruff-format
 
 lint:
-    pre-commit run -a ruff
+    uv run pre-commit run -a ruff-check
