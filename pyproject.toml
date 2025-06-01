@@ -41,7 +41,7 @@ dependencies = [
     "pydantic-settings ==2.9.1",
     "strawberry-graphql ==0.270.2",
 ]
-version = "0.49.4"
+version = "0.50.0"
 
 [project.urls]
 Homepage = "https://github.com/yak-toto/yak-server"
