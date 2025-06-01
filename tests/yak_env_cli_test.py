@@ -23,7 +23,7 @@ def test_yak_env_init() -> None:
         result = runner.invoke(
             app,
             ["env", "init"],
-            input=f"y\n{host}\n{user_name}\n{password}\n{port}\n{database}\n1800\n4\n",
+            input=f"y\n{host}\n{user_name}\n{password}\n{port}\n{database}\n1800\nworld_cup_2022\n",
         )
 
         assert result.exit_code == 0
@@ -58,7 +58,7 @@ def test_yak_env_init_production() -> None:
         result = runner.invoke(
             app,
             ["env", "init"],
-            input="n\ny\nroot\ny\n3000\ndb\n1800\n1\n",
+            input="n\ny\nroot\ny\n3000\ndb\n1800\neuro_2016\n",
         )
 
         assert result.exit_code == 0
@@ -73,7 +73,7 @@ def test_yak_env_init_world_cup_2018() -> None:
         result = runner.invoke(
             app,
             ["env", "init"],
-            input="y\ny\nroot\nroot\ndddddddd\n\ndb\n1800\n3\n",
+            input="y\ny\nroot\nroot\ndddddddd\n\ndb\n1800\nworld_cup_2018\n",
         )
 
         assert result.exit_code == 0
@@ -98,7 +98,7 @@ def test_yak_env_init_invalid_lockdatetime(monkeypatch: pytest.MonkeyPatch) -> N
         result = runner.invoke(
             app,
             ["env", "init"],
-            input="n\ny\nroot\ny\n3000\ndb\n1800\n1\n",
+            input="n\ny\nroot\ny\n3000\ndb\n1800\ncompetition0\n",
             catch_exceptions=True,
         )
 

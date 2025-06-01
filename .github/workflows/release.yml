@@ -29,9 +29,6 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
-      - name: Install hatch
-        run: uv tool install hatchling
-
       - name: Create commits
         id: create-commits
         run: |

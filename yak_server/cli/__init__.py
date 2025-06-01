@@ -84,9 +84,25 @@ def make_env_typer() -> typer.Typer:
     env_typer = typer.Typer()
 
     @env_typer.command()
-    def init() -> None:
+    def init(  # noqa: PLR0913
+        *,
+        debug: bool = typer.Option(False, "--debug", "-d", help="Run in debug mode", prompt=True),  # noqa: FBT003
+        host: str = typer.Option("localhost", "--host", "-H", help="Database host", prompt=True),
+        user: str = typer.Option("yak", "--user", "-u", help="Database username", prompt=True),
+        password: str = typer.Option(..., hide_input=True, help="Database password", prompt=True),
+        port: int = typer.Option(5432, "--port", "-p", help="Database port", prompt=True),
+        database: str = typer.Option(
+            "yak_db", "--database", "-D", help="Database name", prompt=True
+        ),
+        jwt_expiration: int = typer.Option(
+            3600, "--jwt-expiration", "-j", help="JWT expiration time in seconds", prompt=True
+        ),
+        competition: str = typer.Option(
+            ..., "--competition", "-c", help="Competition name", prompt=True
+        ),
+    ) -> None:
         """Build the env files you need to start the server."""
-        init_env()
+        init_env(debug, host, user, password, competition, database, jwt_expiration, port)
 
     return env_typer
 
@@ -95,7 +111,7 @@ def make_env_typer() -> typer.Typer:
 def openapi() -> None:
     """Print the openapi.json file."""
     app = create_app()
-    typer.echo(json.dumps(app.openapi()))
+    typer.echo(json.dumps(app.openapi(), separators=(",", ":")))
 
 
 app.add_typer(make_db_app(), name="db")
