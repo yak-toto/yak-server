@@ -66,7 +66,7 @@ def engine_for_test() -> Generator[Engine, None, None]:
 
     yield engine
 
-    # Always drop database atfer running test session
+    # Always drop database after running test session
     drop_database(engine, debug=True)
 
 
