@@ -35,11 +35,11 @@ dependencies = [
     "psycopg2-binary>=2.9.10",
     "argon2-cffi ==23.1.0",
     "fastapi ==0.115.12",
-    "typer ==0.15.4",
+    "typer ==0.16.0",
     "SQLAlchemy ==2.0.41",
     "pendulum ==3.1.0",
     "pydantic-settings ==2.9.1",
-    "strawberry-graphql ==0.270.2",
+    "strawberry-graphql ==0.270.5",
 ]
 version = "0.50.0"
 
