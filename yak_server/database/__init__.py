@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 class PostgresSettings(BaseSettings):
     host: str
-    user_name: str
+    user: str
     password: str
     port: int
     db: str
@@ -26,9 +26,9 @@ def get_postgres_settings() -> PostgresSettings:
 
 
 def compute_database_uri(
-    client: str, host: str, user_name: str, password: str, port: int, db: str
+    client: str, host: str, user: str, password: str, port: int, db: str
 ) -> str:
-    return f"postgresql+{client}://{user_name}:{password}@{host}:{port}/{db}"
+    return f"postgresql+{client}://{user}:{password}@{host}:{port}/{db}"
 
 
 def build_engine() -> Engine:
@@ -37,7 +37,7 @@ def build_engine() -> Engine:
     database_url = compute_database_uri(
         psycopg2.__name__,
         postgres_settings.host,
-        postgres_settings.user_name,
+        postgres_settings.user,
         postgres_settings.password,
         postgres_settings.port,
         postgres_settings.db,

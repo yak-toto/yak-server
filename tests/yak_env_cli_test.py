@@ -47,7 +47,7 @@ def test_yak_env_init() -> None:
         env_db = dotenv_values(Path(".env.db"))
 
         assert env_db["POSTGRES_HOST"] == host
-        assert env_db["POSTGRES_USER_NAME"] == user_name
+        assert env_db["POSTGRES_USER"] == user_name
         assert env_db["POSTGRES_PASSWORD"] == password
         assert env_db["POSTGRES_PORT"] == str(port)
         assert env_db["POSTGRES_DB"] == database

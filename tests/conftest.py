@@ -27,7 +27,7 @@ def create_test_database() -> Engine:
 
     connection = psycopg2.connect(
         host=db_settings.host,
-        user=db_settings.user_name,
+        user=db_settings.user,
         password=db_settings.password,
         port=db_settings.port,
         dbname="postgres",  # System database
@@ -45,7 +45,7 @@ def create_test_database() -> Engine:
     database_url = compute_database_uri(
         psycopg2.__name__,
         db_settings.host,
-        db_settings.user_name,
+        db_settings.user,
         db_settings.password,
         db_settings.port,
         db_settings.db,

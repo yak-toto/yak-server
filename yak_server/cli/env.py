@@ -82,11 +82,11 @@ def write_app_env_file(debug: bool, jwt_expiration_time: int, competition: str) 
 
 def write_db_env_file(host: str, user: str, password: str, port: int, db: str) -> None:
     # try to instantiate pydantic model to check if settings are ok
-    PostgresSettings(host=host, user_name=user, password=password, port=port, db=db)
+    PostgresSettings(host=host, user=user, password=password, port=port, db=db)
 
     env_db = {
         "POSTGRES_HOST": host,
-        "POSTGRES_USER_NAME": user,
+        "POSTGRES_USER": user,
         "POSTGRES_PASSWORD": password,
         "POSTGRES_PORT": port,
         "POSTGRES_DB": db,
@@ -102,7 +102,7 @@ def init_env(  # noqa: PLR0913, PLR0917
     competition: str,
     database: str,
     jwt_expiration: int,
-    port: str,
+    port: int,
 ) -> None:
     write_app_env_file(debug, jwt_expiration, competition)
     write_db_env_file(host, db_username, password, port, database)

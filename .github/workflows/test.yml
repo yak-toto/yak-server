@@ -53,7 +53,7 @@ jobs:
       - name: Run test
         env:
           POSTGRES_HOST: 127.0.0.1
-          POSTGRES_USER_NAME: ${{ env.username }}
+          POSTGRES_USER: ${{ env.username }}
           POSTGRES_PASSWORD: ${{ env.password }}
           POSTGRES_PORT: ${{ env.port }}
           POSTGRES_DB: ${{ env.database }}
