@@ -1,3 +1,6 @@
+ci:
+  skip: [uv-lock]
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -51,3 +54,8 @@ repos:
     rev: v1
     hooks:
       - id: typos
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.7.11
+    hooks:
+      - id: uv-lock
