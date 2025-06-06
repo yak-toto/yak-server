@@ -33,13 +33,13 @@ classifiers = [
 dependencies = [
     "PyJWT ==2.10.1",
     "psycopg2-binary>=2.9.10",
-    "argon2-cffi ==23.1.0",
+    "argon2-cffi ==25.1.0",
     "fastapi ==0.115.12",
     "typer ==0.16.0",
     "SQLAlchemy ==2.0.41",
     "pendulum ==3.1.0",
     "pydantic-settings ==2.9.1",
-    "strawberry-graphql ==0.270.5",
+    "strawberry-graphql ==0.271.0",
 ]
 version = "0.50.0"
 
@@ -59,7 +59,7 @@ yak = "yak_server.cli:app"
 dev = [
     "httpx>=0.28.1",
     "pre-commit>=4.0.1",
-    "pytest>=8.3.4",
+    "pytest>=8.4.0",
     "pytest-cov>=6.0.0",
     "pytest-env>=1.1.5",
     "types-psycopg2>=2.9.21.20250121",
@@ -78,6 +78,9 @@ path = "yak_server/__init__.py"
 
 [tool.hatch.build.targets.wheel.hooks.custom]
 path = "scripts/build_hooks.py"
+
+[tool.uv]
+required-version = ">=0.7.11"
 
 [tool.coverage.run]
 branch = true
