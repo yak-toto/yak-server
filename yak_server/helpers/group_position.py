@@ -61,6 +61,9 @@ def compute_group_rank(
         team1_id = score_bet.match.team1_id
         team2_id = score_bet.match.team2_id
 
+        if team1_id is None or team2_id is None:
+            continue
+
         if team1_id not in new_group_position:
             new_group_position[team1_id] = GroupPosition()
 
