@@ -1786,7 +1786,7 @@ db-migration = [
     { name = "alembic" },
 ]
 server = [
-    { name = "uvicorn", extra = ["standard"] },
+    { name = "uvicorn" },
 ]
 sync = [
     { name = "beautifulsoup4", extra = ["lxml"] },
@@ -1801,6 +1801,7 @@ dev = [
     { name = "pytest-cov" },
     { name = "pytest-env" },
     { name = "types-psycopg2" },
+    { name = "uvicorn", extra = ["standard"] },
     { name = "yappi" },
 ]
 type-checking = [
@@ -1825,7 +1826,7 @@ requires-dist = [
     { name = "pyjwt", specifier = "==2.10.1" },
     { name = "sqlalchemy", specifier = "==2.0.41" },
     { name = "strawberry-graphql", specifier = "==0.275.2" },
-    { name = "uvicorn", extras = ["standard"], marker = "extra == 'server'", specifier = ">=0.34.0" },
+    { name = "uvicorn", marker = "extra == 'server'", specifier = ">=0.34.0" },
 ]
 provides-extras = ["db-migration", "sync", "server"]
 
@@ -1837,6 +1838,7 @@ dev = [
     { name = "pytest-cov", specifier = ">=6.0.0" },
     { name = "pytest-env", specifier = ">=1.1.5" },
     { name = "types-psycopg2", specifier = ">=2.9.21.20250121" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.34.0" },
     { name = "yappi", specifier = ">=1.6.10" },
 ]
 type-checking = [
