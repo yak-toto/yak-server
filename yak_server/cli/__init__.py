@@ -16,7 +16,7 @@ from .database import (
     setup_migration,
 )
 from .database.sync import synchronize_official_results
-from .env import init_env
+from .env import init_env, write_app_env_file, write_db_env_file
 
 app = typer.Typer()
 
@@ -84,9 +84,9 @@ def make_env_typer() -> typer.Typer:
     env_typer = typer.Typer()
 
     @env_typer.command()
-    def init(  # noqa: PLR0913
+    def all(  # noqa: A001, PLR0913
         *,
-        debug: bool = typer.Option(False, "--debug", "-d", help="Run in debug mode", prompt=True),  # noqa: FBT003
+        debug: bool = typer.Option(help="Run in debug mode", prompt=True),
         host: str = typer.Option("localhost", "--host", "-H", help="Database host", prompt=True),
         user: str = typer.Option("yak", "--user", "-u", help="Database username", prompt=True),
         password: str = typer.Option(..., hide_input=True, help="Database password", prompt=True),
@@ -103,6 +103,34 @@ def make_env_typer() -> typer.Typer:
     ) -> None:
         """Build the env files you need to start the server."""
         init_env(debug, host, user, password, competition, database, jwt_expiration, port)
+
+    @env_typer.command()
+    def db(
+        *,
+        host: str = typer.Option("localhost", "--host", "-H", help="Database host", prompt=True),
+        user: str = typer.Option("yak", "--user", "-u", help="Database username", prompt=True),
+        password: str = typer.Option(..., hide_input=True, help="Database password", prompt=True),
+        port: int = typer.Option(5432, "--port", "-p", help="Database port", prompt=True),
+        database: str = typer.Option(
+            "yak_db", "--database", "-D", help="Database name", prompt=True
+        ),
+    ) -> None:
+        """Build the env files you need to setup database."""
+        write_db_env_file(host, user, password, port, database)
+
+    @env_typer.command()
+    def app(
+        *,
+        debug: bool = typer.Option(help="Run in debug mode", prompt=True),
+        jwt_expiration: int = typer.Option(
+            3600, "--jwt-expiration", "-j", help="JWT expiration time in seconds", prompt=True
+        ),
+        competition: str = typer.Option(
+            ..., "--competition", "-c", help="Competition name", prompt=True
+        ),
+    ) -> None:
+        """Build the env files you need to setup application."""
+        write_app_env_file(debug, jwt_expiration, competition)
 
     return env_typer
 

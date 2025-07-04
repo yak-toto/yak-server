@@ -16,7 +16,7 @@
 ### Database
 
 To setup a database, run `yak env init`. This will ask you to fill different configuration in order build env file.
-Once done, you can run a docker script to start postgres database.
+Once done, you can run a docker script to start postgres database (at `scripts/postgresrun`)
 
 ### Backend
 
