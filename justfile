@@ -8,6 +8,7 @@ alias c := check
 alias f := fmt
 alias l := lint
 alias ud := update_deps
+alias bi := build_image
 
 setup:
     just install
@@ -49,3 +50,6 @@ lint:
 update_deps:
     uv run pre-commit autoupdate
     uv lock -U
+
+build_image COMPETITION:
+    {{ justfile_directory() }}/scripts/build_image.sh {{COMPETITION}}
