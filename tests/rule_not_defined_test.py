@@ -38,7 +38,7 @@ def test_rule_not_defined(monkeypatch: pytest.MonkeyPatch) -> None:
 
         result = runner.invoke(
             app,
-            ["env", "init"],
+            ["env", "all"],
             input=f"y\ny\n{host}\n{user_name}\n{password}\n{port}\n{database}\n1800\nfake_competition\n",
         )
 
