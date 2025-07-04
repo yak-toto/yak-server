@@ -7,6 +7,7 @@ alias rp := run_profiling
 alias c := check
 alias f := fmt
 alias l := lint
+alias bi := build_images
 
 setup:
     just install
@@ -44,3 +45,6 @@ fmt:
 
 lint:
     uv run pre-commit run -a ruff-check
+
+build_images:
+    uv run --no-project {{ justfile_directory() }}/scripts/build_images.py
