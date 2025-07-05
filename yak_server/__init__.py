@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from strawberry.fastapi import GraphQLRouter
 
+from . import health_check
 from .helpers.logging_helpers import setup_logging
 from .v1.helpers.errors import set_exception_handler
 from .v1.routers import bets as bets_router
@@ -47,6 +48,9 @@ def create_app() -> FastAPI:
         title="Yak API",
         description="Yak API",
     )
+
+    # Include health check router
+    app.include_router(health_check.router, prefix=f"/{GLOBAL_ENDPOINT}")
 
     # Include all routers
     v1_prefix = f"/{GLOBAL_ENDPOINT}/{VERSION1}"
