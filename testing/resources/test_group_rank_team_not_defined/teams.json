@@ -1,0 +1,14 @@
+[
+    {
+        "code": "LA",
+        "description_fr": "Laos",
+        "description_en": "Laos",
+        "internal_flag_url": "https://fake-team-flag_laos.com"
+    },
+    {
+        "code": "BR",
+        "description_fr": "Tha\u00eflande",
+        "description_en": "Thailand",
+        "internal_flag_url": "https://fake-team-flag_thailand.com"
+    }
+]

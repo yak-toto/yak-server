@@ -67,6 +67,13 @@ class MissingTeamDuringInitError(Exception):
         super().__init__(f"Error during database initialization: team_code={team_code} not found.")
 
 
+class MissingGroupDuringInitError(Exception):
+    def __init__(self, group_code: str) -> None:
+        super().__init__(
+            f"Error during database initialization: group_code={group_code} not found."
+        )
+
+
 def initialize_database(engine: "Engine", app: "FastAPI") -> None:
     local_session_maker = build_local_session_maker(engine)
 
@@ -134,7 +141,13 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
 
                 match["team2_id"] = team2.id
 
-            group = db.query(GroupModel).filter_by(code=match.pop("group_code")).first()
+            group_code = match.pop("group_code")
+
+            group = db.query(GroupModel).filter_by(code=group_code).first()
+
+            if group is None:
+                raise MissingGroupDuringInitError(group_code)
+
             match["group_id"] = group.id
 
         db.add_all(MatchReferenceModel(**match) for match in matches)
