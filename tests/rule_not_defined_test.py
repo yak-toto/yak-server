@@ -4,7 +4,7 @@ from secrets import randbelow
 from uuid import uuid4
 
 import pytest
-from typer.testing import CliRunner
+from click.testing import CliRunner
 
 from testing.util import get_random_string
 from yak_server.cli import app
@@ -39,7 +39,7 @@ def test_rule_not_defined(monkeypatch: pytest.MonkeyPatch) -> None:
         result = runner.invoke(
             app,
             ["env", "all"],
-            input=f"y\ny\n{host}\n{user_name}\n{password}\n{port}\n{database}\n1800\nfake_competition\n",
+            input=f"y\n{host}\n{user_name}\n{password}\n{port}\n{database}\n1800\nfake_competition\n",
         )
 
         assert result.exit_code == 1
