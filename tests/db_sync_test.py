@@ -3,8 +3,8 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING, Optional
 
 import pytest
+from click.testing import CliRunner
 from fastapi.testclient import TestClient
-from typer.testing import CliRunner
 
 from testing.mock import MockSettings
 from testing.util import get_random_string

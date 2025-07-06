@@ -1,7 +1,6 @@
 import json
-from typing import Annotated
 
-import typer
+import click
 
 from yak_server import create_app
 from yak_server.database import build_engine
@@ -18,11 +17,16 @@ from .database import (
 from .database.sync import synchronize_official_results
 from .env import init_env, write_app_env_file, write_db_env_file
 
-app = typer.Typer()
+
+@click.group()
+def app() -> None:
+    """CLI for yak application"""
 
 
-def make_db_app() -> typer.Typer:
-    db_app = typer.Typer()
+def make_db_app() -> click.Group:
+    @click.group()
+    def db_app() -> None:
+        """Database related commands"""
 
     @db_app.command()
     def create() -> None:
@@ -52,15 +56,26 @@ def make_db_app() -> typer.Typer:
         delete_database(engine, debug=app.debug)
 
     @db_app.command()
-    def admin(
-        password: str = typer.Option(..., prompt=True, confirmation_prompt=True, hide_input=True),
-    ) -> None:
+    @click.option(
+        "--password",
+        prompt=True,
+        hide_input=True,
+        confirmation_prompt=True,
+        required=True,
+    )
+    def admin(password: str) -> None:
         """Create admin account in database."""
         engine = build_engine()
         create_admin(password, engine)
 
     @db_app.command()
-    def migration(*, short: Annotated[bool, typer.Option("--short", "-s")] = False) -> None:
+    @click.option(
+        "-s",
+        "--short",
+        is_flag=True,
+        default=False,
+    )
+    def migration(*, short: bool) -> None:
         """Help to run database migration scripts."""
         setup_migration(short=short)
 
@@ -80,70 +95,112 @@ def make_db_app() -> typer.Typer:
     return db_app
 
 
-def make_env_typer() -> typer.Typer:
-    env_typer = typer.Typer()
+def make_env_typer() -> click.Group:
+    @click.group()
+    def env_app() -> None:
+        """Environment related commands"""
 
-    @env_typer.command()
+    @env_app.command()
+    @click.option("--debug/--no-debug", prompt=True, is_flag=True, default=False, show_default=True)
+    @click.option(
+        "-h", "--host", prompt=True, default="localhost", show_default=True, help="Database host"
+    )
+    @click.option("-u", "--user", prompt=True, help="Database username", required=True)
+    @click.option("--password", prompt=True, hide_input=True, required=True)
+    @click.option(
+        "-p",
+        "--port",
+        prompt=True,
+        default=5432,
+        show_default=1,
+        help="Database port",
+        required=True,
+    )
+    @click.option(
+        "--database",
+        "-D",
+        prompt=True,
+        default="yak_db",
+        help="Database name",
+        show_default=True,
+    )
+    @click.option(
+        "--jwt-expiration",
+        "-j",
+        prompt=True,
+        default=3600,
+        show_default=True,
+        help="JWT expiration time in seconds",
+    )
+    @click.option("--competition", "-c", prompt=True, help="Competition name", required=True)
     def all(  # noqa: A001, PLR0913
         *,
-        debug: bool = typer.Option(help="Run in debug mode", prompt=True),
-        host: str = typer.Option("localhost", "--host", "-H", help="Database host", prompt=True),
-        user: str = typer.Option("yak", "--user", "-u", help="Database username", prompt=True),
-        password: str = typer.Option(..., hide_input=True, help="Database password", prompt=True),
-        port: int = typer.Option(5432, "--port", "-p", help="Database port", prompt=True),
-        database: str = typer.Option(
-            "yak_db", "--database", "-D", help="Database name", prompt=True
-        ),
-        jwt_expiration: int = typer.Option(
-            3600, "--jwt-expiration", "-j", help="JWT expiration time in seconds", prompt=True
-        ),
-        competition: str = typer.Option(
-            ..., "--competition", "-c", help="Competition name", prompt=True
-        ),
+        debug: bool,
+        host: str,
+        user: str,
+        password: str,
+        port: int,
+        database: str,
+        jwt_expiration: int,
+        competition: str,
     ) -> None:
         """Build the env files you need to start the server."""
         init_env(debug, host, user, password, competition, database, jwt_expiration, port)
 
-    @env_typer.command()
-    def db(
-        *,
-        host: str = typer.Option("localhost", "--host", "-H", help="Database host", prompt=True),
-        user: str = typer.Option("yak", "--user", "-u", help="Database username", prompt=True),
-        password: str = typer.Option(..., hide_input=True, help="Database password", prompt=True),
-        port: int = typer.Option(5432, "--port", "-p", help="Database port", prompt=True),
-        database: str = typer.Option(
-            "yak_db", "--database", "-D", help="Database name", prompt=True
-        ),
-    ) -> None:
+    @env_app.command()
+    @click.option(
+        "-h", "--host", prompt=True, default="localhost", show_default=True, help="Database host"
+    )
+    @click.option("-u", "--user", prompt=True, help="Database username", required=True)
+    @click.option("--password", prompt=True, hide_input=True, required=True)
+    @click.option(
+        "-p",
+        "--port",
+        prompt=True,
+        default=5432,
+        show_default=1,
+        help="Database port",
+        required=True,
+    )
+    @click.option(
+        "--database",
+        "-D",
+        prompt=True,
+        default="yak_db",
+        help="Database name",
+        show_default=True,
+    )
+    def db(*, host: str, user: str, password: str, port: int, database: str) -> None:
         """Build the env files you need to setup database."""
         write_db_env_file(host, user, password, port, database)
 
-    @env_typer.command()
-    def app(
-        *,
-        debug: bool = typer.Option(help="Run in debug mode", prompt=True),
-        jwt_expiration: int = typer.Option(
-            3600, "--jwt-expiration", "-j", help="JWT expiration time in seconds", prompt=True
-        ),
-        competition: str = typer.Option(
-            ..., "--competition", "-c", help="Competition name", prompt=True
-        ),
-    ) -> None:
+    @env_app.command()
+    @click.option("--debug/--no-debug", prompt=True, is_flag=True, default=False, show_default=True)
+    @click.option(
+        "--jwt-expiration",
+        "-j",
+        prompt=True,
+        default=3600,
+        show_default=True,
+        help="JWT expiration time in seconds",
+    )
+    @click.option("--competition", "-c", prompt=True, help="Competition name", required=True)
+    def app(*, debug: bool, jwt_expiration: int, competition: str) -> None:
         """Build the env files you need to setup application."""
         write_app_env_file(debug, jwt_expiration, competition)
 
-    return env_typer
+    return env_app
 
 
 @app.command()
 def openapi() -> None:
     """Print the openapi.json file."""
     app = create_app()
-    typer.echo(json.dumps(app.openapi(), separators=(",", ":")))
+    click.echo(json.dumps(app.openapi(), separators=(",", ":")))
 
 
-app.add_typer(make_db_app(), name="db")
-app.add_typer(make_env_typer(), name="env")
+app.add_command(make_db_app(), name="db")
+app.add_command(make_env_typer(), name="env")
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Optional
 
 import pendulum
 import pytest
+from click.testing import CliRunner
 from starlette.testclient import TestClient
-from typer.testing import CliRunner
 
 from testing.mock import MockSettings
 from testing.util import UserData, get_random_string, patch_score_bets

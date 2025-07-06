@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pendulum
+from click.testing import CliRunner
 from starlette.testclient import TestClient
-from typer.testing import CliRunner
 
 from testing.util import get_random_string
 from yak_server.cli import app
