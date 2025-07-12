@@ -27,6 +27,9 @@ test-cov:
       --cov-config={{ justfile_directory() }}/pyproject.toml \
       -vv
 
+tox:
+    {{ justfile_directory() }}/tox.sh
+
 run:
     uv run uvicorn --reload --factory yak_server:create_app
 
