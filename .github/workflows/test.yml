@@ -1,4 +1,4 @@
-name: 🔂 Unit tests
+name: 🧪 Unit tests
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
       - "yak_server/**"
       - "tests/**"
       - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/test.yml"
 
 jobs:
