@@ -1800,7 +1800,6 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-env" },
-    { name = "types-psycopg2" },
     { name = "yappi" },
 ]
 type-checking = [
@@ -1808,6 +1807,7 @@ type-checking = [
     { name = "lxml-stubs" },
     { name = "mypy" },
     { name = "types-beautifulsoup4" },
+    { name = "types-psycopg2" },
     { name = "types-pymysql" },
 ]
 
@@ -1836,7 +1836,6 @@ dev = [
     { name = "pytest", specifier = ">=8.4.0" },
     { name = "pytest-cov", specifier = ">=6.0.0" },
     { name = "pytest-env", specifier = ">=1.1.5" },
-    { name = "types-psycopg2", specifier = ">=2.9.21.20250121" },
     { name = "yappi", specifier = ">=1.6.10" },
 ]
 type-checking = [
@@ -1844,6 +1843,7 @@ type-checking = [
     { name = "lxml-stubs", specifier = ">=0.5.1" },
     { name = "mypy", specifier = ">=1.14.1" },
     { name = "types-beautifulsoup4", specifier = ">=4.12.0.20241020" },
+    { name = "types-psycopg2", specifier = ">=2.9.21.20250121" },
     { name = "types-pymysql", specifier = ">=1.1.0.20241103" },
 ]
 
