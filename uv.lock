@@ -8,7 +8,7 @@ resolution-markers = [
 
 [[package]]
 name = "alembic"
-version = "1.16.2"
+version = "1.16.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mako" },
@@ -16,9 +16,9 @@ dependencies = [
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9c/35/116797ff14635e496bbda0c168987f5326a6555b09312e9b817e360d1f56/alembic-1.16.2.tar.gz", hash = "sha256:e53c38ff88dadb92eb22f8b150708367db731d58ad7e9d417c9168ab516cbed8", size = 1963563, upload-time = "2025-06-16T18:05:08.566Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/83/52/72e791b75c6b1efa803e491f7cbab78e963695e76d4ada05385252927e76/alembic-1.16.4.tar.gz", hash = "sha256:efab6ada0dd0fae2c92060800e0bf5c1dc26af15a10e02fb4babff164b4725e2", size = 1968161, upload-time = "2025-07-10T16:17:20.192Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/dd/e2/88e425adac5ad887a087c38d04fe2030010572a3e0e627f8a6e8c33eeda8/alembic-1.16.2-py3-none-any.whl", hash = "sha256:5f42e9bd0afdbd1d5e3ad856c01754530367debdebf21ed6894e34af52b3bb03", size = 242717, upload-time = "2025-06-16T18:05:10.27Z" },
+    { url = "https://files.pythonhosted.org/packages/c2/62/96b5217b742805236614f05904541000f55422a6060a90d7fd4ce26c172d/alembic-1.16.4-py3-none-any.whl", hash = "sha256:b05e51e8e82efc1abd14ba2af6392897e145930c3e0a2faf2b0da2f7f7fd660d", size = 247026, upload-time = "2025-07-10T16:17:21.845Z" },
 ]
 
 [[package]]
@@ -324,16 +324,16 @@ wheels = [
 
 [[package]]
 name = "fastapi"
-version = "0.115.13"
+version = "0.116.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
     { name = "starlette" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/20/64/ec0788201b5554e2a87c49af26b77a4d132f807a0fa9675257ac92c6aa0e/fastapi-0.115.13.tar.gz", hash = "sha256:55d1d25c2e1e0a0a50aceb1c8705cd932def273c102bff0b1c1da88b3c6eb307", size = 295680, upload-time = "2025-06-17T11:49:45.575Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/78/d7/6c8b3bfe33eeffa208183ec037fee0cce9f7f024089ab1c5d12ef04bd27c/fastapi-0.116.1.tar.gz", hash = "sha256:ed52cbf946abfd70c5a0dccb24673f0670deeb517a88b3544d03c2a6bf283143", size = 296485, upload-time = "2025-07-11T16:22:32.057Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/59/4a/e17764385382062b0edbb35a26b7cf76d71e27e456546277a42ba6545c6e/fastapi-0.115.13-py3-none-any.whl", hash = "sha256:0a0cab59afa7bab22f5eb347f8c9864b681558c278395e94035a741fc10cd865", size = 95315, upload-time = "2025-06-17T11:49:44.106Z" },
+    { url = "https://files.pythonhosted.org/packages/e5/47/d63c60f59a59467fda0f93f46335c9d18526d7071f025cb5b89d5353ea42/fastapi-0.116.1-py3-none-any.whl", hash = "sha256:c46ac7c312df840f0c9e220f7964bada936781bc4e2e6eb71f1c4d7553786565", size = 95631, upload-time = "2025-07-11T16:22:30.485Z" },
 ]
 
 [[package]]
@@ -1120,16 +1120,16 @@ wheels = [
 
 [[package]]
 name = "pydantic-settings"
-version = "2.10.0"
+version = "2.10.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "typing-inspection" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c2/ef/3d61472b7801c896f9efd9bb8750977d9577098b05224c5c41820690155e/pydantic_settings-2.10.0.tar.gz", hash = "sha256:7a12e0767ba283954f3fd3fefdd0df3af21b28aa849c40c35811d52d682fa876", size = 172625, upload-time = "2025-06-21T13:56:55.898Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/68/85/1ea668bbab3c50071ca613c6ab30047fb36ab0da1b92fa8f17bbc38fd36c/pydantic_settings-2.10.1.tar.gz", hash = "sha256:06f0062169818d0f5524420a360d632d5857b83cffd4d42fe29597807a1614ee", size = 172583, upload-time = "2025-06-24T13:26:46.841Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7d/9e/fce9331fecf1d2761ff0516c5dceab8a5fd415e82943e727dc4c5fa84a90/pydantic_settings-2.10.0-py3-none-any.whl", hash = "sha256:33781dfa1c7405d5ed2b6f150830a93bb58462a847357bd8f162f8bacb77c027", size = 45232, upload-time = "2025-06-21T13:56:53.682Z" },
+    { url = "https://files.pythonhosted.org/packages/58/f0/427018098906416f580e3cf1366d3b1abfb408a0652e9f31600c24a1903c/pydantic_settings-2.10.1-py3-none-any.whl", hash = "sha256:a60952460b99cf661dc25c29c0ef171721f98bfcb52ef8d9ea4c943d7c8cc796", size = 45235, upload-time = "2025-06-24T13:26:45.485Z" },
 ]
 
 [[package]]
@@ -1364,7 +1364,7 @@ wheels = [
 
 [[package]]
 name = "strawberry-graphql"
-version = "0.275.2"
+version = "0.275.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "graphql-core" },
@@ -1372,9 +1372,9 @@ dependencies = [
     { name = "python-dateutil" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/73/d7/d42a836e93fb798ea6e0f0da4857918340acdba8f206dd0ba5d71a12795d/strawberry_graphql-0.275.2.tar.gz", hash = "sha256:3c99851103a2859f26bfaea205a0e82383ac26513b003325fa03bb1f38f6f7e6", size = 209415, upload-time = "2025-06-22T17:36:32.636Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/92/94/c7732096c3f420fbd66fe944cb377188ce799041e8d336aafad1aba32162/strawberry_graphql-0.275.7.tar.gz", hash = "sha256:431c19a084452e5dd015994e9a8cf82fee0dbcc46bcc662e5f74c56d23e73e81", size = 209679, upload-time = "2025-07-14T14:20:00.857Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/78/0b/ee9691938265b99d28717cd9d616617123bed4a7c15818f1e8fabdac6bfc/strawberry_graphql-0.275.2-py3-none-any.whl", hash = "sha256:23dc5bf7aec1e3ff99e54b7b1118d0308ea7f787963e46f79e6fe7df6bd56887", size = 305954, upload-time = "2025-06-22T17:36:30.08Z" },
+    { url = "https://files.pythonhosted.org/packages/56/d6/41e61c14fe041f7b11e09dc0b4c41e06e20900e5c2d8917da94bd13c7a7a/strawberry_graphql-0.275.7-py3-none-any.whl", hash = "sha256:3543a9afe7ce76f475303999660ce6eece2593014277ef97ba73fe201992a360", size = 306324, upload-time = "2025-07-14T14:19:58.244Z" },
 ]
 
 [[package]]
@@ -1813,18 +1813,18 @@ type-checking = [
 
 [package.metadata]
 requires-dist = [
-    { name = "alembic", marker = "extra == 'db-migration'", specifier = "==1.16.2" },
+    { name = "alembic", marker = "extra == 'db-migration'", specifier = "==1.16.4" },
     { name = "argon2-cffi", specifier = "==25.1.0" },
     { name = "beautifulsoup4", extras = ["lxml"], marker = "extra == 'sync'", specifier = "==4.13.4" },
     { name = "click", specifier = ">=8.1.8" },
-    { name = "fastapi", specifier = "==0.115.13" },
+    { name = "fastapi", specifier = "==0.116.1" },
     { name = "httpx", marker = "extra == 'sync'", specifier = "==0.28.1" },
     { name = "pendulum", specifier = "==3.1.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
-    { name = "pydantic-settings", specifier = "==2.10.0" },
+    { name = "pydantic-settings", specifier = "==2.10.1" },
     { name = "pyjwt", specifier = "==2.10.1" },
     { name = "sqlalchemy", specifier = "==2.0.41" },
-    { name = "strawberry-graphql", specifier = "==0.275.2" },
+    { name = "strawberry-graphql", specifier = "==0.275.7" },
     { name = "uvicorn", extras = ["standard"], marker = "extra == 'server'", specifier = ">=0.34.0" },
 ]
 provides-extras = ["db-migration", "sync", "server"]
