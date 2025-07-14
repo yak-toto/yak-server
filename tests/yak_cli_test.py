@@ -135,6 +135,31 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
+def test_cli_admin_already_exists() -> None:
+    # Check admin account creation
+    admin_password = get_random_string(9)
+
+    result = runner.invoke(
+        app,
+        ["db", "admin"],
+        input=f"{admin_password}\n{admin_password}\n",
+    )
+
+    admin_already_exists_message = "Admin already exists"
+
+    assert result.exit_code == 0
+    assert admin_already_exists_message not in result.stdout
+
+    result = runner.invoke(
+        app,
+        ["db", "admin"],
+        input=f"{admin_password}\n{admin_password}\n",
+    )
+
+    assert result.exit_code == 0
+    assert admin_already_exists_message in result.stdout
+
+
 def test_db_migration_cli_with_alembic_present() -> None:
     result = runner.invoke(app, ["db", "migration"])
 

@@ -20,7 +20,7 @@ from yak_server.database.models import (
     TeamModel,
     UserModel,
 )
-from yak_server.helpers.authentication import signup_user
+from yak_server.helpers.authentication import NameAlreadyExistsError, signup_user
 from yak_server.helpers.rules.compute_points import compute_points as compute_points_func
 from yak_server.helpers.settings import get_settings
 from yak_server.v1.helpers.errors import NoAdminUser
@@ -57,7 +57,12 @@ def create_admin(password: str, engine: "Engine") -> None:
     local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
-        _ = signup_user(db, name="admin", first_name="admin", last_name="admin", password=password)
+        try:
+            _ = signup_user(
+                db, name="admin", first_name="admin", last_name="admin", password=password
+            )
+        except NameAlreadyExistsError:
+            print("Admin already exists")
 
 
 class MissingPhaseDuringInitError(Exception):
