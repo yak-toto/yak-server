@@ -1,7 +1,11 @@
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
+from uuid import UUID
+
+from sqlalchemy import update
+from sqlalchemy.dialects.postgresql import insert
 
 from yak_server.database import build_local_session_maker
 from yak_server.database.models import (
@@ -30,6 +34,7 @@ except ImportError:  # pragma: no cover
 if TYPE_CHECKING:
     from fastapi import FastAPI
     from sqlalchemy import Engine
+    from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +72,23 @@ class MissingTeamDuringInitError(Exception):
         super().__init__(f"Error during database initialization: team_code={team_code} not found.")
 
 
+def fetch_team_id(team_code: Optional[str], db: "Session") -> Optional[UUID]:
+    if team_code is None:
+        return None
+
+    team1 = db.query(TeamModel).filter_by(code=team_code).first()
+
+    if team1 is None:
+        raise MissingTeamDuringInitError(team_code)
+
+    return team1.id
+
+
+def fetch_group_id(group_code: str, db: "Session") -> UUID:
+    group = db.query(GroupModel).filter_by(code=group_code).first()
+    return group.id
+
+
 def initialize_database(engine: "Engine", app: "FastAPI") -> None:
     local_session_maker = build_local_session_maker(engine)
 
@@ -75,7 +97,11 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
 
         phases = json.loads(Path(data_folder, "phases.json").read_text(encoding="utf-8"))
 
-        db.add_all(PhaseModel(**phase) for phase in phases)
+        for phase in phases:
+            db.execute(
+                insert(PhaseModel).values(**phase).on_conflict_do_nothing(index_elements=["code"])
+            )
+
         db.flush()
 
         groups = json.loads(Path(data_folder, "groups.json").read_text(encoding="utf-8"))
@@ -90,7 +116,11 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
 
             group["phase_id"] = phase.id
 
-        db.add_all(GroupModel(**group) for group in groups)
+        for group in groups:
+            db.execute(
+                insert(GroupModel).values(**group).on_conflict_do_nothing(index_elements=["code"])
+            )
+
         db.flush()
 
         teams = json.loads(Path(data_folder, "teams.json").read_text(encoding="utf-8"))
@@ -98,46 +128,39 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
         for team in teams:
             team["flag_url"] = ""
 
-            team_instance = TeamModel(**team)
-            db.add(team_instance)
+            db.execute(
+                insert(TeamModel).values(**team).on_conflict_do_nothing(index_elements=["code"])
+            )
+
             db.flush()
 
-            team_instance.flag_url = app.url_path_for(
-                "retrieve_team_flag_by_id",
-                team_id=team_instance.id,
+            team_instance = db.query(TeamModel).filter_by(code=team["code"]).first()
+
+            update_flag_url_stmt = (
+                update(TeamModel)
+                .where(TeamModel.code == team["code"])
+                .values(
+                    flag_url=app.url_path_for("retrieve_team_flag_by_id", team_id=team_instance.id)
+                )
             )
+
+            db.execute(update_flag_url_stmt)
             db.flush()
 
         matches = json.loads(Path(data_folder, "matches.json").read_text(encoding="utf-8"))
 
         for match in matches:
-            team1_code = match.pop("team1_code")
-            team2_code = match.pop("team2_code")
+            match["team1_id"] = fetch_team_id(match.pop("team1_code"), db)
+            match["team2_id"] = fetch_team_id(match.pop("team2_code"), db)
+            match["group_id"] = fetch_group_id(match.pop("group_code"), db)
 
-            if team1_code is None:
-                match["team1_id"] = None
-            else:
-                team1 = db.query(TeamModel).filter_by(code=team1_code).first()
+        for match in matches:
+            db.execute(
+                insert(MatchReferenceModel)
+                .values(**match)
+                .on_conflict_do_nothing(index_elements=["group_id", "index"])
+            )
 
-                if team1 is None:
-                    raise MissingTeamDuringInitError(team1_code)
-
-                match["team1_id"] = team1.id
-
-            if team2_code is None:
-                match["team2_id"] = None
-            else:
-                team2 = db.query(TeamModel).filter_by(code=team2_code).first()
-
-                if team2 is None:
-                    raise MissingTeamDuringInitError(team2_code)
-
-                match["team2_id"] = team2.id
-
-            group = db.query(GroupModel).filter_by(code=match.pop("group_code")).first()
-            match["group_id"] = group.id
-
-        db.add_all(MatchReferenceModel(**match) for match in matches)
         db.flush()
 
         db.commit()

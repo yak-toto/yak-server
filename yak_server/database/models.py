@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 import sqlalchemy as sa
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
-from sqlalchemy import CheckConstraint
+from sqlalchemy import CheckConstraint, UniqueConstraint
 from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.dialects.postgresql import UUID as DB_UUID
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -211,6 +211,8 @@ class MatchReferenceModel(Base):
     team2_id: Mapped[UUID] = mapped_column(DB_UUID(), sa.ForeignKey("team.id"), nullable=True)
 
     bet_type_from_match: Mapped[BetMapping] = mapped_column(SqlEnum(BetMapping), nullable=False)
+
+    __table_args__ = (UniqueConstraint("group_id", "index", name="uq_columns_group_id_index"),)
 
 
 class MatchModel(Base):
