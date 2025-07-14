@@ -1,0 +1,42 @@
+name: ⬆️ Lock File Updator
+
+on:
+  schedule:
+    - cron: '0 14 * * MON' # Every Monday at 2PM UTC
+  workflow_dispatch: # Allow manual runs too
+
+jobs:
+  upgrade-deps:
+    name: Lock File Updator
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.11'
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Upgrade lock file
+        run: |
+          uv lock -U
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "49105931+github-actions[bot]@users.noreply.github.com"
+          git switch -c deps/weekly-upgrade
+          git add uv.lock || true
+          git commit -m "chore(deps): weekly lock file upgrade" || echo "No changes to commit"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: deps/weekly-upgrade
+          title: "chore(deps): Weekly lock file upgrade"
+          body: "This PR upgrades uv lock file."
+          commit-message: "chore(deps): weekly lock file upgrade"
