@@ -37,6 +37,9 @@ jobs:
           git add uv.lock || true
           git commit -m "chore(deps): weekly lock file upgrade" || echo "No changes to commit"
 
+      - name: Rebase
+        uses: martincostello/rebaser@v1
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
