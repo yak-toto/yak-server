@@ -6,7 +6,7 @@ on:
   workflow_dispatch: # Allow manual runs too
 
 jobs:
-  upgrade-deps:
+  upgrade-lock-file:
     name: Lock File Updator
     runs-on: ubuntu-latest
 
@@ -26,24 +26,24 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Upgrade lock file
-        run: |
-          uv lock -U
+        run: uv lock -U
 
       - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "49105931+github-actions[bot]@users.noreply.github.com"
-          git switch -c deps/weekly-upgrade
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C lock_file/weekly-upgrade
           git add uv.lock || true
-          git commit -m "chore(deps): weekly lock file upgrade" || echo "No changes to commit"
+          git commit -m "chore(lock_file): weekly lock file upgrade" || echo "No changes to commit"
 
-      - name: Rebase
-        uses: martincostello/rebaser@v1
+      - name: Push branch
+        run: git push origin HEAD
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          branch: deps/weekly-upgrade
-          title: "chore(deps): Weekly lock file upgrade"
+          branch: lock_file/weekly-upgrade
+          title: "chore(lock_file): Weekly lock file upgrade"
           body: "This PR upgrades uv lock file."
-          commit-message: "chore(deps): weekly lock file upgrade"
+          commit-message: "chore(lock_file): weekly lock file upgrade"
+          base: main
