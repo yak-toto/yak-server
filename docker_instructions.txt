@@ -1,0 +1,6 @@
+docker compose build
+docker compose up
+
+docker exec -it yak-server-web-1 yak db create
+docker exec -it yak-server-web-1 yak db init
+docker exec -it yak-server-web-1 yak db admin

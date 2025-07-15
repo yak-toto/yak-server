@@ -1,0 +1,32 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_VERSION: "0.52.0"
+        BUILD_DATE: "1970-01-01T00:00:00Z" # fake build date to build image
+        COMPETITION: world_cup_2022
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: yaktoto
+      ADMIN_PASSWORD: Admin1212
+
+  db:
+    image: postgres:17.5-alpine3.22
+    environment:
+      POSTGRES_DB: yaktoto
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
