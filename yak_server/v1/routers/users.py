@@ -1,12 +1,13 @@
 import logging
-from typing import Annotated
+from typing import Annotated, Optional
+from uuid import uuid4
 
 import pendulum
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
-from yak_server.database.models import UserModel
+from yak_server.database.models import RefreshTokenModel, UserModel
 from yak_server.helpers.authentication import (
     NameAlreadyExistsError,
     encode_bearer_token,
@@ -37,6 +38,7 @@ from yak_server.v1.models.users import (
     LoginOut,
     ModifyUserIn,
     PasswordRequirementsOut,
+    RefreshTokenOut,
     SignupIn,
     SignupOut,
 )
@@ -117,13 +119,38 @@ def login(
     login_in: LoginIn,
     db: Annotated[Session, Depends(get_db)],
     settings: Annotated[Settings, Depends(get_settings)],
+    response: Response,
 ) -> GenericOut[LoginOut]:
     user = UserModel.authenticate(db, login_in.name, login_in.password)
 
     if not user:
         raise InvalidCredentials
 
+    refresh_token = str(uuid4())
+
+    db.add(
+        RefreshTokenModel(
+            user_id=user.id,
+            expiration=(
+                pendulum.now("UTC")
+                + pendulum.duration(seconds=settings.jwt_refresh_expiration_time)
+            ),
+            token=refresh_token,
+        )
+    )
+    db.commit()
+
     logger.info(logged_in_successfully(user.name))
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        max_age=settings.jwt_refresh_expiration_time,
+        secure=True,
+        samesite="lax",
+        path="/",
+    )
 
     return GenericOut(
         result=LoginOut(
@@ -136,6 +163,67 @@ def login(
             ),
         ),
     )
+
+
+@router.post(
+    "/refresh",
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_409_CONFLICT: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+    },
+)
+def refresh(
+    db: Annotated[Session, Depends(get_db)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    refresh_token: Annotated[Optional[str], Cookie()],
+    response: Response,
+) -> GenericOut[RefreshTokenOut]:
+    refresh_token_found = db.query(RefreshTokenModel).filter_by(token=refresh_token).first()
+
+    if refresh_token_found is None:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    if pendulum.now("UTC") > refresh_token_found.expiration:
+        raise HTTPException(status_code=401, detail="Refresh token expired")
+
+    user_id = refresh_token_found.user_id
+
+    # Issue new access token
+    new_access_token = encode_bearer_token(
+        sub=user_id,
+        expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
+        secret_key=settings.jwt_secret_key,
+    )
+
+    # Rotate refresh token
+    new_refresh_token = str(uuid4())
+
+    db.add(
+        RefreshTokenModel(
+            user_id=user_id,
+            expiration=(
+                pendulum.now("UTC")
+                + pendulum.duration(seconds=settings.jwt_refresh_expiration_time)
+            ),
+            token=new_refresh_token,
+        )
+    )
+    db.delete(refresh_token_found)
+    db.commit()
+
+    response.set_cookie(
+        key="refresh_token",
+        value=new_refresh_token,
+        httponly=True,
+        max_age=settings.jwt_refresh_expiration_time,
+        secure=True,
+        samesite="lax",
+        path="/",
+    )
+
+    return GenericOut(result=RefreshTokenOut(access_token=new_access_token))
 
 
 @router.patch(

@@ -33,12 +33,18 @@ def write_env_file(env: dict[str, Any], filename: str) -> None:
     )
 
 
-def write_app_env_file(debug: bool, jwt_expiration_time: int, competition: str) -> None:  # noqa: FBT001
+def write_app_env_file(
+    debug: bool,  # noqa: FBT001
+    jwt_expiration_time: int,
+    jwt_refresh_expiration_time: int,
+    competition: str,
+) -> None:
     env: dict[str, Any] = {}
 
     env["DEBUG"] = 1 if debug else 0
 
     env["JWT_EXPIRATION_TIME"] = jwt_expiration_time
+    env["JWT_REFRESH_EXPIRATION_TIME"] = jwt_refresh_expiration_time
     env["JWT_SECRET_KEY"] = secrets.token_hex(128)
 
     # Select competition to load associated rules
@@ -102,7 +108,8 @@ def init_env(  # noqa: PLR0913, PLR0917
     competition: str,
     database: str,
     jwt_expiration: int,
+    jwt_refresh_expiration: int,
     port: int,
 ) -> None:
-    write_app_env_file(debug, jwt_expiration, competition)
+    write_app_env_file(debug, jwt_expiration, jwt_refresh_expiration, competition)
     write_db_env_file(host, db_username, password, port, database)

@@ -38,6 +38,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
         ["db", "init"],
         env={
             "JWT_EXPIRATION_TIME": "1800",
+            "JWT_REFRESH_EXPIRATION_TIME": "1800",
             "JWT_SECRET_KEY": get_random_string(128),
             "COMPETITION": "world_cup_2022",
             "DATA_FOLDER": data_folder,

@@ -132,6 +132,14 @@ def make_env_typer() -> click.Group:
         show_default=True,
         help="JWT expiration time in seconds",
     )
+    @click.option(
+        "--jwt-refresh-expiration",
+        "-jrf",
+        prompt=True,
+        default=3600,
+        show_default=True,
+        help="JWT refresh expiration time in seconds",
+    )
     @click.option("--competition", "-c", prompt=True, help="Competition name", required=True)
     def all(  # noqa: A001, PLR0913
         *,
@@ -142,10 +150,21 @@ def make_env_typer() -> click.Group:
         port: int,
         database: str,
         jwt_expiration: int,
+        jwt_refresh_expiration: int,
         competition: str,
     ) -> None:
         """Build the env files you need to start the server."""
-        init_env(debug, host, user, password, competition, database, jwt_expiration, port)
+        init_env(
+            debug,
+            host,
+            user,
+            password,
+            competition,
+            database,
+            jwt_expiration,
+            jwt_refresh_expiration,
+            port,
+        )
 
     @env_app.command()
     @click.option(
@@ -184,10 +203,20 @@ def make_env_typer() -> click.Group:
         show_default=True,
         help="JWT expiration time in seconds",
     )
+    @click.option(
+        "--jwt-refresh-expiration",
+        "-jrf",
+        prompt=True,
+        default=3600,
+        show_default=True,
+        help="JWT refresh expiration time in seconds",
+    )
     @click.option("--competition", "-c", prompt=True, help="Competition name", required=True)
-    def app(*, debug: bool, jwt_expiration: int, competition: str) -> None:
+    def app(
+        *, debug: bool, jwt_expiration: int, jwt_refresh_expiration: int, competition: str
+    ) -> None:
         """Build the env files you need to setup application."""
-        write_app_env_file(debug, jwt_expiration, competition)
+        write_app_env_file(debug, jwt_expiration, jwt_refresh_expiration, competition)
 
     return env_app
 

@@ -1,9 +1,8 @@
 from typing import Any
 from uuid import UUID
 
+import jwt
 import pendulum
-from jwt import decode as jwt_decode
-from jwt import encode as jwt_encode
 from sqlalchemy.orm import Session
 
 from yak_server.database.models import MatchModel, MatchReferenceModel, ScoreBetModel, UserModel
@@ -18,7 +17,7 @@ def encode_bearer_token(
     expiration_time: pendulum.Duration,
     secret_key: str,
 ) -> str:
-    return jwt_encode(
+    return jwt.encode(
         {
             "sub": str(sub),
             "nbf": pendulum.now("UTC") - pendulum.duration(seconds=3),
@@ -30,7 +29,7 @@ def encode_bearer_token(
 
 
 def decode_bearer_token(token: str, secret_key: str) -> Any:  # noqa: ANN401
-    return jwt_decode(token, secret_key, algorithms=["HS512"])
+    return jwt.decode(token, secret_key, algorithms=["HS512"])
 
 
 class NameAlreadyExistsError(Exception):
