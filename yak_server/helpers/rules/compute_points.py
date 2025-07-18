@@ -4,6 +4,7 @@ from itertools import chain
 from typing import TYPE_CHECKING
 from uuid import UUID
 
+from fastapi import status
 from pydantic import BaseModel
 from sqlalchemy import and_
 
@@ -155,7 +156,9 @@ def winner_from_user(db: "Session", user: UserModel) -> set[UUID]:
     }
 
 
-def compute_points(db: "Session", admin: UserModel, rule_config: RuleComputePoints) -> None:
+def compute_points(
+    db: "Session", admin: UserModel, rule_config: RuleComputePoints
+) -> tuple[int, str]:
     results = compute_results_for_score_bet(db, admin)
 
     other_users = db.query(UserModel).filter(UserModel.name != "admin")
@@ -223,3 +226,5 @@ def compute_points(db: "Session", admin: UserModel, rule_config: RuleComputePoin
         user.points += 200 * user.number_winner_guess
 
     db.commit()
+
+    return status.HTTP_200_OK, ""
