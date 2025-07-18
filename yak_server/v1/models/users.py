@@ -43,6 +43,12 @@ class LoginOut(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class RefreshTokenOut(BaseModel):
+    access_token: str
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class CurrentUserOut(BaseModel):
     id: UUID4
     name: str

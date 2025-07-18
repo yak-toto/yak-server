@@ -1,12 +1,17 @@
-from typing import Any
+from typing import Any, Optional
 from uuid import UUID
 
+import jwt
 import pendulum
-from jwt import decode as jwt_decode
-from jwt import encode as jwt_encode
 from sqlalchemy.orm import Session
 
-from yak_server.database.models import MatchModel, MatchReferenceModel, ScoreBetModel, UserModel
+from yak_server.database.models import (
+    MatchModel,
+    MatchReferenceModel,
+    RefreshTokenModel,
+    ScoreBetModel,
+    UserModel,
+)
 
 from .errors import name_already_exists_message
 from .group_position import create_group_position
@@ -18,7 +23,7 @@ def encode_bearer_token(
     expiration_time: pendulum.Duration,
     secret_key: str,
 ) -> str:
-    return jwt_encode(
+    return jwt.encode(
         {
             "sub": str(sub),
             "nbf": pendulum.now("UTC") - pendulum.duration(seconds=3),
@@ -30,7 +35,7 @@ def encode_bearer_token(
 
 
 def decode_bearer_token(token: str, secret_key: str) -> Any:  # noqa: ANN401
-    return jwt_decode(token, secret_key, algorithms=["HS512"])
+    return jwt.decode(token, secret_key, algorithms=["HS512"])
 
 
 class NameAlreadyExistsError(Exception):
@@ -78,3 +83,23 @@ def signup_user(
     db.commit()
 
     return user
+
+
+def add_refresh_token(
+    db: Session,
+    user_id: UUID,
+    expiration_time: pendulum.Duration,
+    remove_token: Optional[RefreshTokenModel] = None,
+) -> UUID:
+    new_refresh_token = RefreshTokenModel(
+        user_id=user_id, expiration=pendulum.now("UTC") + expiration_time
+    )
+
+    db.add(new_refresh_token)
+
+    if remove_token is not None:
+        db.delete(remove_token)
+
+    db.commit()
+
+    return new_refresh_token.id

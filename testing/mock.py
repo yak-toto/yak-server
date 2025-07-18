@@ -20,6 +20,7 @@ class MockSettings:
         *,
         jwt_secret_key: Optional[str] = None,
         jwt_expiration_time: Optional[int] = None,
+        jwt_refresh_expiration_time: Optional[int] = None,
         data_folder_relative: Optional[str] = None,
         lock_datetime_shift: Optional[pendulum.Duration] = None,
         rules: Optional["Rules"] = None,
@@ -33,6 +34,7 @@ class MockSettings:
     ) -> None:
         self.jwt_secret_key = jwt_secret_key
         self.jwt_expiration_time = jwt_expiration_time
+        self.jwt_refresh_expiration_time = jwt_refresh_expiration_time
 
         self.data_folder = (
             get_resources_path(data_folder_relative) if data_folder_relative is not None else None

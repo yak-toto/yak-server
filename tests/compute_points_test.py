@@ -97,6 +97,7 @@ def app_and_rules_for_compute_points(
 
     app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=100,
+        jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(100),
         lock_datetime_shift=pendulum.duration(seconds=10),
         rules=rules,

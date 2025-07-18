@@ -5,8 +5,9 @@ from uuid import UUID, uuid4
 import sqlalchemy as sa
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
-from sqlalchemy import CheckConstraint, UniqueConstraint
+from sqlalchemy import CheckConstraint, DateTime, UniqueConstraint
 from sqlalchemy import Enum as SqlEnum
+from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.dialects.postgresql import UUID as DB_UUID
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -84,6 +85,14 @@ class UserModel(Base):
         default=0,
     )
 
+    refresh_tokens: Mapped[list["RefreshTokenModel"]] = relationship(
+        "RefreshTokenModel",
+        back_populates="user",
+        lazy="dynamic",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
+
     matches: Mapped[list["MatchModel"]] = relationship(
         "MatchModel",
         back_populates="user",
@@ -126,6 +135,16 @@ class UserModel(Base):
 
     def change_password(self, new_password: str) -> None:
         self.password = ph.hash(new_password)
+
+
+class RefreshTokenModel(Base):
+    __tablename__ = "refresh_token"
+    id: Mapped[UUID] = mapped_column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(
+        DB_UUID(), sa.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
+    user: Mapped[UserModel] = relationship("UserModel", back_populates="refresh_tokens")
+    expiration: Mapped[DateTime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
 
 
 class ScoreBetModel(Base):
