@@ -13,6 +13,7 @@ PendulumDateTime = Annotated[pendulum.DateTime, PlainValidator(pendulum.parse)]
 class Settings(BaseSettings):
     jwt_secret_key: str
     jwt_expiration_time: int
+    jwt_refresh_expiration_time: int
     competition: str
     lock_datetime: PendulumDateTime
     data_folder: str

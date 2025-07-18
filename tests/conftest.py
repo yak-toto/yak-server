@@ -107,6 +107,19 @@ def _app(
 
 
 @pytest.fixture
+def _app_production(
+    production_app_session: "FastAPI", engine_for_test_with_delete: "Engine"
+) -> Generator["FastAPI", None, None]:
+    # Clean database before running test
+    delete_database(engine_for_test_with_delete, debug=True)
+
+    yield production_app_session
+
+    # Clean database after running test
+    delete_database(engine_for_test_with_delete, debug=True)
+
+
+@pytest.fixture
 def app_with_profiler() -> Generator["FastAPI", None, None]:
     os.environ["DEBUG"] = "1"
 
@@ -114,6 +127,7 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
 
     app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=100,
+        jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
         lock_datetime_shift=pendulum.duration(minutes=10),
     )
@@ -127,6 +141,7 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
 def app_with_valid_jwt_config(_app: "FastAPI") -> Generator["FastAPI", None, None]:
     _app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=100,
+        jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
         lock_datetime_shift=pendulum.duration(minutes=10),
     )
@@ -137,9 +152,40 @@ def app_with_valid_jwt_config(_app: "FastAPI") -> Generator["FastAPI", None, Non
 
 
 @pytest.fixture
+def app_with_valid_jwt_config_production(
+    _app_production: "FastAPI",
+) -> Generator["FastAPI", None, None]:
+    _app_production.dependency_overrides[get_settings] = MockSettings(
+        jwt_expiration_time=100,
+        jwt_refresh_expiration_time=200,
+        jwt_secret_key=get_random_string(15),
+        lock_datetime_shift=pendulum.duration(minutes=10),
+    )
+
+    yield _app_production
+
+    _app_production.dependency_overrides.clear()
+
+
+@pytest.fixture
 def app_with_null_jwt_expiration_time(_app: "FastAPI") -> Generator["FastAPI", None, None]:
     _app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=0,
+        jwt_refresh_expiration_time=200,
+        jwt_secret_key=get_random_string(15),
+        lock_datetime_shift=pendulum.duration(minutes=10),
+    )
+
+    yield _app
+
+    _app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def app_with_null_jwt_refresh_expiration_time(_app: "FastAPI") -> Generator["FastAPI", None, None]:
+    _app.dependency_overrides[get_settings] = MockSettings(
+        jwt_expiration_time=100,
+        jwt_refresh_expiration_time=3,
         jwt_secret_key=get_random_string(15),
         lock_datetime_shift=pendulum.duration(minutes=10),
     )
@@ -153,6 +199,7 @@ def app_with_null_jwt_expiration_time(_app: "FastAPI") -> Generator["FastAPI", N
 def app_with_lock_datetime_in_past(_app: "FastAPI") -> Generator["FastAPI", None, None]:
     _app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=100,
+        jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
         lock_datetime_shift=pendulum.duration(seconds=-10),
     )
@@ -166,6 +213,7 @@ def app_with_lock_datetime_in_past(_app: "FastAPI") -> Generator["FastAPI", None
 def app_with_empty_rules(_app: "FastAPI") -> Generator["FastAPI", None, None]:
     _app.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=100,
+        jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
         lock_datetime_shift=pendulum.duration(seconds=10),
         rules=Rules(),

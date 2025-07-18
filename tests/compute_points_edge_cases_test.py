@@ -30,6 +30,7 @@ def app_with_rules_and_score_board_config(
 ) -> Generator["FastAPI", None, None]:
     app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
         jwt_expiration_time=100,
+        jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(100),
         lock_datetime_shift=pendulum.duration(minutes=10),
         rules=Rules(

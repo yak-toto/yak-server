@@ -46,6 +46,22 @@ class NameAlreadyExists(HTTPException):
         )
 
 
+class InvalidRefreshToken(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
+        )
+
+
+class ExpiredRefreshToken(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token expired",
+        )
+
+
 class BetNotFound(HTTPException):
     def __init__(self, bet_id: UUID) -> None:
         super().__init__(
