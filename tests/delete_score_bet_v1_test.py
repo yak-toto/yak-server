@@ -43,9 +43,11 @@ def test_delete_score_bet(
     assert response_signup.status_code == HTTPStatus.CREATED
 
     # Fetch all bets and get the ids
-    token = response_signup.json()["result"]["token"]
+    access_token = response_signup.json()["result"]["access_token"]
 
-    response_all_bets = client.get("/api/v1/bets", headers={"Authorization": f"Bearer {token}"})
+    response_all_bets = client.get(
+        "/api/v1/bets", headers={"Authorization": f"Bearer {access_token}"}
+    )
 
     assert response_all_bets.status_code == HTTPStatus.OK
 
@@ -54,7 +56,7 @@ def test_delete_score_bet(
     # Retrieve one score bet
     response_get_score_bet = client.get(
         f"/api/v1/score_bets/{bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_get_score_bet.status_code == HTTPStatus.OK
@@ -62,7 +64,7 @@ def test_delete_score_bet(
     # Delete one score bet and compare it to the GET response
     response_delete_score_bet = client.delete(
         f"/api/v1/score_bets/{bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_delete_score_bet.status_code == HTTPStatus.OK
@@ -71,7 +73,7 @@ def test_delete_score_bet(
     # Try to delete a second times and error
     response_delete_score_bet_second_times = client.delete(
         f"/api/v1/score_bets/{bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_delete_score_bet_second_times.status_code == HTTPStatus.NOT_FOUND
@@ -90,7 +92,7 @@ def test_delete_score_bet(
 
     response_delete_locked_score_bet = client.delete(
         f"/api/v1/score_bets/{bet2_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_delete_locked_score_bet.status_code == HTTPStatus.UNAUTHORIZED

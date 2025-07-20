@@ -31,7 +31,7 @@ def test_valid_auth(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_signup.status_code == HTTPStatus.CREATED
     assert response_signup.json() == {
         "ok": True,
-        "result": {"id": ANY, "name": user_name, "token": ANY},
+        "result": {"id": ANY, "name": user_name, "access_token": ANY},
     }
 
     # login test
@@ -42,10 +42,10 @@ def test_valid_auth(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_login.status_code == HTTPStatus.CREATED
     assert response_login.json() == {
         "ok": True,
-        "result": {"id": ANY, "name": user_name, "token": ANY},
+        "result": {"id": ANY, "name": user_name, "access_token": ANY},
     }
 
-    auth_token = response_login.json()["result"]["token"]
+    auth_token = response_login.json()["result"]["access_token"]
 
     # current user tests
     response_current_user = client.get(
@@ -80,7 +80,7 @@ def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_signup.status_code == HTTPStatus.CREATED
     assert response_signup.json() == {
         "ok": True,
-        "result": {"id": ANY, "name": user_name, "token": ANY},
+        "result": {"id": ANY, "name": user_name, "access_token": ANY},
     }
 
     # Try to signup with the same user name
@@ -163,7 +163,7 @@ def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
         },
     )
 
-    auth_token = response_signup.json()["result"]["token"]
+    auth_token = response_signup.json()["result"]["access_token"]
 
     response_get_all_bets = client.get(
         "/api/v1/bets",
@@ -173,7 +173,7 @@ def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_get_all_bets.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Invalid token, authentication required",
+        "description": "Invalid access token, authentication required",
     }
 
     response_get_all_bets_with_cropped_token = client.get(
@@ -185,7 +185,7 @@ def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_get_all_bets_with_cropped_token.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Invalid token, authentication required",
+        "description": "Invalid access token, authentication required",
     }
 
 
@@ -207,7 +207,7 @@ def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI") -> None:
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    auth_token = response_signup.json()["result"]["token"]
+    auth_token = response_signup.json()["result"]["access_token"]
 
     response_current_user = client.get(
         "/api/v1/users/current",
@@ -218,7 +218,7 @@ def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI") -> None:
     assert response_current_user.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Expired token, re-authentication required",
+        "description": "Expired access token, re-authentication required",
     }
 
 

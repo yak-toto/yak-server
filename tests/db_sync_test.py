@@ -392,7 +392,7 @@ def test_db_sync(
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    token = response_signup.json()["result"]["token"]
+    access_token = response_signup.json()["result"]["access_token"]
 
     # Synchronize admin bets with official results
     monkeypatch.setattr(
@@ -405,7 +405,9 @@ def test_db_sync(
     assert result.exit_code == 0
 
     # Fetch all bets and check
-    response_all_bets = client.get("/api/v1/bets", headers={"Authorization": f"Bearer {token}"})
+    response_all_bets = client.get(
+        "/api/v1/bets", headers={"Authorization": f"Bearer {access_token}"}
+    )
 
     assert response_all_bets.status_code == HTTPStatus.OK
 

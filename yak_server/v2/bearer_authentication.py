@@ -25,9 +25,9 @@ def _authentify(
     if len(auth_headers) != NUMBER_ELEMENTS_IN_AUTHORIZATION or auth_headers[0] != "Bearer":
         return InvalidToken()
 
-    token = auth_headers[1]
+    access_token = auth_headers[1]
     try:
-        data = decode_bearer_token(token, jwt_secret_key)
+        data = decode_bearer_token(access_token, jwt_secret_key)
     except ExpiredSignatureError:
         return ExpiredToken()
     except PyJWTError:

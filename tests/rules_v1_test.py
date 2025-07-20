@@ -29,7 +29,7 @@ def test_rule(app_with_empty_rules: "FastAPI") -> None:
 
     response_execute_rule = client.post(
         f"/api/v1/rules/{invalid_rule_id}",
-        headers={"Authorization": f"Bearer {response_signup.json()['result']['token']}"},
+        headers={"Authorization": f"Bearer {response_signup.json()['result']['access_token']}"},
     )
 
     assert response_execute_rule.status_code == HTTPStatus.NOT_FOUND

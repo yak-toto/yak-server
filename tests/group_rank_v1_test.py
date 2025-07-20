@@ -40,11 +40,11 @@ def test_group_rank(
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    token = response_signup.json()["result"]["token"]
+    access_token = response_signup.json()["result"]["access_token"]
 
     response_all_bets = client.get(
         "/api/v1/bets",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_all_bets.status_code == HTTPStatus.OK
@@ -54,7 +54,7 @@ def test_group_rank(
     for bet, new_score in zip(response_all_bets.json()["result"]["score_bets"], new_scores):
         response_patch_bet = client.patch(
             f"/api/v1/score_bets/{bet['id']}",
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": f"Bearer {access_token}"},
             json={
                 "team1": {"score": new_score[0]},
                 "team2": {"score": new_score[1]},
@@ -65,7 +65,7 @@ def test_group_rank(
 
     response_group_result_response = client.get(
         "/api/v1/bets/groups/rank/A",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_group_result_response.status_code == HTTPStatus.OK
@@ -125,7 +125,7 @@ def test_group_rank(
 
     response_group_rank_with_invalid_code = client.get(
         f"/api/v1/bets/groups/rank/{invalid_group_code}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_group_rank_with_invalid_code.json() == {
@@ -136,7 +136,7 @@ def test_group_rank(
 
     response_patch_bet = client.patch(
         f"/api/v1/score_bets/{response_all_bets.json()['result']['score_bets'][0]['id']}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "team1": {"score": 6},
             "team2": {"score": 5},
@@ -147,7 +147,7 @@ def test_group_rank(
 
     response_group_rank_response = client.get(
         "/api/v1/bets/groups/rank/A",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_group_rank_response.status_code == HTTPStatus.OK
@@ -204,7 +204,7 @@ def test_group_rank(
 
     response_patch_bet = client.patch(
         f"/api/v1/score_bets/{response_all_bets.json()['result']['score_bets'][1]['id']}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "team1": {"score": None},
             "team2": {"score": 5},
@@ -215,7 +215,7 @@ def test_group_rank(
 
     response_group_rank_response = client.get(
         "/api/v1/bets/groups/rank/A",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_group_rank_response.json()["result"]["group_rank"] == [
@@ -275,7 +275,7 @@ def test_group_rank(
 
     response_patch_bet = client.patch(
         f"/api/v1/score_bets/{response_all_bets.json()['result']['score_bets'][2]['id']}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "team1": {"score": None},
             "team2": {"score": None},
@@ -286,7 +286,7 @@ def test_group_rank(
 
     response_group_rank_response = client.get(
         "/api/v1/bets/groups/rank/A",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_group_rank_response.json()["result"]["group_rank"] == [
@@ -342,7 +342,7 @@ def test_group_rank(
 
     response_patch_bet = client.patch(
         f"/api/v1/score_bets/{response_all_bets.json()['result']['score_bets'][0]['id']}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "team1": {"score": 1},
             "team2": {"score": None},
@@ -353,7 +353,7 @@ def test_group_rank(
 
     response_group_rank_response = client.get(
         "/api/v1/bets/groups/rank/A",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert sorted(
@@ -416,7 +416,7 @@ def test_group_rank(
 
     response_patch_bet = client.patch(
         f"/api/v1/score_bets/{response_all_bets.json()['result']['score_bets'][0]['id']}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "team1": {"score": None},
             "team2": {"score": None},
@@ -427,7 +427,7 @@ def test_group_rank(
 
     response_group_rank_response_1 = client.get(
         "/api/v1/bets/groups/rank/A",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert sorted(

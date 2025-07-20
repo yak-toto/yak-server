@@ -46,7 +46,7 @@ def test_binary_bet(
                     ) {
                         __typename
                         ... on UserWithToken {
-                            token
+                            accessToken
                         }
                         ... on UserNameAlreadyExists {
                             message
@@ -73,7 +73,7 @@ def test_binary_bet(
                     loginResult(userName: $userName, password: $password) {
                         __typename
                         ... on UserWithToken {
-                            token
+                            accessToken
                             binaryBets {
                                 id
                             }
@@ -92,7 +92,7 @@ def test_binary_bet(
     )
 
     assert response_login.json()["data"]["loginResult"]["__typename"] == "UserWithToken"
-    token = response_login.json()["data"]["loginResult"]["token"]
+    access_token = response_login.json()["data"]["loginResult"]["accessToken"]
     bet_id = response_login.json()["data"]["loginResult"]["binaryBets"][0]["id"]
 
     mutation_modify_binary_bet = """
@@ -137,7 +137,7 @@ def test_binary_bet(
 
     response_modify_binary_bet = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "query": mutation_modify_binary_bet,
             "variables": {"id": bet_id, "isOneWon": is_one_won},
@@ -176,7 +176,7 @@ def test_binary_bet(
         "data": {
             "modifyBinaryBetResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token, authentication required",
+                "message": "Invalid access token, authentication required",
             }
         }
     }
@@ -186,7 +186,7 @@ def test_binary_bet(
 
     response_modify_binary_bet_with_invalid_id = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "query": mutation_modify_binary_bet,
             "variables": {"id": invalid_bet_id, "isOneWon": True},
@@ -209,7 +209,7 @@ def test_binary_bet(
 
     response_modify_locked_binary_bet = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "query": mutation_modify_binary_bet,
             "variables": {"id": bet_id, "isOneWon": True},
@@ -266,7 +266,7 @@ def test_binary_bet(
 
     response_retrieve_binary_bet = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"query": query_binary_bet, "variables": {"id": bet_id}},
     )
 
@@ -293,7 +293,7 @@ def test_binary_bet(
 
     response_binary_with_invalid_id = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"query": query_binary_bet, "variables": {"id": invalid_bet_id}},
     )
 
@@ -315,7 +315,7 @@ def test_binary_bet(
         "data": {
             "binaryBetResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token, authentication required",
+                "message": "Invalid access token, authentication required",
             },
         },
     }

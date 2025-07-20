@@ -42,7 +42,7 @@ def test_group_rank_and_modify_score_bet(
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    authentication_token = response_signup.json()["result"]["token"]
+    authentication_token = response_signup.json()["result"]["access_token"]
 
     # Retrieve all the bets
     response_all_bets = client.get(

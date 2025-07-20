@@ -44,7 +44,7 @@ def test_group(
         },
     )
 
-    auth_token = response_signup.json()["result"]["token"]
+    auth_token = response_signup.json()["result"]["access_token"]
 
     # Check all GET matches response
     expected_group = {"id": ANY, "code": "A", "phase": {"id": ANY}, "description": "Groupe A"}

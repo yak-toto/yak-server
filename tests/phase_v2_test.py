@@ -47,7 +47,7 @@ def test_phase(
                     ) {
                         __typename
                         ... on UserWithToken {
-                            token
+                            accessToken
                         }
                         ... on UserNameAlreadyExists {
                             message
@@ -66,7 +66,7 @@ def test_phase(
 
     assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
 
-    token = response_signup.json()["data"]["signupResult"]["token"]
+    access_token = response_signup.json()["data"]["signupResult"]["accessToken"]
 
     # Check retrieve all phases
     query_all_phases = """
@@ -140,7 +140,9 @@ def test_phase(
     """
 
     response_all_phases = client.post(
-        "/api/v2", headers={"Authorization": f"Bearer {token}"}, json={"query": query_all_phases}
+        "/api/v2",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={"query": query_all_phases},
     )
 
     assert response_all_phases.json() == {
@@ -256,7 +258,7 @@ def test_phase(
         "data": {
             "allPhasesResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token, authentication required",
+                "message": "Invalid access token, authentication required",
             }
         }
     }
@@ -287,7 +289,7 @@ def test_phase(
 
     response_phase_by_id = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "query": query_phase_by_id,
             "variables": {"phaseId": phase_id},
@@ -310,7 +312,7 @@ def test_phase(
 
     response_phase_with_invalid_id = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "query": query_phase_by_id,
             "variables": {"phaseId": invalid_phase_id},
@@ -340,7 +342,7 @@ def test_phase(
         "data": {
             "phaseByIdResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token, authentication required",
+                "message": "Invalid access token, authentication required",
             }
         }
     }
@@ -370,7 +372,7 @@ def test_phase(
 
     response_phase_by_code = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"query": query_phase_by_code, "variables": {"phaseCode": phase_code}},
     )
 
@@ -390,7 +392,7 @@ def test_phase(
 
     response_phase_with_invalid_code = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"query": query_phase_by_code, "variables": {"phaseCode": invalid_phase_code}},
     )
 
@@ -414,7 +416,7 @@ def test_phase(
         "data": {
             "phaseByCodeResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token, authentication required",
+                "message": "Invalid access token, authentication required",
             }
         }
     }

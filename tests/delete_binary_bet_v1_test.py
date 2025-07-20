@@ -43,9 +43,11 @@ def test_delete_binary_bet(
     assert response_signup.status_code == HTTPStatus.CREATED
 
     # Fetch all bets and get the binary bet id
-    token = response_signup.json()["result"]["token"]
+    access_token = response_signup.json()["result"]["access_token"]
 
-    response_all_bets = client.get("/api/v1/bets", headers={"Authorization": f"Bearer {token}"})
+    response_all_bets = client.get(
+        "/api/v1/bets", headers={"Authorization": f"Bearer {access_token}"}
+    )
 
     assert response_all_bets.status_code == HTTPStatus.OK
 
@@ -58,7 +60,7 @@ def test_delete_binary_bet(
 
     response_delete_locked_binary_bet = client.delete(
         f"/api/v1/binary_bets/{binary_bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_delete_locked_binary_bet.status_code == HTTPStatus.UNAUTHORIZED
@@ -75,7 +77,7 @@ def test_delete_binary_bet(
     # Retrieve one binary bet
     response_get_binary_bet = client.get(
         f"/api/v1/binary_bets/{binary_bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_get_binary_bet.status_code == HTTPStatus.OK
@@ -83,7 +85,7 @@ def test_delete_binary_bet(
     # Delete one binary bet and compare it to the GET response
     response_delete_binary_bet = client.delete(
         f"/api/v1/binary_bets/{binary_bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_delete_binary_bet.status_code == HTTPStatus.OK
@@ -92,7 +94,7 @@ def test_delete_binary_bet(
     # Try to delete a second times and error
     response_delete_binary_bet_second_times = client.delete(
         f"/api/v1/binary_bets/{binary_bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_delete_binary_bet_second_times.status_code == HTTPStatus.NOT_FOUND

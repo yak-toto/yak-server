@@ -44,7 +44,7 @@ def test_create_binary_bet(
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    token = response_signup.json()["result"]["token"]
+    access_token = response_signup.json()["result"]["access_token"]
 
     # Fetch all teams
     response_all_teams = client.get("/api/v1/teams")
@@ -56,7 +56,9 @@ def test_create_binary_bet(
     is_one_won = True
 
     # Fetch all groups
-    response_all_groups = client.get("/api/v1/groups", headers={"Authorization": f"Bearer {token}"})
+    response_all_groups = client.get(
+        "/api/v1/groups", headers={"Authorization": f"Bearer {access_token}"}
+    )
 
     assert response_all_groups.status_code == HTTPStatus.OK
 
@@ -65,7 +67,7 @@ def test_create_binary_bet(
     # Create one binary bet
     response_create_binary_bet = client.post(
         "/api/v1/binary_bets",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "is_one_won": is_one_won,
             "index": 1,
@@ -104,7 +106,7 @@ def test_create_binary_bet(
     # Check GET after POST
     response_retrieve_one_bet = client.get(
         f"/api/v1/binary_bets/{binary_bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_retrieve_one_bet.status_code == HTTPStatus.OK
@@ -115,7 +117,7 @@ def test_create_binary_bet(
 
     response_create_binary_bet_with_group_id = client.post(
         "/api/v1/binary_bets",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "index": 1,
             "team1": {"id": team1["id"]},
@@ -136,7 +138,7 @@ def test_create_binary_bet(
 
     response_create_binary_bet_with_team1_id = client.post(
         "/api/v1/binary_bets",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "index": 1,
             "team1": {"id": invalid_team1_id},
@@ -157,7 +159,7 @@ def test_create_binary_bet(
 
     response_create_binary_bet_with_team2_id = client.post(
         "/api/v1/binary_bets",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "index": 1,
             "team1": {"id": team1["id"]},
@@ -180,7 +182,7 @@ def test_create_binary_bet(
 
     response_create_locked_binary_bet = client.post(
         "/api/v1/binary_bets",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "index": 1,
             "team1": {"id": team1["id"]},

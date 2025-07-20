@@ -20,9 +20,9 @@ from .errors import (
 security = HTTPBearer(auto_error=False)
 
 
-def user_from_token(db: Session, secret_key: str, token: str) -> UserModel:
+def user_from_token(db: Session, secret_key: str, access_token: str) -> UserModel:
     try:
-        data = decode_bearer_token(token, secret_key)
+        data = decode_bearer_token(access_token, secret_key)
     except ExpiredSignatureError as exc:
         raise ExpiredToken from exc
     except PyJWTError as exc:
@@ -36,22 +36,22 @@ def user_from_token(db: Session, secret_key: str, token: str) -> UserModel:
 
 
 def get_current_user(
-    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    access_token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     db: Annotated[Session, Depends(get_db)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> UserModel:
-    if token is None:
+    if access_token is None:
         raise InvalidToken
 
-    return user_from_token(db, settings.jwt_secret_key, token.credentials)
+    return user_from_token(db, settings.jwt_secret_key, access_token.credentials)
 
 
 def get_admin_user(
-    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    access_token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     db: Annotated[Session, Depends(get_db)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> UserModel:
-    user = get_current_user(token, db, settings)
+    user = get_current_user(access_token, db, settings)
 
     if user.name != "admin":
         raise UnauthorizedAccessToAdminAPI

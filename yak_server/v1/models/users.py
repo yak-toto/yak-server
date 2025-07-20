@@ -13,7 +13,7 @@ class SignupIn(BaseModel):
 class SignupOut(BaseModel):
     id: UUID4
     name: str
-    token: str
+    access_token: str
 
     model_config = ConfigDict(extra="forbid")
 
@@ -38,7 +38,7 @@ class LoginIn(BaseModel):
 class LoginOut(BaseModel):
     id: UUID4
     name: str
-    token: str
+    access_token: str
 
     model_config = ConfigDict(extra="forbid")
 

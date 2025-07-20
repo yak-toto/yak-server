@@ -77,7 +77,7 @@ def signup(
         result=SignupOut(
             id=user.id,
             name=user.name,
-            token=encode_bearer_token(
+            access_token=encode_bearer_token(
                 sub=user.id,
                 expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
                 secret_key=settings.jwt_secret_key,
@@ -129,7 +129,7 @@ def login(
         result=LoginOut(
             id=user.id,
             name=user.name,
-            token=encode_bearer_token(
+            access_token=encode_bearer_token(
                 sub=user.id,
                 expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
                 secret_key=settings.jwt_secret_key,

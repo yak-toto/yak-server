@@ -47,7 +47,7 @@ def test_group(
                     ) {
                         __typename
                         ... on UserWithToken {
-                            token
+                            accessToken
                         }
                         ... on UserNameAlreadyExists {
                             message
@@ -66,7 +66,7 @@ def test_group(
 
     assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
 
-    auth_token = response_signup.json()["data"]["signupResult"]["token"]
+    auth_token = response_signup.json()["data"]["signupResult"]["accessToken"]
 
     # Success case : Get all groups
     query_all_groups = """
@@ -128,7 +128,7 @@ def test_group(
         "data": {
             "allGroupsResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token, authentication required",
+                "message": "Invalid access token, authentication required",
             }
         }
     }
@@ -251,7 +251,7 @@ def test_group(
         "data": {
             "groupByCodeResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token, authentication required",
+                "message": "Invalid access token, authentication required",
             }
         }
     }
@@ -343,7 +343,7 @@ def test_group(
         "data": {
             "groupByIdResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token, authentication required",
+                "message": "Invalid access token, authentication required",
             }
         }
     }

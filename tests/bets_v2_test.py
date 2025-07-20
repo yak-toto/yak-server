@@ -44,7 +44,7 @@ def test_bets(
             ) {
                 __typename
                 ... on UserWithToken {
-                    token
+                    accessToken
                     scoreBets {
                         id
                     }
@@ -70,7 +70,7 @@ def test_bets(
     )
 
     assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
-    authentication_token = response_signup.json()["data"]["signupResult"]["token"]
+    authentication_token = response_signup.json()["data"]["signupResult"]["accessToken"]
 
     score_bet_ids = [
         bet["id"] for bet in response_signup.json()["data"]["signupResult"]["scoreBets"]
@@ -158,7 +158,7 @@ def test_bets(
         "data": {
             "scoreBetResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token, authentication required",
+                "message": "Invalid access token, authentication required",
             }
         }
     }

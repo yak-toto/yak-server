@@ -43,9 +43,9 @@ def test_binary_bet(
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    token = response_signup.json()["result"]["token"]
+    access_token = response_signup.json()["result"]["access_token"]
 
-    response_bets = client.get("/api/v1/bets", headers={"Authorization": f"Bearer {token}"})
+    response_bets = client.get("/api/v1/bets", headers={"Authorization": f"Bearer {access_token}"})
 
     assert response_bets.status_code == HTTPStatus.OK
 
@@ -53,7 +53,7 @@ def test_binary_bet(
 
     response_modify_binary_bet = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"is_one_won": True},
     )
 
@@ -91,7 +91,7 @@ def test_binary_bet(
 
     response_lock_bet = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"is_one_won": True},
     )
 
@@ -109,7 +109,7 @@ def test_binary_bet(
     # Error case : Invalid input
     response_invalid_inputs = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"is_won": True},
     )
 
@@ -120,7 +120,7 @@ def test_binary_bet(
 
     response_with_invalid_bet_id = client.patch(
         f"/api/v1/binary_bets/{invalid_bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"is_one_won": True},
     )
 
@@ -134,7 +134,7 @@ def test_binary_bet(
     # Success case : retrieve one binary bet
     response_binary_bet_by_id = client.get(
         f"/api/v1/binary_bets/{bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_binary_bet_by_id.status_code == HTTPStatus.OK
@@ -169,7 +169,7 @@ def test_binary_bet(
 
     response_retrieve_with_invalid_bet_id = client.get(
         f"/api/v1/binary_bets/{invalid_bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_retrieve_with_invalid_bet_id.status_code == HTTPStatus.NOT_FOUND
@@ -182,7 +182,7 @@ def test_binary_bet(
     # Success case : Modify team1 id by setting it to None
     response_change_team1_to_none = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"team1": {"id": None}},
     )
 
@@ -213,7 +213,7 @@ def test_binary_bet(
 
     response_change_team2 = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"team2": {"id": team_spain}},
     )
 
@@ -236,7 +236,7 @@ def test_binary_bet(
 
     response_invalid_team1_id = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"team1": {"id": invalid_team_id}},
     )
 
@@ -245,7 +245,7 @@ def test_binary_bet(
 
     response_invalid_team2_id = client.patch(
         f"/api/v1/binary_bets/{bet_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={"team2": {"id": invalid_team_id}},
     )
 

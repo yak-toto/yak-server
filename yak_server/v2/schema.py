@@ -521,7 +521,7 @@ class User:
 
 @strawberry.type
 class UserWithToken(User):
-    token: str
+    access_token: str
 
     @classmethod
     def from_instance_and_token(
@@ -530,7 +530,7 @@ class UserWithToken(User):
         *,
         db: Session,
         lock_datetime: pendulum.DateTime,
-        token: str,
+        access_token: str,
     ) -> "UserWithToken":
         return cls(
             instance=instance,
@@ -541,7 +541,7 @@ class UserWithToken(User):
             first_name=instance.first_name,
             last_name=instance.last_name,
             result=Result.from_instance(instance),
-            token=token,
+            access_token=access_token,
         )
 
 

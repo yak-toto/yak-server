@@ -80,7 +80,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
 
     assert response_login.status_code == HTTPStatus.CREATED
 
-    auth_token = response_login.json()["result"]["token"]
+    auth_token = response_login.json()["result"]["access_token"]
     user_id = response_login.json()["result"]["id"]
 
     # Check records deletion
@@ -129,7 +129,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
         "data": {
             "currentUserResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token, authentication required",
+                "message": "Invalid access token, authentication required",
             },
         },
     }

@@ -20,7 +20,7 @@ QUERY_SIGNUP = """
             __typename
             ... on UserWithToken {
                 id
-                token
+                accessToken
             }
             ... on UserNameAlreadyExists {
                 message
@@ -91,7 +91,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
     )
 
     assert response_signup_admin.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
-    authentication_token = response_signup_admin.json()["data"]["signupResult"]["token"]
+    authentication_token = response_signup_admin.json()["data"]["signupResult"]["accessToken"]
 
     # Create non admin user account
     other_user_name = get_random_string(6)
@@ -114,7 +114,9 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
 
     assert response_signup_glepape.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
     user_id = response_signup_glepape.json()["data"]["signupResult"]["id"]
-    authentication_token_glepape = response_signup_glepape.json()["data"]["signupResult"]["token"]
+    authentication_token_glepape = response_signup_glepape.json()["data"]["signupResult"][
+        "accessToken"
+    ]
 
     # Check update is properly process
     new_password_other_user = get_random_string(15)
@@ -185,7 +187,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
         "message": f"User not found: {invalid_user_id}",
     }
 
-    # Error case : invalid token
+    # Error case : invalid access token
     response_modify_password = client.post(
         "/api/v2",
         headers={"Authorization": f"Bearer {get_random_string(250)}"},
@@ -197,5 +199,5 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
 
     assert response_modify_password.json()["data"]["modifyUserResult"] == {
         "__typename": "InvalidToken",
-        "message": "Invalid token, authentication required",
+        "message": "Invalid access token, authentication required",
     }

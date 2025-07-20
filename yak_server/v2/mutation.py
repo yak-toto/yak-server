@@ -80,7 +80,7 @@ class Mutation:
             user,
             db=db,
             lock_datetime=settings.lock_datetime,
-            token=encode_bearer_token(
+            access_token=encode_bearer_token(
                 sub=user.id,
                 expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
                 secret_key=settings.jwt_secret_key,
@@ -102,7 +102,7 @@ class Mutation:
         if not user:
             return InvalidCredentials()
 
-        token = encode_bearer_token(
+        access_token = encode_bearer_token(
             sub=user.id,
             expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
             secret_key=settings.jwt_secret_key,
@@ -114,7 +114,7 @@ class Mutation:
             user,
             db=db,
             lock_datetime=settings.lock_datetime,
-            token=token,
+            access_token=access_token,
         )
 
     @strawberry.mutation

@@ -108,10 +108,10 @@ def test_compute_points(
 
     assert response_signup_admin.status_code == HTTPStatus.CREATED
 
-    admin.token = response_signup_admin.json()["result"]["token"]
+    admin.access_token = response_signup_admin.json()["result"]["access_token"]
 
     # Patch score bet admin
-    patch_score_bets(client, admin.token, admin.scores)
+    patch_score_bets(client, admin.access_token, admin.scores)
 
     # Signup 3 players and patch their scores
     users_data = [
@@ -187,14 +187,14 @@ def test_compute_points(
 
         assert response_signup.status_code == HTTPStatus.CREATED
 
-        user.token = response_signup.json()["result"]["token"]
+        user.access_token = response_signup.json()["result"]["access_token"]
 
-        patch_score_bets(client, user.token, user.scores)
+        patch_score_bets(client, user.access_token, user.scores)
 
     # Success case : compute_points call
     response_compute_points = client.post(
         "/api/v1/rules/62d46542-8cf1-4a3b-af77-a5086f10ac59",
-        headers={"Authorization": f"Bearer {admin.token}"},
+        headers={"Authorization": f"Bearer {admin.access_token}"},
     )
 
     assert response_compute_points.status_code == HTTPStatus.OK
@@ -202,14 +202,15 @@ def test_compute_points(
     # Check final rule execution
     rule_final_phase_response = client.post(
         "/api/v1/rules/492345de-8d4a-45b6-8b94-d219f2b0c3e9",
-        headers={"Authorization": f"Bearer {users_data[0].token}"},
+        headers={"Authorization": f"Bearer {users_data[0].access_token}"},
     )
 
     assert rule_final_phase_response.status_code == HTTPStatus.OK
 
     # Check retrieve all bets after final phase
     bets_final_phase_response = client.get(
-        "/api/v1/bets/phases/FINAL", headers={"Authorization": f"Bearer {users_data[0].token}"}
+        "/api/v1/bets/phases/FINAL",
+        headers={"Authorization": f"Bearer {users_data[0].access_token}"},
     )
 
     assert bets_final_phase_response.status_code == HTTPStatus.OK
@@ -255,7 +256,7 @@ def test_compute_points(
     # Success case : Check score board call
     score_board_response = client.get(
         "/api/v1/score_board",
-        headers={"Authorization": f"Bearer {users_data[0].token}"},
+        headers={"Authorization": f"Bearer {users_data[0].access_token}"},
     )
 
     assert score_board_response.json()["result"] == [
@@ -309,7 +310,7 @@ def test_compute_points(
     # Patch admin score bets so all groups are not filled
     patch_score_bets(
         client,
-        admin.token,
+        admin.access_token,
         [
             (1, 0),
             None,
@@ -329,13 +330,13 @@ def test_compute_points(
     # Compute points again
     response_compute_points = client.post(
         "/api/v1/rules/62d46542-8cf1-4a3b-af77-a5086f10ac59",
-        headers={"Authorization": f"Bearer {admin.token}"},
+        headers={"Authorization": f"Bearer {admin.access_token}"},
     )
 
     # Check again score board
     score_board_response = client.get(
         "/api/v1/score_board",
-        headers={"Authorization": f"Bearer {users_data[0].token}"},
+        headers={"Authorization": f"Bearer {users_data[0].access_token}"},
     )
 
     assert score_board_response.json()["result"] == [

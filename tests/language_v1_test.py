@@ -42,7 +42,7 @@ def test_group(
         },
     )
 
-    auth_token = response_signup.json()["result"]["token"]
+    auth_token = response_signup.json()["result"]["access_token"]
 
     # retrieve all bets with default language
     response_default_lang = client.get(

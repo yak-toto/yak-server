@@ -27,7 +27,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
         },
     )
 
-    authentication_token = response_signup_admin.json()["result"]["token"]
+    authentication_token = response_signup_admin.json()["result"]["access_token"]
 
     # Create non admin user account
     response_signup_glepape = client.post(
@@ -41,7 +41,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
     )
 
     user_id = response_signup_glepape.json()["result"]["id"]
-    authentication_token_glepape = response_signup_glepape.json()["result"]["token"]
+    authentication_token_glepape = response_signup_glepape.json()["result"]["access_token"]
 
     # Check update is properly process
     new_password_other_user = get_random_string(15)
