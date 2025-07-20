@@ -1,0 +1,24 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        COMPETITION: world_cup_2022
+    depends_on:
+      - db
+    env_file:
+      - .env.db
+    environment:
+      POSTGRES_HOST: db # override to connect to docker compose db container
+    ports:
+      - "8000:8000"
+
+  db:
+    image: postgres:17.5-alpine3.22
+    env_file:
+      - .env.db
+    volumes:
+      - "yak-server_postgres-data:/var/lib/postgresql/data"
+
+volumes:
+  yak-server_postgres-data:
