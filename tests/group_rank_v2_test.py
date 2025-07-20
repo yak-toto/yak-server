@@ -41,7 +41,7 @@ def test_group_rank(
                     ) {
                         __typename
                         ... on UserWithToken {
-                            token
+                            accessToken
                             scoreBets {
                                 id
                             }
@@ -63,7 +63,7 @@ def test_group_rank(
 
     assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
 
-    token = response_signup.json()["data"]["signupResult"]["token"]
+    access_token = response_signup.json()["data"]["signupResult"]["accessToken"]
 
     query_modify_score_bet = """
         mutation Root($id: UUID!, $score1: Int!, $score2: Int!) {
@@ -97,7 +97,7 @@ def test_group_rank(
     ):
         response_patch_bet = client.post(
             "/api/v2",
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": f"Bearer {access_token}"},
             json={
                 "query": query_modify_score_bet,
                 "variables": {
@@ -155,7 +155,7 @@ def test_group_rank(
     response_group_rank_by_code = client.post(
         "/api/v2",
         json={"query": query_group_rank, "variables": {"code": "A"}},
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     result_group_rank = {
@@ -225,7 +225,7 @@ def test_group_rank(
     response_group_rank_with_invalid_code = client.post(
         "/api/v2",
         json={"query": query_group_rank, "variables": {"code": invalid_group_code}},
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_group_rank_with_invalid_code.json()["data"] == {
@@ -235,17 +235,17 @@ def test_group_rank(
         },
     }
 
-    # Error case : Retrieve group rank with invalid token
+    # Error case : Retrieve group rank with invalid access token
     response_group_rank_with_auth_error = client.post(
         "/api/v2",
         json={"query": query_group_rank, "variables": {"code": "A"}},
-        headers={"Authorization": f"Bearer {token[:-1]}"},
+        headers={"Authorization": f"Bearer {access_token[:-1]}"},
     )
 
     assert response_group_rank_with_auth_error.json()["data"] == {
         "groupRankByCodeResult": {
             "__typename": "InvalidToken",
-            "message": "Invalid token, authentication required",
+            "message": "Invalid access token, authentication required",
         },
     }
 
@@ -294,7 +294,7 @@ def test_group_rank(
     response_group_rank_by_id = client.post(
         "/api/v2",
         json={"query": query_group_rank_by_id, "variables": {"id": group_id}},
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_group_rank_by_id.json()["data"] == {"groupRankByIdResult": result_group_rank}
@@ -303,13 +303,13 @@ def test_group_rank(
     response_group_rank_by_id_auth_error = client.post(
         "/api/v2",
         json={"query": query_group_rank_by_id, "variables": {"id": group_id}},
-        headers={"Authorization": f"Bearer {token[:-1]}"},
+        headers={"Authorization": f"Bearer {access_token[:-1]}"},
     )
 
     assert response_group_rank_by_id_auth_error.json()["data"] == {
         "groupRankByIdResult": {
             "__typename": "InvalidToken",
-            "message": "Invalid token, authentication required",
+            "message": "Invalid access token, authentication required",
         },
     }
 
@@ -319,7 +319,7 @@ def test_group_rank(
     response_group_rank_with_invalid_id = client.post(
         "/api/v2",
         json={"query": query_group_rank_by_id, "variables": {"id": invalid_id}},
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_group_rank_with_invalid_id.json()["data"] == {
@@ -332,7 +332,7 @@ def test_group_rank(
     # Modify score bet and check group rank by id updates
     response_modify_score_bet = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "query": query_modify_score_bet,
             "variables": {
@@ -349,7 +349,7 @@ def test_group_rank(
 
     response_retrieve_group_rank_by_id = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "query": query_group_rank_by_id,
             "variables": {
@@ -405,7 +405,7 @@ def test_group_rank(
     # Success case : No recomputation for group rank
     response_retrieve_group_rank_by_code = client.post(
         "/api/v2",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
         json={
             "query": query_group_rank,
             "variables": {

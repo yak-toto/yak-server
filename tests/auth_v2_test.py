@@ -22,7 +22,7 @@ QUERY_SIGNUP = """
                 firstName
                 lastName
                 fullName
-                token
+                accessToken
             }
             ... on UserNameAlreadyExists {
                 message
@@ -39,7 +39,7 @@ QUERY_LOGIN = """
         loginResult(userName: $userName, password: $password) {
             __typename
             ... on UserWithToken {
-                token
+                accessToken
             }
             ... on InvalidCredentials {
                 message
@@ -102,7 +102,7 @@ def test_signup_and_login(app_with_valid_jwt_config: "FastAPI") -> None:
 
     assert response_login.json()["data"]["loginResult"]["__typename"] == "UserWithToken"
 
-    auth_token = response_login.json()["data"]["loginResult"]["token"]
+    auth_token = response_login.json()["data"]["loginResult"]["accessToken"]
 
     response_current_user = client.post(
         "/api/v2",
@@ -157,10 +157,10 @@ def test_signup_and_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
         "firstName": first_name,
         "lastName": last_name,
         "fullName": f"{first_name} {last_name}",
-        "token": ANY,
+        "accessToken": ANY,
     }
 
-    authentication_token = response_signup.json()["data"]["signupResult"]["token"]
+    authentication_token = response_signup.json()["data"]["signupResult"]["accessToken"]
 
     query_current_user = {
         "query": """
@@ -221,7 +221,7 @@ def test_signup_and_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_current_user.json()["data"]["currentUserResult"]["groups"] == []
     assert response_current_user.json()["data"]["currentUserResult"]["phases"] == []
 
-    # invalidate authentication token and check currentUser query
+    # invalidate authentication access token and check currentUser query
     # send InvalidToken response
     response_current_user = client.post(
         "/api/v2",
@@ -231,7 +231,7 @@ def test_signup_and_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
 
     assert response_current_user.json()["data"]["currentUserResult"] == {
         "__typename": "InvalidToken",
-        "message": "Invalid token, authentication required",
+        "message": "Invalid access token, authentication required",
     }
 
     response_current_user_invalid_key = client.post(
@@ -242,7 +242,7 @@ def test_signup_and_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
 
     assert response_current_user_invalid_key.json()["data"]["currentUserResult"] == {
         "__typename": "InvalidToken",
-        "message": "Invalid token, authentication required",
+        "message": "Invalid access token, authentication required",
     }
 
 
@@ -304,7 +304,7 @@ def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI") -> None:
 
     assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
 
-    auth_token = response_signup.json()["data"]["signupResult"]["token"]
+    auth_token = response_signup.json()["data"]["signupResult"]["accessToken"]
 
     response_expired_token = client.post(
         "/api/v2",
@@ -318,7 +318,7 @@ def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI") -> None:
         "data": {
             "currentUserResult": {
                 "__typename": "ExpiredToken",
-                "message": "Expired token, re-authentication required",
+                "message": "Expired access token, re-authentication required",
             },
         },
     }

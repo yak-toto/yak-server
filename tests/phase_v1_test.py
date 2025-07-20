@@ -47,10 +47,12 @@ def test_phase(
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    token = response_signup.json()["result"]["token"]
+    access_token = response_signup.json()["result"]["access_token"]
 
     # Success case : retrieve all phases
-    response_all_phases = client.get("/api/v1/phases", headers={"Authorization": f"Bearer {token}"})
+    response_all_phases = client.get(
+        "/api/v1/phases", headers={"Authorization": f"Bearer {access_token}"}
+    )
 
     assert response_all_phases.status_code == HTTPStatus.OK
     assert response_all_phases.json() == {
@@ -66,7 +68,7 @@ def test_phase(
 
     response_phase_by_id = client.get(
         f"/api/v1/phases/{phase_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_phase_by_id.status_code == HTTPStatus.OK
@@ -80,7 +82,7 @@ def test_phase(
 
     response_phase_with_invalid_id = client.get(
         f"/api/v1/phases/{invalid_phase_id}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_phase_with_invalid_id.status_code == HTTPStatus.NOT_FOUND

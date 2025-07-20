@@ -45,7 +45,7 @@ def test_bets(
     )
 
     assert response_signup.status_code == HTTPStatus.CREATED
-    authentication_token = response_signup.json()["result"]["token"]
+    authentication_token = response_signup.json()["result"]["access_token"]
 
     # Get all bets to retrieve ids
     response_get_all_bets = client.get(

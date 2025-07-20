@@ -39,7 +39,7 @@ def test_modify_partial_score_bet(
     )
 
     assert response_signup.status_code == HTTPStatus.CREATED
-    authentication_token = response_signup.json()["result"]["token"]
+    authentication_token = response_signup.json()["result"]["access_token"]
 
     response_get_all_bets = client.get(
         "/api/v1/bets",

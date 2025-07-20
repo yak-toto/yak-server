@@ -37,7 +37,7 @@ def test_modify_score_bet_and_group_rank(
             ) {
                 __typename
                 ... on UserWithToken {
-                    token
+                    accessToken
                     scoreBets {
                         id
                         team1 {
@@ -71,7 +71,7 @@ def test_modify_score_bet_and_group_rank(
     )
 
     assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
-    token = response_signup.json()["data"]["signupResult"]["token"]
+    access_token = response_signup.json()["data"]["signupResult"]["accessToken"]
 
     # Success case : Modify score bet and observe group rank update
     query_modify_score_and_group_rank = """
@@ -120,7 +120,7 @@ def test_modify_score_bet_and_group_rank(
     for _ in range(2):
         response_modify_score_bet = client.post(
             "/api/v2",
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": f"Bearer {access_token}"},
             json={
                 "query": query_modify_score_and_group_rank,
                 "variables": {

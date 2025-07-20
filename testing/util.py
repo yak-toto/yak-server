@@ -29,15 +29,17 @@ class UserData:
     last_name: str
     name: str
     scores: list[Optional[tuple[Optional[int], Optional[int]]]]
-    token: str = ""
+    access_token: str = ""
 
 
 def patch_score_bets(
     client: TestClient,
-    token: str,
+    access_token: str,
     new_scores: list[Optional[tuple[Optional[int], Optional[int]]]],
 ) -> None:
-    response_get_all_bets = client.get("/api/v1/bets", headers={"Authorization": f"Bearer {token}"})
+    response_get_all_bets = client.get(
+        "/api/v1/bets", headers={"Authorization": f"Bearer {access_token}"}
+    )
 
     assert response_get_all_bets.status_code == HTTPStatus.OK
 
@@ -45,7 +47,7 @@ def patch_score_bets(
         if new_score is not None:
             response_patch_score_bet = client.patch(
                 f"/api/v1/score_bets/{bet['id']}",
-                headers={"Authorization": f"Bearer {token}"},
+                headers={"Authorization": f"Bearer {access_token}"},
                 json={
                     "team1": {"score": new_score[0]},
                     "team2": {"score": new_score[1]},

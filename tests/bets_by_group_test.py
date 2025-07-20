@@ -40,12 +40,12 @@ def test_bets_by_groups(
 
     assert response_signup.status_code == HTTPStatus.CREATED
 
-    token = response_signup.json()["result"]["token"]
+    access_token = response_signup.json()["result"]["access_token"]
 
     # Success case
     bets_by_valid_group = client.get(
         "/api/v1/bets/groups/A",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert bets_by_valid_group.json()["result"] == {
@@ -134,7 +134,7 @@ def test_bets_by_groups(
 
     bets_by_invalid_group_code = client.get(
         f"/api/v1/bets/groups/{invalid_group_code}",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert bets_by_invalid_group_code.json() == {

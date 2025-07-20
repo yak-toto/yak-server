@@ -51,7 +51,7 @@ def test_modify_score_bet(
                             firstName
                             lastName
                             fullName
-                            token
+                            accessToken
                             scoreBets {
                                 id
                             }
@@ -75,7 +75,7 @@ def test_modify_score_bet(
     score_bet_ids = [
         score_bet["id"] for score_bet in response_signup.json()["data"]["signupResult"]["scoreBets"]
     ]
-    authentication_token = response_signup.json()["data"]["signupResult"]["token"]
+    authentication_token = response_signup.json()["data"]["signupResult"]["accessToken"]
 
     # Success case : check update is OK
     score1 = 4
@@ -149,7 +149,7 @@ def test_modify_score_bet(
     assert new_bet["team2"]["score"] == score2
     assert new_bet["team1"]["flag"]["url"] == f"/api/v1/teams/{new_bet['team1']['id']}/flag"
 
-    # Error case : authentication token is invalid
+    # Error case : authentication access token is invalid
     response_modify_bet_auth_error = client.post(
         "/api/v2",
         headers={"Authorization": "InvalidKey llllllllllllllll"},
@@ -167,7 +167,7 @@ def test_modify_score_bet(
         "data": {
             "modifyScoreBetResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token, authentication required",
+                "message": "Invalid access token, authentication required",
             }
         }
     }

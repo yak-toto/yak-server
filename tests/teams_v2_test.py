@@ -47,7 +47,7 @@ def test_teams(
                     ) {
                         __typename
                         ... on UserWithToken {
-                            token
+                            accessToken
                         }
                         ... on UserNameAlreadyExists {
                             message
@@ -66,7 +66,7 @@ def test_teams(
 
     assert response_signup.json()["data"]["signupResult"]["__typename"] == "UserWithToken"
 
-    auth_token = response_signup.json()["data"]["signupResult"]["token"]
+    auth_token = response_signup.json()["data"]["signupResult"]["accessToken"]
 
     all_teams_query = """
         query {
@@ -270,7 +270,7 @@ def test_teams(
         "data": {
             "teamByIdResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token, authentication required",
+                "message": "Invalid access token, authentication required",
             }
         }
     }
@@ -357,7 +357,7 @@ def test_teams(
         "data": {
             "teamByCodeResult": {
                 "__typename": "InvalidToken",
-                "message": "Invalid token, authentication required",
+                "message": "Invalid access token, authentication required",
             }
         }
     }
