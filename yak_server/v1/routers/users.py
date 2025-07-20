@@ -31,6 +31,7 @@ from yak_server.v1.helpers.errors import (
     InvalidCredentials,
     InvalidRefreshToken,
     NameAlreadyExists,
+    ReservedUsername,
     UnsatisfiedPasswordRequirements,
     UserNotFound,
 )
@@ -83,6 +84,9 @@ def signup(
     request: Request,
     response: Response,
 ) -> GenericOut[SignupOut]:
+    if signup_in.name == "admin" or "official_results" in signup_in.name:
+        raise ReservedUsername(signup_in.name)
+
     try:
         user = signup_user(
             db, signup_in.name, signup_in.first_name, signup_in.last_name, signup_in.password

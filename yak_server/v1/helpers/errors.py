@@ -47,6 +47,14 @@ class NameAlreadyExists(HTTPException):
         )
 
 
+class ReservedUsername(HTTPException):
+    def __init__(self, username: str) -> None:
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"The username '{username}' is reserved and cannot be used.",
+        )
+
+
 class InvalidRefreshToken(HTTPException):
     def __init__(self) -> None:
         super().__init__(
@@ -168,6 +176,13 @@ class RuleNotFound(HTTPException):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=rule_not_found_message(rule_id),
+        )
+
+
+class LobbyNotFound(HTTPException):
+    def __init__(self, lobby_id: UUID) -> None:
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Lobby with id {lobby_id} not found"
         )
 
 

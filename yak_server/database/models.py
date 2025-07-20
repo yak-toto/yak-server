@@ -8,7 +8,7 @@ from argon2.exceptions import VerificationError
 from pendulum import DateTime
 from sqlalchemy import CheckConstraint, UniqueConstraint
 from sqlalchemy import Enum as SqlEnum
-from sqlalchemy.dialects.postgresql import TIMESTAMP
+from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
 from sqlalchemy.dialects.postgresql import UUID as DB_UUID
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -21,6 +21,44 @@ ph = PasswordHasher()
 
 class Base(DeclarativeBase):
     pass
+
+
+class CompetitionModel(Base):
+    __tablename__ = "competition"
+    id: Mapped[UUID] = mapped_column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
+    name: Mapped[str] = mapped_column(sa.String(100), unique=True, nullable=False)
+    description_fr: Mapped[str] = mapped_column(sa.String(300), unique=True, nullable=False)
+    description_en: Mapped[str] = mapped_column(sa.String(300), unique=True, nullable=False)
+    lock_datetime: Mapped[Optional[DateTime]] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False
+    )
+    rules: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    lobbies: Mapped[list["LobbyModel"]] = relationship(
+        "LobbyModel",
+        back_populates="competition",
+        lazy="dynamic",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
+
+
+class LobbyModel(Base):
+    __tablename__ = "lobby"
+    id: Mapped[UUID] = mapped_column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
+    name: Mapped[str] = mapped_column(sa.String(100), unique=True, nullable=False)
+    competition_id: Mapped[UUID] = mapped_column(
+        DB_UUID(), sa.ForeignKey("competition.id", ondelete="CASCADE"), nullable=False
+    )
+    competition: Mapped["CompetitionModel"] = relationship(
+        "CompetitionModel", back_populates="lobbies"
+    )
+    users: Mapped[list["UserModel"]] = relationship(
+        "UserModel",
+        back_populates="lobby",
+        lazy="dynamic",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
 
 
 class UserModel(Base):
@@ -85,6 +123,13 @@ class UserModel(Base):
         nullable=False,
         default=0,
     )
+
+    lobby_id: Mapped[Optional[UUID]] = mapped_column(
+        DB_UUID(),
+        sa.ForeignKey("lobby.id", ondelete="CASCADE"),
+        nullable=True,
+    )
+    lobby: Mapped[Optional[LobbyModel]] = relationship("LobbyModel", back_populates="users")
 
     refresh_tokens: Mapped[list["RefreshTokenModel"]] = relationship(
         "RefreshTokenModel",

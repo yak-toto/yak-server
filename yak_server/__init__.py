@@ -13,6 +13,7 @@ from .v1.helpers.errors import set_exception_handler
 from .v1.routers import bets as bets_router
 from .v1.routers import binary_bets as binary_bets_router
 from .v1.routers import groups as groups_router
+from .v1.routers import lobbies as lobbies_router
 from .v1.routers import phases as phases_router
 from .v1.routers import results as results_router
 from .v1.routers import rules as rules_router
@@ -58,6 +59,7 @@ def create_app() -> FastAPI:
     app.include_router(bets_router.router, prefix=v1_prefix)
     app.include_router(binary_bets_router.router, prefix=v1_prefix)
     app.include_router(groups_router.router, prefix=v1_prefix)
+    app.include_router(lobbies_router.router, prefix=v1_prefix)
     app.include_router(phases_router.router, prefix=v1_prefix)
     app.include_router(results_router.router, prefix=v1_prefix)
     app.include_router(rules_router.router, prefix=v1_prefix)
