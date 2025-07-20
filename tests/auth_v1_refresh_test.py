@@ -159,7 +159,7 @@ def test_refresh_token_expired(app_with_null_jwt_refresh_expiration_time: "FastA
 
     refresh_cookie = response_signup.cookies.get("refresh_token")
 
-    time.sleep(3)  # Wait for the refresh token to expire
+    time.sleep(5)  # Wait for the refresh token to expire
 
     new_client = TestClient(
         app_with_null_jwt_refresh_expiration_time, cookies={"refresh_token": refresh_cookie}

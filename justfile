@@ -7,6 +7,7 @@ alias rp := run_profiling
 alias c := check
 alias f := fmt
 alias l := lint
+alias ud := update_deps
 
 setup:
     just install
@@ -44,3 +45,7 @@ fmt:
 
 lint:
     uv run pre-commit run -a ruff-check
+
+update_deps:
+    uv run pre-commit autoupdate
+    uv lock -U
