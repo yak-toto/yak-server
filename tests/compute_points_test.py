@@ -24,31 +24,6 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
     from sqlalchemy import Engine
 
-QUERY_SCORE_BOARD = """
-    query {
-        scoreBoardResult {
-            __typename
-            ... on ScoreBoard {
-                users {
-                    fullName
-                    result {
-                        numberMatchGuess
-                        numberScoreGuess
-                        numberQualifiedTeamsGuess
-                        points
-                    }
-                }
-            }
-            ... on InvalidToken {
-                message
-            }
-            ... on ExpiredToken {
-                message
-            }
-        }
-    }
-"""
-
 
 def put_finale_phase(client: TestClient, access_token: str, *, is_one_won: Optional[bool]) -> None:
     response_post_finale_phase_bets_admin = client.post(
@@ -337,66 +312,6 @@ def test_compute_points(
             "points": 131.0,
         },
     ]
-
-    # Check score board
-    response_score_board_v2 = client.post(
-        "/api/v2",
-        json={"query": QUERY_SCORE_BOARD},
-        headers={"Authorization": f"Bearer {users_data[0].access_token}"},
-    )
-
-    assert response_score_board_v2.json() == {
-        "data": {
-            "scoreBoardResult": {
-                "__typename": "ScoreBoard",
-                "users": [
-                    {
-                        "fullName": f"{users_data[0].first_name} {users_data[0].last_name}",
-                        "result": {
-                            "numberMatchGuess": 2,
-                            "numberQualifiedTeamsGuess": 2,
-                            "numberScoreGuess": 2,
-                            "points": 483.0,
-                        },
-                    },
-                    {
-                        "fullName": f"{users_data[2].first_name} {users_data[2].last_name}",
-                        "result": {
-                            "numberMatchGuess": 3,
-                            "numberQualifiedTeamsGuess": 2,
-                            "numberScoreGuess": 0,
-                            "points": 286.0,
-                        },
-                    },
-                    {
-                        "fullName": f"{users_data[1].first_name} {users_data[1].last_name}",
-                        "result": {
-                            "numberMatchGuess": 1,
-                            "numberQualifiedTeamsGuess": 1,
-                            "numberScoreGuess": 0,
-                            "points": 131.0,
-                        },
-                    },
-                ],
-            },
-        },
-    }
-
-    # Error case : authentication error
-    response_score_board_unauthorized = client.post(
-        "/api/v2",
-        json={"query": QUERY_SCORE_BOARD},
-        headers={"Authorization": f"Bearer {get_random_string(100)}"},
-    )
-
-    assert response_score_board_unauthorized.json() == {
-        "data": {
-            "scoreBoardResult": {
-                "__typename": "InvalidToken",
-                "message": "Invalid access token, authentication required",
-            }
-        }
-    }
 
     # Success case : check user GET /results call
     get_results_response = client.get(

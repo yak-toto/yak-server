@@ -346,18 +346,6 @@ wheels = [
 ]
 
 [[package]]
-name = "graphql-core"
-version = "3.2.6"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.10'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c4/16/7574029da84834349b60ed71614d66ca3afe46e9bf9c7b9562102acb7d4f/graphql_core-3.2.6.tar.gz", hash = "sha256:c08eec22f9e40f0bd61d805907e3b3b1b9a320bc606e23dc145eebca07c8fbab", size = 505353, upload-time = "2025-01-26T16:36:27.374Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ae/4f/7297663840621022bc73c22d7d9d80dbc78b4db6297f764b545cd5dd462d/graphql_core-3.2.6-py3-none-any.whl", hash = "sha256:78b016718c161a6fb20a7d97bbf107f331cd1afe53e45566c59f776ed7f0b45f", size = 203416, upload-time = "2025-01-26T16:36:24.868Z" },
-]
-
-[[package]]
 name = "greenlet"
 version = "3.2.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1358,21 +1346,6 @@ wheels = [
 ]
 
 [[package]]
-name = "strawberry-graphql"
-version = "0.275.7"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "graphql-core" },
-    { name = "packaging" },
-    { name = "python-dateutil" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/92/94/c7732096c3f420fbd66fe944cb377188ce799041e8d336aafad1aba32162/strawberry_graphql-0.275.7.tar.gz", hash = "sha256:431c19a084452e5dd015994e9a8cf82fee0dbcc46bcc662e5f74c56d23e73e81", size = 209679, upload-time = "2025-07-14T14:20:00.857Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/56/d6/41e61c14fe041f7b11e09dc0b4c41e06e20900e5c2d8917da94bd13c7a7a/strawberry_graphql-0.275.7-py3-none-any.whl", hash = "sha256:3543a9afe7ce76f475303999660ce6eece2593014277ef97ba73fe201992a360", size = 306324, upload-time = "2025-07-14T14:19:58.244Z" },
-]
-
-[[package]]
 name = "tomli"
 version = "2.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1764,7 +1737,6 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "pyjwt" },
     { name = "sqlalchemy" },
-    { name = "strawberry-graphql" },
 ]
 
 [package.optional-dependencies]
@@ -1809,7 +1781,6 @@ requires-dist = [
     { name = "pydantic-settings", specifier = "==2.10.1" },
     { name = "pyjwt", specifier = "==2.10.1" },
     { name = "sqlalchemy", specifier = "==2.0.41" },
-    { name = "strawberry-graphql", specifier = "==0.275.7" },
     { name = "uvicorn", extras = ["standard"], marker = "extra == 'server'", specifier = ">=0.34.0" },
 ]
 provides-extras = ["db-migration", "sync", "server"]

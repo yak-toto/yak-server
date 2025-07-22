@@ -93,34 +93,3 @@ def test_password_requirements_v1(app_with_valid_jwt_config: "FastAPI") -> None:
             "no_space": True,
         },
     }
-
-
-def test_password_requirements_v2(app_with_valid_jwt_config: "FastAPI") -> None:
-    client = TestClient(app_with_valid_jwt_config)
-
-    query = """
-        query {
-            passwordRequirements {
-                minimumLength
-                uppercase
-                lowercase
-                digit
-                noSpace
-            }
-        }
-    """
-
-    response = client.post("/api/v2", json={"query": query})
-
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        "data": {
-            "passwordRequirements": {
-                "minimumLength": 8,
-                "uppercase": True,
-                "lowercase": True,
-                "digit": True,
-                "noSpace": True,
-            }
-        }
-    }

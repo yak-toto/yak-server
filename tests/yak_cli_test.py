@@ -102,39 +102,6 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
         "description": f"User not found: {user_id}",
     }
 
-    # Check the same error with v2 api
-    response_login_user_not_found_v2 = client.post(
-        "/api/v2",
-        headers={"Authorization": f"Bearer {auth_token}"},
-        json={
-            "query": """
-                query {
-                    currentUserResult {
-                        __typename
-                        ... on User {
-                            fullName
-                        }
-                        ... on InvalidToken {
-                            message
-                        }
-                        ... on ExpiredToken {
-                            message
-                        }
-                    }
-                }
-            """,
-        },
-    )
-
-    assert response_login_user_not_found_v2.json() == {
-        "data": {
-            "currentUserResult": {
-                "__typename": "InvalidToken",
-                "message": "Invalid access token, authentication required",
-            },
-        },
-    }
-
 
 def test_cli_admin_already_exists() -> None:
     # Check admin account creation
