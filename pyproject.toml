@@ -4,12 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "yak-server"
-description = "Football bet rest/graphql server"
+description = "Football bet rest server"
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
 authors = [{name = "Guillaume Le Pape", email = "gui.lepape25@gmail.com"}]
-keywords = ["postgresql", "api", "rest", "graphql"]
+keywords = ["postgresql", "api", "rest"]
 classifiers = [
     "Operating System :: Unix",
     "Environment :: Web Environment",
@@ -39,7 +39,6 @@ dependencies = [
     "SQLAlchemy ==2.0.41",
     "pendulum ==3.1.0",
     "pydantic-settings ==2.10.1",
-    "strawberry-graphql ==0.275.7",
 ]
 version = "0.54.0"
 
@@ -119,8 +118,6 @@ max-complexity = 12
 "yak_server/cli/*" = ["T20"]
 "yak_server/database/migrations/*" = ["ANN001", "ANN201"]
 "yak_server/helpers/errors.py" = ["S105"]
-"yak_server/v2/mutation.py" = ["PLR6301"]
-"yak_server/v2/query.py" = ["PLR6301"]
 "tests/*" = ["S101", "PLR0914", "PLR2004"]
 "testing/*" = ["S101"]
 "scripts/*" = ["T201"]
@@ -132,7 +129,7 @@ max-returns = 7
 [tool.mypy]
 strict = true
 pretty = true
-plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin", "strawberry.ext.mypy_plugin"]
+plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
 exclude = '''(?x)(
     ^yak_server/database/migrations/.*?\.py$|
     ^yak_server/cli/database/sync.py$
@@ -153,18 +150,13 @@ type = "independence"
 modules = ["yak_server.database"]
 
 [[tool.importlinter.contracts]]
-name = "yak_server.helpers should not import yak_server.{v1,v2,cli}"
+name = "yak_server.helpers should not import yak_server.{v1,cli}"
 type = "forbidden"
 source_modules = ["yak_server.helpers"]
-forbidden_modules = ["yak_server.v1", "yak_server.v2", "yak_server.cli"]
+forbidden_modules = ["yak_server.v1", "yak_server.cli"]
 
 [[tool.importlinter.contracts]]
 name = "yak_server.v1.helpers should not import yak_server.v1.models and yak_server.v1.routers"
 type = "forbidden"
 source_modules = ["yak_server.v1.helpers"]
 forbidden_modules = ["yak_server.v1.models", "yak_server.v1.routers"]
-
-[[tool.importlinter.contracts]]
-name = "yak_server.v1 and yak_server.v2 should be independent"
-type = "independence"
-modules = ["yak_server.v1", "yak_server.v2"]
