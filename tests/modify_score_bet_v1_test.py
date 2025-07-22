@@ -6,28 +6,17 @@ from uuid import uuid4
 import pendulum
 from fastapi.testclient import TestClient
 
-from testing.mock import MockLockDatetime, MockSettings
-from testing.util import get_random_string
-from yak_server.cli.database import initialize_database
+from testing.mock import MockLockDatetime
+from testing.util import get_random_string, setup_competition
 from yak_server.helpers.settings import get_lock_datetime
 
 if TYPE_CHECKING:
-    import pytest
     from fastapi import FastAPI
-    from sqlalchemy import Engine
+    from sqlalchemy.orm import Session
 
 
-def test_modify_score_bet(
-    app_with_valid_jwt_config: "FastAPI",
-    engine_for_test: "Engine",
-    monkeypatch: "pytest.MonkeyPatch",
-) -> None:
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(data_folder_relative="test_modify_bet_v2"),
-    )
-
-    initialize_database(engine_for_test, app_with_valid_jwt_config)
+def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", db_session: "Session") -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_modify_bet_v2")
 
     user_name = get_random_string(10)
     first_name = get_random_string(5)

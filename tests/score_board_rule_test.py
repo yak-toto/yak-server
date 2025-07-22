@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from testing.mock import MockSettings
+from testing.mock import MockCompetition, MockSettings
 from testing.util import get_random_string
 from yak_server.cli.database import (
     ComputePointsRuleNotDefinedError,
@@ -19,7 +19,13 @@ if TYPE_CHECKING:
 def test_score_board_rule_not_defined(
     monkeypatch: pytest.MonkeyPatch, engine_for_test_with_delete: "Engine"
 ) -> None:
-    monkeypatch.setattr("yak_server.cli.database.get_settings", MockSettings(rules=Rules()))
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_competition", lambda *_: MockCompetition(rules=Rules())
+    )
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        lambda *_: MockSettings(competition="test_phase_v1"),
+    )
 
     password_admin = get_random_string(10)
 

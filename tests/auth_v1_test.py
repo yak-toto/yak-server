@@ -4,13 +4,16 @@ from unittest.mock import ANY
 
 from starlette.testclient import TestClient
 
-from testing.util import get_random_string
+from testing.util import get_random_string, setup_competition
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
+    from sqlalchemy.orm import Session
 
 
-def test_valid_auth(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_valid_auth(app_with_valid_jwt_config: "FastAPI", db_session: "Session") -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(6)
@@ -73,7 +76,9 @@ def test_valid_auth(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_double_signup(app_with_valid_jwt_config: "FastAPI", db_session: "Session") -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(6)
@@ -122,7 +127,9 @@ def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_login_wrong_name(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_login_wrong_name(app_with_valid_jwt_config: "FastAPI", db_session: "Session") -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config)
 
     response_login = client.post(
@@ -141,7 +148,9 @@ def test_login_wrong_name(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_login_wrong_password(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_login_wrong_password(app_with_valid_jwt_config: "FastAPI", db_session: "Session") -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(6)
@@ -171,7 +180,9 @@ def test_login_wrong_password(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_invalid_token(app_with_valid_jwt_config: "FastAPI", db_session: "Session") -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config)
 
     response_signup = client.post(
@@ -210,7 +221,9 @@ def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI") -> None:
+def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI", db_session: "Session") -> None:
+    setup_competition(app_with_null_jwt_expiration_time, db_session, "test_login")
+
     client = TestClient(app_with_null_jwt_expiration_time)
 
     user_name = get_random_string(6)
@@ -243,7 +256,9 @@ def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI") -> None:
     }
 
 
-def test_invalid_signup_body(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_invalid_signup_body(app_with_valid_jwt_config: "FastAPI", db_session: "Session") -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     name = get_random_string(10)
     first_name = get_random_string(12)
     last_name = get_random_string(6)
@@ -273,7 +288,9 @@ def test_invalid_signup_body(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_invalid_login_body(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_invalid_login_body(app_with_valid_jwt_config: "FastAPI", db_session: "Session") -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     user_name = get_random_string(6)
     password = get_random_string(10)
 
@@ -298,7 +315,11 @@ def test_invalid_login_body(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_non_compliant_password(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_non_compliant_password(
+    app_with_valid_jwt_config: "FastAPI", db_session: "Session"
+) -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config)
 
     response_signup = client.post(

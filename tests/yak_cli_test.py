@@ -9,12 +9,15 @@ import pendulum
 from click.testing import CliRunner
 from starlette.testclient import TestClient
 
-from testing.util import get_random_string
+from testing.mock import MockSettings
+from testing.util import get_random_string, get_resources_path
 from yak_server.cli import app
+from yak_server.cli.database import initialize_competition
 
 if TYPE_CHECKING:
     import pytest
     from fastapi import FastAPI
+    from sqlalchemy.orm import Session
 
 runner = CliRunner()
 
@@ -103,7 +106,15 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_cli_admin_already_exists() -> None:
+def test_cli_admin_already_exists(
+    app_with_valid_jwt_config: "FastAPI", db_session: "Session", monkeypatch: "pytest.MonkeyPatch"
+) -> None:
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings", lambda: MockSettings(competition="test_login")
+    )
+
+    initialize_competition(db_session, app_with_valid_jwt_config, get_resources_path("test_login"))
+
     # Check admin account creation
     admin_password = get_random_string(9)
 

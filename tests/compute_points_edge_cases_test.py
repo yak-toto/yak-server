@@ -7,9 +7,9 @@ import pytest
 from fastapi import status
 from starlette.testclient import TestClient
 
-from testing.mock import MockSettings
-from testing.util import UserData, get_random_string, patch_score_bets
-from yak_server.cli.database import create_admin, initialize_database
+from testing.mock import MockCompetition
+from testing.util import UserData, get_random_string, patch_score_bets, setup_competition
+from yak_server.cli.database import create_admin
 from yak_server.database import build_local_session_maker
 from yak_server.database.models import Role, UserModel
 from yak_server.helpers.rules import Rules
@@ -20,18 +20,19 @@ from yak_server.helpers.rules.compute_final_from_rank import (
     compute_finale_phase_from_group_rank,
 )
 from yak_server.helpers.rules.compute_points import RuleComputePoints
-from yak_server.helpers.settings import get_settings
+from yak_server.helpers.settings import get_competition
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
     from sqlalchemy import Engine
+    from sqlalchemy.orm import Session
 
 
 @pytest.fixture
 def app_with_rules_and_score_board_config(
     app_with_valid_jwt_config: "FastAPI",
 ) -> Generator["FastAPI", None, None]:
-    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
+    app_with_valid_jwt_config.dependency_overrides[get_competition] = MockCompetition(
         rules=Rules(
             compute_finale_phase_from_group_rank=RuleComputeFinaleFromGroupRank(
                 to_group="2",
@@ -59,16 +60,14 @@ def app_with_rules_and_score_board_config(
 
 def test_compute_points(
     app_with_rules_and_score_board_config: "FastAPI",
+    db_session: "Session",
     engine_for_test: "Engine",
-    monkeypatch: "pytest.MonkeyPatch",
 ) -> None:
-    client = TestClient(app_with_rules_and_score_board_config)
-
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(data_folder_relative="test_compute_points_edge_cases_v1"),
+    setup_competition(
+        app_with_rules_and_score_board_config, db_session, "test_compute_points_edge_cases_v1"
     )
-    initialize_database(engine_for_test, app_with_rules_and_score_board_config)
+
+    client = TestClient(app_with_rules_and_score_board_config)
 
     admin = UserData(
         name="admin",
@@ -410,15 +409,11 @@ def test_missing_first_phase_group(engine_for_test: "Engine") -> None:
 
 
 def test_no_bet_associated_to_first_phase_group(
-    app_with_valid_jwt_config: "FastAPI",
-    engine_for_test: "Engine",
-    monkeypatch: "pytest.MonkeyPatch",
+    app_with_valid_jwt_config: "FastAPI", db_session: "Session"
 ) -> None:
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(data_folder_relative="test_no_bet_associated_to_first_phase_group"),
+    setup_competition(
+        app_with_valid_jwt_config, db_session, "test_no_bet_associated_to_first_phase_group"
     )
-    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     client = TestClient(app_with_valid_jwt_config)
 
@@ -451,16 +446,13 @@ def test_no_bet_associated_to_first_phase_group(
 
     assert response.status_code == HTTPStatus.OK
 
-    local_session_maker = build_local_session_maker(engine_for_test)
-
     rule = RuleComputeFinaleFromGroupRank(
         to_group="1",
         from_phase="GROUP",
         versus=[Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="A"))],
     )
 
-    with local_session_maker() as db:
-        user = db.query(UserModel).filter_by(id=user_id).first()
+    user = db_session.query(UserModel).filter_by(id=user_id).first()
 
-        assert user is not None
-        assert compute_finale_phase_from_group_rank(db, user, rule) == (status.HTTP_200_OK, "")
+    assert user is not None
+    assert compute_finale_phase_from_group_rank(db_session, user, rule) == (status.HTTP_200_OK, "")

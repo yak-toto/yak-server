@@ -1,38 +1,31 @@
 from functools import cache
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import pendulum
-from pydantic import HttpUrl, PlainValidator
+from fastapi import Depends
+from pydantic import PlainValidator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from .rules import Rules
+from yak_server.database.models import CompetitionModel
+
+from .database import get_db
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 PendulumDateTime = Annotated[pendulum.DateTime, PlainValidator(pendulum.parse)]
 
 
 class Settings(BaseSettings):
     competition: str
-    data_folder: str
-    rules: Rules
-    official_results_url: HttpUrl
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
 
 
 @cache
 def get_settings() -> Settings:
+    # assert False
     return Settings()
-
-
-class LockDatetimeSettings(BaseSettings):
-    lock_datetime: PendulumDateTime
-
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
-
-
-@cache
-def get_lock_datetime() -> pendulum.DateTime:
-    return LockDatetimeSettings().lock_datetime  # pragma: no cover
 
 
 class AuthenticationSettings(BaseSettings):
@@ -47,3 +40,22 @@ class AuthenticationSettings(BaseSettings):
 @cache
 def get_authentication_settings() -> AuthenticationSettings:
     return AuthenticationSettings()  # pragma: no cover
+
+
+def get_competition(
+    db: Annotated["Session", Depends(get_db)], settings: Annotated[Settings, Depends(get_settings)]
+) -> CompetitionModel:
+    competition = db.query(CompetitionModel).filter_by(name=settings.competition).first()
+
+    if competition is None:
+        message = f"Competition '{settings.competition}' not found in the database."
+        raise ValueError(message)
+
+    return competition
+
+
+@cache
+def get_lock_datetime(
+    competition: Annotated[CompetitionModel, Depends(get_competition)],
+) -> pendulum.DateTime:
+    return competition.lock_datetime  # pragma: no cover

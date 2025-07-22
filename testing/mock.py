@@ -1,12 +1,12 @@
 import sys
 from typing import TYPE_CHECKING, Optional
+from uuid import UUID
 
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
     from typing_extensions import Self
 
-from .util import get_resources_path
 
 if TYPE_CHECKING:
     import pendulum
@@ -15,19 +15,8 @@ if TYPE_CHECKING:
 
 
 class MockSettings:
-    def __init__(
-        self,
-        *,
-        data_folder_relative: Optional[str] = None,
-        rules: Optional["Rules"] = None,
-        official_results_url: Optional[str] = None,
-    ) -> None:
-        self.data_folder = (
-            get_resources_path(data_folder_relative) if data_folder_relative is not None else None
-        )
-
-        self.rules = rules
-        self.official_results_url = official_results_url
+    def __init__(self, *, competition: str) -> None:
+        self.competition = competition
 
     def __call__(self) -> Self:
         return self
@@ -53,6 +42,22 @@ class MockAuthenticationSettings:
         self.jwt_refresh_secret_key = jwt_refresh_secret_key
         self.jwt_expiration_time = jwt_expiration_time
         self.jwt_refresh_expiration_time = jwt_refresh_expiration_time
+
+    def __call__(self) -> Self:
+        return self
+
+
+class MockCompetition:
+    def __init__(
+        self,
+        *,
+        id: Optional[UUID] = None,
+        rules: Optional["Rules"] = None,
+        official_results_url: Optional[str] = None,
+    ) -> None:
+        self.id = id
+        self.rules = rules
+        self.official_results_url = official_results_url
 
     def __call__(self) -> Self:
         return self

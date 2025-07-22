@@ -4,15 +4,20 @@ from uuid import uuid4
 
 from starlette.testclient import TestClient
 
-from testing.util import get_random_string
+from testing.util import get_random_string, setup_competition
 from yak_server.cli.database import create_admin
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
     from sqlalchemy import Engine
+    from sqlalchemy.orm import Session
 
 
-def test_modify_password(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
+def test_modify_password(
+    app_with_valid_jwt_config: "FastAPI", db_session: "Session", engine_for_test: "Engine"
+) -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config)
 
     password = get_random_string(9)
