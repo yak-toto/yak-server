@@ -1,4 +1,8 @@
 {
     "lock_datetime": "2018-06-14T18:00:00.000000+03:00",
-    "official_results_url": "https://en.wikipedia.org/wiki/2018_FIFA_World_Cup"
+    "official_results_url": "https://en.wikipedia.org/wiki/2018_FIFA_World_Cup",
+    "description": {
+        "fr": "Coupe du monde 2018",
+        "en": "World Cup 2018"
+    }
 }

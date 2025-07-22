@@ -6,13 +6,16 @@ import pytest
 from fastapi.testclient import TestClient
 
 from scripts.profiling import create_app as create_app_with_profiler
-from testing.util import get_random_string
+from testing.util import get_random_string, setup_competition
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
+    from sqlalchemy.orm import Session
 
 
-def test_debug_profiling(app_with_profiler: "FastAPI") -> None:
+def test_debug_profiling(app_with_profiler: "FastAPI", db_session: "Session") -> None:
+    setup_competition(app_with_profiler, db_session, "test_login")
+
     client = TestClient(app_with_profiler)
 
     user_name = get_random_string(6)

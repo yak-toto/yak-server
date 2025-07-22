@@ -4,13 +4,16 @@ from uuid import uuid4
 
 from starlette.testclient import TestClient
 
-from testing.util import get_random_string
+from testing.util import get_random_string, setup_competition
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
+    from sqlalchemy.orm import Session
 
 
-def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_modify_password(app_with_valid_jwt_config: "FastAPI", db_session: "Session") -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config)
 
     admin_name = "admin"
