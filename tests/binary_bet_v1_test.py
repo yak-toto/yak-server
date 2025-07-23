@@ -6,10 +6,10 @@ from uuid import uuid4
 import pendulum
 from starlette.testclient import TestClient
 
-from testing.mock import MockSettings
+from testing.mock import MockLockDatetime, MockSettings
 from testing.util import get_random_string
 from yak_server.cli.database import initialize_database
-from yak_server.helpers.settings import get_settings
+from yak_server.helpers.settings import get_lock_datetime
 
 if TYPE_CHECKING:
     import pytest
@@ -85,8 +85,8 @@ def test_binary_bet(
     }
 
     # Error case : locked bet
-    app_with_valid_jwt_config.dependency_overrides[get_settings]().set_lock_datetime(
-        -pendulum.duration(minutes=10)
+    app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
+        pendulum.now("UTC") - pendulum.duration(minutes=10)
     )
 
     response_lock_bet = client.patch(
@@ -102,8 +102,8 @@ def test_binary_bet(
         "description": "Cannot modify binary bet, lock date is exceeded",
     }
 
-    app_with_valid_jwt_config.dependency_overrides[get_settings]().set_lock_datetime(
-        pendulum.duration(minutes=10)
+    app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
+        pendulum.now("UTC") + pendulum.duration(minutes=10)
     )
 
     # Error case : Invalid input

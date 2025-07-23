@@ -6,23 +6,22 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self
 
-import pendulum
-
 from .util import get_resources_path
 
 if TYPE_CHECKING:
+    import pendulum
+
     from yak_server.helpers.rules import Rules
 
 
 class MockSettings:
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         *,
         jwt_secret_key: Optional[str] = None,
         jwt_expiration_time: Optional[int] = None,
         jwt_refresh_expiration_time: Optional[int] = None,
         data_folder_relative: Optional[str] = None,
-        lock_datetime_shift: Optional[pendulum.Duration] = None,
         rules: Optional["Rules"] = None,
         official_results_url: Optional[str] = None,
     ) -> None:
@@ -34,15 +33,16 @@ class MockSettings:
             get_resources_path(data_folder_relative) if data_folder_relative is not None else None
         )
 
-        self.lock_datetime = (
-            pendulum.now() + lock_datetime_shift if lock_datetime_shift is not None else None
-        )
-
         self.rules = rules
         self.official_results_url = official_results_url
 
-    def set_lock_datetime(self, lock_datetime_shift: pendulum.Duration) -> None:
-        self.lock_datetime = pendulum.now() + lock_datetime_shift
-
     def __call__(self) -> Self:
         return self
+
+
+class MockLockDatetime:
+    def __init__(self, lock_datetime: "pendulum.DateTime") -> None:
+        self.lock_datetime = lock_datetime
+
+    def __call__(self) -> "pendulum.DateTime":
+        return self.lock_datetime

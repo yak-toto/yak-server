@@ -3,7 +3,6 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
 
-import pendulum
 import pytest
 from fastapi import status
 from starlette.testclient import TestClient
@@ -36,7 +35,6 @@ def app_with_rules_and_score_board_config(
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(100),
-        lock_datetime_shift=pendulum.duration(minutes=10),
         rules=Rules(
             compute_finale_phase_from_group_rank=RuleComputeFinaleFromGroupRank(
                 to_group="2",

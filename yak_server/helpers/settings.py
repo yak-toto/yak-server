@@ -15,7 +15,6 @@ class Settings(BaseSettings):
     jwt_expiration_time: int
     jwt_refresh_expiration_time: int
     competition: str
-    lock_datetime: PendulumDateTime
     data_folder: str
     rules: Rules
     official_results_url: HttpUrl
@@ -26,3 +25,14 @@ class Settings(BaseSettings):
 @cache
 def get_settings() -> Settings:
     return Settings()
+
+
+class LockDatetimeSettings(BaseSettings):
+    lock_datetime: PendulumDateTime
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
+
+
+@cache
+def get_lock_datetime() -> pendulum.DateTime:
+    return LockDatetimeSettings().lock_datetime  # pragma: no cover

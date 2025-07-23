@@ -2,7 +2,6 @@ from collections.abc import Generator
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Optional
 
-import pendulum
 import pytest
 from click.testing import CliRunner
 from starlette.testclient import TestClient
@@ -74,7 +73,6 @@ def app_and_rules_for_compute_points(
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(100),
-        lock_datetime_shift=pendulum.duration(seconds=10),
         rules=rules,
     )
 

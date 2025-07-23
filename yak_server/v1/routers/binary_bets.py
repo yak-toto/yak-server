@@ -1,6 +1,7 @@
 import logging
 from typing import Annotated
 
+import pendulum
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 from sqlalchemy import and_
@@ -16,7 +17,7 @@ from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.database import get_db
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
 from yak_server.helpers.logging_helpers import modify_binary_bet_successfully
-from yak_server.helpers.settings import Settings, get_settings
+from yak_server.helpers.settings import get_lock_datetime
 from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.errors import (
     BetNotFound,
@@ -90,7 +91,7 @@ def retrieve_binary_bet_by_id(
     bet_id: UUID4,
     db: Annotated[Session, Depends(get_db)],
     user: Annotated[UserModel, Depends(get_current_user)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[BinaryBetResponse]:
     binary_bet = (
@@ -103,7 +104,7 @@ def retrieve_binary_bet_by_id(
     if not binary_bet:
         raise BetNotFound(bet_id)
 
-    return send_response(binary_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
+    return send_response(binary_bet, locked=is_locked(user.name, lock_datetime), lang=lang)
 
 
 @router.patch(
@@ -119,10 +120,10 @@ def modify_binary_bet_by_id(
     modify_binary_bet_in: ModifyBinaryBetIn,
     db: Annotated[Session, Depends(get_db)],
     user: Annotated[UserModel, Depends(get_current_user)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[BinaryBetResponse]:
-    if is_locked(user.name, settings.lock_datetime):
+    if is_locked(user.name, lock_datetime):
         raise LockedBinaryBet
 
     binary_bet = (
@@ -174,4 +175,4 @@ def modify_binary_bet_by_id(
 
     db.commit()
 
-    return send_response(binary_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
+    return send_response(binary_bet, locked=is_locked(user.name, lock_datetime), lang=lang)
