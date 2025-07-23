@@ -24,12 +24,6 @@ class MockSettings:
         data_folder_relative: Optional[str] = None,
         lock_datetime_shift: Optional[pendulum.Duration] = None,
         rules: Optional["Rules"] = None,
-        base_correct_result: Optional[int] = None,
-        multiplying_factor_correct_result: Optional[int] = None,
-        base_correct_score: Optional[int] = None,
-        multiplying_factor_correct_score: Optional[int] = None,
-        team_qualified: Optional[int] = None,
-        first_team_qualified: Optional[int] = None,
         official_results_url: Optional[str] = None,
     ) -> None:
         self.jwt_secret_key = jwt_secret_key
@@ -45,12 +39,6 @@ class MockSettings:
         )
 
         self.rules = rules
-        self.base_correct_result = base_correct_result
-        self.multiplying_factor_correct_result = multiplying_factor_correct_result
-        self.base_correct_score = base_correct_score
-        self.multiplying_factor_correct_score = multiplying_factor_correct_score
-        self.team_qualified = team_qualified
-        self.first_team_qualified = first_team_qualified
         self.official_results_url = official_results_url
 
     def set_lock_datetime(self, lock_datetime_shift: pendulum.Duration) -> None:

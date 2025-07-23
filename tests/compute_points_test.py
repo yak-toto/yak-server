@@ -76,12 +76,6 @@ def app_and_rules_for_compute_points(
         jwt_secret_key=get_random_string(100),
         lock_datetime_shift=pendulum.duration(seconds=10),
         rules=rules,
-        base_correct_result=1,
-        multiplying_factor_correct_result=2,
-        base_correct_score=3,
-        multiplying_factor_correct_score=7,
-        team_qualified=10,
-        first_team_qualified=20,
     )
 
     yield app_with_valid_jwt_config, rules
