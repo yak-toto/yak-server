@@ -10,13 +10,13 @@ from psycopg2 import sql
 from sqlalchemy import Engine, create_engine
 
 from scripts.profiling import create_app as create_app_with_profiling
-from testing.mock import MockLockDatetime, MockSettings
+from testing.mock import MockAuthenticationSettings, MockLockDatetime, MockSettings
 from testing.util import get_random_string
 from yak_server import create_app
 from yak_server.cli.database import create_database, delete_database, drop_database
 from yak_server.database import compute_database_uri, get_postgres_settings
 from yak_server.helpers.rules import Rules
-from yak_server.helpers.settings import get_lock_datetime, get_settings
+from yak_server.helpers.settings import get_authentication_settings, get_lock_datetime, get_settings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -125,7 +125,7 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
 
     app = create_app_with_profiling()
 
-    app.dependency_overrides[get_settings] = MockSettings(
+    app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
@@ -142,7 +142,7 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
 
 @pytest.fixture
 def app_with_valid_jwt_config(_app: "FastAPI") -> Generator["FastAPI", None, None]:
-    _app.dependency_overrides[get_settings] = MockSettings(
+    _app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
@@ -161,7 +161,7 @@ def app_with_valid_jwt_config(_app: "FastAPI") -> Generator["FastAPI", None, Non
 def app_with_valid_jwt_config_production(
     _app_production: "FastAPI",
 ) -> Generator["FastAPI", None, None]:
-    _app_production.dependency_overrides[get_settings] = MockSettings(
+    _app_production.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
@@ -178,7 +178,7 @@ def app_with_valid_jwt_config_production(
 
 @pytest.fixture
 def app_with_null_jwt_expiration_time(_app: "FastAPI") -> Generator["FastAPI", None, None]:
-    _app.dependency_overrides[get_settings] = MockSettings(
+    _app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
         jwt_expiration_time=0,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
@@ -195,7 +195,7 @@ def app_with_null_jwt_expiration_time(_app: "FastAPI") -> Generator["FastAPI", N
 
 @pytest.fixture
 def app_with_null_jwt_refresh_expiration_time(_app: "FastAPI") -> Generator["FastAPI", None, None]:
-    _app.dependency_overrides[get_settings] = MockSettings(
+    _app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=3,
         jwt_secret_key=get_random_string(15),
@@ -211,18 +211,9 @@ def app_with_null_jwt_refresh_expiration_time(_app: "FastAPI") -> Generator["Fas
 
 
 @pytest.fixture
-def app_with_empty_rules(_app: "FastAPI") -> Generator["FastAPI", None, None]:
-    _app.dependency_overrides[get_settings] = MockSettings(
-        jwt_expiration_time=100,
-        jwt_refresh_expiration_time=200,
-        jwt_secret_key=get_random_string(15),
-        rules=Rules(),
-    )
+def app_with_empty_rules(app_with_valid_jwt_config: "FastAPI") -> Generator["FastAPI", None, None]:
+    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(rules=Rules())
 
-    _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") + pendulum.duration(minutes=10)
-    )
+    yield app_with_valid_jwt_config
 
-    yield _app
-
-    _app.dependency_overrides.clear()
+    app_with_valid_jwt_config.dependency_overrides.clear()
