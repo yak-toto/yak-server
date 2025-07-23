@@ -55,12 +55,6 @@ def app_with_rules_and_score_board_config(
                 first_team_qualified=20,
             ),
         ),
-        base_correct_result=1,
-        multiplying_factor_correct_result=2,
-        base_correct_score=3,
-        multiplying_factor_correct_score=7,
-        team_qualified=10,
-        first_team_qualified=20,
     )
 
     yield app_with_valid_jwt_config
