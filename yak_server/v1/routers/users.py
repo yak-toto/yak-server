@@ -24,7 +24,10 @@ from yak_server.helpers.password_validator import (
     PasswordRequirements,
     PasswordRequirementsError,
 )
-from yak_server.helpers.settings import Settings, get_settings
+from yak_server.helpers.settings import (
+    AuthenticationSettings,
+    get_authentication_settings,
+)
 from yak_server.v1.helpers.auth import get_admin_user, get_current_user
 from yak_server.v1.helpers.errors import (
     ExpiredRefreshToken,
@@ -79,7 +82,7 @@ def set_refresh_token_cookie(
 def signup(
     signup_in: SignupIn,
     db: Annotated[Session, Depends(get_db)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
     request: Request,
     response: Response,
 ) -> GenericOut[SignupOut]:
@@ -95,13 +98,13 @@ def signup(
         raise NameAlreadyExists(signup_in.name) from name_already_exists_error
 
     refresh_token = add_refresh_token(
-        db, user.id, pendulum.duration(seconds=settings.jwt_refresh_expiration_time)
+        db, user.id, pendulum.duration(seconds=auth_settings.jwt_refresh_expiration_time)
     )
 
     logger.info(signed_up_successfully(user.name))
 
     set_refresh_token_cookie(
-        response, refresh_token, settings.jwt_refresh_expiration_time, debug=request.app.debug
+        response, refresh_token, auth_settings.jwt_refresh_expiration_time, debug=request.app.debug
     )
 
     return GenericOut(
@@ -110,8 +113,8 @@ def signup(
             name=user.name,
             access_token=encode_bearer_token(
                 sub=user.id,
-                expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
-                secret_key=settings.jwt_secret_key,
+                expiration_time=pendulum.duration(seconds=auth_settings.jwt_expiration_time),
+                secret_key=auth_settings.jwt_secret_key,
             ),
         ),
     )
@@ -147,7 +150,7 @@ def password_requirements() -> GenericOut[PasswordRequirementsOut]:
 def login(
     login_in: LoginIn,
     db: Annotated[Session, Depends(get_db)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
     request: Request,
     response: Response,
 ) -> GenericOut[LoginOut]:
@@ -157,13 +160,13 @@ def login(
         raise InvalidCredentials
 
     refresh_token = add_refresh_token(
-        db, user.id, pendulum.duration(seconds=settings.jwt_refresh_expiration_time)
+        db, user.id, pendulum.duration(seconds=auth_settings.jwt_refresh_expiration_time)
     )
 
     logger.info(logged_in_successfully(user.name))
 
     set_refresh_token_cookie(
-        response, refresh_token, settings.jwt_refresh_expiration_time, debug=request.app.debug
+        response, refresh_token, auth_settings.jwt_refresh_expiration_time, debug=request.app.debug
     )
 
     return GenericOut(
@@ -172,8 +175,8 @@ def login(
             name=user.name,
             access_token=encode_bearer_token(
                 sub=user.id,
-                expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
-                secret_key=settings.jwt_secret_key,
+                expiration_time=pendulum.duration(seconds=auth_settings.jwt_expiration_time),
+                secret_key=auth_settings.jwt_secret_key,
             ),
         ),
     )
@@ -189,7 +192,7 @@ def login(
 )
 def refresh(
     db: Annotated[Session, Depends(get_db)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
     refresh_token: Annotated[str, Cookie()],
     request: Request,
     response: Response,
@@ -207,20 +210,23 @@ def refresh(
     # Issue new access token
     new_access_token = encode_bearer_token(
         sub=user_id,
-        expiration_time=pendulum.duration(seconds=settings.jwt_expiration_time),
-        secret_key=settings.jwt_secret_key,
+        expiration_time=pendulum.duration(seconds=auth_settings.jwt_expiration_time),
+        secret_key=auth_settings.jwt_secret_key,
     )
 
     # Rotate refresh token
     new_refresh_token = add_refresh_token(
         db,
         user_id,
-        pendulum.duration(seconds=settings.jwt_refresh_expiration_time),
+        pendulum.duration(seconds=auth_settings.jwt_refresh_expiration_time),
         refresh_token_found,
     )
 
     set_refresh_token_cookie(
-        response, new_refresh_token, settings.jwt_refresh_expiration_time, debug=request.app.debug
+        response,
+        new_refresh_token,
+        auth_settings.jwt_refresh_expiration_time,
+        debug=request.app.debug,
     )
 
     return GenericOut(result=RefreshTokenOut(access_token=new_access_token))

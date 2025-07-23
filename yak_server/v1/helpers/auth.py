@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from yak_server.database.models import UserModel
 from yak_server.helpers.authentication import decode_bearer_token
 from yak_server.helpers.database import get_db
-from yak_server.helpers.settings import Settings, get_settings
+from yak_server.helpers.settings import AuthenticationSettings, get_authentication_settings
 
 from .errors import (
     ExpiredToken,
@@ -38,20 +38,20 @@ def user_from_token(db: Session, secret_key: str, access_token: str) -> UserMode
 def get_current_user(
     access_token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     db: Annotated[Session, Depends(get_db)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
 ) -> UserModel:
     if access_token is None:
         raise InvalidToken
 
-    return user_from_token(db, settings.jwt_secret_key, access_token.credentials)
+    return user_from_token(db, auth_settings.jwt_secret_key, access_token.credentials)
 
 
 def get_admin_user(
     access_token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     db: Annotated[Session, Depends(get_db)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
 ) -> UserModel:
-    user = get_current_user(access_token, db, settings)
+    user = get_current_user(access_token, db, auth_settings)
 
     if user.name != "admin":
         raise UnauthorizedAccessToAdminAPI

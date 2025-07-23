@@ -46,3 +46,15 @@ class MockLockDatetime:
 
     def __call__(self) -> "pendulum.DateTime":
         return self.lock_datetime
+
+
+class MockAuthenticationSettings:
+    def __init__(
+        self, jwt_secret_key: str, jwt_expiration_time: int, jwt_refresh_expiration_time: int
+    ) -> None:
+        self.jwt_secret_key = jwt_secret_key
+        self.jwt_expiration_time = jwt_expiration_time
+        self.jwt_refresh_expiration_time = jwt_refresh_expiration_time
+
+    def __call__(self) -> Self:
+        return self
