@@ -21,7 +21,6 @@ from yak_server.helpers.settings import Settings, get_settings
 from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.errors import (
     BetNotFound,
-    GroupNotFound,
     LockedScoreBet,
     TeamNotFound,
 )
@@ -30,7 +29,6 @@ from yak_server.v1.models.groups import GroupOut
 from yak_server.v1.models.phases import PhaseOut
 from yak_server.v1.models.score_bets import (
     ModifyScoreBetIn,
-    ScoreBetIn,
     ScoreBetOut,
     ScoreBetResponse,
 )
@@ -79,60 +77,6 @@ def send_response(
             ),
         ),
     )
-
-
-@router.post(
-    "/",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
-    },
-)
-def create_score_bet(
-    score_bet_in: ScoreBetIn,
-    db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(get_current_user)],
-    settings: Annotated[Settings, Depends(get_settings)],
-    lang: Lang = DEFAULT_LANGUAGE,
-) -> GenericOut[ScoreBetResponse]:
-    if is_locked(user.name, settings.lock_datetime):
-        raise LockedScoreBet
-
-    match = MatchModel(
-        team1_id=score_bet_in.team1.id,
-        team2_id=score_bet_in.team2.id,
-        index=score_bet_in.index,
-        group_id=score_bet_in.group.id,
-        user_id=user.id,
-    )
-
-    db.add(match)
-    try:
-        db.flush()
-    except IntegrityError as integrity_error:
-        if f"(team1_id)=({score_bet_in.team1.id})" in str(integrity_error):
-            raise TeamNotFound(team_id=score_bet_in.team1.id) from integrity_error
-
-        if f"(team2_id)=({score_bet_in.team2.id})" in str(integrity_error):
-            raise TeamNotFound(team_id=score_bet_in.team2.id) from integrity_error
-
-        raise GroupNotFound(group_id=score_bet_in.group.id) from integrity_error
-
-    score_bet = ScoreBetModel(
-        match_id=match.id,
-        score1=score_bet_in.team1.score,
-        score2=score_bet_in.team2.score,
-    )
-
-    set_recomputation_flag(db, score_bet_in.team1.id, user.id)
-    set_recomputation_flag(db, score_bet_in.team2.id, user.id)
-
-    db.add(score_bet)
-    db.commit()
-    db.refresh(score_bet)
-
-    return send_response(score_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
 
 
 @router.get(
@@ -238,46 +182,3 @@ def modify_score_bet(
     db.commit()
 
     return send_response(score_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
-
-
-@router.delete(
-    "/{bet_id}",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
-    },
-)
-def delete_score_bet_by_id(
-    bet_id: UUID4,
-    db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(get_current_user)],
-    settings: Annotated[Settings, Depends(get_settings)],
-    lang: Lang = DEFAULT_LANGUAGE,
-) -> GenericOut[ScoreBetResponse]:
-    if is_locked(user.name, settings.lock_datetime):
-        raise LockedScoreBet
-
-    score_bet = (
-        db.query(ScoreBetModel)
-        .join(ScoreBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id))
-        .first()
-    )
-
-    if not score_bet:
-        raise BetNotFound(bet_id)
-
-    response = send_response(
-        score_bet,
-        locked=is_locked(user.name, settings.lock_datetime),
-        lang=lang,
-    )
-
-    set_recomputation_flag(db, score_bet.match.team1_id, user.id)
-    set_recomputation_flag(db, score_bet.match.team2_id, user.id)
-
-    db.delete(score_bet)
-    db.commit()
-
-    return response

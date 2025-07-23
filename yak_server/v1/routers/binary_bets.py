@@ -20,12 +20,10 @@ from yak_server.helpers.settings import Settings, get_settings
 from yak_server.v1.helpers.auth import get_current_user
 from yak_server.v1.helpers.errors import (
     BetNotFound,
-    GroupNotFound,
     LockedBinaryBet,
     TeamNotFound,
 )
 from yak_server.v1.models.binary_bets import (
-    BinaryBetIn,
     BinaryBetOut,
     BinaryBetResponse,
     ModifyBinaryBetIn,
@@ -78,54 +76,6 @@ def send_response(
             ),
         ),
     )
-
-
-@router.post(
-    "/",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
-    },
-)
-def create_binary_bet(
-    binary_bet_in: BinaryBetIn,
-    db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(get_current_user)],
-    settings: Annotated[Settings, Depends(get_settings)],
-    lang: Lang = DEFAULT_LANGUAGE,
-) -> GenericOut[BinaryBetResponse]:
-    if is_locked(user.name, settings.lock_datetime):
-        raise LockedBinaryBet
-
-    match = MatchModel(
-        team1_id=binary_bet_in.team1.id,
-        team2_id=binary_bet_in.team2.id,
-        index=binary_bet_in.index,
-        group_id=binary_bet_in.group.id,
-        user_id=user.id,
-    )
-
-    db.add(match)
-    try:
-        db.flush()
-    except IntegrityError as integrity_error:
-        db.rollback()
-        if f"(team1_id)=({binary_bet_in.team1.id})" in str(integrity_error):
-            raise TeamNotFound(team_id=binary_bet_in.team1.id) from integrity_error
-
-        if f"(team2_id)=({binary_bet_in.team2.id})" in str(integrity_error):
-            raise TeamNotFound(team_id=binary_bet_in.team2.id) from integrity_error
-
-        raise GroupNotFound(group_id=binary_bet_in.group.id) from integrity_error
-
-    binary_bet = BinaryBetModel(match_id=match.id, is_one_won=binary_bet_in.is_one_won)
-
-    db.add(binary_bet)
-    db.commit()
-    db.refresh(binary_bet)
-
-    return send_response(binary_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
 
 
 @router.get(
@@ -225,43 +175,3 @@ def modify_binary_bet_by_id(
     db.commit()
 
     return send_response(binary_bet, locked=is_locked(user.name, settings.lock_datetime), lang=lang)
-
-
-@router.delete(
-    "/{bet_id}",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
-    },
-)
-def delete_binary_bet_by_id(
-    bet_id: UUID4,
-    db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(get_current_user)],
-    settings: Annotated[Settings, Depends(get_settings)],
-    lang: Lang = DEFAULT_LANGUAGE,
-) -> GenericOut[BinaryBetResponse]:
-    if is_locked(user.name, settings.lock_datetime):
-        raise LockedBinaryBet
-
-    binary_bet = (
-        db.query(BinaryBetModel)
-        .join(BinaryBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, BinaryBetModel.id == bet_id))
-        .first()
-    )
-
-    if not binary_bet:
-        raise BetNotFound(bet_id)
-
-    response = send_response(
-        binary_bet,
-        locked=is_locked(user.name, settings.lock_datetime),
-        lang=lang,
-    )
-
-    db.delete(binary_bet)
-    db.commit()
-
-    return response
