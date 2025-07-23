@@ -10,13 +10,13 @@ from psycopg2 import sql
 from sqlalchemy import Engine, create_engine
 
 from scripts.profiling import create_app as create_app_with_profiling
-from testing.mock import MockSettings
+from testing.mock import MockLockDatetime, MockSettings
 from testing.util import get_random_string
 from yak_server import create_app
 from yak_server.cli.database import create_database, delete_database, drop_database
 from yak_server.database import compute_database_uri, get_postgres_settings
 from yak_server.helpers.rules import Rules
-from yak_server.helpers.settings import get_settings
+from yak_server.helpers.settings import get_lock_datetime, get_settings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -129,7 +129,10 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
-        lock_datetime_shift=pendulum.duration(minutes=10),
+    )
+
+    app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
+        pendulum.now("UTC") + pendulum.duration(minutes=10)
     )
 
     yield app
@@ -143,7 +146,10 @@ def app_with_valid_jwt_config(_app: "FastAPI") -> Generator["FastAPI", None, Non
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
-        lock_datetime_shift=pendulum.duration(minutes=10),
+    )
+
+    _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
+        pendulum.now("UTC") + pendulum.duration(minutes=10)
     )
 
     yield _app
@@ -159,7 +165,10 @@ def app_with_valid_jwt_config_production(
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
-        lock_datetime_shift=pendulum.duration(minutes=10),
+    )
+
+    _app_production.dependency_overrides[get_lock_datetime] = MockLockDatetime(
+        pendulum.now("UTC") + pendulum.duration(minutes=10)
     )
 
     yield _app_production
@@ -173,7 +182,10 @@ def app_with_null_jwt_expiration_time(_app: "FastAPI") -> Generator["FastAPI", N
         jwt_expiration_time=0,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
-        lock_datetime_shift=pendulum.duration(minutes=10),
+    )
+
+    _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
+        pendulum.now("UTC") + pendulum.duration(minutes=10)
     )
 
     yield _app
@@ -187,7 +199,10 @@ def app_with_null_jwt_refresh_expiration_time(_app: "FastAPI") -> Generator["Fas
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=3,
         jwt_secret_key=get_random_string(15),
-        lock_datetime_shift=pendulum.duration(minutes=10),
+    )
+
+    _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
+        pendulum.now("UTC") + pendulum.duration(minutes=10)
     )
 
     yield _app
@@ -201,8 +216,11 @@ def app_with_empty_rules(_app: "FastAPI") -> Generator["FastAPI", None, None]:
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
-        lock_datetime_shift=pendulum.duration(seconds=10),
         rules=Rules(),
+    )
+
+    _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
+        pendulum.now("UTC") + pendulum.duration(minutes=10)
     )
 
     yield _app
