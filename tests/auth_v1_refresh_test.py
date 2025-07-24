@@ -6,13 +6,18 @@ from uuid import uuid4
 
 from starlette.testclient import TestClient
 
-from testing.util import get_random_string
+from testing.util import get_random_string, setup_competition
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
+    from sqlalchemy.orm import Session
 
 
-def test_refresh_token_after_signup(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_refresh_token_after_signup(
+    app_with_valid_jwt_config: "FastAPI", db_session: "Session"
+) -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config)
 
     response = client.post(
@@ -41,7 +46,11 @@ def test_refresh_token_after_signup(app_with_valid_jwt_config: "FastAPI") -> Non
     assert response.status_code == HTTPStatus.OK
 
 
-def test_refresh_token_after_login(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_refresh_token_after_login(
+    app_with_valid_jwt_config: "FastAPI", db_session: "Session"
+) -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config)
 
     name = get_random_string(10)
@@ -83,7 +92,11 @@ def test_refresh_token_after_login(app_with_valid_jwt_config: "FastAPI") -> None
     assert response.status_code == HTTPStatus.OK
 
 
-def test_non_existing_refresh_token(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_non_existing_refresh_token(
+    app_with_valid_jwt_config: "FastAPI", db_session: "Session"
+) -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config)
 
     response = client.post(
@@ -113,7 +126,9 @@ def test_non_existing_refresh_token(app_with_valid_jwt_config: "FastAPI") -> Non
     }
 
 
-def test_cookie_header(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_cookie_header(app_with_valid_jwt_config: "FastAPI", db_session: "Session") -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config)
 
     response = client.post(
@@ -141,7 +156,11 @@ def test_cookie_header(app_with_valid_jwt_config: "FastAPI") -> None:
     )
 
 
-def test_refresh_token_expired(app_with_null_jwt_refresh_expiration_time: "FastAPI") -> None:
+def test_refresh_token_expired(
+    app_with_null_jwt_refresh_expiration_time: "FastAPI", db_session: "Session"
+) -> None:
+    setup_competition(app_with_null_jwt_refresh_expiration_time, db_session, "test_login")
+
     client = TestClient(app_with_null_jwt_refresh_expiration_time)
 
     # Login to get the cookie
@@ -176,7 +195,11 @@ def test_refresh_token_expired(app_with_null_jwt_refresh_expiration_time: "FastA
     }
 
 
-def test_refresh_token_rotation(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_refresh_token_rotation(
+    app_with_valid_jwt_config: "FastAPI", db_session: "Session"
+) -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config)
 
     name = get_random_string(10)
@@ -212,7 +235,11 @@ def test_refresh_token_rotation(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_refresh_token_production_secure(app_with_valid_jwt_config_production: "FastAPI") -> None:
+def test_refresh_token_production_secure(
+    app_with_valid_jwt_config_production: "FastAPI", db_session: "Session"
+) -> None:
+    setup_competition(app_with_valid_jwt_config_production, db_session, "test_login")
+
     client = TestClient(app_with_valid_jwt_config_production)
 
     response = client.post(

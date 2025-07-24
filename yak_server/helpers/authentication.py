@@ -6,6 +6,7 @@ import pendulum
 from sqlalchemy.orm import Session
 
 from yak_server.database.models import (
+    CompetitionModel,
     MatchModel,
     MatchReferenceModel,
     RefreshTokenModel,
@@ -44,7 +45,12 @@ class NameAlreadyExistsError(Exception):
 
 
 def signup_user(
-    db: Session, name: str, first_name: str, last_name: str, password: str
+    db: Session,
+    name: str,
+    first_name: str,
+    last_name: str,
+    password: str,
+    competition: CompetitionModel,
 ) -> UserModel:
     # Check existing user in db
     existing_user = db.query(UserModel).filter_by(name=name).first()
@@ -60,13 +66,14 @@ def signup_user(
     db.flush()
 
     # Initialize matches and bets and integrate in db
-    for match_reference in db.query(MatchReferenceModel).all():
+    for match_reference in db.query(MatchReferenceModel).filter_by(competition_id=competition.id):
         match = MatchModel(
             team1_id=match_reference.team1_id,
             team2_id=match_reference.team2_id,
             index=match_reference.index,
             group_id=match_reference.group_id,
             user_id=user.id,
+            competition_id=competition.id,
         )
         db.add(match)
         db.flush()
