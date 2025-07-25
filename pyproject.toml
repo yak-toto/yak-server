@@ -39,6 +39,7 @@ dependencies = [
     "SQLAlchemy ==2.0.41",
     "pendulum ==3.1.0",
     "pydantic-settings ==2.10.1",
+    "sqlmodel>=0.0.24",
 ]
 version = "0.54.0"
 
