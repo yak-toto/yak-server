@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from yak_server.helpers.admin_view import view_admin
+
 from . import health_check
 from .helpers.logging_helpers import setup_logging
 from .v1.helpers.errors import set_exception_handler
@@ -74,5 +76,8 @@ def create_app() -> FastAPI:
 
     # Declare logger configuration for yak server
     setup_logging(debug=app.debug)
+
+    if app.debug:
+        view_admin(app)
 
     return app

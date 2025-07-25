@@ -61,6 +61,7 @@ dev = [
     "pytest>=8.4.0",
     "pytest-cov>=6.0.0",
     "pytest-env>=1.1.5",
+    "sqladmin>=0.21.0",
     "yappi>=1.6.10",
 ]
 type-checking = [
