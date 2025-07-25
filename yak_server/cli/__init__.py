@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 import click
@@ -9,6 +10,7 @@ from .database import (
     compute_score_board,
     create_admin,
     create_database,
+    create_database_1,
     delete_database,
     drop_database,
     initialize_database,
@@ -33,6 +35,14 @@ def make_db_app() -> click.Group:
         """Create all database tables."""
         engine = build_engine()
         create_database(engine)
+
+    @db_app.command()
+    def create1() -> None:
+        """Create all database tables."""
+        # engine = build_engine()
+        asyncio.run(create_database_1())
+
+        # await create_database_1()
 
     @db_app.command()
     def init() -> None:

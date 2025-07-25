@@ -2,9 +2,12 @@ from enum import Enum
 from typing import TYPE_CHECKING, Optional, Union
 from uuid import UUID, uuid4
 
+import edgy
+import psycopg2
 import sqlalchemy as sa
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
+from edgy import Database, Registry
 from pendulum import DateTime
 from sqlalchemy import CheckConstraint, UniqueConstraint
 from sqlalchemy import Enum as SqlEnum
@@ -13,10 +16,48 @@ from sqlalchemy.dialects.postgresql import UUID as DB_UUID
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+from . import compute_database_uri, get_postgres_settings
+
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
 ph = PasswordHasher()
+
+postgres_settings = get_postgres_settings()
+
+database_url = compute_database_uri(
+    psycopg2.__name__,
+    postgres_settings.host,
+    postgres_settings.user,
+    postgres_settings.password,
+    postgres_settings.port,
+    postgres_settings.db,
+)
+print(database_url)
+
+database = Database(database_url)
+models = Registry(database=database)
+
+
+class User(edgy.Model):
+    class Meta:
+        registry = models
+        tablename = "user"
+
+    id: UUID = edgy.fields.UUIDField(primary_key=True, default=uuid4)
+    name: str = edgy.fields.CharField(max_length=100, unique=True, null=False)
+    first_name: str = edgy.fields.CharField(max_length=100, nullable=False)
+    last_name: str = edgy.fields.CharField(max_length=100, nullable=False)
+    password: str = edgy.fields.CharField(max_length=100, nullable=False)
+    number_match_guess: int = edgy.fields.IntegerField(default=0, min_value=0)
+    number_score_guess: int = edgy.fields.IntegerField(default=0, min_value=0)
+    number_qualified_teams_guess: int = edgy.fields.IntegerField(default=0, min_value=0)
+    number_first_qualified_guess: int = edgy.IntegerField(default=0, min_value=0)
+    number_quarter_final_guess: int = edgy.fields.IntegerField(default=0, min_value=0)
+    number_semi_final_guess: int = edgy.fields.IntegerField(default=0, min_value=0)
+    number_final_guess: int = edgy.fields.IntegerField(default=0, min_value=0)
+    number_winner_guess: int = edgy.fields.IntegerField(default=0, min_value=0)
+    points: float = edgy.fields.FloatField(default=0, min_value=0)
 
 
 class Base(DeclarativeBase):

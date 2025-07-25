@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
-from sqlalchemy import update
+from sqlalchemy import MetaData, update
 from sqlalchemy.dialects.postgresql import insert
 
 from yak_server.database import build_local_session_maker
@@ -19,6 +19,7 @@ from yak_server.database.models import (
     ScoreBetModel,
     TeamModel,
     UserModel,
+    database,
 )
 from yak_server.helpers.authentication import NameAlreadyExistsError, signup_user
 from yak_server.helpers.rules.compute_points import compute_points as compute_points_func
@@ -51,6 +52,11 @@ class TableDropInProductionError(Exception):
 
 def create_database(engine: "Engine") -> None:
     Base.metadata.create_all(bind=engine)
+
+
+async def create_database_1() -> None:
+    await database.connect()
+    await database.create_all(MetaData())
 
 
 def create_admin(password: str, engine: "Engine") -> None:
