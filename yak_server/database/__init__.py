@@ -1,6 +1,6 @@
 from functools import cache
 
-import psycopg2
+import psycopg
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -35,7 +35,7 @@ def build_engine() -> Engine:
     postgres_settings = get_postgres_settings()
 
     database_url = compute_database_uri(
-        psycopg2.__name__,
+        psycopg.__name__,
         postgres_settings.host,
         postgres_settings.user,
         postgres_settings.password,
