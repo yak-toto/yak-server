@@ -4,9 +4,9 @@ from collections.abc import Generator
 from typing import TYPE_CHECKING
 
 import pendulum
-import psycopg2
+import psycopg
 import pytest
-from psycopg2 import sql
+from psycopg import sql
 from sqlalchemy import Engine, create_engine
 
 from scripts.profiling import create_app as create_app_with_profiling
@@ -25,25 +25,20 @@ if TYPE_CHECKING:
 def create_test_database() -> Engine:
     db_settings = get_postgres_settings()
 
-    connection = psycopg2.connect(
+    with psycopg.connect(
         host=db_settings.host,
         user=db_settings.user,
         password=db_settings.password,
         port=db_settings.port,
         dbname="postgres",  # System database
-    )
-    connection.autocommit = True  # Required to create a database
+    ) as connection:
+        connection.autocommit = True  # Required to create a database
 
-    cursor = connection.cursor()
-
-    with contextlib.suppress(psycopg2.errors.DuplicateDatabase):
-        cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(db_settings.db)))
-
-    cursor.close()
-    connection.close()
+        with contextlib.suppress(psycopg.errors.DuplicateDatabase):
+            connection.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(db_settings.db)))
 
     database_url = compute_database_uri(
-        psycopg2.__name__,
+        psycopg.__name__,
         db_settings.host,
         db_settings.user,
         db_settings.password,
