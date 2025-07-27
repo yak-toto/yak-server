@@ -2,8 +2,8 @@ from functools import cache
 
 import psycopg
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from sqlalchemy import Engine, create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import Engine
+from sqlmodel import create_engine
 
 
 class PostgresSettings(BaseSettings):
@@ -44,7 +44,3 @@ def build_engine() -> Engine:
     )
 
     return create_engine(database_url, pool_recycle=7200, pool_pre_ping=True)
-
-
-def build_local_session_maker(engine: Engine) -> sessionmaker[Session]:
-    return sessionmaker(autocommit=False, autoflush=False, bind=engine)

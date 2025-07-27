@@ -5,12 +5,12 @@ from unittest.mock import ANY
 
 import pytest
 from fastapi import status
+from sqlmodel import Session, select
 from starlette.testclient import TestClient
 
 from testing.mock import MockSettings
 from testing.util import UserData, get_random_string, patch_score_bets
 from yak_server.cli.database import initialize_database
-from yak_server.database import build_local_session_maker
 from yak_server.database.models import UserModel
 from yak_server.helpers.rules import Rules
 from yak_server.helpers.rules.compute_final_from_rank import (
@@ -394,13 +394,11 @@ def test_missing_first_phase_group(engine_for_test: "Engine") -> None:
         ],
     )
 
-    local_session_maker = build_local_session_maker(engine_for_test)
-
     user = UserModel(
         name="fake_user", first_name="fake", last_name="user", password=get_random_string(150)
     )
 
-    with local_session_maker() as db:
+    with Session(engine_for_test) as db:
         assert compute_finale_phase_from_group_rank(db, user, rule) == (
             status.HTTP_404_NOT_FOUND,
             "Group not found with code: 2",
@@ -449,16 +447,14 @@ def test_no_bet_associated_to_first_phase_group(
 
     assert response.status_code == HTTPStatus.OK
 
-    local_session_maker = build_local_session_maker(engine_for_test)
-
     rule = RuleComputeFinaleFromGroupRank(
         to_group="1",
         from_phase="GROUP",
         versus=[Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="A"))],
     )
 
-    with local_session_maker() as db:
-        user = db.query(UserModel).filter_by(id=user_id).first()
+    with Session(engine_for_test) as db:
+        user = db.exec(select(UserModel).where(UserModel.id == user_id)).first()
 
         assert user is not None
         assert compute_finale_phase_from_group_rank(db, user, rule) == (status.HTTP_200_OK, "")

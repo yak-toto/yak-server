@@ -4,12 +4,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
-from sqlalchemy import update
 from sqlalchemy.dialects.postgresql import insert
+from sqlmodel import Session, SQLModel, delete, select, update
 
-from yak_server.database import build_local_session_maker
 from yak_server.database.models import (
-    Base,
     BinaryBetModel,
     GroupModel,
     GroupPositionModel,
@@ -34,7 +32,6 @@ except ImportError:  # pragma: no cover
 if TYPE_CHECKING:
     from fastapi import FastAPI
     from sqlalchemy import Engine
-    from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
@@ -50,13 +47,11 @@ class TableDropInProductionError(Exception):
 
 
 def create_database(engine: "Engine") -> None:
-    Base.metadata.create_all(bind=engine)
+    SQLModel.metadata.create_all(bind=engine)
 
 
 def create_admin(password: str, engine: "Engine") -> None:
-    local_session_maker = build_local_session_maker(engine)
-
-    with local_session_maker() as db:
+    with Session(engine) as db:
         try:
             _ = signup_user(
                 db, name="admin", first_name="admin", last_name="admin", password=password
@@ -88,7 +83,7 @@ def fetch_team_id(team_code: Optional[str], db: "Session") -> Optional[UUID]:
     if team_code is None:
         return None
 
-    team = db.query(TeamModel).filter_by(code=team_code).first()
+    team = db.exec(select(TeamModel).where(TeamModel.code == team_code)).first()
 
     if team is None:
         raise MissingTeamDuringInitError(team_code)
@@ -97,7 +92,7 @@ def fetch_team_id(team_code: Optional[str], db: "Session") -> Optional[UUID]:
 
 
 def fetch_group_id(group_code: str, db: "Session") -> UUID:
-    group = db.query(GroupModel).filter_by(code=group_code).first()
+    group = db.exec(select(GroupModel).where(GroupModel.code == group_code)).first()
 
     if group is None:
         raise MissingGroupDuringInitError(group_code)
@@ -106,15 +101,13 @@ def fetch_group_id(group_code: str, db: "Session") -> UUID:
 
 
 def initialize_database(engine: "Engine", app: "FastAPI") -> None:
-    local_session_maker = build_local_session_maker(engine)
-
-    with local_session_maker() as db:
+    with Session(engine) as db:
         data_folder = get_settings().data_folder
 
         phases = json.loads(Path(data_folder, "phases.json").read_text(encoding="utf-8"))
 
         for phase in phases:
-            db.execute(
+            db.exec(
                 insert(PhaseModel).values(**phase).on_conflict_do_nothing(index_elements=["code"])
             )
 
@@ -125,7 +118,7 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
         for group in groups:
             phase_code = group.pop("phase_code")
 
-            phase = db.query(PhaseModel).filter_by(code=phase_code).first()
+            phase = db.exec(select(PhaseModel).where(PhaseModel.code == phase_code)).first()
 
             if phase is None:
                 raise MissingPhaseDuringInitError(phase_code)
@@ -133,7 +126,7 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
             group["phase_id"] = phase.id
 
         for group in groups:
-            db.execute(
+            db.exec(
                 insert(GroupModel).values(**group).on_conflict_do_nothing(index_elements=["code"])
             )
 
@@ -144,13 +137,13 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
         for team in teams:
             team["flag_url"] = ""
 
-            db.execute(
+            db.exec(
                 insert(TeamModel).values(**team).on_conflict_do_nothing(index_elements=["code"])
             )
 
             db.flush()
 
-            team_instance = db.query(TeamModel).filter_by(code=team["code"]).first()
+            team_instance = db.exec(select(TeamModel).where(TeamModel.code == team["code"])).first()
 
             if team_instance is None:  # pragma: no cover
                 raise MissingTeamDuringInitError(team_code=team["code"])
@@ -163,7 +156,7 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
                 )
             )
 
-            db.execute(update_flag_url_stmt)
+            db.exec(update_flag_url_stmt)
             db.flush()
 
         matches = json.loads(Path(data_folder, "matches.json").read_text(encoding="utf-8"))
@@ -189,18 +182,16 @@ def delete_database(engine: "Engine", *, debug: bool) -> None:
     if debug is False:
         raise RecordDeletionInProductionError
 
-    local_session_maker = build_local_session_maker(engine)
-
-    with local_session_maker() as db:
-        db.query(GroupPositionModel).delete()
-        db.query(ScoreBetModel).delete()
-        db.query(BinaryBetModel).delete()
-        db.query(MatchReferenceModel).delete()
-        db.query(MatchModel).delete()
-        db.query(UserModel).delete()
-        db.query(GroupModel).delete()
-        db.query(PhaseModel).delete()
-        db.query(TeamModel).delete()
+    with Session(engine) as db:
+        db.exec(delete(GroupPositionModel))
+        db.exec(delete(ScoreBetModel))
+        db.exec(delete(BinaryBetModel))
+        db.exec(delete(MatchReferenceModel))
+        db.exec(delete(MatchModel))
+        db.exec(delete(UserModel))
+        db.exec(delete(GroupModel))
+        db.exec(delete(PhaseModel))
+        db.exec(delete(TeamModel))
         db.commit()
 
 
@@ -208,7 +199,7 @@ def drop_database(engine: "Engine", *, debug: bool) -> None:
     if debug is False:
         raise TableDropInProductionError
 
-    Base.metadata.drop_all(bind=engine)
+    SQLModel.metadata.drop_all(bind=engine)
 
 
 def print_export_command(alembic_ini_path: Path) -> None:
@@ -249,10 +240,8 @@ class ComputePointsRuleNotDefinedError(Exception):
 
 
 def compute_score_board(engine: "Engine") -> None:
-    local_session_maker = build_local_session_maker(engine)
-
-    with local_session_maker() as db:
-        admin = db.query(UserModel).filter_by(name="admin").first()
+    with Session(engine) as db:
+        admin = db.exec(select(UserModel).where(UserModel.name == "admin")).first()
 
         if admin is None:
             raise NoAdminUser

@@ -7,7 +7,8 @@ import pendulum
 import psycopg
 import pytest
 from psycopg import sql
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Engine
+from sqlmodel import create_engine
 
 from scripts.profiling import create_app as create_app_with_profiling
 from testing.mock import MockAuthenticationSettings, MockLockDatetime, MockSettings

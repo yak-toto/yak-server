@@ -21,7 +21,7 @@ def test_health_check_ok(app_with_valid_jwt_config: "FastAPI") -> None:
 
 
 class FakeDbSession:
-    def execute(self, statement: TextClause) -> None:  # noqa: PLR6301
+    def exec(self, statement: TextClause) -> None:  # noqa: PLR6301
         raise SQLAlchemyError(statement)
 
 

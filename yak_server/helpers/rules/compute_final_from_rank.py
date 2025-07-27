@@ -3,13 +3,13 @@ from typing import TYPE_CHECKING
 
 from fastapi import status
 from pydantic import BaseModel
-from sqlalchemy import and_
+from sqlmodel import select
 
 from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, PhaseModel
 from yak_server.helpers.group_position import get_group_rank_with_code
 
 if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
+    from sqlmodel import Session
 
     from yak_server.database.models import UserModel
 
@@ -35,17 +35,21 @@ def compute_finale_phase_from_group_rank(
     user: "UserModel",
     rule_config: RuleComputeFinaleFromGroupRank,
 ) -> tuple[int, str]:
-    first_phase_group = db.query(GroupModel).filter_by(code=rule_config.to_group).first()
+    first_phase_group = db.exec(
+        select(GroupModel).where(GroupModel.code == rule_config.to_group)
+    ).first()
 
     if first_phase_group is None:
         return status.HTTP_404_NOT_FOUND, f"Group not found with code: {rule_config.to_group}"
 
     groups_result = {
         group.code: get_group_rank_with_code(db, user, group.id)
-        for group in db.query(GroupModel)
-        .join(GroupModel.phase)
-        .filter(
-            PhaseModel.code == rule_config.from_phase,
+        for group in (
+            db.exec(
+                select(GroupModel)
+                .join(GroupModel.phase)
+                .where(PhaseModel.code == rule_config.from_phase)
+            )
         )
     }
 
@@ -60,18 +64,15 @@ def compute_finale_phase_from_group_rank(
             team1 = groups_result[match_config.team1.group][match_config.team1.rank - 1].team
             team2 = groups_result[match_config.team2.group][match_config.team2.rank - 1].team
 
-            binary_bet = (
-                db.query(BinaryBetModel)
+            binary_bet = db.exec(
+                select(BinaryBetModel)
                 .join(BinaryBetModel.match)
-                .filter(
-                    and_(
-                        MatchModel.index == index,
-                        MatchModel.user_id == user.id,
-                        MatchModel.group_id == first_phase_group.id,
-                    ),
+                .where(
+                    MatchModel.index == index,
+                    MatchModel.user_id == user.id,
+                    MatchModel.group_id == first_phase_group.id,
                 )
-                .first()
-            )
+            ).first()
 
             if binary_bet is not None:
                 binary_bet.match.team1_id = team1.id

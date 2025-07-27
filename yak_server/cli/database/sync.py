@@ -2,9 +2,8 @@ import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import and_
+from sqlmodel import Session, select
 
-from yak_server.database import build_local_session_maker
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
@@ -177,12 +176,10 @@ def synchronize_official_results(engine: "Engine") -> None:
 
     soup = bs4.BeautifulSoup(response.text, "lxml")
 
-    local_session_maker = build_local_session_maker(engine)
-
-    with local_session_maker() as db:
+    with Session(engine) as db:
         groups = [
             GroupContainer(model=group, content=content.parent.parent)
-            for group in db.query(GroupModel).order_by(GroupModel.index)
+            for group in db.exec(select(GroupModel).order_by(GroupModel.index))
             for content in soup.find(
                 "h3", id=group.description_en.replace(" ", "_"), string=group.description_en
             )
@@ -190,49 +187,43 @@ def synchronize_official_results(engine: "Engine") -> None:
 
         matches = extract_matches_from_html(groups)
 
-        admin = db.query(UserModel).filter_by(name="admin").first()
+        admin = db.exec(select(UserModel).where(UserModel.name == "admin")).first()
 
         for match in matches:
-            score_bet = (
-                db.query(ScoreBetModel)
+            score_bet = db.exec(
+                select(ScoreBetModel)
                 .join(ScoreBetModel.match)
                 .join(MatchModel.group)
-                .filter(
-                    and_(
-                        GroupModel.index == match.group.index,
-                        MatchModel.index == match.index,
-                        MatchModel.user_id == admin.id,
-                    )
+                .where(
+                    GroupModel.index == match.group.index,
+                    MatchModel.index == match.index,
+                    MatchModel.user_id == admin.id,
                 )
-                .first()
-            )
+            ).first()
 
             if score_bet is not None:
                 score_bet.score1 = match.team1.score
                 score_bet.score2 = match.team2.score
 
-            binary_bet = (
-                db.query(BinaryBetModel)
+            binary_bet = db.exec(
+                select(BinaryBetModel)
                 .join(BinaryBetModel.match)
                 .join(MatchModel.group)
                 .join(GroupModel.phase)
-                .filter(
-                    and_(
-                        GroupModel.index == match.group.index,
-                        MatchModel.index == match.index,
-                        MatchModel.user_id == admin.id,
-                    )
+                .where(
+                    GroupModel.index == match.group.index,
+                    MatchModel.index == match.index,
+                    MatchModel.user_id == admin.id,
                 )
-                .first()
-            )
+            ).first()
 
             if binary_bet is not None:
-                team1 = (
-                    db.query(TeamModel).filter_by(description_en=match.team1.description).first()
-                )
-                team2 = (
-                    db.query(TeamModel).filter_by(description_en=match.team2.description).first()
-                )
+                team1 = db.exec(
+                    select(TeamModel).where(TeamModel.description_en == match.team1.description)
+                ).first()
+                team2 = db.exec(
+                    select(TeamModel).where(TeamModel.description_en == match.team2.description)
+                ).first()
 
                 if team1 is not None and team2 is not None:
                     binary_bet.match.team1_id = team1.id

@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
 from yak_server.database.models import UserModel
 from yak_server.helpers.database import get_db
@@ -34,9 +34,11 @@ def retrieve_score_board(
         result=[
             UserResult.from_instance(user, rank=rank)
             for rank, user in enumerate(
-                db.query(UserModel)
-                .order_by(UserModel.points.desc())
-                .where(UserModel.name != "admin"),
+                db.exec(
+                    select(UserModel)
+                    .order_by(UserModel.points.desc())
+                    .where(UserModel.name != "admin")
+                ),
                 1,
             )
         ],
@@ -45,15 +47,15 @@ def retrieve_score_board(
 
 def compute_rank(db: Session, user_id: UUID) -> Optional[int]:
     subq = (
-        db.query(
+        select(
             UserModel,
             func.row_number().over(order_by=UserModel.points.desc()).label("rownum"),
         )
-        .filter(UserModel.name != "admin")
+        .where(UserModel.name != "admin")
         .subquery()
     )
 
-    rank: Sequence[int] = db.query(subq.c.rownum).filter(subq.c.id == user_id).first()
+    rank: Sequence[int] = db.query(subq.c.rownum).where(subq.c.id == user_id).first()
 
     if not rank:
         return None

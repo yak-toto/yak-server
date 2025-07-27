@@ -1,8 +1,9 @@
+import operator
 from typing import Annotated
 
 import pendulum
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
 from yak_server.database.models import (
     BinaryBetModel,
@@ -52,24 +53,28 @@ def retrieve_all_bets(
     lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[AllBetsResponse]:
-    binary_bets = (
-        db.query(BinaryBetModel)
+    results = db.exec(
+        select(BinaryBetModel, MatchModel, GroupModel)
         .join(BinaryBetModel.match)
-        .filter(MatchModel.user_id == user.id)
+        .where(MatchModel.user_id == user.id)
         .join(MatchModel.group)
         .order_by(GroupModel.index, MatchModel.index)
-    )
+    ).all()
 
-    score_bets = (
-        db.query(ScoreBetModel)
+    binary_bets = map(operator.itemgetter(0), results)
+
+    results = db.exec(
+        select(ScoreBetModel, MatchModel, GroupModel)
         .join(ScoreBetModel.match)
-        .filter(MatchModel.user_id == user.id)
+        .where(MatchModel.user_id == user.id)
         .join(MatchModel.group)
         .order_by(GroupModel.index, MatchModel.index)
-    )
+    ).all()
 
-    groups = db.query(GroupModel).order_by(GroupModel.index)
-    phases = db.query(PhaseModel).order_by(PhaseModel.index)
+    score_bets = map(operator.itemgetter(0), results)
+
+    groups = db.exec(select(GroupModel).order_by(GroupModel.index))
+    phases = db.exec(select(PhaseModel).order_by(PhaseModel.index))
 
     return GenericOut(
         result=AllBetsResponse(
@@ -197,7 +202,7 @@ def retrieve_group_rank_by_code(
     db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[GroupRankResponse]:
-    group = db.query(GroupModel).filter_by(code=group_code).first()
+    group = db.exec(select(GroupModel).where(GroupModel.code == group_code)).first()
 
     if not group:
         raise GroupNotFound(group_code)

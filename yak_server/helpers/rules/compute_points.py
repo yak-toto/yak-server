@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import status
 from pydantic import BaseModel
-from sqlalchemy import and_
+from sqlmodel import select
 
 from yak_server.database.models import (
     BinaryBetModel,
@@ -19,7 +19,7 @@ from yak_server.database.models import (
 from yak_server.helpers.group_position import get_group_rank_with_code
 
 if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
+    from sqlmodel import Session
 
     from yak_server.database.models import GroupPositionModel
 
@@ -44,20 +44,18 @@ class ResultForScoreBet:
 def compute_results_for_score_bet(db: "Session", admin: UserModel) -> list[ResultForScoreBet]:
     results: list[ResultForScoreBet] = []
 
-    for real_score in (
-        db.query(ScoreBetModel).join(ScoreBetModel.match).filter(MatchModel.user_id == admin.id)
+    for real_score in db.exec(
+        select(ScoreBetModel).join(ScoreBetModel.match).where(MatchModel.user_id == admin.id)
     ):
         result_for_score_bet = ResultForScoreBet()
 
-        for user_score in (
-            db.query(ScoreBetModel)
+        for user_score in db.exec(
+            select(ScoreBetModel)
             .join(ScoreBetModel.match)
-            .filter(
-                and_(
-                    MatchModel.user_id != admin.id,
-                    MatchModel.index == real_score.match.index,
-                    MatchModel.group_id == real_score.match.group_id,
-                ),
+            .where(
+                MatchModel.user_id != admin.id,
+                MatchModel.index == real_score.match.index,
+                MatchModel.group_id == real_score.match.group_id,
             )
         ):
             if user_score.is_same_results(real_score):
@@ -90,7 +88,9 @@ def compute_results_for_group_rank(
 ) -> dict[UUID, ResultForGroupRank]:
     result_groups: dict[UUID, ResultForGroupRank] = {}
 
-    for group in db.query(GroupModel).join(GroupModel.phase).filter(PhaseModel.code == "GROUP"):
+    for group in db.exec(
+        select(GroupModel).join(GroupModel.phase).where(PhaseModel.code == "GROUP")
+    ):
         group_result_admin = get_group_rank_with_code(db, admin, group.id)
 
         if all_results_filled_in_group(group_result_admin):
@@ -123,11 +123,13 @@ def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set
         chain(
             *(
                 (bet.match.team1_id, bet.match.team2_id)
-                for bet in db.query(BinaryBetModel)
-                .join(BinaryBetModel.match)
-                .filter(and_(MatchModel.user_id == user.id, GroupModel.code == group_code))
-                .join(BinaryBetModel.match)
-                .join(MatchModel.group)
+                for bet in db.exec(
+                    select(BinaryBetModel)
+                    .join(BinaryBetModel.match)
+                    .where(MatchModel.user_id == user.id, GroupModel.code == group_code)
+                    .join(BinaryBetModel.match)
+                    .join(MatchModel.group)
+                )
                 if bet.match.team1_id is not None and bet.match.team2_id is not None
             ),
         ),
@@ -137,10 +139,12 @@ def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set
 def winner_from_user(db: "Session", user: UserModel) -> set[UUID]:
     finale_bet = next(
         iter(
-            db.query(BinaryBetModel)
-            .join(BinaryBetModel.match)
-            .join(MatchModel.group)
-            .filter(and_(MatchModel.user_id == user.id, GroupModel.code == "1"))
+            db.exec(
+                select(BinaryBetModel)
+                .join(BinaryBetModel.match)
+                .join(MatchModel.group)
+                .where(MatchModel.user_id == user.id, GroupModel.code == "1")
+            )
         ),
     )
 
@@ -161,7 +165,7 @@ def compute_points(
 ) -> tuple[int, str]:
     results = compute_results_for_score_bet(db, admin)
 
-    other_users = db.query(UserModel).filter(UserModel.name != "admin")
+    other_users = db.exec(select(UserModel).where(UserModel.name != "admin")).all()
 
     result_groups: dict[UUID, ResultForGroupRank] = compute_results_for_group_rank(
         db,
@@ -174,7 +178,7 @@ def compute_points(
     final_team = team_from_group_code(db, admin, "1")
     winner = winner_from_user(db, admin)
 
-    numbers_of_players = other_users.count()
+    numbers_of_players = len(other_users)
 
     for user in other_users:
         user.number_score_guess = 0
