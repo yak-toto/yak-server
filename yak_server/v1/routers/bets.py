@@ -2,7 +2,7 @@ from typing import Annotated
 
 import pendulum
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from yak_server.database.models import (
     BinaryBetModel,
@@ -12,10 +12,7 @@ from yak_server.database.models import (
     ScoreBetModel,
     UserModel,
 )
-from yak_server.database.query import (
-    bets_from_group_code,
-    bets_from_phase_code,
-)
+from yak_server.database.query import bets_from_group_code, bets_from_phase_code
 from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.database import get_db
 from yak_server.helpers.group_position import get_group_rank_with_code
@@ -52,19 +49,27 @@ def retrieve_all_bets(
     lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[AllBetsResponse]:
-    binary_bets = (
-        db.query(BinaryBetModel)
-        .join(BinaryBetModel.match)
-        .filter(MatchModel.user_id == user.id)
+    score_bets = (
+        db.query(ScoreBetModel)
+        .options(
+            selectinload(ScoreBetModel.match).selectinload(MatchModel.team1),
+            selectinload(ScoreBetModel.match).selectinload(MatchModel.team2),
+        )
+        .join(ScoreBetModel.match)
         .join(MatchModel.group)
+        .where(MatchModel.user_id == user.id)
         .order_by(GroupModel.index, MatchModel.index)
     )
 
-    score_bets = (
-        db.query(ScoreBetModel)
-        .join(ScoreBetModel.match)
-        .filter(MatchModel.user_id == user.id)
+    binary_bets = (
+        db.query(BinaryBetModel)
+        .options(
+            selectinload(BinaryBetModel.match).selectinload(MatchModel.team1),
+            selectinload(BinaryBetModel.match).selectinload(MatchModel.team2),
+        )
+        .join(BinaryBetModel.match)
         .join(MatchModel.group)
+        .where(MatchModel.user_id == user.id)
         .order_by(GroupModel.index, MatchModel.index)
     )
 
@@ -197,12 +202,19 @@ def retrieve_group_rank_by_code(
     db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[GroupRankResponse]:
-    group = db.query(GroupModel).filter_by(code=group_code).first()
+    group = (
+        db.query(GroupModel)
+        .options(selectinload(GroupModel.phase))
+        .filter_by(code=group_code)
+        .first()
+    )
 
     if not group:
         raise GroupNotFound(group_code)
 
     group_rank = get_group_rank_with_code(db, user, group.id)
+
+    db.refresh(group)
 
     return GenericOut(
         result=GroupRankResponse(

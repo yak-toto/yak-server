@@ -4,31 +4,18 @@ from typing import Annotated
 import pendulum
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
-from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
-from yak_server.database.models import (
-    BinaryBetModel,
-    MatchModel,
-    UserModel,
-)
+from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, UserModel
 from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.database import get_db
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
 from yak_server.helpers.logging_helpers import modify_binary_bet_successfully
 from yak_server.helpers.settings import get_lock_datetime
 from yak_server.v1.helpers.auth import get_current_user
-from yak_server.v1.helpers.errors import (
-    BetNotFound,
-    LockedBinaryBet,
-    TeamNotFound,
-)
-from yak_server.v1.models.binary_bets import (
-    BinaryBetOut,
-    BinaryBetResponse,
-    ModifyBinaryBetIn,
-)
+from yak_server.v1.helpers.errors import BetNotFound, LockedBinaryBet, TeamNotFound
+from yak_server.v1.models.binary_bets import BinaryBetOut, BinaryBetResponse, ModifyBinaryBetIn
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.groups import GroupOut
 from yak_server.v1.models.phases import PhaseOut
@@ -96,8 +83,16 @@ def retrieve_binary_bet_by_id(
 ) -> GenericOut[BinaryBetResponse]:
     binary_bet = (
         db.query(BinaryBetModel)
+        .options(
+            selectinload(BinaryBetModel.match)
+            .selectinload(MatchModel.group)
+            .selectinload(GroupModel.phase),
+            selectinload(BinaryBetModel.match).selectinload(MatchModel.group),
+            selectinload(BinaryBetModel.match).selectinload(MatchModel.team1),
+            selectinload(BinaryBetModel.match).selectinload(MatchModel.team2),
+        )
         .join(BinaryBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, BinaryBetModel.id == bet_id))
+        .where(MatchModel.user_id == user.id, BinaryBetModel.id == bet_id)
         .first()
     )
 
@@ -128,8 +123,16 @@ def modify_binary_bet_by_id(
 
     binary_bet = (
         db.query(BinaryBetModel)
+        .options(
+            selectinload(BinaryBetModel.match)
+            .selectinload(MatchModel.group)
+            .selectinload(GroupModel.phase),
+            selectinload(BinaryBetModel.match).selectinload(MatchModel.group),
+            selectinload(BinaryBetModel.match).selectinload(MatchModel.team1),
+            selectinload(BinaryBetModel.match).selectinload(MatchModel.team2),
+        )
         .join(BinaryBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, BinaryBetModel.id == bet_id))
+        .where(MatchModel.user_id == user.id, BinaryBetModel.id == bet_id)
         .first()
     )
 
@@ -174,5 +177,6 @@ def modify_binary_bet_by_id(
             raise TeamNotFound(modify_binary_bet_in.team2.id) from integrity_error  # type: ignore[arg-type]
 
     db.commit()
+    db.refresh(binary_bet)
 
     return send_response(binary_bet, locked=is_locked(user.name, lock_datetime), lang=lang)

@@ -49,11 +49,11 @@ def compute_rank(db: Session, user_id: UUID) -> Optional[int]:
             UserModel,
             func.row_number().over(order_by=UserModel.points.desc()).label("rownum"),
         )
-        .filter(UserModel.name != "admin")
+        .where(UserModel.name != "admin")
         .subquery()
     )
 
-    rank: Sequence[int] = db.query(subq.c.rownum).filter(subq.c.id == user_id).first()
+    rank: Sequence[int] = db.query(subq.c.rownum).where(subq.c.id == user_id).first()
 
     if not rank:
         return None

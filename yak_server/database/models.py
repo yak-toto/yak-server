@@ -144,7 +144,9 @@ class RefreshTokenModel(Base):
     user_id: Mapped[UUID] = mapped_column(
         DB_UUID(), sa.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
-    user: Mapped[UserModel] = relationship("UserModel", back_populates="refresh_tokens")
+    user: Mapped[UserModel] = relationship(
+        "UserModel", back_populates="refresh_tokens", lazy="raise"
+    )
     expiration: Mapped[DateTime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
 
 
@@ -156,7 +158,9 @@ class ScoreBetModel(Base):
     match_id: Mapped[UUID] = mapped_column(
         DB_UUID(), sa.ForeignKey("match.id", ondelete="CASCADE"), nullable=False
     )
-    match: Mapped["MatchModel"] = relationship("MatchModel", back_populates="score_bets")
+    match: Mapped["MatchModel"] = relationship(
+        "MatchModel", back_populates="score_bets", lazy="raise"
+    )
 
     score1: Mapped[Optional[int]] = mapped_column(
         sa.Integer, CheckConstraint("score1>=0"), default=None
@@ -203,7 +207,9 @@ class BinaryBetModel(Base):
     match_id: Mapped[UUID] = mapped_column(
         DB_UUID(), sa.ForeignKey("match.id", ondelete="CASCADE"), nullable=False
     )
-    match: Mapped["MatchModel"] = relationship("MatchModel", back_populates="binary_bets")
+    match: Mapped["MatchModel"] = relationship(
+        "MatchModel", back_populates="binary_bets", lazy="raise"
+    )
 
     is_one_won: Mapped[Optional[bool]] = mapped_column(sa.Boolean, default=None)
 
@@ -241,9 +247,7 @@ class MatchModel(Base):
 
     group_id: Mapped[UUID] = mapped_column(DB_UUID(), sa.ForeignKey("group.id"), nullable=False)
     group: Mapped["GroupModel"] = relationship(
-        "GroupModel",
-        foreign_keys=group_id,
-        backref="matches",
+        "GroupModel", foreign_keys=group_id, backref="matches", lazy="raise"
     )
 
     index: Mapped[int] = mapped_column(sa.Integer, nullable=False)
@@ -253,19 +257,23 @@ class MatchModel(Base):
         sa.ForeignKey("team.id"),
         nullable=True,
     )
-    team1: Mapped[Optional["TeamModel"]] = relationship("TeamModel", foreign_keys=team1_id)
+    team1: Mapped[Optional["TeamModel"]] = relationship(
+        "TeamModel", foreign_keys=team1_id, lazy="raise"
+    )
 
     team2_id: Mapped[Optional[UUID]] = mapped_column(
         DB_UUID(),
         sa.ForeignKey("team.id"),
         nullable=True,
     )
-    team2: Mapped[Optional["TeamModel"]] = relationship("TeamModel", foreign_keys=team2_id)
+    team2: Mapped[Optional["TeamModel"]] = relationship(
+        "TeamModel", foreign_keys=team2_id, lazy="raise"
+    )
 
     user_id: Mapped[UUID] = mapped_column(
         DB_UUID(), sa.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
-    user: Mapped[UserModel] = relationship("UserModel", foreign_keys=user_id)
+    user: Mapped[UserModel] = relationship("UserModel", foreign_keys=user_id, lazy="raise")
 
     score_bets: Mapped[list[ScoreBetModel]] = relationship(
         "ScoreBetModel",
@@ -302,7 +310,7 @@ class GroupModel(Base):
     index: Mapped[int] = mapped_column(sa.Integer, nullable=False)
 
     phase_id: Mapped[UUID] = mapped_column(DB_UUID(), sa.ForeignKey("phase.id"), nullable=False)
-    phase: Mapped["PhaseModel"] = relationship("PhaseModel", backref="groups")
+    phase: Mapped["PhaseModel"] = relationship("PhaseModel", backref="groups", lazy="raise")
 
 
 class PhaseModel(Base):
@@ -352,7 +360,7 @@ class GroupPositionModel(Base):
         sa.ForeignKey("team.id"),
         nullable=False,
     )
-    team: Mapped[TeamModel] = relationship("TeamModel")
+    team: Mapped[TeamModel] = relationship("TeamModel", lazy="raise")
 
     group_id: Mapped[UUID] = mapped_column(
         DB_UUID(),

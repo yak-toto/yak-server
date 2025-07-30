@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from yak_server.database.models import GroupModel, PhaseModel, UserModel
 from yak_server.helpers.database import get_db
@@ -58,7 +58,12 @@ def retrieve_group_by_id(
     db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[GroupResponse]:
-    group = db.query(GroupModel).filter_by(code=group_code).first()
+    group = (
+        db.query(GroupModel)
+        .options(selectinload(GroupModel.phase))
+        .filter_by(code=group_code)
+        .first()
+    )
 
     if not group:
         raise GroupNotFound(group_code)

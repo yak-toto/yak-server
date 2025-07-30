@@ -11,7 +11,4 @@ def get_db() -> Generator[Session, None, None]:
     local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
-        try:
-            yield db
-        finally:
-            db.close()
+        yield db

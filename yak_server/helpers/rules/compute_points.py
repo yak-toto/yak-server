@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import status
 from pydantic import BaseModel
-from sqlalchemy import and_
+from sqlalchemy.orm import selectinload
 
 from yak_server.database.models import (
     BinaryBetModel,
@@ -45,19 +45,21 @@ def compute_results_for_score_bet(db: "Session", admin: UserModel) -> list[Resul
     results: list[ResultForScoreBet] = []
 
     for real_score in (
-        db.query(ScoreBetModel).join(ScoreBetModel.match).filter(MatchModel.user_id == admin.id)
+        db.query(ScoreBetModel)
+        .options(selectinload(ScoreBetModel.match))
+        .join(ScoreBetModel.match)
+        .where(MatchModel.user_id == admin.id)
     ):
         result_for_score_bet = ResultForScoreBet()
 
         for user_score in (
             db.query(ScoreBetModel)
+            .options(selectinload(ScoreBetModel.match))
             .join(ScoreBetModel.match)
-            .filter(
-                and_(
-                    MatchModel.user_id != admin.id,
-                    MatchModel.index == real_score.match.index,
-                    MatchModel.group_id == real_score.match.group_id,
-                ),
+            .where(
+                MatchModel.user_id != admin.id,
+                MatchModel.index == real_score.match.index,
+                MatchModel.group_id == real_score.match.group_id,
             )
         ):
             if user_score.is_same_results(real_score):
@@ -90,7 +92,7 @@ def compute_results_for_group_rank(
 ) -> dict[UUID, ResultForGroupRank]:
     result_groups: dict[UUID, ResultForGroupRank] = {}
 
-    for group in db.query(GroupModel).join(GroupModel.phase).filter(PhaseModel.code == "GROUP"):
+    for group in db.query(GroupModel).join(GroupModel.phase).where(PhaseModel.code == "GROUP"):
         group_result_admin = get_group_rank_with_code(db, admin, group.id)
 
         if all_results_filled_in_group(group_result_admin):
@@ -124,10 +126,10 @@ def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set
             *(
                 (bet.match.team1_id, bet.match.team2_id)
                 for bet in db.query(BinaryBetModel)
-                .join(BinaryBetModel.match)
-                .filter(and_(MatchModel.user_id == user.id, GroupModel.code == group_code))
+                .options(selectinload(BinaryBetModel.match))
                 .join(BinaryBetModel.match)
                 .join(MatchModel.group)
+                .where(MatchModel.user_id == user.id, GroupModel.code == group_code)
                 if bet.match.team1_id is not None and bet.match.team2_id is not None
             ),
         ),
@@ -138,9 +140,13 @@ def winner_from_user(db: "Session", user: UserModel) -> set[UUID]:
     finale_bet = next(
         iter(
             db.query(BinaryBetModel)
+            .options(
+                selectinload(BinaryBetModel.match).selectinload(MatchModel.team1),
+                selectinload(BinaryBetModel.match).selectinload(MatchModel.team2),
+            )
             .join(BinaryBetModel.match)
             .join(MatchModel.group)
-            .filter(and_(MatchModel.user_id == user.id, GroupModel.code == "1"))
+            .where(MatchModel.user_id == user.id, GroupModel.code == "1")
         ),
     )
 
@@ -161,7 +167,7 @@ def compute_points(
 ) -> tuple[int, str]:
     results = compute_results_for_score_bet(db, admin)
 
-    other_users = db.query(UserModel).filter(UserModel.name != "admin")
+    other_users = db.query(UserModel).where(UserModel.name != "admin")
 
     result_groups: dict[UUID, ResultForGroupRank] = compute_results_for_group_rank(
         db,

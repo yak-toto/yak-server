@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from fastapi import status
 from pydantic import BaseModel
-from sqlalchemy import and_
+from sqlalchemy.orm import selectinload
 
 from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, PhaseModel
 from yak_server.helpers.group_position import get_group_rank_with_code
@@ -44,7 +44,7 @@ def compute_finale_phase_from_group_rank(
         group.code: get_group_rank_with_code(db, user, group.id)
         for group in db.query(GroupModel)
         .join(GroupModel.phase)
-        .filter(
+        .where(
             PhaseModel.code == rule_config.from_phase,
         )
     }
@@ -62,13 +62,12 @@ def compute_finale_phase_from_group_rank(
 
             binary_bet = (
                 db.query(BinaryBetModel)
+                .options(selectinload(BinaryBetModel.match))
                 .join(BinaryBetModel.match)
-                .filter(
-                    and_(
-                        MatchModel.index == index,
-                        MatchModel.user_id == user.id,
-                        MatchModel.group_id == first_phase_group.id,
-                    ),
+                .where(
+                    MatchModel.index == index,
+                    MatchModel.user_id == user.id,
+                    MatchModel.group_id == first_phase_group.id,
                 )
                 .first()
             )
