@@ -4,9 +4,8 @@ from typing import Annotated
 import pendulum
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
-from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
 from yak_server.database.models import (
     BinaryBetModel,
@@ -94,12 +93,11 @@ def retrieve_binary_bet_by_id(
     lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[BinaryBetResponse]:
-    binary_bet = (
-        db.query(BinaryBetModel)
+    binary_bet = db.exec(
+        select(BinaryBetModel)
         .join(BinaryBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, BinaryBetModel.id == bet_id))
-        .first()
-    )
+        .where(MatchModel.user_id == user.id, BinaryBetModel.id == bet_id)
+    ).first()
 
     if not binary_bet:
         raise BetNotFound(bet_id)
@@ -126,12 +124,11 @@ def modify_binary_bet_by_id(
     if is_locked(user.name, lock_datetime):
         raise LockedBinaryBet
 
-    binary_bet = (
-        db.query(BinaryBetModel)
+    binary_bet = db.exec(
+        select(BinaryBetModel)
         .join(BinaryBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, BinaryBetModel.id == bet_id))
-        .first()
-    )
+        .where(MatchModel.user_id == user.id, BinaryBetModel.id == bet_id)
+    ).first()
 
     if not binary_bet:
         raise BetNotFound(bet_id)

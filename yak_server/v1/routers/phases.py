@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
 from yak_server.database.models import PhaseModel, UserModel
 from yak_server.helpers.database import get_db
@@ -30,7 +30,7 @@ def retrieve_all_phases(
     return GenericOut(
         result=[
             PhaseOut.from_instance(phase, lang=lang)
-            for phase in db.query(PhaseModel).order_by(PhaseModel.index)
+            for phase in db.exec(select(PhaseModel).order_by(PhaseModel.index))
         ],
     )
 
@@ -49,7 +49,7 @@ def retrieve_phase(
     db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[PhaseOut]:
-    phase = db.query(PhaseModel).filter_by(id=phase_id).first()
+    phase = db.exec(select(PhaseModel).where(PhaseModel.id == phase_id)).first()
 
     if not phase:
         raise PhaseNotFound(phase_id)

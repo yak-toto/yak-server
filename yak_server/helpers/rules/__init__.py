@@ -2,7 +2,7 @@ from typing import Callable, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 
 from yak_server.database.models import UserModel
 

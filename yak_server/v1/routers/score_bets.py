@@ -4,9 +4,8 @@ from typing import Annotated
 import pendulum
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
-from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
 from yak_server.database.models import (
     MatchModel,
@@ -95,12 +94,11 @@ def retrieve_score_bet_by_id(
     lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[ScoreBetResponse]:
-    score_bet = (
-        db.query(ScoreBetModel)
+    score_bet = db.exec(
+        select(ScoreBetModel)
         .join(ScoreBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id))
-        .first()
-    )
+        .where(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id)
+    ).first()
 
     if not score_bet:
         raise BetNotFound(bet_id)
@@ -127,13 +125,12 @@ def modify_score_bet(
     if is_locked(user.name, lock_datetime):
         raise LockedScoreBet
 
-    score_bet = (
-        db.query(ScoreBetModel)
+    score_bet = db.exec(
+        select(ScoreBetModel)
         .join(ScoreBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id))
+        .where(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id)
         .with_for_update()
-        .first()
-    )
+    ).first()
 
     if not score_bet:
         raise BetNotFound(bet_id)

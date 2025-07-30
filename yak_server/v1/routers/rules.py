@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 
 from yak_server.database.models import UserModel
 from yak_server.helpers.database import get_db

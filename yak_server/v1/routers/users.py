@@ -5,7 +5,7 @@ from uuid import UUID
 import pendulum
 from fastapi import APIRouter, Cookie, Depends, Request, Response, status
 from pydantic import UUID4
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
 from yak_server.database.models import RefreshTokenModel, UserModel
 from yak_server.helpers.authentication import (
@@ -197,7 +197,9 @@ def refresh(
     request: Request,
     response: Response,
 ) -> GenericOut[RefreshTokenOut]:
-    refresh_token_found = db.query(RefreshTokenModel).filter_by(id=refresh_token).first()
+    refresh_token_found = db.exec(
+        select(RefreshTokenModel).where(RefreshTokenModel.id == refresh_token)
+    ).first()
 
     if refresh_token_found is None:
         raise InvalidRefreshToken
@@ -247,7 +249,7 @@ def modify_user(
     db: Annotated[Session, Depends(get_db)],
     _: Annotated[UserModel, Depends(get_admin_user)],
 ) -> GenericOut[CurrentUserOut]:
-    user = db.query(UserModel).filter_by(id=user_id).first()
+    user = db.exec(select(UserModel).where(UserModel.id == user_id)).first()
 
     if not user:
         raise UserNotFound(user_id)

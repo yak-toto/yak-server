@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
 from yak_server.database.models import GroupModel, PhaseModel, UserModel
 from yak_server.helpers.database import get_db
@@ -33,8 +33,8 @@ def retrieve_all_groups(
     db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[AllGroupsResponse]:
-    groups = db.query(GroupModel).order_by(GroupModel.index)
-    phases = db.query(PhaseModel).order_by(PhaseModel.index)
+    groups = db.exec(select(GroupModel).order_by(GroupModel.index))
+    phases = db.exec(select(PhaseModel).order_by(PhaseModel.index))
 
     return GenericOut(
         result=AllGroupsResponse(
@@ -58,7 +58,7 @@ def retrieve_group_by_id(
     db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[GroupResponse]:
-    group = db.query(GroupModel).filter_by(code=group_code).first()
+    group = db.exec(select(GroupModel).where(GroupModel.code == group_code)).first()
 
     if not group:
         raise GroupNotFound(group_code)
@@ -85,12 +85,14 @@ def retrieve_groups_by_phase_code(
     db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[GroupsByPhaseCodeResponse]:
-    phase = db.query(PhaseModel).filter_by(code=phase_code).first()
+    phase = db.exec(select(PhaseModel).where(PhaseModel.code == phase_code)).first()
 
     if not phase:
         raise PhaseNotFound(phase_code)
 
-    groups = db.query(GroupModel).order_by(GroupModel.index).filter_by(phase_id=phase.id)
+    groups = db.exec(
+        select(GroupModel).where(GroupModel.phase_id == phase.id).order_by(GroupModel.index)
+    )
 
     return GenericOut(
         result=GroupsByPhaseCodeResponse(

@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import RedirectResponse
 from pydantic import UUID4
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
 from yak_server.database.models import TeamModel
 from yak_server.helpers.database import get_db
@@ -29,7 +29,7 @@ def retrieve_all_teams(
 ) -> GenericOut[AllTeamsResponse]:
     return GenericOut(
         result=AllTeamsResponse(
-            teams=[TeamOut.from_instance(team, lang=lang) for team in db.query(TeamModel).all()],
+            teams=[TeamOut.from_instance(team, lang=lang) for team in db.exec(select(TeamModel))],
         ),
     )
 
@@ -48,9 +48,9 @@ def retrieve_team_by_id(
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[OneTeamResponse]:
     if is_uuid4(team_id):
-        team = db.query(TeamModel).filter_by(id=team_id).first()
+        team = db.exec(select(TeamModel).where(TeamModel.id == team_id)).first()
     elif is_iso_3166_1_alpha_2_code(team_id):
-        team = db.query(TeamModel).filter_by(code=team_id).first()
+        team = db.exec(select(TeamModel).where(TeamModel.code == team_id)).first()
     else:
         raise InvalidTeamId(team_id)
 
@@ -72,7 +72,7 @@ def retrieve_team_flag_by_id(
     team_id: UUID4,
     db: Annotated[Session, Depends(get_db)],
 ) -> RedirectResponse:
-    team = db.query(TeamModel).filter_by(id=team_id).first()
+    team = db.exec(select(TeamModel).where(TeamModel.id == team_id)).first()
 
     if not team:
         raise TeamNotFound(team_id)

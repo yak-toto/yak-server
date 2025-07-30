@@ -3,7 +3,7 @@ from uuid import UUID
 
 import jwt
 import pendulum
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
 from yak_server.database.models import (
     MatchModel,
@@ -47,7 +47,7 @@ def signup_user(
     db: Session, name: str, first_name: str, last_name: str, password: str
 ) -> UserModel:
     # Check existing user in db
-    existing_user = db.query(UserModel).filter_by(name=name).first()
+    existing_user = db.exec(select(UserModel).where(UserModel.name == name)).first()
     if existing_user:
         raise NameAlreadyExistsError(name)
 
@@ -60,7 +60,7 @@ def signup_user(
     db.flush()
 
     # Initialize matches and bets and integrate in db
-    for match_reference in db.query(MatchReferenceModel).all():
+    for match_reference in db.exec(select(MatchReferenceModel)):
         match = MatchModel(
             team1_id=match_reference.team1_id,
             team2_id=match_reference.team2_id,
@@ -77,7 +77,9 @@ def signup_user(
     # Create group position records
     db.add_all(
         create_group_position(
-            db.query(ScoreBetModel).join(ScoreBetModel.match).filter_by(user_id=user.id)
+            db.exec(
+                select(ScoreBetModel).join(ScoreBetModel.match).where(MatchModel.user_id == user.id)
+            )
         )
     )
     db.commit()

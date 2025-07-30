@@ -1,15 +1,17 @@
 from collections.abc import Iterable
 from dataclasses import dataclass
+from operator import itemgetter
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import and_, update
+from sqlalchemy import update
+from sqlmodel import select
 
 from yak_server.database.models import GroupPositionModel, MatchModel, ScoreBetModel
 
 if TYPE_CHECKING:
     from uuid import UUID
 
-    from sqlalchemy.orm import Session
+    from sqlmodel import Session
 
     from yak_server.database.models import UserModel
 
@@ -110,7 +112,11 @@ def compute_group_rank(
 def get_group_rank_with_code(
     db: "Session", user: "UserModel", group_id: "UUID"
 ) -> list[GroupPositionModel]:
-    group_rank = db.query(GroupPositionModel).filter_by(group_id=group_id, user_id=user.id)
+    group_rank = db.exec(
+        select(GroupPositionModel).where(
+            GroupPositionModel.group_id == group_id, GroupPositionModel.user_id == user.id
+        )
+    ).all()
 
     if not any(group_position.need_recomputation for group_position in group_rank):
         return sorted(
@@ -123,13 +129,15 @@ def get_group_rank_with_code(
             reverse=True,
         )
 
-    score_bets = (
-        db.query(ScoreBetModel)
-        .join(ScoreBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, MatchModel.group_id == group_id))
+    score_bets = db.exec(
+        select(ScoreBetModel, MatchModel).where(
+            ScoreBetModel.match_id == MatchModel.id,
+            MatchModel.user_id == user.id,
+            MatchModel.group_id == group_id,
+        )
     )
 
-    group_rank_list = compute_group_rank(group_rank, score_bets)
+    group_rank_list = compute_group_rank(group_rank, map(itemgetter(0), score_bets))
 
     db.commit()
 

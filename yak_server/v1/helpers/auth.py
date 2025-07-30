@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import ExpiredSignatureError, PyJWTError
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
 from yak_server.database.models import UserModel
 from yak_server.helpers.authentication import decode_bearer_token
@@ -28,7 +28,7 @@ def user_from_token(db: Session, secret_key: str, access_token: str) -> UserMode
     except PyJWTError as exc:
         raise InvalidToken from exc
 
-    user = db.query(UserModel).filter_by(id=data["sub"]).first()
+    user = db.exec(select(UserModel).where(UserModel.id == data["sub"])).first()
     if not user:
         raise UserNotFound(data["sub"])
 

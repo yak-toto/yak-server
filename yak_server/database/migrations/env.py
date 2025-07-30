@@ -3,9 +3,9 @@ from logging.config import fileConfig
 from typing import TYPE_CHECKING
 
 from alembic import context
+from sqlmodel import SQLModel
 
 from yak_server.database import build_engine
-from yak_server.database.models import Base
 
 if TYPE_CHECKING:
     from sqlalchemy.sql.schema import MetaData
@@ -40,7 +40,7 @@ config.set_main_option("sqlalchemy.url", get_engine_url())
 
 
 def get_metadata() -> "MetaData":
-    return Base.metadata
+    return SQLModel.metadata
 
 
 def run_migrations_offline() -> None:
