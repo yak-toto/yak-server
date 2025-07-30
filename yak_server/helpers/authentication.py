@@ -3,7 +3,7 @@ from uuid import UUID
 
 import jwt
 import pendulum
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from yak_server.database.models import (
     MatchModel,
@@ -77,7 +77,10 @@ def signup_user(
     # Create group position records
     db.add_all(
         create_group_position(
-            db.query(ScoreBetModel).join(ScoreBetModel.match).filter_by(user_id=user.id)
+            db.query(ScoreBetModel)
+            .options(selectinload(ScoreBetModel.match))
+            .join(ScoreBetModel.match)
+            .filter_by(user_id=user.id)
         )
     )
     db.commit()

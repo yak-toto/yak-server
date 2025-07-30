@@ -4,15 +4,10 @@ from typing import Annotated
 import pendulum
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
-from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
-from yak_server.database.models import (
-    MatchModel,
-    ScoreBetModel,
-    UserModel,
-)
+from yak_server.database.models import GroupModel, MatchModel, ScoreBetModel, UserModel
 from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.database import get_db
 from yak_server.helpers.group_position import set_recomputation_flag
@@ -20,19 +15,11 @@ from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_des
 from yak_server.helpers.logging_helpers import modify_score_bet_successfully
 from yak_server.helpers.settings import get_lock_datetime
 from yak_server.v1.helpers.auth import get_current_user
-from yak_server.v1.helpers.errors import (
-    BetNotFound,
-    LockedScoreBet,
-    TeamNotFound,
-)
+from yak_server.v1.helpers.errors import BetNotFound, LockedScoreBet, TeamNotFound
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.groups import GroupOut
 from yak_server.v1.models.phases import PhaseOut
-from yak_server.v1.models.score_bets import (
-    ModifyScoreBetIn,
-    ScoreBetOut,
-    ScoreBetResponse,
-)
+from yak_server.v1.models.score_bets import ModifyScoreBetIn, ScoreBetOut, ScoreBetResponse
 from yak_server.v1.models.teams import FlagOut, TeamWithScoreOut
 
 logger = logging.getLogger(__name__)
@@ -97,8 +84,15 @@ def retrieve_score_bet_by_id(
 ) -> GenericOut[ScoreBetResponse]:
     score_bet = (
         db.query(ScoreBetModel)
+        .options(
+            selectinload(ScoreBetModel.match)
+            .selectinload(MatchModel.group)
+            .selectinload(GroupModel.phase),
+            selectinload(ScoreBetModel.match).selectinload(MatchModel.team1),
+            selectinload(ScoreBetModel.match).selectinload(MatchModel.team2),
+        )
         .join(ScoreBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id))
+        .where(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id)
         .first()
     )
 
@@ -129,8 +123,15 @@ def modify_score_bet(
 
     score_bet = (
         db.query(ScoreBetModel)
+        .options(
+            selectinload(ScoreBetModel.match)
+            .selectinload(MatchModel.group)
+            .selectinload(GroupModel.phase),
+            selectinload(ScoreBetModel.match).selectinload(MatchModel.team1),
+            selectinload(ScoreBetModel.match).selectinload(MatchModel.team2),
+        )
         .join(ScoreBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id))
+        .where(MatchModel.user_id == user.id, ScoreBetModel.id == bet_id)
         .with_for_update()
         .first()
     )
@@ -181,5 +182,6 @@ def modify_score_bet(
     set_recomputation_flag(db, score_bet.match.team2_id, user.id)
 
     db.commit()
+    db.refresh(score_bet)
 
     return send_response(score_bet, locked=is_locked(user.name, lock_datetime), lang=lang)

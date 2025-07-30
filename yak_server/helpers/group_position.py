@@ -2,7 +2,8 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import and_, update
+from sqlalchemy import update
+from sqlalchemy.orm import selectinload
 
 from yak_server.database.models import GroupPositionModel, MatchModel, ScoreBetModel
 
@@ -24,8 +25,8 @@ def create_group_position(score_bets: Iterable[ScoreBetModel]) -> list[GroupPosi
             group_positions.append(
                 GroupPositionModel(
                     team_id=score_bet.match.team1_id,
-                    user_id=score_bet.match.user.id,
-                    group_id=score_bet.match.group.id,
+                    user_id=score_bet.match.user_id,
+                    group_id=score_bet.match.group_id,
                 ),
             )
             team_ids.append(score_bet.match.team1_id)
@@ -34,8 +35,8 @@ def create_group_position(score_bets: Iterable[ScoreBetModel]) -> list[GroupPosi
             group_positions.append(
                 GroupPositionModel(
                     team_id=score_bet.match.team2_id,
-                    user_id=score_bet.match.user.id,
-                    group_id=score_bet.match.group.id,
+                    user_id=score_bet.match.user_id,
+                    group_id=score_bet.match.group_id,
                 ),
             )
             team_ids.append(score_bet.match.team2_id)
@@ -110,7 +111,11 @@ def compute_group_rank(
 def get_group_rank_with_code(
     db: "Session", user: "UserModel", group_id: "UUID"
 ) -> list[GroupPositionModel]:
-    group_rank = db.query(GroupPositionModel).filter_by(group_id=group_id, user_id=user.id)
+    group_rank = (
+        db.query(GroupPositionModel)
+        .options(selectinload(GroupPositionModel.team))
+        .filter_by(group_id=group_id, user_id=user.id)
+    )
 
     if not any(group_position.need_recomputation for group_position in group_rank):
         return sorted(
@@ -125,8 +130,9 @@ def get_group_rank_with_code(
 
     score_bets = (
         db.query(ScoreBetModel)
+        .options(selectinload(ScoreBetModel.match).selectinload(MatchModel.group))
         .join(ScoreBetModel.match)
-        .filter(and_(MatchModel.user_id == user.id, MatchModel.group_id == group_id))
+        .where(MatchModel.user_id == user.id, MatchModel.group_id == group_id)
     )
 
     group_rank_list = compute_group_rank(group_rank, score_bets)

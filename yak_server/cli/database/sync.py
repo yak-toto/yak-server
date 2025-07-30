@@ -2,7 +2,7 @@ import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import and_
+from sqlalchemy.orm import selectinload
 
 from yak_server.database import build_local_session_maker
 from yak_server.database.models import (
@@ -197,12 +197,10 @@ def synchronize_official_results(engine: "Engine") -> None:
                 db.query(ScoreBetModel)
                 .join(ScoreBetModel.match)
                 .join(MatchModel.group)
-                .filter(
-                    and_(
-                        GroupModel.index == match.group.index,
-                        MatchModel.index == match.index,
-                        MatchModel.user_id == admin.id,
-                    )
+                .where(
+                    GroupModel.index == match.group.index,
+                    MatchModel.index == match.index,
+                    MatchModel.user_id == admin.id,
                 )
                 .first()
             )
@@ -213,15 +211,14 @@ def synchronize_official_results(engine: "Engine") -> None:
 
             binary_bet = (
                 db.query(BinaryBetModel)
+                .options(selectinload(BinaryBetModel.match))
                 .join(BinaryBetModel.match)
                 .join(MatchModel.group)
                 .join(GroupModel.phase)
-                .filter(
-                    and_(
-                        GroupModel.index == match.group.index,
-                        MatchModel.index == match.index,
-                        MatchModel.user_id == admin.id,
-                    )
+                .where(
+                    GroupModel.index == match.group.index,
+                    MatchModel.index == match.index,
+                    MatchModel.user_id == admin.id,
                 )
                 .first()
             )
