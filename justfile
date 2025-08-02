@@ -8,6 +8,7 @@ alias c := check
 alias f := fmt
 alias l := lint
 alias ud := update_deps
+alias bi := build_images
 
 setup:
     just install
@@ -49,3 +50,6 @@ lint:
 update_deps:
     uv run pre-commit autoupdate
     uv lock -U
+
+build_images:
+    uv run --no-project {{ justfile_directory() }}/scripts/build_images.py
