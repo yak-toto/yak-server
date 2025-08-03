@@ -31,7 +31,14 @@ def test_valid_auth(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_signup.status_code == HTTPStatus.CREATED
     assert response_signup.json() == {
         "ok": True,
-        "result": {"id": ANY, "name": user_name, "access_token": ANY},
+        "result": {
+            "id": ANY,
+            "name": user_name,
+            "access_token": ANY,
+            "access_expires_in": 100,
+            "refresh_token": ANY,
+            "refresh_expires_in": 200,
+        },
     }
 
     # login test
@@ -42,7 +49,14 @@ def test_valid_auth(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_login.status_code == HTTPStatus.CREATED
     assert response_login.json() == {
         "ok": True,
-        "result": {"id": ANY, "name": user_name, "access_token": ANY},
+        "result": {
+            "id": ANY,
+            "name": user_name,
+            "access_token": ANY,
+            "access_expires_in": 100,
+            "refresh_token": ANY,
+            "refresh_expires_in": 200,
+        },
     }
 
     auth_token = response_login.json()["result"]["access_token"]
@@ -80,7 +94,14 @@ def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_signup.status_code == HTTPStatus.CREATED
     assert response_signup.json() == {
         "ok": True,
-        "result": {"id": ANY, "name": user_name, "access_token": ANY},
+        "result": {
+            "id": ANY,
+            "name": user_name,
+            "access_token": ANY,
+            "access_expires_in": 100,
+            "refresh_token": ANY,
+            "refresh_expires_in": 200,
+        },
     }
 
     # Try to signup with the same user name

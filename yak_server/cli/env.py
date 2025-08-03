@@ -46,6 +46,7 @@ def write_app_env_file(
     env["JWT_EXPIRATION_TIME"] = jwt_expiration_time
     env["JWT_REFRESH_EXPIRATION_TIME"] = jwt_refresh_expiration_time
     env["JWT_SECRET_KEY"] = secrets.token_hex(128)
+    env["JWT_REFRESH_SECRET_KEY"] = secrets.token_hex(128)
 
     # Select competition to load associated rules
     path = Path(__file__).parents[1] / "data"
