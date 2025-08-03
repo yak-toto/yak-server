@@ -1,16 +1,14 @@
 import logging
 from typing import Annotated
-from uuid import UUID
 
 import pendulum
-from fastapi import APIRouter, Cookie, Depends, Request, Response, status
+from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
-from yak_server.database.models import RefreshTokenModel, UserModel
+from yak_server.database.models import UserModel
 from yak_server.helpers.authentication import (
     NameAlreadyExistsError,
-    add_refresh_token,
     encode_bearer_token,
     signup_user,
 )
@@ -24,15 +22,10 @@ from yak_server.helpers.password_validator import (
     PasswordRequirements,
     PasswordRequirementsError,
 )
-from yak_server.helpers.settings import (
-    AuthenticationSettings,
-    get_authentication_settings,
-)
-from yak_server.v1.helpers.auth import get_admin_user, get_current_user
+from yak_server.helpers.settings import AuthenticationSettings, get_authentication_settings
+from yak_server.v1.helpers.auth import get_admin_user, get_current_user, user_from_token
 from yak_server.v1.helpers.errors import (
-    ExpiredRefreshToken,
     InvalidCredentials,
-    InvalidRefreshToken,
     NameAlreadyExists,
     UnsatisfiedPasswordRequirements,
     UserNotFound,
@@ -44,7 +37,8 @@ from yak_server.v1.models.users import (
     LoginOut,
     ModifyUserIn,
     PasswordRequirementsOut,
-    RefreshTokenOut,
+    RefreshIn,
+    RefreshOut,
     SignupIn,
     SignupOut,
 )
@@ -52,22 +46,6 @@ from yak_server.v1.models.users import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-
-def set_refresh_token_cookie(
-    response: Response, refresh_token: UUID, max_age: int, *, debug: bool
-) -> None:
-    secure = not debug
-
-    response.set_cookie(
-        key="refresh_token",
-        value=str(refresh_token),
-        httponly=True,
-        max_age=max_age,
-        secure=secure,
-        samesite="lax",
-        path="/",
-    )
 
 
 @router.post(
@@ -83,8 +61,6 @@ def signup(
     signup_in: SignupIn,
     db: Annotated[Session, Depends(get_db)],
     auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
-    request: Request,
-    response: Response,
 ) -> GenericOut[SignupOut]:
     try:
         user = signup_user(
@@ -97,15 +73,7 @@ def signup(
     except NameAlreadyExistsError as name_already_exists_error:
         raise NameAlreadyExists(signup_in.name) from name_already_exists_error
 
-    refresh_token = add_refresh_token(
-        db, user.id, pendulum.duration(seconds=auth_settings.jwt_refresh_expiration_time)
-    )
-
     logger.info(signed_up_successfully(user.name))
-
-    set_refresh_token_cookie(
-        response, refresh_token, auth_settings.jwt_refresh_expiration_time, debug=request.app.debug
-    )
 
     return GenericOut(
         result=SignupOut(
@@ -116,6 +84,15 @@ def signup(
                 expiration_time=pendulum.duration(seconds=auth_settings.jwt_expiration_time),
                 secret_key=auth_settings.jwt_secret_key,
             ),
+            access_expires_in=auth_settings.jwt_expiration_time,
+            refresh_token=encode_bearer_token(
+                sub=user.id,
+                expiration_time=pendulum.duration(
+                    seconds=auth_settings.jwt_refresh_expiration_time
+                ),
+                secret_key=auth_settings.jwt_refresh_secret_key,
+            ),
+            refresh_expires_in=auth_settings.jwt_refresh_expiration_time,
         ),
     )
 
@@ -151,23 +128,13 @@ def login(
     login_in: LoginIn,
     db: Annotated[Session, Depends(get_db)],
     auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
-    request: Request,
-    response: Response,
 ) -> GenericOut[LoginOut]:
     user = UserModel.authenticate(db, login_in.name, login_in.password)
 
     if not user:
         raise InvalidCredentials
 
-    refresh_token = add_refresh_token(
-        db, user.id, pendulum.duration(seconds=auth_settings.jwt_refresh_expiration_time)
-    )
-
     logger.info(logged_in_successfully(user.name))
-
-    set_refresh_token_cookie(
-        response, refresh_token, auth_settings.jwt_refresh_expiration_time, debug=request.app.debug
-    )
 
     return GenericOut(
         result=LoginOut(
@@ -178,6 +145,15 @@ def login(
                 expiration_time=pendulum.duration(seconds=auth_settings.jwt_expiration_time),
                 secret_key=auth_settings.jwt_secret_key,
             ),
+            access_expires_in=auth_settings.jwt_expiration_time,
+            refresh_token=encode_bearer_token(
+                sub=user.id,
+                expiration_time=pendulum.duration(
+                    seconds=auth_settings.jwt_refresh_expiration_time
+                ),
+                secret_key=auth_settings.jwt_refresh_secret_key,
+            ),
+            refresh_expires_in=auth_settings.jwt_refresh_expiration_time,
         ),
     )
 
@@ -193,43 +169,28 @@ def login(
 def refresh(
     db: Annotated[Session, Depends(get_db)],
     auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
-    refresh_token: Annotated[str, Cookie()],
-    request: Request,
-    response: Response,
-) -> GenericOut[RefreshTokenOut]:
-    refresh_token_found = db.query(RefreshTokenModel).filter_by(id=refresh_token).first()
+    refresh_in: RefreshIn,
+) -> GenericOut[RefreshOut]:
+    user = user_from_token(db, auth_settings.jwt_refresh_secret_key, refresh_in.refresh_token)
 
-    if refresh_token_found is None:
-        raise InvalidRefreshToken
-
-    if pendulum.now("UTC") > refresh_token_found.expiration:
-        raise ExpiredRefreshToken
-
-    user_id = refresh_token_found.user_id
-
-    # Issue new access token
-    new_access_token = encode_bearer_token(
-        sub=user_id,
-        expiration_time=pendulum.duration(seconds=auth_settings.jwt_expiration_time),
-        secret_key=auth_settings.jwt_secret_key,
+    return GenericOut(
+        result=RefreshOut(
+            access_token=encode_bearer_token(
+                sub=user.id,
+                expiration_time=pendulum.duration(seconds=auth_settings.jwt_expiration_time),
+                secret_key=auth_settings.jwt_secret_key,
+            ),
+            access_expires_in=auth_settings.jwt_expiration_time,
+            refresh_token=encode_bearer_token(
+                sub=user.id,
+                expiration_time=pendulum.duration(
+                    seconds=auth_settings.jwt_refresh_expiration_time
+                ),
+                secret_key=auth_settings.jwt_refresh_secret_key,
+            ),
+            refresh_expires_in=auth_settings.jwt_refresh_expiration_time,
+        ),
     )
-
-    # Rotate refresh token
-    new_refresh_token = add_refresh_token(
-        db,
-        user_id,
-        pendulum.duration(seconds=auth_settings.jwt_refresh_expiration_time),
-        refresh_token_found,
-    )
-
-    set_refresh_token_cookie(
-        response,
-        new_refresh_token,
-        auth_settings.jwt_refresh_expiration_time,
-        debug=request.app.debug,
-    )
-
-    return GenericOut(result=RefreshTokenOut(access_token=new_access_token))
 
 
 @router.patch(

@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 import jwt
@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session, selectinload
 from yak_server.database.models import (
     MatchModel,
     MatchReferenceModel,
-    RefreshTokenModel,
     ScoreBetModel,
     UserModel,
 )
@@ -86,23 +85,3 @@ def signup_user(
     db.commit()
 
     return user
-
-
-def add_refresh_token(
-    db: Session,
-    user_id: UUID,
-    expiration_time: pendulum.Duration,
-    remove_token: Optional[RefreshTokenModel] = None,
-) -> UUID:
-    new_refresh_token = RefreshTokenModel(
-        user_id=user_id, expiration=pendulum.now("UTC") + expiration_time
-    )
-
-    db.add(new_refresh_token)
-
-    if remove_token is not None:
-        db.delete(remove_token)
-
-    db.commit()
-
-    return new_refresh_token.id

@@ -124,6 +124,7 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
+        jwt_refresh_secret_key=get_random_string(15),
     )
 
     app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
@@ -141,6 +142,7 @@ def app_with_valid_jwt_config(_app: "FastAPI") -> Generator["FastAPI", None, Non
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
+        jwt_refresh_secret_key=get_random_string(15),
     )
 
     _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
@@ -160,6 +162,7 @@ def app_with_valid_jwt_config_production(
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
+        jwt_refresh_secret_key=get_random_string(15),
     )
 
     _app_production.dependency_overrides[get_lock_datetime] = MockLockDatetime(
@@ -177,6 +180,7 @@ def app_with_null_jwt_expiration_time(_app: "FastAPI") -> Generator["FastAPI", N
         jwt_expiration_time=0,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(15),
+        jwt_refresh_secret_key=get_random_string(15),
     )
 
     _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
@@ -194,6 +198,7 @@ def app_with_null_jwt_refresh_expiration_time(_app: "FastAPI") -> Generator["Fas
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=3,
         jwt_secret_key=get_random_string(15),
+        jwt_refresh_secret_key=get_random_string(15),
     )
 
     _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(

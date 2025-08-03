@@ -37,6 +37,7 @@ def get_lock_datetime() -> pendulum.DateTime:
 
 class AuthenticationSettings(BaseSettings):
     jwt_secret_key: str
+    jwt_refresh_secret_key: str
     jwt_expiration_time: int
     jwt_refresh_expiration_time: int
 

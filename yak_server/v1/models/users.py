@@ -14,6 +14,9 @@ class SignupOut(BaseModel):
     id: UUID4
     name: str
     access_token: str
+    access_expires_in: int
+    refresh_token: str
+    refresh_expires_in: int
 
     model_config = ConfigDict(extra="forbid")
 
@@ -39,12 +42,23 @@ class LoginOut(BaseModel):
     id: UUID4
     name: str
     access_token: str
+    access_expires_in: int
+    refresh_token: str
+    refresh_expires_in: int
+    model_config = ConfigDict(extra="forbid")
+
+
+class RefreshIn(BaseModel):
+    refresh_token: str
 
     model_config = ConfigDict(extra="forbid")
 
 
-class RefreshTokenOut(BaseModel):
+class RefreshOut(BaseModel):
     access_token: str
+    access_expires_in: int
+    refresh_token: str
+    refresh_expires_in: int
 
     model_config = ConfigDict(extra="forbid")
 
