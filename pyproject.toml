@@ -71,9 +71,6 @@ type-checking = [
     "types-beautifulsoup4>=4.12.0.20241020",
 ]
 
-[tool.hatch.version]
-path = "yak_server/__init__.py"
-
 [tool.hatch.build.targets.wheel.hooks.custom]
 path = "scripts/build_hooks.py"
 
