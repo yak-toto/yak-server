@@ -23,7 +23,7 @@ def bets_from_group_code(
         .first()
     )
 
-    if not group:
+    if group is None:
         return None, [], []
 
     score_bets = (
