@@ -161,7 +161,7 @@ def retrieve_bets_by_group_code(
 ) -> GenericOut[BetsByGroupCodeResponse]:
     group, score_bets, binary_bets = bets_from_group_code(db, user, group_code)
 
-    if not group:
+    if group is None:
         raise GroupNotFound(group_code)
 
     return GenericOut(
@@ -209,7 +209,7 @@ def retrieve_group_rank_by_code(
         .first()
     )
 
-    if not group:
+    if group is None:
         raise GroupNotFound(group_code)
 
     group_rank = get_group_rank_with_code(db, user, group.id)

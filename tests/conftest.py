@@ -81,13 +81,6 @@ def _debug_app_session() -> "FastAPI":
     return create_app()
 
 
-@pytest.fixture(scope="session")
-def production_app_session() -> "FastAPI":
-    os.environ["DEBUG"] = "0"
-
-    return create_app()
-
-
 @pytest.fixture
 def _app(
     _debug_app_session: "FastAPI", engine_for_test: "Engine"
@@ -99,19 +92,6 @@ def _app(
 
     # Clean database after running test
     delete_database(engine_for_test, debug=True)
-
-
-@pytest.fixture
-def _app_production(
-    production_app_session: "FastAPI", engine_for_test_with_delete: "Engine"
-) -> Generator["FastAPI", None, None]:
-    # Clean database before running test
-    delete_database(engine_for_test_with_delete, debug=True)
-
-    yield production_app_session
-
-    # Clean database after running test
-    delete_database(engine_for_test_with_delete, debug=True)
 
 
 @pytest.fixture
@@ -152,26 +132,6 @@ def app_with_valid_jwt_config(_app: "FastAPI") -> Generator["FastAPI", None, Non
     yield _app
 
     _app.dependency_overrides.clear()
-
-
-@pytest.fixture
-def app_with_valid_jwt_config_production(
-    _app_production: "FastAPI",
-) -> Generator["FastAPI", None, None]:
-    _app_production.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
-        jwt_expiration_time=100,
-        jwt_refresh_expiration_time=200,
-        jwt_secret_key=get_random_string(15),
-        jwt_refresh_secret_key=get_random_string(15),
-    )
-
-    _app_production.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") + pendulum.duration(minutes=10)
-    )
-
-    yield _app_production
-
-    _app_production.dependency_overrides.clear()
 
 
 @pytest.fixture

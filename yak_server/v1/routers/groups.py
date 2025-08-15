@@ -65,7 +65,7 @@ def retrieve_group_by_id(
         .first()
     )
 
-    if not group:
+    if group is None:
         raise GroupNotFound(group_code)
 
     return GenericOut(
