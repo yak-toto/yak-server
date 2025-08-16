@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from testing.mock import MockSettings
 from testing.util import get_random_string
 from yak_server.cli import app as typer_app
-from yak_server.cli.database import initialize_database
+from yak_server.cli.database import create_admin, initialize_database
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -380,14 +380,12 @@ def test_db_sync(
     # Signup admin user
     client = TestClient(app_with_valid_jwt_config)
 
+    password = get_random_string(100)
+
+    create_admin(password, engine_for_test)
+
     response_signup = client.post(
-        "/api/v1/users/signup",
-        json={
-            "name": "admin",
-            "first_name": "admin",
-            "last_name": "admin",
-            "password": get_random_string(15),
-        },
+        "/api/v1/users/login", json={"name": "admin", "password": password}
     )
 
     assert response_signup.status_code == HTTPStatus.CREATED

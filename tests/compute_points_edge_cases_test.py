@@ -9,9 +9,9 @@ from starlette.testclient import TestClient
 
 from testing.mock import MockSettings
 from testing.util import UserData, get_random_string, patch_score_bets
-from yak_server.cli.database import initialize_database
+from yak_server.cli.database import create_admin, initialize_database
 from yak_server.database import build_local_session_maker
-from yak_server.database.models import UserModel
+from yak_server.database.models import Role, UserModel
 from yak_server.helpers.rules import Rules
 from yak_server.helpers.rules.compute_final_from_rank import (
     RuleComputeFinaleFromGroupRank,
@@ -72,8 +72,8 @@ def test_compute_points(
 
     admin = UserData(
         name="admin",
-        first_name="admin",
-        last_name="admin",
+        first_name=get_random_string(15),
+        last_name=get_random_string(10),
         scores=[
             (1, 2),
             (5, 1),
@@ -90,19 +90,17 @@ def test_compute_points(
         ],
     )
 
-    response_signup_admin = client.post(
-        "/api/v1/users/signup",
-        json={
-            "name": admin.name,
-            "first_name": admin.first_name,
-            "last_name": admin.last_name,
-            "password": get_random_string(15),
-        },
+    password = get_random_string(15)
+
+    create_admin(password, engine_for_test)
+
+    response_login_admin = client.post(
+        "/api/v1/users/login", json={"name": admin.name, "password": password}
     )
 
-    assert response_signup_admin.status_code == HTTPStatus.CREATED
+    assert response_login_admin.status_code == HTTPStatus.CREATED
 
-    admin.access_token = response_signup_admin.json()["result"]["access_token"]
+    admin.access_token = response_login_admin.json()["result"]["access_token"]
 
     # Patch score bet admin
     patch_score_bets(client, admin.access_token, admin.scores)
@@ -397,7 +395,11 @@ def test_missing_first_phase_group(engine_for_test: "Engine") -> None:
     local_session_maker = build_local_session_maker(engine_for_test)
 
     user = UserModel(
-        name="fake_user", first_name="fake", last_name="user", password=get_random_string(150)
+        name="fake_user",
+        first_name="fake",
+        last_name="user",
+        password=get_random_string(150),
+        role=Role.USER,
     )
 
     with local_session_maker() as db:

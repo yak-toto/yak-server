@@ -9,7 +9,7 @@ from starlette.testclient import TestClient
 from testing.mock import MockSettings
 from testing.util import UserData, get_random_string, patch_score_bets
 from yak_server.cli import app as cli_app
-from yak_server.cli.database import initialize_database
+from yak_server.cli.database import create_admin, initialize_database
 from yak_server.helpers.rules import Rules
 from yak_server.helpers.rules.compute_final_from_rank import (
     RuleComputeFinaleFromGroupRank,
@@ -92,6 +92,8 @@ def test_compute_points(
     initialize_database(engine_for_test, app)
 
     # Signup admin
+    password = get_random_string(15)
+
     admin = UserData(
         first_name=get_random_string(10),
         last_name=get_random_string(12),
@@ -99,19 +101,19 @@ def test_compute_points(
         scores=[(1, 2), (5, 1), (5, 5)],
     )
 
-    response_signup_admin = client.post(
-        "/api/v1/users/signup",
+    create_admin(password, engine_for_test)
+
+    response_login_admin = client.post(
+        "/api/v1/users/login",
         json={
-            "first_name": admin.first_name,
-            "last_name": admin.last_name,
             "name": admin.name,
-            "password": get_random_string(85),
+            "password": password,
         },
     )
 
-    assert response_signup_admin.status_code == HTTPStatus.CREATED
+    assert response_login_admin.status_code == HTTPStatus.CREATED
 
-    admin.access_token = response_signup_admin.json()["result"]["access_token"]
+    admin.access_token = response_login_admin.json()["result"]["access_token"]
 
     # Patch admin scores
     patch_score_bets(client, admin.access_token, admin.scores)

@@ -13,6 +13,7 @@ from yak_server.database.models import (
     GroupModel,
     MatchModel,
     PhaseModel,
+    Role,
     ScoreBetModel,
     UserModel,
 )
@@ -167,7 +168,7 @@ def compute_points(
 ) -> tuple[int, str]:
     results = compute_results_for_score_bet(db, admin)
 
-    other_users = db.query(UserModel).where(UserModel.name != "admin")
+    other_users = db.query(UserModel).where(UserModel.role == Role.USER)
 
     result_groups: dict[UUID, ResultForGroupRank] = compute_results_for_group_rank(
         db,

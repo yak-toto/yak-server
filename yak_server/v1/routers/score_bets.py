@@ -14,7 +14,7 @@ from yak_server.helpers.group_position import set_recomputation_flag
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
 from yak_server.helpers.logging_helpers import modify_score_bet_successfully
 from yak_server.helpers.settings import get_lock_datetime
-from yak_server.v1.helpers.auth import get_current_user
+from yak_server.v1.helpers.auth import require_user
 from yak_server.v1.helpers.errors import BetNotFound, LockedScoreBet, TeamNotFound
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.groups import GroupOut
@@ -78,7 +78,7 @@ def send_response(
 def retrieve_score_bet_by_id(
     bet_id: UUID4,
     db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(get_current_user)],
+    user: Annotated[UserModel, Depends(require_user)],
     lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[ScoreBetResponse]:
@@ -99,7 +99,7 @@ def retrieve_score_bet_by_id(
     if not score_bet:
         raise BetNotFound(bet_id)
 
-    return send_response(score_bet, locked=is_locked(user.name, lock_datetime), lang=lang)
+    return send_response(score_bet, locked=is_locked(user, lock_datetime), lang=lang)
 
 
 @router.patch(
@@ -114,11 +114,11 @@ def modify_score_bet(
     bet_id: UUID4,
     modify_score_bet_in: ModifyScoreBetIn,
     db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(get_current_user)],
+    user: Annotated[UserModel, Depends(require_user)],
     lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[ScoreBetResponse]:
-    if is_locked(user.name, lock_datetime):
+    if is_locked(user, lock_datetime):
         raise LockedScoreBet
 
     score_bet = (
@@ -184,4 +184,4 @@ def modify_score_bet(
     db.commit()
     db.refresh(score_bet)
 
-    return send_response(score_bet, locked=is_locked(user.name, lock_datetime), lang=lang)
+    return send_response(score_bet, locked=is_locked(user, lock_datetime), lang=lang)

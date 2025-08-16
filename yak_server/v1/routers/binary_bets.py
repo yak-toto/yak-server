@@ -13,7 +13,7 @@ from yak_server.helpers.database import get_db
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
 from yak_server.helpers.logging_helpers import modify_binary_bet_successfully
 from yak_server.helpers.settings import get_lock_datetime
-from yak_server.v1.helpers.auth import get_current_user
+from yak_server.v1.helpers.auth import require_user
 from yak_server.v1.helpers.errors import BetNotFound, LockedBinaryBet, TeamNotFound
 from yak_server.v1.models.binary_bets import BinaryBetOut, BinaryBetResponse, ModifyBinaryBetIn
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
@@ -77,7 +77,7 @@ def send_response(
 def retrieve_binary_bet_by_id(
     bet_id: UUID4,
     db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(get_current_user)],
+    user: Annotated[UserModel, Depends(require_user)],
     lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[BinaryBetResponse]:
@@ -99,7 +99,7 @@ def retrieve_binary_bet_by_id(
     if not binary_bet:
         raise BetNotFound(bet_id)
 
-    return send_response(binary_bet, locked=is_locked(user.name, lock_datetime), lang=lang)
+    return send_response(binary_bet, locked=is_locked(user, lock_datetime), lang=lang)
 
 
 @router.patch(
@@ -114,11 +114,11 @@ def modify_binary_bet_by_id(
     bet_id: UUID4,
     modify_binary_bet_in: ModifyBinaryBetIn,
     db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(get_current_user)],
+    user: Annotated[UserModel, Depends(require_user)],
     lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[BinaryBetResponse]:
-    if is_locked(user.name, lock_datetime):
+    if is_locked(user, lock_datetime):
         raise LockedBinaryBet
 
     binary_bet = (
@@ -179,4 +179,4 @@ def modify_binary_bet_by_id(
     db.commit()
     db.refresh(binary_bet)
 
-    return send_response(binary_bet, locked=is_locked(user.name, lock_datetime), lang=lang)
+    return send_response(binary_bet, locked=is_locked(user, lock_datetime), lang=lang)
