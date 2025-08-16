@@ -21,6 +21,11 @@ class Base(DeclarativeBase):
     pass
 
 
+class Role(Enum):
+    USER = "user"
+    ADMIN = "admin"
+
+
 class UserModel(Base):
     __tablename__ = "user"
     id: Mapped[UUID] = mapped_column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
@@ -28,6 +33,7 @@ class UserModel(Base):
     first_name: Mapped[str] = mapped_column(sa.String(100), nullable=False)
     last_name: Mapped[str] = mapped_column(sa.String(100), nullable=False)
     password: Mapped[str] = mapped_column(sa.String(100), nullable=False)
+    role: Mapped[Role] = mapped_column(SqlEnum(Role), nullable=False)
     number_match_guess: Mapped[int] = mapped_column(
         sa.Integer,
         CheckConstraint("number_match_guess>=0"),
@@ -98,11 +104,13 @@ class UserModel(Base):
         first_name: str,
         last_name: str,
         password: str,
+        role: Role,
     ) -> None:
         self.name = name
         self.first_name = first_name
         self.last_name = last_name
         self.password = ph.hash(password)
+        self.role = role
 
     @hybrid_property
     def full_name(self) -> str:

@@ -16,6 +16,7 @@ from yak_server.database.models import (
     MatchModel,
     MatchReferenceModel,
     PhaseModel,
+    Role,
     ScoreBetModel,
     TeamModel,
     UserModel,
@@ -59,7 +60,12 @@ def create_admin(password: str, engine: "Engine") -> None:
     with local_session_maker() as db:
         try:
             _ = signup_user(
-                db, name="admin", first_name="admin", last_name="admin", password=password
+                db,
+                name="admin",
+                first_name="admin",
+                last_name="admin",
+                password=password,
+                role=Role.ADMIN,
             )
         except NameAlreadyExistsError:
             print("Admin already exists")

@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Any
 from uuid import UUID
 
@@ -8,6 +9,7 @@ from sqlalchemy.orm import Session, selectinload
 from yak_server.database.models import (
     MatchModel,
     MatchReferenceModel,
+    Role,
     ScoreBetModel,
     UserModel,
 )
@@ -43,7 +45,7 @@ class NameAlreadyExistsError(Exception):
 
 
 def signup_user(
-    db: Session, name: str, first_name: str, last_name: str, password: str
+    db: Session, name: str, first_name: str, last_name: str, password: str, role: Role
 ) -> UserModel:
     # Check existing user in db
     existing_user = db.query(UserModel).filter_by(name=name).first()
@@ -54,7 +56,7 @@ def signup_user(
     validate_password(password)
 
     # Initialize user and integrate in db
-    user = UserModel(name, first_name, last_name, password)
+    user = UserModel(name, first_name, last_name, password, role)
     db.add(user)
     db.flush()
 
@@ -85,3 +87,28 @@ def signup_user(
     db.commit()
 
     return user
+
+
+class Permission(Enum):
+    """Define different permission levels"""
+
+    USER = "user"  # Basic authenticated user
+    ADMIN = "admin"  # Administrative access
+
+
+def has_permission(user: UserModel, required_permission: Permission) -> bool:
+    """Check if user has the required permission level.
+
+    Args:
+        user: The user to check permissions for
+        required_permission: The permission level required
+
+    Returns:
+        True if user has the required permission, False otherwise
+    """
+    permission_hierarchy = {
+        Permission.USER: [Role.USER, Role.ADMIN],
+        Permission.ADMIN: [Role.ADMIN],
+    }
+
+    return user.role in permission_hierarchy[required_permission]

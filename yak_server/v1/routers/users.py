@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
-from yak_server.database.models import UserModel
+from yak_server.database.models import Role, UserModel
 from yak_server.helpers.authentication import (
     NameAlreadyExistsError,
     encode_bearer_token,
@@ -23,7 +23,7 @@ from yak_server.helpers.password_validator import (
     PasswordRequirementsError,
 )
 from yak_server.helpers.settings import AuthenticationSettings, get_authentication_settings
-from yak_server.v1.helpers.auth import get_admin_user, get_current_user, user_from_token
+from yak_server.v1.helpers.auth import require_admin, require_user, user_from_token
 from yak_server.v1.helpers.errors import (
     InvalidCredentials,
     NameAlreadyExists,
@@ -64,7 +64,12 @@ def signup(
 ) -> GenericOut[SignupOut]:
     try:
         user = signup_user(
-            db, signup_in.name, signup_in.first_name, signup_in.last_name, signup_in.password
+            db,
+            signup_in.name,
+            signup_in.first_name,
+            signup_in.last_name,
+            signup_in.password,
+            Role.USER,
         )
     except PasswordRequirementsError as password_requirements_error:
         raise UnsatisfiedPasswordRequirements(
@@ -206,7 +211,7 @@ def modify_user(
     user_id: UUID4,
     modify_user_in: ModifyUserIn,
     db: Annotated[Session, Depends(get_db)],
-    _: Annotated[UserModel, Depends(get_admin_user)],
+    _: Annotated[UserModel, Depends(require_admin)],
 ) -> GenericOut[CurrentUserOut]:
     user = db.query(UserModel).filter_by(id=user_id).first()
 
@@ -230,6 +235,6 @@ def modify_user(
     },
 )
 def current_user(
-    user: Annotated[UserModel, Depends(get_current_user)],
+    user: Annotated[UserModel, Depends(require_user)],
 ) -> GenericOut[CurrentUserOut]:
     return GenericOut(result=CurrentUserOut.model_validate(user))

@@ -5,29 +5,31 @@ from uuid import uuid4
 from starlette.testclient import TestClient
 
 from testing.util import get_random_string
+from yak_server.cli.database import create_admin
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 
-def test_modify_password(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_modify_password(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
     client = TestClient(app_with_valid_jwt_config)
 
-    admin_name = "admin"
+    password = get_random_string(9)
     other_user_name = get_random_string(6)
 
     # Create admin account
-    response_signup_admin = client.post(
-        "/api/v1/users/signup",
+    create_admin(password, engine_for_test)
+
+    response_login_admin = client.post(
+        "/api/v1/users/login",
         json={
-            "name": admin_name,
-            "first_name": "admin",
-            "last_name": "admin",
-            "password": get_random_string(9),
+            "name": "admin",
+            "password": password,
         },
     )
 
-    authentication_token = response_signup_admin.json()["result"]["access_token"]
+    authentication_token = response_login_admin.json()["result"]["access_token"]
 
     # Create non admin user account
     response_signup_glepape = client.post(
