@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
-from yak_server.database.models import Role, UserModel
+from yak_server.database.models import CompetitionModel, Role, UserModel
 from yak_server.helpers.authentication import (
     NameAlreadyExistsError,
     encode_bearer_token,
@@ -22,8 +22,16 @@ from yak_server.helpers.password_validator import (
     PasswordRequirements,
     PasswordRequirementsError,
 )
-from yak_server.helpers.settings import AuthenticationSettings, get_authentication_settings
-from yak_server.v1.helpers.auth import require_admin, require_user, user_from_token
+from yak_server.helpers.settings import (
+    AuthenticationSettings,
+    get_authentication_settings,
+    get_competition,
+)
+from yak_server.v1.helpers.auth import (
+    require_admin,
+    require_user,
+    user_from_token,
+)
 from yak_server.v1.helpers.errors import (
     InvalidCredentials,
     NameAlreadyExists,
@@ -61,6 +69,7 @@ def signup(
     signup_in: SignupIn,
     db: Annotated[Session, Depends(get_db)],
     auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
+    competition: Annotated[CompetitionModel, Depends(get_competition)],
 ) -> GenericOut[SignupOut]:
     try:
         user = signup_user(
@@ -70,6 +79,7 @@ def signup(
             signup_in.last_name,
             signup_in.password,
             Role.USER,
+            competition,
         )
     except PasswordRequirementsError as password_requirements_error:
         raise UnsatisfiedPasswordRequirements(

@@ -10,6 +10,7 @@ from testing.mock import MockSettings
 from testing.util import get_random_string
 from yak_server.cli import app as typer_app
 from yak_server.cli.database import create_admin, initialize_database
+from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -366,18 +367,12 @@ def test_db_sync(
     monkeypatch: "pytest.MonkeyPatch",
     competition_data: CompetitionData,
 ) -> None:
-    # Setup fastapi application and initialize database
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(
-            data_folder_relative=f"../../yak_server/data/{competition_data.folder}",
-            official_results_url=competition_data.url,
-        ),
-    )
-
     initialize_database(engine_for_test, app_with_valid_jwt_config)
 
-    # Signup admin user
+    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
+        competition=competition_data.folder
+    )
+
     client = TestClient(app_with_valid_jwt_config)
 
     password = get_random_string(100)
@@ -395,10 +390,10 @@ def test_db_sync(
     # Synchronize admin bets with official results
     monkeypatch.setattr(
         "yak_server.cli.database.sync.get_settings",
-        MockSettings(official_results_url=competition_data.url),
+        lambda *_: MockSettings(competition=competition_data.folder),
     )
 
-    result = runner.invoke(typer_app, ["db", "sync"])
+    result = runner.invoke(typer_app, ["db", "sync"], catch_exceptions=False)
 
     assert result.exit_code == 0
 
