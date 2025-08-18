@@ -13,6 +13,12 @@ on:
       - ".github/workflows/test.yml"
 
 jobs:
+  locking:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check lock file
+        run: uv lock --check
+
   unit-tests:
     strategy:
       matrix:

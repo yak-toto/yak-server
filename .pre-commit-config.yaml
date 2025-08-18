@@ -1,4 +1,5 @@
 ci:
+  # Skip uv-lock since pre-commit ci does not connect to the internet
   skip: [uv-lock]
 
 repos:
@@ -24,7 +25,7 @@ repos:
       - id: ssort
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.8
+    rev: v0.12.9
     hooks:
       - id: ruff-check
       - id: ruff-format
@@ -34,13 +35,18 @@ repos:
     hooks:
       - id: mdformat
 
-  - repo: https://github.com/google/yamlfmt
-    rev: v0.17.2
-    hooks:
-      - id: yamlfmt
+  - repo: local
+    hooks:  
+      - id: import-linter
+        name: import-linter
+        description: Import Linter allows you to define and enforce rules for the internal and external imports within your Python project.
+        entry: lint-imports
+        language: python
+        pass_filenames: false
+        additional_dependencies: ["import-linter==2.4"]
 
   - repo: https://github.com/seddonym/import-linter
-    rev: v2.3
+    rev: v2.4
     hooks:
       - id: import-linter
 
@@ -51,12 +57,12 @@ repos:
         args: [--autofix, --indent, "4", --trailing-commas, --no-sort]
 
   - repo: https://github.com/adhtruong/mirrors-typos
-    rev: v1.35.3
+    rev: v1.35.4
     hooks:
       - id: typos
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.8.8
+    rev: 0.8.11
     hooks:
       - id: uv-lock
 
