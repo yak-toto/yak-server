@@ -6,26 +6,18 @@ from uuid import uuid4
 
 from starlette.testclient import TestClient
 
-from testing.mock import MockSettings
-from yak_server.cli.database import initialize_database
+from testing.util import get_resources_path
+from yak_server.cli.database import initialize_competition
 
 if TYPE_CHECKING:
-    import pytest
     from fastapi import FastAPI
-    from sqlalchemy import Engine
+    from sqlalchemy.orm import Session
 
 
-def test_teams(
-    app_with_valid_jwt_config: "FastAPI",
-    engine_for_test: "Engine",
-    monkeypatch: "pytest.MonkeyPatch",
-) -> None:
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(data_folder_relative="test_teams_v1"),
+def test_teams(app_with_valid_jwt_config: "FastAPI", db_session: "Session") -> None:
+    initialize_competition(
+        db_session, app_with_valid_jwt_config, get_resources_path("test_teams_v1")
     )
-
-    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     client = TestClient(app_with_valid_jwt_config)
 

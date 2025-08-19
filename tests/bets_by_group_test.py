@@ -4,29 +4,17 @@ from unittest.mock import ANY
 
 from starlette.testclient import TestClient
 
-from testing.mock import MockSettings
-from testing.util import get_random_string
-from yak_server.cli.database import initialize_database
+from testing.util import get_random_string, setup_competition
 
 if TYPE_CHECKING:
-    import pytest
     from fastapi import FastAPI
-    from sqlalchemy import Engine
+    from sqlalchemy.orm import Session
 
 
-def test_bets_by_groups(
-    app_with_valid_jwt_config: "FastAPI",
-    engine_for_test: "Engine",
-    monkeypatch: "pytest.MonkeyPatch",
-) -> None:
+def test_bets_by_groups(app_with_valid_jwt_config: "FastAPI", db_session: "Session") -> None:
+    setup_competition(app_with_valid_jwt_config, db_session, "test_compute_points_v1")
+
     client = TestClient(app_with_valid_jwt_config)
-
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(data_folder_relative="test_compute_points_v1"),
-    )
-
-    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     response_signup = client.post(
         "/api/v1/users/signup",

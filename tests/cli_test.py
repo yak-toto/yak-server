@@ -4,21 +4,35 @@ from typing import TYPE_CHECKING
 import pytest
 from starlette.testclient import TestClient
 
-from testing.util import get_random_string
+from testing.mock import MockSettings
+from testing.util import get_random_string, get_resources_path
 from yak_server.cli.database import (
     RecordDeletionInProductionError,
     TableDropInProductionError,
     create_admin,
     delete_database,
     drop_database,
+    initialize_competition,
 )
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
     from sqlalchemy import Engine
+    from sqlalchemy.orm import Session
 
 
-def test_create_admin(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
+def test_create_admin(
+    app_with_valid_jwt_config: "FastAPI",
+    engine_for_test: "Engine",
+    db_session: "Session",
+    monkeypatch: "pytest.MonkeyPatch",
+) -> None:
+    initialize_competition(db_session, app_with_valid_jwt_config, get_resources_path("test_login"))
+
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings", lambda: MockSettings(competition="test_login")
+    )
+
     client = TestClient(app_with_valid_jwt_config)
 
     # Success case : create admin using script and test login is OK

@@ -13,7 +13,7 @@ from yak_server.database.models import (
     TeamModel,
     UserModel,
 )
-from yak_server.helpers.settings import get_settings
+from yak_server.helpers.settings import get_competition, get_settings
 
 if TYPE_CHECKING:
     from sqlalchemy import Engine
@@ -171,13 +171,19 @@ def synchronize_official_results(engine: "Engine") -> None:
     if bs4 is None or lxml is None or httpx is None:
         raise SyncOfficialResultsNotAvailableError
 
-    official_results_url = get_settings().official_results_url
+    local_session_maker = build_local_session_maker(engine)
+
+    with local_session_maker() as db:
+        competition = get_competition(db, get_settings())
+
+    if competition is None:
+        raise ValueError
+
+    official_results_url = competition.official_results_url
 
     response = httpx.get(str(official_results_url))
 
     soup = bs4.BeautifulSoup(response.text, "lxml")
-
-    local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
         groups = [

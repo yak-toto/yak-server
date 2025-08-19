@@ -3,9 +3,18 @@ import string
 from dataclasses import dataclass
 from http import HTTPStatus
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from fastapi.testclient import TestClient
+
+from yak_server.cli.database import initialize_competition
+from yak_server.helpers.settings import get_settings
+
+from .mock import MockSettings
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+    from sqlalchemy.orm import Session
 
 TESTING_PATH = Path(__file__).parent
 
@@ -55,3 +64,9 @@ def patch_score_bets(
             )
 
             assert response_patch_score_bet.status_code == HTTPStatus.OK
+
+
+def setup_competition(app: "FastAPI", db_session: "Session", competition: str) -> None:
+    initialize_competition(db_session, app, get_resources_path(competition))
+
+    app.dependency_overrides[get_settings] = MockSettings(competition=competition)

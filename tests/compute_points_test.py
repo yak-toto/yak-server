@@ -6,10 +6,10 @@ import pytest
 from click.testing import CliRunner
 from starlette.testclient import TestClient
 
-from testing.mock import MockSettings
-from testing.util import UserData, get_random_string, patch_score_bets
+from testing.mock import MockCompetition
+from testing.util import UserData, get_random_string, patch_score_bets, setup_competition
 from yak_server.cli import app as cli_app
-from yak_server.cli.database import create_admin, initialize_database
+from yak_server.cli.database import create_admin
 from yak_server.helpers.rules import Rules
 from yak_server.helpers.rules.compute_final_from_rank import (
     RuleComputeFinaleFromGroupRank,
@@ -17,11 +17,12 @@ from yak_server.helpers.rules.compute_final_from_rank import (
     Versus,
 )
 from yak_server.helpers.rules.compute_points import RuleComputePoints
-from yak_server.helpers.settings import get_settings
+from yak_server.helpers.settings import get_competition
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
     from sqlalchemy import Engine
+    from sqlalchemy.orm import Session
 
 
 def put_finale_phase(client: TestClient, access_token: str, *, is_one_won: Optional[bool]) -> None:
@@ -69,7 +70,7 @@ def app_and_rules_for_compute_points(
         ),
     )
 
-    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(rules=rules)
+    app_with_valid_jwt_config.dependency_overrides[get_competition] = MockCompetition(rules=rules)
 
     yield app_with_valid_jwt_config, rules
 
@@ -78,6 +79,7 @@ def app_and_rules_for_compute_points(
 
 def test_compute_points(
     app_and_rules_for_compute_points: tuple["FastAPI", Rules],
+    db_session: "Session",
     engine_for_test: "Engine",
     monkeypatch: "pytest.MonkeyPatch",
 ) -> None:
@@ -85,11 +87,7 @@ def test_compute_points(
 
     client = TestClient(app)
 
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(data_folder_relative="test_compute_points_v1"),
-    )
-    initialize_database(engine_for_test, app)
+    setup_competition(app, db_session, "test_compute_points_v1")
 
     # Signup admin
     password = get_random_string(15)
@@ -240,7 +238,9 @@ def test_compute_points(
 
     # Compute points again with cli
 
-    monkeypatch.setattr("yak_server.cli.database.get_settings", MockSettings(rules=rules))
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_competition", lambda *_: MockCompetition(rules=rules)
+    )
 
     runner = CliRunner()
 
