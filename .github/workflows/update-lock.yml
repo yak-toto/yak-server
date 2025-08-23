@@ -3,14 +3,17 @@ name: ⬆️ Update lock file
 on:
   schedule:
     - cron: "0 6 * * 1" # Every Monday at 06:00 UTC
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   update-lockfile:
+    name: Update lock file
     runs-on: ubuntu-latest
 
     env:
       python-version: "3.13"
+      branch-name: "update-lockfile"
+      pr-title: "Update uv lock file"
 
     steps:
       - name: Checkout repository
@@ -26,21 +29,27 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Update lock file
-        run: uv lock --upgrade
+        id: update
+        run: |
+          UPDATED=$(uv lock --upgrade 2>&1 | grep "^Updated")
+          echo "updated_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$UPDATED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.PAT_FOR_CI }}
-          commit-message: "chore(deps): update uv lock file"
-          branch: chore/update-lockfile
+          commit-message: |
+            ${{ env.pr-title }}
+
+            ${{ steps.update.outputs.updated_output }}
+          branch: ${{ env.branch-name }}
           delete-branch: true
-          title: "chore(deps): update lock file"
+          title: ${{ env.pr-title }}
           body: |
-            This PR updates the **uv** lock file with the latest dependency resolutions.
-
-            - Triggered by GitHub Actions (scheduled job)
-            - Updated using `uv lock --upgrade`
-
-            Please review and merge if everything looks good.
+            ## Updated dependencies
+            ```
+            ${{ steps.update.outputs.updated_output }}
+            ```
           labels: dependencies, automated-pr
