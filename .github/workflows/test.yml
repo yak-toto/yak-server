@@ -11,6 +11,8 @@ on:
       - "pyproject.toml"
       - "uv.lock"
       - ".github/workflows/test.yml"
+  pull_request_target:
+    branches: [main]
 
 jobs:
   check-lock-file:
