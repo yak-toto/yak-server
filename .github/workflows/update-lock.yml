@@ -7,6 +7,7 @@ on:
 
 jobs:
   update-lockfile:
+    name: Update lock file
     runs-on: ubuntu-latest
 
     env:
@@ -26,7 +27,12 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Update lock file
-        run: uv lock --upgrade
+        id: update
+        run: |
+          UPDATED=$(uv lock --upgrade 2>&1 | grep "^Updated")
+          echo "updated_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$UPDATED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
@@ -37,10 +43,8 @@ jobs:
           delete-branch: true
           title: "chore(deps): update lock file"
           body: |
-            This PR updates the **uv** lock file with the latest dependency resolutions.
-
-            - Triggered by GitHub Actions (scheduled job)
-            - Updated using `uv lock --upgrade`
-
-            Please review and merge if everything looks good.
+            ## Updated dependencies
+            ```
+            ${{ steps.update.outputs.updated_output }}
+            ```
           labels: dependencies, automated-pr
