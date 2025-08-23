@@ -2,7 +2,7 @@ name: 🧪 Unit tests
 
 on:
   push:
-    branches: [main, chore/update-lockfile]
+    branches: [main]
   pull_request:
     branches: [main]
     paths:
