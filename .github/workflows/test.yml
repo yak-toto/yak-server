@@ -13,6 +13,26 @@ on:
       - ".github/workflows/test.yml"
 
 jobs:
+  check-lock-file:
+    name: Check lock file
+    runs-on: ubuntu-latest
+
+    env:
+      python-version: "3.13"
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ env.python-version }}
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Check lock file
+        run: uv lock --check
+
   unit-tests:
     strategy:
       matrix:
@@ -23,10 +43,12 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     env:
+      host: 127.0.0.1
       username: ci
       password: test
       database: test
       port: 6522
+      postgres-version: 17
 
     steps:
       - uses: actions/checkout@v5
@@ -38,7 +60,7 @@ jobs:
           password: ${{ env.password }}
           database: ${{ env.database }}
           port: ${{ env.port }}
-          postgres-version: "14"
+          postgres-version: ${{ env.postgres-version }}
           ssl: true
 
       - name: Install uv
@@ -53,7 +75,7 @@ jobs:
 
       - name: Run test
         env:
-          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_HOST: ${{ env.host }}
           POSTGRES_USER: ${{ env.username }}
           POSTGRES_PASSWORD: ${{ env.password }}
           POSTGRES_PORT: ${{ env.port }}
