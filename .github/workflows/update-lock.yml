@@ -31,6 +31,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
+          token: ${{ secrets.PAT_FOR_CI }}
           commit-message: "chore(deps): update uv lock file"
           branch: chore/update-lockfile
           delete-branch: true
