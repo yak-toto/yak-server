@@ -48,7 +48,5 @@ jobs:
           delete-branch: true
           title: ${{ env.pr-title }}
           body: |
-            ```
             ${{ steps.update.outputs.updated_output }}
-            ```
           labels: dependencies, automated-pr
