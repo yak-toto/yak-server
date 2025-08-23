@@ -1,4 +1,4 @@
-name: Update lock file
+name: ⬆️ Update lock file
 
 on:
   schedule:
@@ -9,22 +9,24 @@ jobs:
   update-lockfile:
     runs-on: ubuntu-latest
 
+    env:
+      python-version: "3.13"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # needed for PRs and git history
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12" # match your project
-
       - name: Install uv
-        run: pip install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ env.python-version }}
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Update lock file
-        run: uv lock --upgrade # or just `uv lock` if you only want to re-resolve
+        run: uv lock --upgrade
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
