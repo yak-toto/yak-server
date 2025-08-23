@@ -10,6 +10,8 @@ on:
       - "tests/**"
       - "pyproject.toml"
       - ".github/workflows/type_checking.yml"
+  pull_request_target:
+    branches: [main]
 
 jobs:
   type-checking:
