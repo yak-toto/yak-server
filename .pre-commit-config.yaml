@@ -1,4 +1,5 @@
 ci:
+  # Skip uv-lock since pre-commit ci does not connect to the internet
   skip: [uv-lock]
 
 repos:
