@@ -26,7 +26,11 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Update lock file
-        run: uv lock --upgrade
+        run: |
+          UPDATED=$(uv lock --upgrade 2>&1 | grep -v "^Resolved")
+          echo "updated_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$UPDATED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
@@ -43,4 +47,9 @@ jobs:
             - Updated using `uv lock --upgrade`
 
             Please review and merge if everything looks good.
+
+            ## Updated dependencies
+            ```
+            ${{ steps.update.outputs.updated_output }}
+            ```
           labels: dependencies, automated-pr
