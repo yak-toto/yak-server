@@ -48,7 +48,6 @@ jobs:
           delete-branch: true
           title: ${{ env.pr-title }}
           body: |
-            ## Updated dependencies
             ```
             ${{ steps.update.outputs.updated_output }}
             ```
