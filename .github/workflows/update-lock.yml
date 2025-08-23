@@ -1,0 +1,43 @@
+name: Update lock file
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Every Monday at 06:00 UTC
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update-lockfile:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed for PRs and git history
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12" # match your project
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Update lock file
+        run: uv lock --upgrade # or just `uv lock` if you only want to re-resolve
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(deps): update uv lock file"
+          branch: chore/update-lockfile
+          delete-branch: true
+          title: "chore(deps): update lock file"
+          body: |
+            This PR updates the **uv** lock file with the latest dependency resolutions.
+
+            - Triggered by GitHub Actions (scheduled job)
+            - Updated using `uv lock --upgrade`
+
+            Please review and merge if everything looks good.
+          labels: dependencies, automated-pr
