@@ -47,8 +47,8 @@ Homepage = "https://github.com/yak-toto/yak-server"
 Repository = "https://github.com/yak-toto/yak-server"
 
 [project.optional-dependencies]
-db_migration = ["alembic ==1.16.4"]
-sync = ["beautifulsoup4[lxml] ==4.13.4", "httpx ==0.28.1"]
+db_migration = ["alembic ==1.16.5"]
+sync = ["beautifulsoup4[lxml] ==4.13.5", "httpx ==0.28.1"]
 server = ["uvicorn>=0.34.0"]
 
 [project.scripts]
