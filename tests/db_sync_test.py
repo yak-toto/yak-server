@@ -385,7 +385,8 @@ def test_db_sync(
     create_admin(password, engine_for_test)
 
     response_signup = client.post(
-        "/api/v1/users/login", json={"name": "admin", "password": password}
+        "/api/v1/users/login",
+        json={"name": "admin", "password": password},
     )
 
     assert response_signup.status_code == HTTPStatus.CREATED
@@ -404,7 +405,8 @@ def test_db_sync(
 
     # Fetch all bets and check
     response_all_bets = client.get(
-        "/api/v1/bets", headers={"Authorization": f"Bearer {access_token}"}
+        "/api/v1/bets",
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_all_bets.status_code == HTTPStatus.OK

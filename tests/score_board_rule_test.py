@@ -17,7 +17,8 @@ if TYPE_CHECKING:
 
 
 def test_score_board_rule_not_defined(
-    monkeypatch: pytest.MonkeyPatch, engine_for_test_with_delete: "Engine"
+    monkeypatch: pytest.MonkeyPatch,
+    engine_for_test_with_delete: "Engine",
 ) -> None:
     monkeypatch.setattr("yak_server.cli.database.get_settings", MockSettings(rules=Rules()))
 

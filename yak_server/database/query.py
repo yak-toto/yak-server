@@ -56,7 +56,10 @@ def bets_from_phase_code(
     user: "UserModel",
     phase_code: str,
 ) -> tuple[
-    Optional[PhaseModel], Iterable[GroupModel], Iterable[ScoreBetModel], Iterable[BinaryBetModel]
+    Optional[PhaseModel],
+    Iterable[GroupModel],
+    Iterable[ScoreBetModel],
+    Iterable[BinaryBetModel],
 ]:
     phase = db.query(PhaseModel).filter_by(code=phase_code).first()
 

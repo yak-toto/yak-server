@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID
 
+import click
 from sqlalchemy import update
 from sqlalchemy.dialects.postgresql import insert
 
@@ -68,13 +69,13 @@ def create_admin(password: str, engine: "Engine") -> None:
                 role=Role.ADMIN,
             )
         except NameAlreadyExistsError:
-            print("Admin already exists")
+            click.echo("Admin already exists")
 
 
 class MissingPhaseDuringInitError(Exception):
     def __init__(self, phase_code: str) -> None:
         super().__init__(
-            f"Error during database initialization: phase_code={phase_code} not found."
+            f"Error during database initialization: phase_code={phase_code} not found.",
         )
 
 
@@ -86,7 +87,7 @@ class MissingTeamDuringInitError(Exception):
 class MissingGroupDuringInitError(Exception):
     def __init__(self, group_code: str) -> None:
         super().__init__(
-            f"Error during database initialization: group_code={group_code} not found."
+            f"Error during database initialization: group_code={group_code} not found.",
         )
 
 
@@ -121,7 +122,7 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
 
         for phase in phases:
             db.execute(
-                insert(PhaseModel).values(**phase).on_conflict_do_nothing(index_elements=["code"])
+                insert(PhaseModel).values(**phase).on_conflict_do_nothing(index_elements=["code"]),
             )
 
         db.flush()
@@ -140,7 +141,7 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
 
         for group in groups:
             db.execute(
-                insert(GroupModel).values(**group).on_conflict_do_nothing(index_elements=["code"])
+                insert(GroupModel).values(**group).on_conflict_do_nothing(index_elements=["code"]),
             )
 
         db.flush()
@@ -151,7 +152,7 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
             team["flag_url"] = ""
 
             db.execute(
-                insert(TeamModel).values(**team).on_conflict_do_nothing(index_elements=["code"])
+                insert(TeamModel).values(**team).on_conflict_do_nothing(index_elements=["code"]),
             )
 
             db.flush()
@@ -165,7 +166,7 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
                 update(TeamModel)
                 .where(TeamModel.code == team["code"])
                 .values(
-                    flag_url=app.url_path_for("retrieve_team_flag_by_id", team_id=team_instance.id)
+                    flag_url=app.url_path_for("retrieve_team_flag_by_id", team_id=team_instance.id),
                 )
             )
 
@@ -183,7 +184,7 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
             db.execute(
                 insert(MatchReferenceModel)
                 .values(**match)
-                .on_conflict_do_nothing(index_elements=["group_id", "index"])
+                .on_conflict_do_nothing(index_elements=["group_id", "index"]),
             )
 
         db.flush()
@@ -218,7 +219,7 @@ def drop_database(engine: "Engine", *, debug: bool) -> None:
 
 
 def print_export_command(alembic_ini_path: Path) -> None:
-    print(f"export ALEMBIC_CONFIG={alembic_ini_path}")
+    click.echo(f"export ALEMBIC_CONFIG={alembic_ini_path}")
 
 
 def setup_migration(*, short: bool = False) -> None:
@@ -230,22 +231,22 @@ def setup_migration(*, short: bool = False) -> None:
     if short is True:
         print_export_command(alembic_ini_path)
     else:
-        print(
+        click.echo(
             "To be able to run the database migration scripts, "
             "you need to run the following command:",
         )
         print_export_command(alembic_ini_path)
-        print()
-        print(
+        click.echo()
+        click.echo(
             "Follow this link for more information: "
             "https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file",
         )
 
         if alembic is None:
-            print()
-            print(
+            click.echo()
+            click.echo(
                 "To enable migration using alembic, please run: "
-                "uv pip install yak-server[db_migration]"
+                "uv pip install yak-server[db_migration]",
             )
 
 

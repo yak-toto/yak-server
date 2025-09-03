@@ -142,17 +142,25 @@ class ScoreBetModel(Base):
     id: Mapped[UUID] = mapped_column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
 
     match_id: Mapped[UUID] = mapped_column(
-        DB_UUID(), sa.ForeignKey("match.id", ondelete="CASCADE"), nullable=False
+        DB_UUID(),
+        sa.ForeignKey("match.id", ondelete="CASCADE"),
+        nullable=False,
     )
     match: Mapped["MatchModel"] = relationship(
-        "MatchModel", back_populates="score_bets", lazy="raise"
+        "MatchModel",
+        back_populates="score_bets",
+        lazy="raise",
     )
 
     score1: Mapped[Optional[int]] = mapped_column(
-        sa.Integer, CheckConstraint("score1>=0"), default=None
+        sa.Integer,
+        CheckConstraint("score1>=0"),
+        default=None,
     )
     score2: Mapped[Optional[int]] = mapped_column(
-        sa.Integer, CheckConstraint("score2>=0"), default=None
+        sa.Integer,
+        CheckConstraint("score2>=0"),
+        default=None,
     )
 
     def is_invalid(self) -> bool:
@@ -191,10 +199,14 @@ class BinaryBetModel(Base):
     id = mapped_column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
 
     match_id: Mapped[UUID] = mapped_column(
-        DB_UUID(), sa.ForeignKey("match.id", ondelete="CASCADE"), nullable=False
+        DB_UUID(),
+        sa.ForeignKey("match.id", ondelete="CASCADE"),
+        nullable=False,
     )
     match: Mapped["MatchModel"] = relationship(
-        "MatchModel", back_populates="binary_bets", lazy="raise"
+        "MatchModel",
+        back_populates="binary_bets",
+        lazy="raise",
     )
 
     is_one_won: Mapped[Optional[bool]] = mapped_column(sa.Boolean, default=None)
@@ -233,7 +245,10 @@ class MatchModel(Base):
 
     group_id: Mapped[UUID] = mapped_column(DB_UUID(), sa.ForeignKey("group.id"), nullable=False)
     group: Mapped["GroupModel"] = relationship(
-        "GroupModel", foreign_keys=group_id, backref="matches", lazy="raise"
+        "GroupModel",
+        foreign_keys=group_id,
+        backref="matches",
+        lazy="raise",
     )
 
     index: Mapped[int] = mapped_column(sa.Integer, nullable=False)
@@ -244,7 +259,9 @@ class MatchModel(Base):
         nullable=True,
     )
     team1: Mapped[Optional["TeamModel"]] = relationship(
-        "TeamModel", foreign_keys=team1_id, lazy="raise"
+        "TeamModel",
+        foreign_keys=team1_id,
+        lazy="raise",
     )
 
     team2_id: Mapped[Optional[UUID]] = mapped_column(
@@ -253,11 +270,15 @@ class MatchModel(Base):
         nullable=True,
     )
     team2: Mapped[Optional["TeamModel"]] = relationship(
-        "TeamModel", foreign_keys=team2_id, lazy="raise"
+        "TeamModel",
+        foreign_keys=team2_id,
+        lazy="raise",
     )
 
     user_id: Mapped[UUID] = mapped_column(
-        DB_UUID(), sa.ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+        DB_UUID(),
+        sa.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
     )
     user: Mapped[UserModel] = relationship("UserModel", foreign_keys=user_id, lazy="raise")
 
@@ -312,13 +333,22 @@ class GroupPositionModel(Base):
     __tablename__ = "group_position"
     id: Mapped[UUID] = mapped_column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
     won: Mapped[int] = mapped_column(
-        sa.Integer, CheckConstraint("won>=0"), nullable=False, default=0
+        sa.Integer,
+        CheckConstraint("won>=0"),
+        nullable=False,
+        default=0,
     )
     drawn: Mapped[int] = mapped_column(
-        sa.Integer, CheckConstraint("drawn>=0"), nullable=False, default=0
+        sa.Integer,
+        CheckConstraint("drawn>=0"),
+        nullable=False,
+        default=0,
     )
     lost: Mapped[int] = mapped_column(
-        sa.Integer, CheckConstraint("lost>=0"), nullable=False, default=0
+        sa.Integer,
+        CheckConstraint("lost>=0"),
+        nullable=False,
+        default=0,
     )
     goals_for: Mapped[int] = mapped_column(
         sa.Integer,

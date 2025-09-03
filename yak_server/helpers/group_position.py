@@ -54,7 +54,8 @@ class GroupPosition:
 
 
 def compute_group_rank(
-    group_rank: Iterable[GroupPositionModel], score_bets: Iterable["ScoreBetModel"]
+    group_rank: Iterable[GroupPositionModel],
+    score_bets: Iterable["ScoreBetModel"],
 ) -> list[GroupPositionModel]:
     new_group_position: dict[UUID, GroupPosition] = {}
 
@@ -109,7 +110,9 @@ def compute_group_rank(
 
 
 def get_group_rank_with_code(
-    db: "Session", user: "UserModel", group_id: "UUID"
+    db: "Session",
+    user: "UserModel",
+    group_id: "UUID",
 ) -> list[GroupPositionModel]:
     group_rank = (
         db.query(GroupPositionModel)

@@ -45,7 +45,12 @@ class NameAlreadyExistsError(Exception):
 
 
 def signup_user(
-    db: Session, name: str, first_name: str, last_name: str, password: str, role: Role
+    db: Session,
+    name: str,
+    first_name: str,
+    last_name: str,
+    password: str,
+    role: Role,
 ) -> UserModel:
     # Check existing user in db
     existing_user = db.query(UserModel).filter_by(name=name).first()
@@ -81,8 +86,8 @@ def signup_user(
             db.query(ScoreBetModel)
             .options(selectinload(ScoreBetModel.match))
             .join(ScoreBetModel.match)
-            .filter_by(user_id=user.id)
-        )
+            .filter_by(user_id=user.id),
+        ),
     )
     db.commit()
 

@@ -70,7 +70,7 @@ def compute_results_for_score_bet(db: "Session", admin: UserModel) -> list[Resul
                 if user_score.is_same_scores(real_score):
                     result_for_score_bet.number_correct_score += 1
                     result_for_score_bet.user_ids_found_correct_score.append(
-                        user_score.match.user_id
+                        user_score.match.user_id,
                     )
 
         results.append(result_for_score_bet)
@@ -89,7 +89,9 @@ def all_results_filled_in_group(group_result: list["GroupPositionModel"]) -> boo
 
 
 def compute_results_for_group_rank(
-    db: "Session", admin: UserModel, other_users: Iterable[UserModel]
+    db: "Session",
+    admin: UserModel,
+    other_users: Iterable[UserModel],
 ) -> dict[UUID, ResultForGroupRank]:
     result_groups: dict[UUID, ResultForGroupRank] = {}
 
@@ -147,7 +149,7 @@ def winner_from_user(db: "Session", user: UserModel) -> set[UUID]:
             )
             .join(BinaryBetModel.match)
             .join(MatchModel.group)
-            .where(MatchModel.user_id == user.id, GroupModel.code == "1")
+            .where(MatchModel.user_id == user.id, GroupModel.code == "1"),
         ),
     )
 
@@ -164,7 +166,9 @@ def winner_from_user(db: "Session", user: UserModel) -> set[UUID]:
 
 
 def compute_points(
-    db: "Session", admin: UserModel, rule_config: RuleComputePoints
+    db: "Session",
+    admin: UserModel,
+    rule_config: RuleComputePoints,
 ) -> tuple[int, str]:
     results = compute_results_for_score_bet(db, admin)
 

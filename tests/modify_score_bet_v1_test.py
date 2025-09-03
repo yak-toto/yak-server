@@ -87,7 +87,7 @@ def test_modify_score_bet(
 
     # Error case : check locked bet
     app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") - pendulum.duration(minutes=10)
+        pendulum.now("UTC") - pendulum.duration(minutes=10),
     )
 
     response_locked_bet = client.patch(
@@ -103,7 +103,7 @@ def test_modify_score_bet(
     }
 
     app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") + pendulum.duration(minutes=10)
+        pendulum.now("UTC") + pendulum.duration(minutes=10),
     )
 
     # Error case : check bet not found
@@ -135,7 +135,7 @@ def test_modify_score_bet(
             {
                 "error": "Input should be greater than or equal to 0",
                 "field": "body -> team1 -> score",
-            }
+            },
         ],
     }
 

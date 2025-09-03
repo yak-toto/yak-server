@@ -30,10 +30,16 @@ def downgrade():
         sa.Column("id", sa.UUID(), autoincrement=False, nullable=False),
         sa.Column("user_id", sa.UUID(), autoincrement=False, nullable=False),
         sa.Column(
-            "expiration", postgresql.TIMESTAMP(timezone=True), autoincrement=False, nullable=False
+            "expiration",
+            postgresql.TIMESTAMP(timezone=True),
+            autoincrement=False,
+            nullable=False,
         ),
         sa.ForeignKeyConstraint(
-            ["user_id"], ["user.id"], name=op.f("refresh_token_user_id_fkey"), ondelete="CASCADE"
+            ["user_id"],
+            ["user.id"],
+            name=op.f("refresh_token_user_id_fkey"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("refresh_token_pkey")),
     )

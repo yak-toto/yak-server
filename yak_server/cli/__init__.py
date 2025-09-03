@@ -103,7 +103,12 @@ def make_env_typer() -> click.Group:
     @env_app.command()
     @click.option("--debug/--no-debug", prompt=True, is_flag=True, default=False, show_default=True)
     @click.option(
-        "-h", "--host", prompt=True, default="localhost", show_default=True, help="Database host"
+        "-h",
+        "--host",
+        prompt=True,
+        default="localhost",
+        show_default=True,
+        help="Database host",
     )
     @click.option("-u", "--user", prompt=True, help="Database username", required=True)
     @click.option("--password", prompt=True, hide_input=True, required=True)
@@ -168,7 +173,12 @@ def make_env_typer() -> click.Group:
 
     @env_app.command()
     @click.option(
-        "-h", "--host", prompt=True, default="localhost", show_default=True, help="Database host"
+        "-h",
+        "--host",
+        prompt=True,
+        default="localhost",
+        show_default=True,
+        help="Database host",
     )
     @click.option("-u", "--user", prompt=True, help="Database username", required=True)
     @click.option("--password", prompt=True, hide_input=True, required=True)
@@ -213,7 +223,11 @@ def make_env_typer() -> click.Group:
     )
     @click.option("--competition", "-c", prompt=True, help="Competition name", required=True)
     def app(
-        *, debug: bool, jwt_expiration: int, jwt_refresh_expiration: int, competition: str
+        *,
+        debug: bool,
+        jwt_expiration: int,
+        jwt_refresh_expiration: int,
+        competition: str,
     ) -> None:
         """Build the env files you need to setup application."""
         write_app_env_file(debug, jwt_expiration, jwt_refresh_expiration, competition)

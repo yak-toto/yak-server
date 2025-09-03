@@ -173,7 +173,7 @@ def set_exception_handler(app: "FastAPI") -> None:
         log_traceback(http_exception)
 
         logger.info(
-            f"An expected exception occurs: {type(http_exception).__name__} {http_exception}"
+            f"An expected exception occurs: {type(http_exception).__name__} {http_exception}",
         )
 
         return JSONResponse(
@@ -214,7 +214,7 @@ def set_exception_handler(app: "FastAPI") -> None:
 
         logger.info(
             "An validation error occurs: "
-            f"{type(request_validator_error).__name__} {request_validator_error}"
+            f"{type(request_validator_error).__name__} {request_validator_error}",
         )
 
         errors = []

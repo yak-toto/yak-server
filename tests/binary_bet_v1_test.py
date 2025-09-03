@@ -86,7 +86,7 @@ def test_binary_bet(
 
     # Error case : locked bet
     app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") - pendulum.duration(minutes=10)
+        pendulum.now("UTC") - pendulum.duration(minutes=10),
     )
 
     response_lock_bet = client.patch(
@@ -103,7 +103,7 @@ def test_binary_bet(
     }
 
     app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") + pendulum.duration(minutes=10)
+        pendulum.now("UTC") + pendulum.duration(minutes=10),
     )
 
     # Error case : Invalid input
