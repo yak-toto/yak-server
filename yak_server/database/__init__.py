@@ -26,7 +26,12 @@ def get_postgres_settings() -> PostgresSettings:
 
 
 def compute_database_uri(
-    client: str, host: str, user: str, password: str, port: int, db: str
+    client: str,
+    host: str,
+    user: str,
+    password: str,
+    port: int,
+    db: str,
 ) -> str:
     return f"postgresql+{client}://{user}:{password}@{host}:{port}/{db}"
 

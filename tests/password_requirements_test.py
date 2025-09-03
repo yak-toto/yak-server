@@ -36,7 +36,7 @@ def test_password_without_upper_case_letter() -> None:
         validate_password(
             secrets.choice(string.ascii_lowercase)
             + secrets.choice(string.digits)
-            + "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(10))
+            + "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(10)),
         )
 
     assert str(exception.value) == "At least one upper-case letter expected."
@@ -47,7 +47,7 @@ def test_password_without_lower_case_letter() -> None:
         validate_password(
             secrets.choice(string.ascii_uppercase)
             + secrets.choice(string.digits)
-            + "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+            + "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(10)),
         )
 
     assert str(exception.value) == "At least one lower-case letter expected."
@@ -58,7 +58,7 @@ def test_password_without_digits() -> None:
         validate_password(
             secrets.choice(string.ascii_uppercase)
             + secrets.choice(string.ascii_lowercase)
-            + "".join(secrets.choice(string.ascii_letters) for _ in range(10))
+            + "".join(secrets.choice(string.ascii_letters) for _ in range(10)),
         )
 
     assert str(exception.value) == "At least one digit expected."
@@ -71,7 +71,7 @@ def test_password_with_spaces() -> None:
             + secrets.choice(string.ascii_lowercase)
             + secrets.choice(string.digits)
             + "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(10))
-            + " " * 10
+            + " " * 10,
         )
 
     assert str(exception.value) == "Password must not contain spaces."

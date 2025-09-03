@@ -14,8 +14,8 @@ def name_already_exists_message(user_name: str) -> str:
     return f"Name already exists: {user_name}"
 
 
-def generic_not_found_message(id: Union[UUID, str], resource_name: str) -> str:
-    return f"{resource_name} not found: {id}"
+def generic_not_found_message(resource_id: Union[UUID, str], resource_name: str) -> str:
+    return f"{resource_name} not found: {resource_id}"
 
 
 bet_not_found_message = partial(generic_not_found_message, resource_name="Bet")

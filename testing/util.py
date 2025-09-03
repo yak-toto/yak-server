@@ -38,7 +38,8 @@ def patch_score_bets(
     new_scores: list[Optional[tuple[Optional[int], Optional[int]]]],
 ) -> None:
     response_get_all_bets = client.get(
-        "/api/v1/bets", headers={"Authorization": f"Bearer {access_token}"}
+        "/api/v1/bets",
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_get_all_bets.status_code == HTTPStatus.OK

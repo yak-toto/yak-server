@@ -141,7 +141,9 @@ def modify_binary_bet_by_id(
 
     logger.info(
         modify_binary_bet_successfully(
-            user.name, binary_bet, new_is_one_won=modify_binary_bet_in.is_one_won
+            user.name,
+            binary_bet,
+            new_is_one_won=modify_binary_bet_in.is_one_won,
         ),
     )
 

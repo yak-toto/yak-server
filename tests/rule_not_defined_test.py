@@ -25,7 +25,7 @@ def test_rule_not_defined(monkeypatch: pytest.MonkeyPatch) -> None:
         (rules_dir / f"{rule_id}.json").write_text(json.dumps({}))
 
         (competition_dir / "config.ini").write_text(
-            "[locking]\ndatetime = 2022-11-20T17:00:00.000000+01:00\n"
+            "[locking]\ndatetime = 2022-11-20T17:00:00.000000+01:00\n",
         )
 
         monkeypatch.setattr("yak_server.cli.env.__file__", Path("cli", "env.py"))

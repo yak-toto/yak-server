@@ -99,8 +99,6 @@ ignore = [
     # docstring
     "D",
     # shadow builtins
-    "A002",
-    # f-string logging
     "G004",
     # copyright
     "CPY001",
@@ -108,19 +106,16 @@ ignore = [
     "FA100",
     # formatter compatiblity
     "COM812",
-    "ISC001",
 ]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 12
 
 [tool.ruff.lint.per-file-ignores]
-"yak_server/cli/*" = ["T20"]
 "yak_server/database/migrations/*" = ["ANN001", "ANN201"]
 "yak_server/helpers/errors.py" = ["S105"]
 "tests/*" = ["S101", "PLR0914", "PLR2004"]
 "testing/*" = ["S101"]
-"scripts/*" = ["T201"]
 
 [tool.ruff.lint.pylint]
 max-args = 6

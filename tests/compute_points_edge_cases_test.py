@@ -95,7 +95,8 @@ def test_compute_points(
     create_admin(password, engine_for_test)
 
     response_login_admin = client.post(
-        "/api/v1/users/login", json={"name": admin.name, "password": password}
+        "/api/v1/users/login",
+        json={"name": admin.name, "password": password},
     )
 
     assert response_login_admin.status_code == HTTPStatus.CREATED
@@ -438,7 +439,8 @@ def test_no_bet_associated_to_first_phase_group(
     access_token = response.json()["result"]["access_token"]
 
     response_get_all_bets = client.get(
-        "/api/v1/bets", headers={"Authorization": f"Bearer {access_token}"}
+        "/api/v1/bets",
+        headers={"Authorization": f"Bearer {access_token}"},
     )
     assert response_get_all_bets.status_code == HTTPStatus.OK
     bet_id = response_get_all_bets.json()["result"]["score_bets"][0]["id"]

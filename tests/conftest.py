@@ -83,7 +83,8 @@ def _debug_app_session() -> "FastAPI":
 
 @pytest.fixture
 def _app(
-    _debug_app_session: "FastAPI", engine_for_test: "Engine"
+    _debug_app_session: "FastAPI",
+    engine_for_test: "Engine",
 ) -> Generator["FastAPI", None, None]:
     # Clean database before running test
     delete_database(engine_for_test, debug=True)
@@ -108,7 +109,7 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
     )
 
     app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") + pendulum.duration(minutes=10)
+        pendulum.now("UTC") + pendulum.duration(minutes=10),
     )
 
     yield app
@@ -126,7 +127,7 @@ def app_with_valid_jwt_config(_app: "FastAPI") -> Generator["FastAPI", None, Non
     )
 
     _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") + pendulum.duration(minutes=10)
+        pendulum.now("UTC") + pendulum.duration(minutes=10),
     )
 
     yield _app
@@ -144,7 +145,7 @@ def app_with_null_jwt_expiration_time(_app: "FastAPI") -> Generator["FastAPI", N
     )
 
     _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") + pendulum.duration(minutes=10)
+        pendulum.now("UTC") + pendulum.duration(minutes=10),
     )
 
     yield _app
@@ -162,7 +163,7 @@ def app_with_null_jwt_refresh_expiration_time(_app: "FastAPI") -> Generator["Fas
     )
 
     _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") + pendulum.duration(minutes=10)
+        pendulum.now("UTC") + pendulum.duration(minutes=10),
     )
 
     yield _app

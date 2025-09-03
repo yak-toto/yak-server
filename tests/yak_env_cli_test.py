@@ -41,7 +41,7 @@ def test_yak_env_all() -> None:
         assert env["OFFICIAL_RESULTS_URL"] == "https://en.wikipedia.org/wiki/2022_FIFA_World_Cup"
         assert env["DATA_FOLDER"] is not None
         assert Path(env["DATA_FOLDER"]).samefile(
-            Path(__file__).parents[1] / "yak_server" / "data" / "world_cup_2022"
+            Path(__file__).parents[1] / "yak_server" / "data" / "world_cup_2022",
         )
         assert env["RULES"] is not None
         assert len(json.loads(env["RULES"])) == 2
@@ -92,7 +92,7 @@ def test_yak_env_all_invalid_lockdatetime(monkeypatch: pytest.MonkeyPatch) -> No
 
         (Path(tmpdir) / "data" / "competition0").mkdir(parents=True)
         (Path(tmpdir) / "data" / "competition0" / "common.json").write_text(
-            json.dumps({"lock_datetime": date, "official_results_url": ""})
+            json.dumps({"lock_datetime": date, "official_results_url": ""}),
         )
 
         monkeypatch.setattr("yak_server.cli.env.__file__", (Path(tmpdir) / "e" / "e").resolve())
@@ -117,7 +117,9 @@ def test_yak_env_db() -> None:
 
     with runner.isolated_filesystem():
         result = runner.invoke(
-            app, ["env", "db"], input=f"{host}\n{user_name}\n{password}\n{port}\n{database}\n"
+            app,
+            ["env", "db"],
+            input=f"{host}\n{user_name}\n{password}\n{port}\n{database}\n",
         )
 
         assert result.exit_code == 0
@@ -154,7 +156,7 @@ def test_yak_env_app() -> None:
         assert env["OFFICIAL_RESULTS_URL"] == "https://en.wikipedia.org/wiki/2018_FIFA_World_Cup"
         assert env["DATA_FOLDER"] is not None
         assert Path(env["DATA_FOLDER"]).samefile(
-            Path(__file__).parents[1] / "yak_server" / "data" / "world_cup_2018"
+            Path(__file__).parents[1] / "yak_server" / "data" / "world_cup_2018",
         )
         assert env["RULES"] is not None
         assert len(json.loads(env["RULES"])) == 0

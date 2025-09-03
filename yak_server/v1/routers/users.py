@@ -73,7 +73,7 @@ def signup(
         )
     except PasswordRequirementsError as password_requirements_error:
         raise UnsatisfiedPasswordRequirements(
-            str(password_requirements_error)
+            str(password_requirements_error),
         ) from password_requirements_error
     except NameAlreadyExistsError as name_already_exists_error:
         raise NameAlreadyExists(signup_in.name) from name_already_exists_error
@@ -93,7 +93,7 @@ def signup(
             refresh_token=encode_bearer_token(
                 sub=user.id,
                 expiration_time=pendulum.duration(
-                    seconds=auth_settings.jwt_refresh_expiration_time
+                    seconds=auth_settings.jwt_refresh_expiration_time,
                 ),
                 secret_key=auth_settings.jwt_refresh_secret_key,
             ),
@@ -116,7 +116,7 @@ def password_requirements() -> GenericOut[PasswordRequirementsOut]:
             lowercase=password_requirements.LOWERCASE,
             digit=password_requirements.DIGIT,
             no_space=password_requirements.NO_SPACE,
-        )
+        ),
     )
 
 
@@ -154,7 +154,7 @@ def login(
             refresh_token=encode_bearer_token(
                 sub=user.id,
                 expiration_time=pendulum.duration(
-                    seconds=auth_settings.jwt_refresh_expiration_time
+                    seconds=auth_settings.jwt_refresh_expiration_time,
                 ),
                 secret_key=auth_settings.jwt_refresh_secret_key,
             ),
@@ -189,7 +189,7 @@ def refresh(
             refresh_token=encode_bearer_token(
                 sub=user.id,
                 expiration_time=pendulum.duration(
-                    seconds=auth_settings.jwt_refresh_expiration_time
+                    seconds=auth_settings.jwt_refresh_expiration_time,
                 ),
                 secret_key=auth_settings.jwt_refresh_secret_key,
             ),

@@ -51,7 +51,8 @@ def test_phase(
 
     # Success case : retrieve all phases
     response_all_phases = client.get(
-        "/api/v1/phases", headers={"Authorization": f"Bearer {access_token}"}
+        "/api/v1/phases",
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_all_phases.status_code == HTTPStatus.OK

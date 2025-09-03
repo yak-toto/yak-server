@@ -468,7 +468,8 @@ def test_group_rank_team_not_defined(
     access_token = response_signup.json()["result"]["access_token"]
 
     response_retrieve_bets_group = client.get(
-        "/api/v1/bets/groups/A", headers={"Authorization": f"Bearer {access_token}"}
+        "/api/v1/bets/groups/A",
+        headers={"Authorization": f"Bearer {access_token}"},
     )
 
     assert response_retrieve_bets_group.status_code == HTTPStatus.OK
