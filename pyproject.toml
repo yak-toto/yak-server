@@ -34,11 +34,11 @@ dependencies = [
     "PyJWT ==2.10.1",
     "psycopg[binary] >=3.2.9",
     "argon2-cffi ==25.1.0",
-    "fastapi ==0.117.1",
+    "fastapi ==0.118.0",
     "click >=8.1.8",
     "SQLAlchemy ==2.0.41",
     "pendulum ==3.1.0",
-    "pydantic-settings ==2.10.1",
+    "pydantic-settings ==2.11.0",
 ]
 version = "0.57.4"
 
@@ -48,7 +48,7 @@ Repository = "https://github.com/yak-toto/yak-server"
 
 [project.optional-dependencies]
 db_migration = ["alembic ==1.16.5"]
-sync = ["beautifulsoup4[lxml] ==4.13.5", "httpx ==0.28.1"]
+sync = ["beautifulsoup4[lxml] ==4.14.0", "httpx ==0.28.1"]
 server = ["uvicorn>=0.34.0"]
 
 [project.scripts]
