@@ -4,4 +4,5 @@ extend-ignore-re = [
     "\"Phase de groupes\"",
     # Bug Thaïlande
     "\"Tha",
+    "passwor",
 ]
