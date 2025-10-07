@@ -44,10 +44,10 @@ def test_check_response_models(app_with_valid_jwt_config: "FastAPI") -> None:
                     or str(status.HTTP_201_CREATED) in specification["responses"]
                 )
 
-                assert str(status.HTTP_422_UNPROCESSABLE_ENTITY) in specification["responses"]
+                assert str(status.HTTP_422_UNPROCESSABLE_CONTENT) in specification["responses"]
 
                 for status_code, schema in specification["responses"].items():
-                    if int(status_code) == status.HTTP_422_UNPROCESSABLE_ENTITY:
+                    if int(status_code) == status.HTTP_422_UNPROCESSABLE_CONTENT:
                         assert (
                             schema["content"]["application/json"]["schema"]["$ref"]
                             == "#/components/schemas/ValidationErrorOut"

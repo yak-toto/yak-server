@@ -1,4 +1,5 @@
-from typing import Callable, Optional, Union
+from collections.abc import Callable
+from dataclasses import dataclass
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -15,24 +16,18 @@ from .compute_points import compute_points as compute_points_func
 
 
 class Rules(BaseModel):
-    compute_finale_phase_from_group_rank: Optional[RuleComputeFinaleFromGroupRank] = None
-    compute_points: Optional[RuleComputePoints] = None
+    compute_finale_phase_from_group_rank: RuleComputeFinaleFromGroupRank | None = None
+    compute_points: RuleComputePoints | None = None
 
 
+@dataclass(frozen=True, kw_only=True)
 class RuleMetadata:
-    def __init__(
-        self,
-        *,
-        function: Union[
-            Callable[[Session, UserModel, RuleComputeFinaleFromGroupRank], tuple[int, str]],
-            Callable[[Session, UserModel, RuleComputePoints], tuple[int, str]],
-        ],
-        attribute: str,
-        required_admin: bool = False,
-    ) -> None:
-        self.function = function
-        self.attribute = attribute
-        self.required_admin = required_admin
+    function: (
+        Callable[[Session, UserModel, RuleComputeFinaleFromGroupRank], tuple[int, str]]
+        | Callable[[Session, UserModel, RuleComputePoints], tuple[int, str]]
+    )
+    attribute: str
+    required_admin: bool = False
 
 
 RULE_MAPPING = {

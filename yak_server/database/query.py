@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import selectinload
 
@@ -15,7 +15,7 @@ def bets_from_group_code(
     db: "Session",
     user: "UserModel",
     group_code: str,
-) -> tuple[Optional[GroupModel], Iterable[ScoreBetModel], Iterable[BinaryBetModel]]:
+) -> tuple[GroupModel | None, Iterable[ScoreBetModel], Iterable[BinaryBetModel]]:
     group = (
         db.query(GroupModel)
         .options(selectinload(GroupModel.phase))
@@ -56,7 +56,7 @@ def bets_from_phase_code(
     user: "UserModel",
     phase_code: str,
 ) -> tuple[
-    Optional[PhaseModel],
+    PhaseModel | None,
     Iterable[GroupModel],
     Iterable[ScoreBetModel],
     Iterable[BinaryBetModel],

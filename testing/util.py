@@ -3,7 +3,6 @@ import string
 from dataclasses import dataclass
 from http import HTTPStatus
 from pathlib import Path
-from typing import Optional
 
 from fastapi.testclient import TestClient
 
@@ -28,14 +27,14 @@ class UserData:
     first_name: str
     last_name: str
     name: str
-    scores: list[Optional[tuple[Optional[int], Optional[int]]]]
+    scores: list[tuple[int | None, int | None] | None]
     access_token: str = ""
 
 
 def patch_score_bets(
     client: TestClient,
     access_token: str,
-    new_scores: list[Optional[tuple[Optional[int], Optional[int]]]],
+    new_scores: list[tuple[int | None, int | None] | None],
 ) -> None:
     response_get_all_bets = client.get(
         "/api/v1/bets",
@@ -44,7 +43,9 @@ def patch_score_bets(
 
     assert response_get_all_bets.status_code == HTTPStatus.OK
 
-    for bet, new_score in zip(response_get_all_bets.json()["result"]["score_bets"], new_scores):
+    for bet, new_score in zip(
+        response_get_all_bets.json()["result"]["score_bets"], new_scores, strict=False
+    ):
         if new_score is not None:
             response_patch_score_bet = client.patch(
                 f"/api/v1/score_bets/{bet['id']}",

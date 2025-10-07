@@ -19,7 +19,7 @@ router = APIRouter(prefix="/phases", tags=["phases"])
     "/",
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def retrieve_all_phases(
@@ -40,7 +40,7 @@ def retrieve_all_phases(
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
         status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def retrieve_phase(

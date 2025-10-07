@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from pydantic import UUID4, BaseModel, ConfigDict, PositiveInt
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class BinaryBetIn(BaseModel):
-    is_one_won: Optional[bool] = None
+    is_one_won: bool | None = None
     index: PositiveInt
     team1: TeamIn
     team2: TeamIn
@@ -23,8 +23,8 @@ class BinaryBetIn(BaseModel):
 class BinaryBetOut(BaseModel):
     id: UUID4
     locked: bool
-    team1: Optional[TeamWithWonOut] = None
-    team2: Optional[TeamWithWonOut] = None
+    team1: TeamWithWonOut | None = None
+    team2: TeamWithWonOut | None = None
 
     @classmethod
     def from_instance(
@@ -70,8 +70,8 @@ class BinaryBetWithGroupIdOut(BaseModel):
     id: UUID4
     locked: bool
     group: Group
-    team1: Optional[TeamWithWonOut] = None
-    team2: Optional[TeamWithWonOut] = None
+    team1: TeamWithWonOut | None = None
+    team2: TeamWithWonOut | None = None
 
     @classmethod
     def from_instance(
@@ -117,8 +117,8 @@ class BinaryBetResponse(BaseModel):
 
 
 class ModifyBinaryBetIn(BaseModel):
-    is_one_won: Optional[bool] = None
-    team1: Optional[TeamModifyBinaryBetIn] = None
-    team2: Optional[TeamModifyBinaryBetIn] = None
+    is_one_won: bool | None = None
+    team1: TeamModifyBinaryBetIn | None = None
+    team2: TeamModifyBinaryBetIn | None = None
 
     model_config = ConfigDict(extra="forbid")

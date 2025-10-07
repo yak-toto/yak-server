@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Annotated, Optional
+from typing import TYPE_CHECKING, Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
@@ -23,7 +23,7 @@ router = APIRouter(tags=["results"])
     "/score_board",
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def retrieve_score_board(
@@ -43,7 +43,7 @@ def retrieve_score_board(
     )
 
 
-def compute_rank(db: Session, user_id: UUID) -> Optional[int]:
+def compute_rank(db: Session, user_id: UUID) -> int | None:
     subq = (
         db.query(
             UserModel,
@@ -65,7 +65,7 @@ def compute_rank(db: Session, user_id: UUID) -> Optional[int]:
     "/results",
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def retrieve_user_results(

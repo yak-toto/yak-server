@@ -1,6 +1,6 @@
 import logging
 import traceback
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from fastapi import HTTPException, Request, status
@@ -96,7 +96,7 @@ class InvalidTeamId(HTTPException):
 
 
 class TeamNotFound(HTTPException):
-    def __init__(self, team_id: Union[str, UUID]) -> None:
+    def __init__(self, team_id: str | UUID) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=team_not_found_message(team_id),
@@ -122,7 +122,7 @@ class NoResultsForAdminUser(HTTPException):
 
 
 class GroupNotFound(HTTPException):
-    def __init__(self, group_id: Union[str, UUID]) -> None:
+    def __init__(self, group_id: str | UUID) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=group_not_found_message(group_id),
@@ -130,7 +130,7 @@ class GroupNotFound(HTTPException):
 
 
 class PhaseNotFound(HTTPException):
-    def __init__(self, phase_id: Union[str, UUID]) -> None:
+    def __init__(self, phase_id: str | UUID) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=phase_not_found_message(phase_id),
@@ -225,10 +225,10 @@ def set_exception_handler(app: "FastAPI") -> None:
             errors.append({"field": loc, "error": msg})
 
         return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             content={
                 "ok": False,
-                "error_code": status.HTTP_422_UNPROCESSABLE_ENTITY,
+                "error_code": status.HTTP_422_UNPROCESSABLE_CONTENT,
                 "description": errors,
             },
         )

@@ -1,7 +1,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import click
@@ -91,7 +91,7 @@ class MissingGroupDuringInitError(Exception):
         )
 
 
-def fetch_team_id(team_code: Optional[str], db: "Session") -> Optional[UUID]:
+def fetch_team_id(team_code: str | None, db: "Session") -> UUID | None:
     if team_code is None:
         return None
 

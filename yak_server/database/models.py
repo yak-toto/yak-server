@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
 
 import sqlalchemy as sa
@@ -152,12 +152,12 @@ class ScoreBetModel(Base):
         lazy="raise",
     )
 
-    score1: Mapped[Optional[int]] = mapped_column(
+    score1: Mapped[int | None] = mapped_column(
         sa.Integer,
         CheckConstraint("score1>=0"),
         default=None,
     )
-    score2: Mapped[Optional[int]] = mapped_column(
+    score2: Mapped[int | None] = mapped_column(
         sa.Integer,
         CheckConstraint("score2>=0"),
         default=None,
@@ -209,9 +209,9 @@ class BinaryBetModel(Base):
         lazy="raise",
     )
 
-    is_one_won: Mapped[Optional[bool]] = mapped_column(sa.Boolean, default=None)
+    is_one_won: Mapped[bool | None] = mapped_column(sa.Boolean, default=None)
 
-    def bet_from_is_one_won(self) -> Union[tuple[None, None], tuple[bool, bool]]:
+    def bet_from_is_one_won(self) -> tuple[None, None] | tuple[bool, bool]:
         if self.is_one_won is None:
             return (None, None)
 
@@ -253,7 +253,7 @@ class MatchModel(Base):
 
     index: Mapped[int] = mapped_column(sa.Integer, nullable=False)
 
-    team1_id: Mapped[Optional[UUID]] = mapped_column(
+    team1_id: Mapped[UUID | None] = mapped_column(
         DB_UUID(),
         sa.ForeignKey("team.id"),
         nullable=True,
@@ -264,7 +264,7 @@ class MatchModel(Base):
         lazy="raise",
     )
 
-    team2_id: Mapped[Optional[UUID]] = mapped_column(
+    team2_id: Mapped[UUID | None] = mapped_column(
         DB_UUID(),
         sa.ForeignKey("team.id"),
         nullable=True,

@@ -18,9 +18,9 @@ class MockSettings:
     def __init__(
         self,
         *,
-        data_folder_relative: Optional[str] = None,
+        data_folder_relative: str | None = None,
         rules: Optional["Rules"] = None,
-        official_results_url: Optional[str] = None,
+        official_results_url: str | None = None,
     ) -> None:
         self.data_folder = (
             get_resources_path(data_folder_relative) if data_folder_relative is not None else None

@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "yak-server"
 description = "Football bet rest server"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "MIT"
 authors = [{name = "Guillaume Le Pape", email = "gui.lepape25@gmail.com"}]
 keywords = ["postgresql", "api", "rest"]
@@ -22,7 +22,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -89,7 +88,6 @@ exclude_lines = ["if TYPE_CHECKING:", "pragma: no cover"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
 fix = true
 preview = true
 
