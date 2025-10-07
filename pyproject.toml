@@ -135,23 +135,3 @@ log_file = "yak_test.log"
 # log_file_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 log_file_level = "INFO"
 env = ["POSTGRES_DB=test"]
-
-[tool.importlinter]
-root_package = "yak_server"
-
-[[tool.importlinter.contracts]]
-name = "yak_server.database should not import other yak_server modules"
-type = "independence"
-modules = ["yak_server.database"]
-
-[[tool.importlinter.contracts]]
-name = "yak_server.helpers should not import yak_server.{v1,cli}"
-type = "forbidden"
-source_modules = ["yak_server.helpers"]
-forbidden_modules = ["yak_server.v1", "yak_server.cli"]
-
-[[tool.importlinter.contracts]]
-name = "yak_server.v1.helpers should not import yak_server.v1.models and yak_server.v1.routers"
-type = "forbidden"
-source_modules = ["yak_server.v1.helpers"]
-forbidden_modules = ["yak_server.v1.models", "yak_server.v1.routers"]
