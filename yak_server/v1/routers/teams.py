@@ -20,7 +20,7 @@ router = APIRouter(prefix="/teams", tags=["teams"])
     "/",
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def retrieve_all_teams(
@@ -39,7 +39,7 @@ def retrieve_all_teams(
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
         status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def retrieve_team_by_id(
@@ -65,7 +65,7 @@ def retrieve_team_by_id(
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
         status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def retrieve_team_flag_by_id(

@@ -1,6 +1,6 @@
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import selectinload
 
@@ -37,7 +37,7 @@ except ImportError:  # pragma: no cover
     lxml = None  # type: ignore[assignment]
 
 
-def parse_score(content: str) -> tuple[Optional[int], Optional[int]]:
+def parse_score(content: str) -> tuple[int | None, int | None]:
     try:
         scores = next(next(content.children).children)
     except AttributeError:
@@ -99,7 +99,7 @@ class Group:
 class Team:
     score: int
     description: str
-    won: Optional[bool] = None
+    won: bool | None = None
 
 
 @dataclass

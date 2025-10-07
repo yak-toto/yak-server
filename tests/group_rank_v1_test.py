@@ -51,7 +51,9 @@ def test_group_rank(
 
     new_scores = [(5, 1), (0, 0), (1, 2)]
 
-    for bet, new_score in zip(response_all_bets.json()["result"]["score_bets"], new_scores):
+    for bet, new_score in zip(
+        response_all_bets.json()["result"]["score_bets"], new_scores, strict=False
+    ):
         response_patch_bet = client.patch(
             f"/api/v1/score_bets/{bet['id']}",
             headers={"Authorization": f"Bearer {access_token}"},

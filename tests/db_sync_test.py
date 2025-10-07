@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pytest
 from click.testing import CliRunner
@@ -22,8 +22,8 @@ runner = CliRunner()
 class CompetitionData:
     url: str
     folder: str
-    excepted_score_bets: list[tuple[Optional[int], Optional[int]]]
-    excepted_binary_bets: list[Optional[bool]]
+    excepted_score_bets: list[tuple[int | None, int | None]]
+    excepted_binary_bets: list[bool | None]
 
 
 euro_2024_data = CompetitionData(

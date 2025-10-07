@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from pydantic import UUID4, BaseModel, ConfigDict, PositiveInt
 
@@ -22,8 +22,8 @@ class ScoreBetIn(BaseModel):
 class ScoreBetOut(BaseModel):
     id: UUID4
     locked: bool
-    team1: Optional[TeamWithScoreOut] = None
-    team2: Optional[TeamWithScoreOut] = None
+    team1: TeamWithScoreOut | None = None
+    team2: TeamWithScoreOut | None = None
 
     @classmethod
     def from_instance(
@@ -69,8 +69,8 @@ class ScoreBetWithGroupIdOut(BaseModel):
     id: UUID4
     locked: bool
     group: Group
-    team1: Optional[TeamWithScoreOut] = None
-    team2: Optional[TeamWithScoreOut] = None
+    team1: TeamWithScoreOut | None = None
+    team2: TeamWithScoreOut | None = None
 
     @classmethod
     def from_instance(
@@ -116,7 +116,7 @@ class ScoreBetResponse(BaseModel):
 
 
 class ModifyScoreBetIn(BaseModel):
-    team1: Optional[TeamModifyScoreBetIn] = None
-    team2: Optional[TeamModifyScoreBetIn] = None
+    team1: TeamModifyScoreBetIn | None = None
+    team2: TeamModifyScoreBetIn | None = None
 
     model_config = ConfigDict(extra="forbid")

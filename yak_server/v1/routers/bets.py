@@ -40,7 +40,7 @@ router = APIRouter(prefix="/bets", tags=["bets"])
     "/",
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def retrieve_all_bets(
@@ -105,7 +105,7 @@ def retrieve_all_bets(
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
         status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def retrieve_bets_by_phase_code(
@@ -149,7 +149,7 @@ def retrieve_bets_by_phase_code(
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
         status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def retrieve_bets_by_group_code(
@@ -193,7 +193,7 @@ def retrieve_bets_by_group_code(
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
         status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def retrieve_group_rank_by_code(

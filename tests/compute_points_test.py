@@ -1,6 +1,6 @@
 from collections.abc import Generator
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pytest
 from click.testing import CliRunner
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from sqlalchemy import Engine
 
 
-def put_finale_phase(client: TestClient, access_token: str, *, is_one_won: Optional[bool]) -> None:
+def put_finale_phase(client: TestClient, access_token: str, *, is_one_won: bool | None) -> None:
     response_post_finale_phase_bets_admin = client.post(
         "/api/v1/rules/492345de-8d4a-45b6-8b94-d219f2b0c3e9",
         headers={"Authorization": f"Bearer {access_token}"},

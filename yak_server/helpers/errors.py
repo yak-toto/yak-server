@@ -1,5 +1,4 @@
 from functools import partial
-from typing import Union
 from uuid import UUID
 
 INVALID_CREDENTIALS_MESSAGE = "Invalid credentials"
@@ -14,7 +13,7 @@ def name_already_exists_message(user_name: str) -> str:
     return f"Name already exists: {user_name}"
 
 
-def generic_not_found_message(resource_id: Union[UUID, str], resource_name: str) -> str:
+def generic_not_found_message(resource_id: UUID | str, resource_name: str) -> str:
     return f"{resource_name} not found: {resource_id}"
 
 

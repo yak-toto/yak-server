@@ -54,7 +54,7 @@ router = APIRouter(prefix="/users", tags=["users"])
     responses={
         status.HTTP_400_BAD_REQUEST: {"model": ErrorOut},
         status.HTTP_409_CONFLICT: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def signup(
@@ -104,7 +104,7 @@ def signup(
 
 @router.get(
     "/signup/password_requirements",
-    responses={status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut}},
+    responses={status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut}},
 )
 def password_requirements() -> GenericOut[PasswordRequirementsOut]:
     password_requirements = PasswordRequirements()
@@ -126,7 +126,7 @@ def password_requirements() -> GenericOut[PasswordRequirementsOut]:
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
         status.HTTP_409_CONFLICT: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def login(
@@ -168,7 +168,7 @@ def login(
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def refresh(
@@ -204,7 +204,7 @@ def refresh(
         status.HTTP_400_BAD_REQUEST: {"model": ErrorOut},
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
         status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def modify_user(
@@ -231,7 +231,7 @@ def modify_user(
     "/current",
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
 def current_user(
