@@ -1,3 +1,4 @@
+import contextlib
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
@@ -120,17 +121,20 @@ class UserModel(Base):
     def authenticate(cls, db: "Session", name: str, password: str) -> Optional["UserModel"]:
         user = db.query(cls).filter_by(name=name).first()
 
-        try:
-            if user is not None:
-                ph.verify(user.password, password)
-            else:
-                # verify password with itself to avoid timing attack
+        # user not found, verify password with itself to avoid timing attack
+        if user is None:
+            with contextlib.suppress(VerificationError):
                 ph.verify(ph.hash(password), password)
-            is_correct_password = True
-        except VerificationError:
-            is_correct_password = False
 
-        return user if user and is_correct_password else None
+            return None
+
+        # user found
+        try:
+            ph.verify(user.password, password)
+        except VerificationError:
+            return None
+
+        return user
 
     def change_password(self, new_password: str) -> None:
         self.password = ph.hash(new_password)
