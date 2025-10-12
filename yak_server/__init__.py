@@ -1,7 +1,9 @@
 import logging
+import time
+from collections.abc import Awaitable, Callable
 from importlib.metadata import version
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -74,5 +76,21 @@ def create_app() -> FastAPI:
 
     # Declare logger configuration for yak server
     setup_logging(debug=app.debug)
+
+    @app.middleware("http")
+    async def profile_process_time(
+        request: "Request",
+        call_next: Callable[["Request"], Awaitable["Response"]],
+    ) -> "Response":
+        t0 = time.perf_counter()
+
+        response = await call_next(request)
+
+        t1 = time.perf_counter()
+        response.headers["X-Process-Time-ms"] = str((t1 - t0) * 1000)
+
+        print(f"[DI] Process Time: {(t1 - t0) * 1000:.2f}ms")
+
+        return response
 
     return app

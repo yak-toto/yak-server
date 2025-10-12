@@ -36,6 +36,16 @@ def compute_database_uri(
     return f"postgresql+{client}://{user}:{password}@{host}:{port}/{db}"
 
 
+def compute_database_uri_without_client(
+    host: str,
+    user: str,
+    password: str,
+    port: int,
+    db: str,
+) -> str:
+    return f"postgresql://{user}:{password}@{host}:{port}/{db}"
+
+
 def build_engine() -> Engine:
     postgres_settings = get_postgres_settings()
 

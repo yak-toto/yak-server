@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 from pydantic import UUID4, BaseModel
 
@@ -7,6 +7,8 @@ from yak_server.helpers.language import Lang, get_language_description
 from .phases import PhaseOut
 
 if TYPE_CHECKING:
+    from yak_server_db import Group
+
     from yak_server.database.models import GroupModel
 
 
@@ -35,7 +37,9 @@ class GroupWithPhaseIdOut(BaseModel):
     description: str
 
     @classmethod
-    def from_instance(cls, group: "GroupModel", *, lang: Lang) -> "GroupWithPhaseIdOut":
+    def from_instance(
+        cls, group: Union["GroupModel", "Group"], *, lang: Lang
+    ) -> "GroupWithPhaseIdOut":
         return cls(
             id=group.id,
             code=group.code,

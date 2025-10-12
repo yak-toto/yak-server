@@ -1722,6 +1722,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "pyjwt" },
     { name = "sqlalchemy" },
+    { name = "yak-server-db" },
 ]
 
 [package.optional-dependencies]
@@ -1767,6 +1768,7 @@ requires-dist = [
     { name = "pyjwt", specifier = "==2.10.1" },
     { name = "sqlalchemy", specifier = "==2.0.41" },
     { name = "uvicorn", marker = "extra == 'server'", specifier = ">=0.34.0" },
+    { name = "yak-server-db", path = "../yak-server-db/target/wheels/yak_server_db-0.1.0-cp312-cp312-manylinux_2_34_x86_64.whl" },
 ]
 provides-extras = ["db-migration", "sync", "server"]
 
@@ -1785,6 +1787,14 @@ type-checking = [
     { name = "lxml-stubs", specifier = ">=0.5.1" },
     { name = "mypy", specifier = ">=1.17.0" },
     { name = "types-beautifulsoup4", specifier = ">=4.12.0.20241020" },
+]
+
+[[package]]
+name = "yak-server-db"
+version = "0.1.0"
+source = { path = "../yak-server-db/target/wheels/yak_server_db-0.1.0-cp312-cp312-manylinux_2_34_x86_64.whl" }
+wheels = [
+    { filename = "yak_server_db-0.1.0-cp312-cp312-manylinux_2_34_x86_64.whl", hash = "sha256:26c13a1cf842c5a4820d24213cb3324a18db077c4ac710275eea046bd61e71be" },
 ]
 
 [[package]]
