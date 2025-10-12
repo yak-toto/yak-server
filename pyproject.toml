@@ -61,6 +61,7 @@ dev = [
     "pytest>=8.4.0",
     "pytest-cov>=6.0.0",
     "pytest-env>=1.1.5",
+    "snakeviz>=2.2.2",
     "uvicorn[standard]>=0.34.0",
     "yappi>=1.6.10",
 ]
@@ -82,7 +83,7 @@ required-version = ">=0.7.1"
 reinstall-package = ["yak-server-db"]
 
 [tool.uv.sources]
-yak-server-db = { path = "../yak-server-db/target/wheels/yak_server_db-0.1.0-cp312-cp312-manylinux_2_34_x86_64.whl" }
+yak-server-db = {path = "../yak-server-db/target/wheels/yak_server_db-0.1.0-cp312-cp312-manylinux_2_34_x86_64.whl"}
 
 [tool.coverage.run]
 branch = true

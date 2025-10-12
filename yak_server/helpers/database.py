@@ -1,6 +1,7 @@
 from collections.abc import Generator
+from functools import cache
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 from yak_server_db import DatabaseConnection
 
 from yak_server.database import (
@@ -11,10 +12,16 @@ from yak_server.database import (
 )
 
 
-def get_db() -> Generator[Session, None, None]:
+# Cache SQLAlchemy engine and session maker (singleton pattern)
+@cache
+def _get_sqlalchemy_session_maker() -> sessionmaker[Session]:
     engine = build_engine()
+    return build_local_session_maker(engine)
 
-    local_session_maker = build_local_session_maker(engine)
+
+def get_db() -> Generator[Session, None, None]:
+    """Get SQLAlchemy database session with cached engine."""
+    local_session_maker = _get_sqlalchemy_session_maker()
 
     with local_session_maker() as db:
         yield db

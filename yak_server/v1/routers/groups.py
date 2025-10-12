@@ -1,4 +1,3 @@
-import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
@@ -23,23 +22,6 @@ from yak_server.v1.models.phases import PhaseOut
 router = APIRouter(prefix="/groups", tags=["groups"])
 
 
-# Wrapper functions to monitor dependency injection timing
-async def get_db_rust_timed() -> DatabaseConnection:
-    t0 = time.perf_counter()
-    result = await get_db_rust()
-    t1 = time.perf_counter()
-    print(f"[DI] get_db_rust: {(t1 - t0) * 1000:.2f}ms")
-    return result
-
-
-def require_user_timed(
-    user: Annotated[UserModel, Depends(require_user)],
-) -> UserModel:
-    # The timing is captured by FastAPI before this is called
-    # But we can at least mark when it's done
-    return user
-
-
 @router.get(
     "/",
     responses={
@@ -47,35 +29,20 @@ def require_user_timed(
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
-def retrieve_all_groups(
-    _: Annotated[UserModel, Depends(require_user_timed)],
-    db: Annotated[Session, Depends(get_db)],
+async def retrieve_all_groups(
+    _: Annotated[UserModel, Depends(require_user)],
+    db: Annotated[DatabaseConnection, Depends(get_db_rust)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[AllGroupsResponse]:
-    t0 = time.perf_counter()
-    t1 = time.perf_counter()
-    groups = db.query(GroupModel).order_by(GroupModel.index)
-    t2 = time.perf_counter()
-    phases = db.query(PhaseModel).order_by(PhaseModel.index)
-    t3 = time.perf_counter()
+    groups = await db.query_group().select_all()
+    phases = await db.query_phase().select_all()
 
-    result = AllGroupsResponse(
-        phases=[PhaseOut.from_instance(phase, lang=lang) for phase in phases],
-        groups=[GroupWithPhaseIdOut.from_instance(group, lang=lang) for group in groups],
+    return GenericOut(
+        result=AllGroupsResponse(
+            phases=[PhaseOut.from_instance(phase, lang=lang) for phase in phases],
+            groups=[GroupWithPhaseIdOut.from_instance(group, lang=lang) for group in groups],
+        )
     )
-    t4 = time.perf_counter()
-
-    response = GenericOut(result=result)
-    t5 = time.perf_counter()
-
-    print(f"Groups query: {(t2 - t1) * 1000:.2f}ms")
-    print(f"Phases query: {(t3 - t2) * 1000:.2f}ms")
-    print(f"Model serialization: {(t4 - t3) * 1000:.2f}ms")
-    print(f"Response creation: {(t5 - t4) * 1000:.2f}ms")
-    print(f"TOTAL HANDLER: {(t5 - t0) * 1000:.2f}ms")
-    print("---")
-
-    return response
 
 
 @router.get(

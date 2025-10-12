@@ -28,7 +28,7 @@ def set_yappi_profiler(app: "FastAPI") -> None:
         call_next: Callable[["Request"], Awaitable["Response"]],
     ) -> "Response":
         yappi.clear_stats()
-        yappi.set_clock_type("cpu")
+        yappi.set_clock_type("wall")
         yappi.start()
 
         response = await call_next(request)
