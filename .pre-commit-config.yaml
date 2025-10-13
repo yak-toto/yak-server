@@ -25,7 +25,7 @@ repos:
       - id: ssort
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.3
+    rev: v0.14.0
     hooks:
       - id: ruff-check
       - id: ruff-format
@@ -47,12 +47,12 @@ repos:
         args: [--autofix, --indent, "4", --trailing-commas, --no-sort]
 
   - repo: https://github.com/adhtruong/mirrors-typos
-    rev: v1.37.2
+    rev: v1.38.1
     hooks:
       - id: typos
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.8.23
+    rev: 0.9.2
     hooks:
       - id: uv-lock
 
