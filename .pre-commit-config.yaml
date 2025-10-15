@@ -39,6 +39,7 @@ repos:
     rev: v0.17.2
     hooks:
       - id: yamlfmt
+        types: [yaml]
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
     rev: v2.15.0
