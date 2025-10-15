@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      security-events: write
+      security-events: write # Required to upload SARIF results to GitHub Security tab
 
     steps:
       - name: Checkout repository
