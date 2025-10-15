@@ -11,20 +11,25 @@ on:
       - "pyproject.toml"
       - ".github/workflows/type_checking.yml"
 
+permissions: {}
+
 jobs:
   type-checking:
     name: Type checking
     runs-on: ubuntu-latest
 
+    permissions: {}
+
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@3259c6206f993105e3a61b142c2d97bf4b9ef83d # v7.1.0
         with:
           python-version: "3.12"
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
+          enable-cache: false
 
       - name: Install dependencies
         run: uv sync --all-extras --group type-checking
