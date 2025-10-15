@@ -11,6 +11,8 @@ on:
           - minor
           - major
 
+permissions: {}
+
 jobs:
   release:
     name: Release
@@ -25,44 +27,49 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@3259c6206f993105e3a61b142c2d97bf4b9ef83d # v7.1.0
         with:
           python-version: ${{ env.python-version }}
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
+          enable-cache: false
 
       - name: Create commits
         id: create-commits
         run: |
           git config user.name 'yak-toto'
           git config user.email 'yaktoto648@gmail.com'
-          uv version --bump ${{ github.event.inputs.release-type }}
+          uv version --bump ${GITHUB_EVENT_INPUTS_RELEASE_TYPE}
           export NEW_VERSION=$(uv version --short)
           uv lock
           git add pyproject.toml uv.lock
           git commit -m "Release "$NEW_VERSION
           git tag -a $NEW_VERSION HEAD -m \"$NEW_VERSION\"
           echo "new-version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+        env:
+          GITHUB_EVENT_INPUTS_RELEASE_TYPE: ${{ github.event.inputs.release-type }}
 
       - name: Push
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@77c5b412c50b723d2a4fbc6d71fb5723bcd439aa # v1
         with:
           tags: true
 
       - name: Checkout code
-        run: git checkout ${{ steps.create-commits.outputs.new-version }}
+        run: git checkout ${STEPS_CREATE_COMMITS_OUTPUTS_NEW_VERSION}
+        env:
+          STEPS_CREATE_COMMITS_OUTPUTS_NEW_VERSION: ${{ steps.create-commits.outputs.new-version }}
 
       - name: Build distribution
         run: uv build
 
       - name: Publish
-        uses: pypa/gh-action-pypi-publish@v1.13.0
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
 
       - name: Create Release
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@b7eabc95ff50cbeeedec83973935c8f306dfcd0b # v1.20.0
         with:
           artifacts: "dist/*"
           generateReleaseNotes: true
