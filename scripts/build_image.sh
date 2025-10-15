@@ -35,6 +35,7 @@ echo "Building Docker image for competition: $COMPETITION"
 echo "Using yak version: $YAK_VERSION"
 
 docker buildx build \
+    --load \
     --build-arg "COMPETITION=$COMPETITION" \
     -t "yak_server:$YAK_VERSION-$COMPETITION" \
     "$PROJECT_ROOT"
