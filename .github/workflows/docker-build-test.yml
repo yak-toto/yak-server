@@ -1,0 +1,71 @@
+name: 🐋 Docker Build Test
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - yak_server/**
+      - scripts/build_image.sh
+      - scripts/build_hooks.py
+      - Dockerfile
+      - docker-entrypoint.sh
+      - .github/docker-compose.ci.yml
+      - pyproject.toml
+      - uv.lock
+      - alembic.ini
+      - .github/workflows/docker-build-test.yml
+
+permissions: {}
+
+jobs:
+  build-image:
+    name: Build Docker Image (euro_2024)
+    runs-on: ubuntu-latest
+
+    permissions: {}
+
+    env:
+      python-version: "3.13"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@3259c6206f993105e3a61b142c2d97bf4b9ef83d # v7.1.0
+        with:
+          python-version: ${{ env.python-version }}
+          enable-cache: false
+
+      - name: Build and start services
+        run: |
+          export YAK_VERSION=$(uv version --short)
+          echo "Building and starting services with version: $YAK_VERSION"
+          docker compose -f .github/docker-compose.ci.yml up -d --build --wait
+
+      - name: Test health endpoint
+        run: |
+          echo "Testing health endpoint..."
+          curl -f http://localhost:8000/api/health/ || exit 1
+          echo "✓ Health endpoint test passed!"
+
+      - name: Test admin login
+        run: |
+          echo "Testing admin login..."
+          LOGIN_RESPONSE=$(curl -s -X POST http://localhost:8000/api/v1/users/login \
+            -H "Content-Type: application/json" \
+            -d '{"name": "admin", "password": "Test1234"}')
+
+          echo "$LOGIN_RESPONSE" | grep -q '"ok":true' || exit 1
+          echo "$LOGIN_RESPONSE" | grep -q '"access_token":' || exit 1
+          echo "✓ Admin login test passed!"
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose -f .github/docker-compose.ci.yml logs
+
+      - name: Cleanup
+        if: always()
+        run: docker compose -f .github/docker-compose.ci.yml down -v

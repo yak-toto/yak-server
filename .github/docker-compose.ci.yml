@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ci
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ci -d test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  yak-server:
+    image: yak_server:${YAK_VERSION}-euro_2024
+    build:
+      context: ..
+      args:
+        COMPETITION: euro_2024
+    ports:
+      - "8000:8000"
+    environment:
+      ADMIN_PASSWORD: Test1234
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ci
+      POSTGRES_PASSWORD: test
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: test
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8000/api/health/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
