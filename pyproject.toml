@@ -31,11 +31,11 @@ classifiers = [
 ]
 dependencies = [
     "PyJWT ==2.10.1",
-    "psycopg[binary] >=3.2.9",
+    "psycopg[binary] ==3.2.10",
     "argon2-cffi ==25.1.0",
     "fastapi ==0.119.0",
-    "click >=8.1.8",
-    "SQLAlchemy ==2.0.41",
+    "click ==8.3.0",
+    "SQLAlchemy ==2.0.44",
     "pendulum ==3.1.0",
     "pydantic-settings ==2.11.0",
 ]
@@ -48,7 +48,7 @@ Repository = "https://github.com/yak-toto/yak-server"
 [project.optional-dependencies]
 db_migration = ["alembic ==1.17.0"]
 sync = ["beautifulsoup4[lxml] ==4.14.2", "httpx ==0.28.1"]
-server = ["uvicorn>=0.34.0"]
+server = ["uvicorn==0.37.0"]
 
 [project.scripts]
 yak = "yak_server.cli:app"
