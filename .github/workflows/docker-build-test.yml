@@ -41,8 +41,9 @@ jobs:
 
       - name: Build and start services
         run: |
-          export YAK_VERSION=$(uv version --short)
-          echo "Building and starting services with version: $YAK_VERSION"
+          YAK_VERSION=$(uv version --short)
+          export YAK_VERSION
+          echo "Building and starting services with version: ${YAK_VERSION}"
           docker compose -f .github/docker-compose.ci.yml up -d --build --wait
 
       - name: Test health endpoint

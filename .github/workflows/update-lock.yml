@@ -38,9 +38,9 @@ jobs:
           UPDATED=$(uv lock --upgrade 2>&1 | grep "^Updated")
           {
             echo "updated_output<<EOF"
-            echo "$UPDATED"
+            echo "${UPDATED}"
             echo "EOF"
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
