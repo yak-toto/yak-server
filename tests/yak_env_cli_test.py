@@ -105,7 +105,7 @@ def test_yak_env_all_invalid_lockdatetime(monkeypatch: pytest.MonkeyPatch) -> No
         )
 
         assert result.exit_code == 1
-        assert str(result.exception) == f"lock_datetime is not a valid datetime: {date}"
+        assert "Input should have timezone info" in str(result.exception)
 
 
 def test_yak_env_db() -> None:

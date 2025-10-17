@@ -6,11 +6,11 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self
 
+from datetime import datetime
+
 from .util import get_resources_path
 
 if TYPE_CHECKING:
-    import pendulum
-
     from yak_server.helpers.rules import Rules
 
 
@@ -34,10 +34,10 @@ class MockSettings:
 
 
 class MockLockDatetime:
-    def __init__(self, lock_datetime: "pendulum.DateTime") -> None:
+    def __init__(self, lock_datetime: datetime) -> None:
         self.lock_datetime = lock_datetime
 
-    def __call__(self) -> "pendulum.DateTime":
+    def __call__(self) -> datetime:
         return self.lock_datetime
 
 

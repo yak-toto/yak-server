@@ -1,9 +1,9 @@
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any
 from uuid import UUID
 
 import jwt
-import pendulum
 from sqlalchemy.orm import Session, selectinload
 
 from yak_server.database.models import (
@@ -21,14 +21,14 @@ from .password_validator import validate_password
 
 def encode_bearer_token(
     sub: UUID,
-    expiration_time: pendulum.Duration,
+    expiration_time: timedelta,
     secret_key: str,
 ) -> str:
     return jwt.encode(
         {
             "sub": str(sub),
-            "nbf": pendulum.now("UTC") - pendulum.duration(seconds=3),
-            "exp": pendulum.now("UTC") + expiration_time,
+            "nbf": datetime.now(timezone.utc) - timedelta(seconds=3),
+            "exp": datetime.now(timezone.utc) + expiration_time,
         },
         secret_key,
         algorithm="HS512",

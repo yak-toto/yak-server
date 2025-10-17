@@ -1,7 +1,7 @@
 import logging
+from datetime import timedelta
 from typing import Annotated
 
-import pendulum
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 from sqlalchemy.orm import Session
@@ -86,13 +86,13 @@ def signup(
             name=user.name,
             access_token=encode_bearer_token(
                 sub=user.id,
-                expiration_time=pendulum.duration(seconds=auth_settings.jwt_expiration_time),
+                expiration_time=timedelta(seconds=auth_settings.jwt_expiration_time),
                 secret_key=auth_settings.jwt_secret_key,
             ),
             access_expires_in=auth_settings.jwt_expiration_time,
             refresh_token=encode_bearer_token(
                 sub=user.id,
-                expiration_time=pendulum.duration(
+                expiration_time=timedelta(
                     seconds=auth_settings.jwt_refresh_expiration_time,
                 ),
                 secret_key=auth_settings.jwt_refresh_secret_key,
@@ -147,13 +147,13 @@ def login(
             name=user.name,
             access_token=encode_bearer_token(
                 sub=user.id,
-                expiration_time=pendulum.duration(seconds=auth_settings.jwt_expiration_time),
+                expiration_time=timedelta(seconds=auth_settings.jwt_expiration_time),
                 secret_key=auth_settings.jwt_secret_key,
             ),
             access_expires_in=auth_settings.jwt_expiration_time,
             refresh_token=encode_bearer_token(
                 sub=user.id,
-                expiration_time=pendulum.duration(
+                expiration_time=timedelta(
                     seconds=auth_settings.jwt_refresh_expiration_time,
                 ),
                 secret_key=auth_settings.jwt_refresh_secret_key,
@@ -182,13 +182,13 @@ def refresh(
         result=RefreshOut(
             access_token=encode_bearer_token(
                 sub=user.id,
-                expiration_time=pendulum.duration(seconds=auth_settings.jwt_expiration_time),
+                expiration_time=timedelta(seconds=auth_settings.jwt_expiration_time),
                 secret_key=auth_settings.jwt_secret_key,
             ),
             access_expires_in=auth_settings.jwt_expiration_time,
             refresh_token=encode_bearer_token(
                 sub=user.id,
-                expiration_time=pendulum.duration(
+                expiration_time=timedelta(
                     seconds=auth_settings.jwt_refresh_expiration_time,
                 ),
                 secret_key=auth_settings.jwt_refresh_secret_key,

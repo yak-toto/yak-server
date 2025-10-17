@@ -1,6 +1,6 @@
+from datetime import datetime
 from typing import Annotated
 
-import pendulum
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session, selectinload
 
@@ -46,7 +46,7 @@ router = APIRouter(prefix="/bets", tags=["bets"])
 def retrieve_all_bets(
     user: Annotated[UserModel, Depends(require_user)],
     db: Annotated[Session, Depends(get_db)],
-    lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
+    lock_datetime: Annotated[datetime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[AllBetsResponse]:
     score_bets = (
@@ -112,7 +112,7 @@ def retrieve_bets_by_phase_code(
     phase_code: str,
     user: Annotated[UserModel, Depends(require_user)],
     db: Annotated[Session, Depends(get_db)],
-    lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
+    lock_datetime: Annotated[datetime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[BetsByPhaseCodeResponse]:
     phase, groups, score_bets, binary_bets = bets_from_phase_code(db, user, phase_code)
@@ -156,7 +156,7 @@ def retrieve_bets_by_group_code(
     group_code: str,
     user: Annotated[UserModel, Depends(require_user)],
     db: Annotated[Session, Depends(get_db)],
-    lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
+    lock_datetime: Annotated[datetime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[BetsByGroupCodeResponse]:
     group, score_bets, binary_bets = bets_from_group_code(db, user, group_code)

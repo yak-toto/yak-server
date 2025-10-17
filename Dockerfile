@@ -48,8 +48,6 @@ RUN uv run yak env app --no-debug \
 
 # Clean up unnecessary files from site-packages
 RUN PYTHON_VERSION=$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")') \
-  && mv .venv/lib/python${PYTHON_VERSION}/site-packages/pendulum/testing \
-         .venv/lib/python${PYTHON_VERSION}/site-packages/pendulum/keep_this_one \
   && find .venv/lib/python${PYTHON_VERSION}/site-packages \
     -type d \( \
       -name "tests" -o \
@@ -60,9 +58,7 @@ RUN PYTHON_VERSION=$(python -c 'import sys; print(f"{sys.version_info.major}.{sy
     \) \
     -exec rm -rf {} + \
   && find .venv/lib/python${PYTHON_VERSION}/site-packages \
-    -type f -name "*.dist-info" -delete \
-  && mv .venv/lib/python${PYTHON_VERSION}/site-packages/pendulum/keep_this_one \
-          .venv/lib/python${PYTHON_VERSION}/site-packages/pendulum/testing
+    -type f -name "*.dist-info" -delete
 
 # ===========================
 # 2️⃣ Runtime Stage (uvicorn)
