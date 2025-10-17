@@ -47,9 +47,10 @@ RUN uv run yak env app --no-debug \
       --competition $COMPETITION
 
 # Clean up unnecessary files from site-packages
-RUN mv .venv/lib/python3.13/site-packages/pendulum/testing \
-         .venv/lib/python3.13/site-packages/pendulum/keep_this_one \
-  && find .venv/lib/python3.13/site-packages \
+RUN PYTHON_VERSION=$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")') \
+  && mv .venv/lib/python${PYTHON_VERSION}/site-packages/pendulum/testing \
+         .venv/lib/python${PYTHON_VERSION}/site-packages/pendulum/keep_this_one \
+  && find .venv/lib/python${PYTHON_VERSION}/site-packages \
     -type d \( \
       -name "tests" -o \
       -name "testing" -o \
@@ -58,10 +59,10 @@ RUN mv .venv/lib/python3.13/site-packages/pendulum/testing \
       -name "docs" \
     \) \
     -exec rm -rf {} + \
-  && find .venv/lib/python3.13/site-packages \
+  && find .venv/lib/python${PYTHON_VERSION}/site-packages \
     -type f -name "*.dist-info" -delete \
-  && mv .venv/lib/python3.13/site-packages/pendulum/keep_this_one \
-          .venv/lib/python3.13/site-packages/pendulum/testing
+  && mv .venv/lib/python${PYTHON_VERSION}/site-packages/pendulum/keep_this_one \
+          .venv/lib/python${PYTHON_VERSION}/site-packages/pendulum/testing
 
 # ===========================
 # 2️⃣ Runtime Stage (uvicorn)
