@@ -7,6 +7,17 @@
         "enabled": true
     },
     "lockFileMaintenance": {
-        "enabled": true
-    }
+        "enabled": true,
+        "automerge": true,
+        "automergeType": "pr"
+    },
+    "packageRules": [
+        {
+            "matchManagers": [
+                "pre-commit"
+            ],
+            "automerge": true,
+            "automergeType": "pr"
+        }
+    ]
 }
