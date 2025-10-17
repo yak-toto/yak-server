@@ -1,11 +1,11 @@
 import json
 import os
+from datetime import datetime, timezone
 from http import HTTPStatus
 from importlib.metadata import version
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import pendulum
 from click.testing import CliRunner
 from starlette.testclient import TestClient
 
@@ -42,7 +42,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
             "JWT_SECRET_KEY": get_random_string(128),
             "COMPETITION": "world_cup_2022",
             "DATA_FOLDER": data_folder,
-            "LOCK_DATETIME": str(pendulum.now("UTC")),
+            "LOCK_DATETIME": str(datetime.now(timezone.utc)),
             "RULES": "{}",
             "OFFICIAL_RESULTS_URL": "https://en.wikipedia.org/wiki/2022_FIFA_World_Cup",
         },
@@ -61,7 +61,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
             "JWT_SECRET_KEY": get_random_string(128),
             "COMPETITION": "world_cup_2022",
             "DATA_FOLDER": data_folder,
-            "LOCK_DATETIME": str(pendulum.now("UTC")),
+            "LOCK_DATETIME": str(datetime.now(timezone.utc)),
             "RULES": "{}",
         },
         input=f"{admin_password}\n{admin_password}\n",

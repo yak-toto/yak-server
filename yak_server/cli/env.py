@@ -5,10 +5,9 @@ from pathlib import Path
 from typing import Any
 from uuid import UUID
 
-import pendulum
-
 from yak_server.database import PostgresSettings
 from yak_server.helpers.rules import RULE_MAPPING, Rules
+from yak_server.helpers.settings import LockDatetimeSettings
 
 
 class YesOrNo(str, Enum):
@@ -19,11 +18,6 @@ class YesOrNo(str, Enum):
 class RuleNotDefinedError(Exception):
     def __init__(self, rule_id: UUID) -> None:
         super().__init__(f"Rule not defined: {rule_id}")
-
-
-class InvalidLockDatetimeError(Exception):
-    def __init__(self, raw_lock_datetime: str) -> None:
-        super().__init__(f"lock_datetime is not a valid datetime: {raw_lock_datetime}")
 
 
 def write_env_file(env: dict[str, Any], filename: str) -> None:
@@ -75,12 +69,10 @@ def write_app_env_file(
     # Load lock datetime
     common_settings = json.loads((data_folder / "common.json").read_text())
 
-    parsed_lock_datetime = pendulum.parse(common_settings["lock_datetime"], exact=True)
+    # Validate lock datetime by instantiating pydantic model
+    lock_datetime_settings = LockDatetimeSettings(lock_datetime=common_settings["lock_datetime"])
 
-    if not isinstance(parsed_lock_datetime, pendulum.DateTime):
-        raise InvalidLockDatetimeError(common_settings["lock_datetime"])
-
-    env["LOCK_DATETIME"] = parsed_lock_datetime.to_iso8601_string()
+    env["LOCK_DATETIME"] = lock_datetime_settings.lock_datetime.isoformat()
 
     env["OFFICIAL_RESULTS_URL"] = common_settings["official_results_url"]
 

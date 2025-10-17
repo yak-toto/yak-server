@@ -1,9 +1,9 @@
 import contextlib
 import os
 from collections.abc import Generator
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
-import pendulum
 import psycopg
 import pytest
 from psycopg import sql
@@ -109,7 +109,7 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
     )
 
     app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") + pendulum.duration(minutes=10),
+        datetime.now(timezone.utc) + timedelta(minutes=10),
     )
 
     yield app
@@ -127,7 +127,7 @@ def app_with_valid_jwt_config(_app: "FastAPI") -> Generator["FastAPI", None, Non
     )
 
     _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") + pendulum.duration(minutes=10),
+        datetime.now(timezone.utc) + timedelta(minutes=10),
     )
 
     yield _app
@@ -145,7 +145,7 @@ def app_with_null_jwt_expiration_time(_app: "FastAPI") -> Generator["FastAPI", N
     )
 
     _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") + pendulum.duration(minutes=10),
+        datetime.now(timezone.utc) + timedelta(minutes=10),
     )
 
     yield _app
@@ -163,7 +163,7 @@ def app_with_null_jwt_refresh_expiration_time(_app: "FastAPI") -> Generator["Fas
     )
 
     _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") + pendulum.duration(minutes=10),
+        datetime.now(timezone.utc) + timedelta(minutes=10),
     )
 
     yield _app

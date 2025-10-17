@@ -1,9 +1,9 @@
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
 from uuid import uuid4
 
-import pendulum
 from starlette.testclient import TestClient
 
 from testing.mock import MockLockDatetime, MockSettings
@@ -86,7 +86,7 @@ def test_binary_bet(
 
     # Error case : locked bet
     app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") - pendulum.duration(minutes=10),
+        datetime.now(timezone.utc) - timedelta(minutes=10),
     )
 
     response_lock_bet = client.patch(
@@ -103,7 +103,7 @@ def test_binary_bet(
     }
 
     app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        pendulum.now("UTC") + pendulum.duration(minutes=10),
+        datetime.now(timezone.utc) + timedelta(minutes=10),
     )
 
     # Error case : Invalid input

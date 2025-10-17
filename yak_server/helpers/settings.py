@@ -1,13 +1,10 @@
+from datetime import datetime
 from functools import cache
-from typing import Annotated
 
-import pendulum
-from pydantic import HttpUrl, PlainValidator
+from pydantic import AwareDatetime, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .rules import Rules
-
-PendulumDateTime = Annotated[pendulum.DateTime, PlainValidator(pendulum.parse)]
 
 
 class Settings(BaseSettings):
@@ -25,13 +22,13 @@ def get_settings() -> Settings:
 
 
 class LockDatetimeSettings(BaseSettings):
-    lock_datetime: PendulumDateTime
+    lock_datetime: AwareDatetime
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
 
 
 @cache
-def get_lock_datetime() -> pendulum.DateTime:
+def get_lock_datetime() -> datetime:
     return LockDatetimeSettings().lock_datetime  # pragma: no cover
 
 

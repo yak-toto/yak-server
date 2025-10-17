@@ -1,7 +1,7 @@
 import logging
+from datetime import datetime
 from typing import Annotated
 
-import pendulum
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
 from sqlalchemy.exc import IntegrityError
@@ -79,7 +79,7 @@ def retrieve_score_bet_by_id(
     bet_id: UUID4,
     db: Annotated[Session, Depends(get_db)],
     user: Annotated[UserModel, Depends(require_user)],
-    lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
+    lock_datetime: Annotated[datetime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[ScoreBetResponse]:
     score_bet = (
@@ -115,7 +115,7 @@ def modify_score_bet(
     modify_score_bet_in: ModifyScoreBetIn,
     db: Annotated[Session, Depends(get_db)],
     user: Annotated[UserModel, Depends(require_user)],
-    lock_datetime: Annotated[pendulum.DateTime, Depends(get_lock_datetime)],
+    lock_datetime: Annotated[datetime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[ScoreBetResponse]:
     if is_locked(user, lock_datetime):
