@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:18.0-alpine
+    image: postgres:18.0-alpine3.22
     environment:
       POSTGRES_USER: ci
       POSTGRES_PASSWORD: test
@@ -14,7 +14,7 @@ services:
   yak-server:
     image: yak_server:${YAK_VERSION}-euro_2024
     build:
-      context: ..
+      context: .
       args:
         COMPETITION: euro_2024
     ports:

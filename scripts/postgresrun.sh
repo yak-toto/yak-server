@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-source $(dirname $0)/../.env.db
 
-docker run --name yaktoto-postgres \
-    -e POSTGRES_USER=$POSTGRES_USER \
-    -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
-    -e POSTGRES_DB=$POSTGRES_DB \
-    -p $POSTGRES_PORT:5432 \
-    -d postgres:17.5-alpine3.22
+set -e
+
+# Start PostgreSQL using docker compose (env_file handles .env.db automatically)
+docker compose -f $(dirname $0)/../docker-compose.dev.yml up -d postgres
+
+echo "PostgreSQL is starting..."
+echo "Use 'docker compose -f docker-compose.dev.yml logs -f postgres' to see logs"
+echo "Use 'docker compose -f docker-compose.dev.yml down' to stop"

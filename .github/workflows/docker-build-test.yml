@@ -44,7 +44,7 @@ jobs:
           YAK_VERSION=$(uv version --short)
           export YAK_VERSION
           echo "Building and starting services with version: ${YAK_VERSION}"
-          docker compose -f .github/docker-compose.ci.yml up -d --build --wait
+          docker compose -f docker-compose.ci.yml up -d --build --wait
 
       - name: Test health endpoint
         run: |
@@ -65,8 +65,8 @@ jobs:
 
       - name: Show logs on failure
         if: failure()
-        run: docker compose -f .github/docker-compose.ci.yml logs
+        run: docker compose -f docker-compose.ci.yml logs
 
       - name: Cleanup
         if: always()
-        run: docker compose -f .github/docker-compose.ci.yml down -v
+        run: docker compose -f docker-compose.ci.yml down -v
