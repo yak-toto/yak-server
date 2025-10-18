@@ -54,19 +54,19 @@ yak = "yak_server.cli:app"
 
 [dependency-groups]
 dev = [
-    "httpx>=0.28.1",
-    "pre-commit>=4.0.1",
-    "pytest>=8.4.0",
-    "pytest-cov>=6.0.0",
-    "pytest-env>=1.1.5",
-    "uvicorn[standard]>=0.34.0",
+    "httpx==0.28.1",
+    "pre-commit==4.0.1",
+    "pytest==8.4.0",
+    "pytest-cov==6.0.0",
+    "pytest-env==1.1.5",
+    "uvicorn[standard]==0.37.0",
     "yappi>=1.6.10",
 ]
 type-checking = [
-    "hatchling>=1.27.0",
-    "lxml-stubs>=0.5.1",
-    "mypy>=1.17.0",
-    "types-beautifulsoup4>=4.12.0.20241020",
+    "hatchling==1.27.0",
+    "lxml-stubs==0.5.1",
+    "mypy==1.17.0",
+    "types-beautifulsoup4==4.12.0.20241020",
 ]
 
 [tool.hatch.version]
