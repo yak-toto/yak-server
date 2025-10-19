@@ -69,8 +69,31 @@ jobs:
         uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
 
       - name: Create Release
+        id: create-release
         uses: ncipollo/release-action@b7eabc95ff50cbeeedec83973935c8f306dfcd0b # v1.20.0
         with:
           artifacts: "dist/*"
           generateReleaseNotes: true
           tag: ${{ steps.create-commits.outputs.new-version }}
+
+      - name: Send Release Notification to Telegram
+        if: success()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RELEASE_TAG: ${{ steps.create-commits.outputs.new-version }}
+          RELEASE_URL: ${{ steps.create-release.outputs.html_url }}
+          REPO: ${{ github.repository }}
+        run: |-
+          FULL_MESSAGE="🎉 New Release: ${RELEASE_TAG}
+          📁 Repository: ${REPO}
+          📦 PyPI: https://pypi.org/project/yak-server/${RELEASE_TAG}/
+          🔗 ${RELEASE_URL}"
+
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
+              \"text\": \"${FULL_MESSAGE}\",
+              \"disable_web_page_preview\": false
+            }"
