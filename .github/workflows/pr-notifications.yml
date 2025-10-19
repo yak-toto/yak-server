@@ -1,0 +1,63 @@
+name: ▶️ PR Notifications
+
+on:
+  pull_request:
+    types: [opened, reopened, closed]
+
+permissions: {}
+
+jobs:
+  notify-telegram:
+    name: Send PR Notification
+    runs-on: ubuntu-latest
+
+    permissions: {}
+
+    steps:
+      - name: Determine PR notification type
+        id: notification
+        env:
+          GITHUB_EVENT_ACTION: ${{ github.event.action }}
+          GITHUB_EVENT_PULL_REQUEST_TITLE: ${{ github.event.pull_request.title }}
+          GITHUB_EVENT_PULL_REQUEST_USER_LOGIN: ${{ github.event.pull_request.user.login }}
+          GITHUB_EVENT_PULL_REQUEST_MERGED: ${{ github.event.pull_request.merged }}
+          GITHUB_EVENT_PULL_REQUEST_HTML_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          if [ "${GITHUB_EVENT_ACTION}" = "opened" ]; then
+            echo "icon=🟢" >> "$GITHUB_OUTPUT"
+            echo "title=New PR" >> "$GITHUB_OUTPUT"
+          elif [ "${GITHUB_EVENT_ACTION}" = "reopened" ]; then
+            echo "icon=🔄" >> "$GITHUB_OUTPUT"
+            echo "title=PR Reopened" >> "$GITHUB_OUTPUT"
+          elif [ "${GITHUB_EVENT_ACTION}" = "closed" ] && [ "${GITHUB_EVENT_PULL_REQUEST_MERGED}" = "true" ]; then
+            echo "icon=🟣" >> "$GITHUB_OUTPUT"
+            echo "title=PR Merged" >> "$GITHUB_OUTPUT"
+          elif [ "${GITHUB_EVENT_ACTION}" = "closed" ]; then
+            echo "icon=⚫" >> "$GITHUB_OUTPUT"
+            echo "title=PR Closed" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "message=${GITHUB_EVENT_PULL_REQUEST_TITLE} by ${GITHUB_EVENT_PULL_REQUEST_USER_LOGIN}" >> "$GITHUB_OUTPUT"
+          echo "url=${GITHUB_EVENT_PULL_REQUEST_HTML_URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Send Telegram notification
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ICON: ${{ steps.notification.outputs.icon }}
+          TITLE: ${{ steps.notification.outputs.title }}
+          MESSAGE: ${{ steps.notification.outputs.message }}
+          URL: ${{ steps.notification.outputs.url }}
+          REPO: ${{ github.repository }}
+        run: |-
+          FULL_MESSAGE="${ICON} ${TITLE}: ${MESSAGE}
+          📁 Repository: ${REPO}
+          🔗 ${URL}"
+
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
+              \"text\": \"${FULL_MESSAGE}\",
+              \"disable_web_page_preview\": false
+            }"
