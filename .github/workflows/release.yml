@@ -90,7 +90,7 @@ jobs:
           📦 PyPI: https://pypi.org/project/yak-server/${RELEASE_TAG}/
           🔗 ${RELEASE_URL}"
 
-          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          curl -s -o /dev/null -S -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
             -d "{
               \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
