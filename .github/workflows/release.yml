@@ -95,5 +95,5 @@ jobs:
             -d "{
               \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
               \"text\": \"${FULL_MESSAGE}\",
-              \"disable_web_page_preview\": false
+              \"disable_web_page_preview\": true
             }"
