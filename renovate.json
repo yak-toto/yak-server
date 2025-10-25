@@ -15,6 +15,13 @@
     "packageRules": [
         {
             "matchManagers": [
+                "github-actions"
+            ],
+            "automerge": true,
+            "automergeType": "pr"
+        },
+        {
+            "matchManagers": [
                 "pre-commit"
             ],
             "automerge": true,
