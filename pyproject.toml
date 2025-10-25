@@ -60,7 +60,7 @@ dev = [
     "pytest-cov==7.0.0",
     "pytest-env==1.2.0",
     "uvicorn[standard]==0.38.0",
-    "yappi>=1.6.10",
+    "yappi==1.7.3",
 ]
 type-checking = [
     "hatchling==1.27.0",
