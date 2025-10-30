@@ -15,6 +15,20 @@
     "packageRules": [
         {
             "matchManagers": [
+                "dockerfile"
+            ],
+            "automerge": true,
+            "automergeType": "pr"
+        },
+        {
+            "matchManagers": [
+                "docker-compose"
+            ],
+            "automerge": true,
+            "automergeType": "pr"
+        },
+        {
+            "matchManagers": [
                 "github-actions"
             ],
             "automerge": true,
