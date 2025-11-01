@@ -173,7 +173,10 @@ def synchronize_official_results(engine: "Engine") -> None:
 
     official_results_url = get_settings().official_results_url
 
-    response = httpx.get(str(official_results_url))
+    response = httpx.get(
+        str(official_results_url),
+        headers={"User-Agent": "YakServerWebScraper/1.0 (yaktoto648@gmail.com)"},
+    )
 
     soup = bs4.BeautifulSoup(response.text, "lxml")
 
