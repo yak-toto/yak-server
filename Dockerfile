@@ -8,6 +8,9 @@ ARG COMPETITION
 # Enforce it's set, or fail the build
 RUN [ -n "$COMPETITION" ] || (echo "COMPETITION is required!" && false)
 
+# TODO: remove after greenlet provides musl wheels for Python 3.14
+RUN apk add g++
+
 WORKDIR /app/
 
 # Install uv
