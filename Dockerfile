@@ -1,12 +1,15 @@
 # ===========================
 # 1️⃣ Build Stage (uv)
 # ===========================
-FROM python:3.13.5-alpine3.22 AS builder
+FROM python:3.14.0-alpine3.22 AS builder
 
 ARG COMPETITION
 
 # Enforce it's set, or fail the build
 RUN [ -n "$COMPETITION" ] || (echo "COMPETITION is required!" && false)
+
+# TODO: remove after greenlet provides musl wheels for Python 3.14
+RUN apk add g++
 
 WORKDIR /app/
 
@@ -63,7 +66,7 @@ RUN PYTHON_VERSION=$(python -c 'import sys; print(f"{sys.version_info.major}.{sy
 # ===========================
 # 2️⃣ Runtime Stage (uvicorn)
 # ===========================
-FROM python:3.13.5-alpine3.22 AS runtime
+FROM python:3.14.0-alpine3.22 AS runtime
 
 ARG COMPETITION
 
