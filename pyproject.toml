@@ -37,7 +37,7 @@ dependencies = [
     "fastapi ==0.121.1",
     "click ==8.3.0",
     "SQLAlchemy ==2.0.44",
-    "pydantic-settings ==2.11.0",
+    "pydantic-settings ==2.12.0",
 ]
 version = "0.59.5"
 
