@@ -35,7 +35,7 @@ dependencies = [
     "psycopg[binary] ==3.2.12",
     "argon2-cffi ==25.1.0",
     "fastapi ==0.121.2",
-    "click ==8.3.0",
+    "click ==8.3.1",
     "SQLAlchemy ==2.0.44",
     "pydantic-settings ==2.12.0",
 ]
