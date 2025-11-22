@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -16,6 +18,7 @@ from yak_server.database.models import (
 from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
+    from bs4.element import Tag
     from sqlalchemy import Engine
 
 try:
@@ -37,10 +40,22 @@ except ImportError:  # pragma: no cover
     lxml = None  # type: ignore[assignment]
 
 
-def parse_score(content: str) -> tuple[int | None, int | None]:
+def parse_score(content: Tag) -> tuple[int | None, int | None]:
     try:
-        scores = next(next(content.children).children)
-    except AttributeError:
+        first_child = None
+        for child in content.children:
+            if isinstance(child, bs4.element.Tag):
+                first_child = child
+                break
+
+        if first_child is None:
+            return None, None
+
+        scores = next(iter(first_child.children))
+
+        if not isinstance(scores, str):
+            return None, None
+    except (AttributeError, StopIteration):
         return None, None
 
     try:
@@ -63,16 +78,47 @@ def parse_score(content: str) -> tuple[int | None, int | None]:
     return score1, score2
 
 
-def parse_penalty(content: str) -> bool:
+def parse_penalty(content: Tag) -> bool:
     penalties_tag = content.find("a", string="Penalties")
-    score_content = penalties_tag.next.parent.find_next("th").string
+    # mypy might complain about find returning None or Tag.
+    if not isinstance(penalties_tag, bs4.element.Tag):
+        # If we can't find penalties tag, we can't parse it.
+        # But the caller checks is_penalties first.
+        pass
+
+    # We need to be careful about bs4 being None at runtime if not installed,
+    # but this function is only called if bs4 is installed.
+
+    if penalties_tag is None:
+        msg = "Penalties tag not found"
+        raise ValueError(msg)
+
+    next_element = penalties_tag.next
+    if next_element is None:
+        msg = "Penalties tag has no next element"
+        raise ValueError(msg)
+
+    parent = next_element.parent
+    if parent is None:
+        msg = "Next element has no parent"
+        raise ValueError(msg)
+
+    th = parent.find_next("th")
+    if not isinstance(th, bs4.element.Tag):
+        msg = "Could not find next th"
+        raise TypeError(msg)
+
+    score_content = th.string
+    if score_content is None:
+        msg = "th has no string content"
+        raise ValueError(msg)
 
     score1, score2 = score_content.split("\u2013")
 
     return int(score1) > int(score2)
 
 
-def is_penalties(content: str) -> bool:
+def is_penalties(content: Tag) -> bool:
     return bool(content.find("a", string="Penalties"))
 
 
@@ -87,7 +133,7 @@ class SyncOfficialResultsNotAvailableError(Exception):
 @dataclass
 class GroupContainer:
     model: GroupModel
-    content: str
+    content: Tag
 
 
 @dataclass
@@ -134,24 +180,34 @@ def extract_matches_from_html(groups: list[GroupContainer]) -> list[Match]:
         ]
 
         for match_index, match_html in enumerate(matches_html, start=1):
-            score1, score2 = parse_score(match_html.find("th", class_="fscore"))
+            # match_html is a Tag (from find_all_next)
+            if not isinstance(match_html, bs4.element.Tag):
+                continue
+
+            fscore = match_html.find("th", class_="fscore")
+            if not isinstance(fscore, bs4.element.Tag):
+                continue
+
+            score1, score2 = parse_score(fscore)
 
             if score1 is None or score2 is None:  # pragma: no cover
+                continue
+
+            fhome = match_html.find("th", class_="fhome")
+            faway = match_html.find("th", class_="faway")
+
+            if not isinstance(fhome, bs4.element.Tag) or not isinstance(faway, bs4.element.Tag):
                 continue
 
             match = Match(
                 index=match_index,
                 group=Group(index=group.model.index),
                 team1=Team(
-                    description=(
-                        match_html.find("th", class_="fhome").get_text().replace("\xa0", "")
-                    ),
+                    description=(fhome.get_text().replace("\xa0", "")),
                     score=score1,
                 ),
                 team2=Team(
-                    description=(
-                        match_html.find("th", class_="faway").get_text().replace("\xa0", "")
-                    ),
+                    description=(faway.get_text().replace("\xa0", "")),
                     score=score2,
                 ),
             )
@@ -167,7 +223,7 @@ def extract_matches_from_html(groups: list[GroupContainer]) -> list[Match]:
     return matches
 
 
-def synchronize_official_results(engine: "Engine") -> None:
+def synchronize_official_results(engine: Engine) -> None:
     if bs4 is None or lxml is None or httpx is None:
         raise SyncOfficialResultsNotAvailableError
 
@@ -183,19 +239,27 @@ def synchronize_official_results(engine: "Engine") -> None:
     local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
-        groups = [
-            GroupContainer(model=group, content=content.parent.parent)
-            for group in db.query(GroupModel).order_by(GroupModel.index)
-            for content in soup.find(
+        groups = []
+        for group in db.query(GroupModel).order_by(GroupModel.index):
+            h3 = soup.find(
                 "h3",
                 id=group.description_en.replace(" ", "_"),
                 string=group.description_en,
             )
-        ]
+            if (
+                isinstance(h3, bs4.element.Tag)
+                and h3.parent
+                and isinstance(h3.parent, bs4.element.Tag)
+            ):
+                groups.append(GroupContainer(model=group, content=h3.parent))
 
         matches = extract_matches_from_html(groups)
 
         admin = db.query(UserModel).filter_by(name="admin").first()
+
+        if not admin:
+            warnings.warn("Admin user not found. Skipping sync.", stacklevel=2)
+            return
 
         for match in matches:
             score_bet = (
