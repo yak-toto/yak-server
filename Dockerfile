@@ -1,7 +1,7 @@
 # ===========================
 # 1️⃣ Build Stage (uv)
 # ===========================
-FROM python:3.14.0-alpine3.22 AS builder
+FROM python:3.14.1-alpine3.22 AS builder
 
 ARG COMPETITION
 
@@ -63,7 +63,7 @@ RUN PYTHON_VERSION=$(python -c 'import sys; print(f"{sys.version_info.major}.{sy
 # ===========================
 # 2️⃣ Runtime Stage (uvicorn)
 # ===========================
-FROM python:3.14.0-alpine3.22 AS runtime
+FROM python:3.14.1-alpine3.22 AS runtime
 
 ARG COMPETITION
 
