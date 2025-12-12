@@ -16,7 +16,7 @@ repos:
       - id: name-tests-test
 
   - repo: https://github.com/bwhmather/ssort
-    rev: 0.15.0
+    rev: 0.16.0
     hooks:
       - id: ssort
 
