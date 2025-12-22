@@ -54,12 +54,6 @@ jobs:
           # Update lock file
           uv lock
 
-          # Create branch and commit
-          BRANCH_NAME="release/v${NEW_VERSION}"
-          git checkout -b "${BRANCH_NAME}"
-          git add pyproject.toml uv.lock
-          git commit -m "Release ${NEW_VERSION}"
-
           # Create annotated tag
           git tag -a "${NEW_VERSION}" HEAD -m "${NEW_VERSION}"
 
@@ -69,11 +63,11 @@ jobs:
           GITHUB_EVENT_INPUTS_RELEASE_TYPE: ${{ github.event.inputs.release-type }}
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725
+        uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ steps.version-bump.outputs.branch-name }}
-          base: main
+          delete-branch: false
           title: "Release ${{ steps.version-bump.outputs.new-version }}"
           body: |
             ## 🚀 Release ${{ steps.version-bump.outputs.new-version }}
