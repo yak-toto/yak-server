@@ -63,6 +63,10 @@ jobs:
           # Create annotated tag
           git tag -a "${NEW_VERSION}" HEAD -m "${NEW_VERSION}"
 
+          # Push branch and tag
+          git push origin "${BRANCH_NAME}"
+          git push origin "${NEW_VERSION}"
+
           echo "new-version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
           echo "branch-name=${BRANCH_NAME}" >> "$GITHUB_OUTPUT"
         env:
