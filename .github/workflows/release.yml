@@ -1,18 +1,11 @@
-# DEPRECATED: This workflow has been replaced by two safer workflows:
-# - prepare-release.yml: Creates a PR with version bump changes
-# - publish-release.yml: Publishes to PyPI when a tag is pushed
-#
-# This file is kept for reference but should not be used.
-# Please use the "Prepare Release" workflow instead.
-
-name: 🆙 Release (DEPRECATED)
+name: 🆙 Release
 
 on:
   workflow_dispatch:
     inputs:
       release-type:
         type: choice
-        description: Release type (DEPRECATED - use Prepare Release workflow)
+        description: Release type
         options:
           - patch
           - minor
