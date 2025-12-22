@@ -315,7 +315,7 @@ class TeamModel(Base):
 class GroupModel(Base):
     __tablename__ = "group"
     id: Mapped[UUID] = mapped_column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
-    code: Mapped[str] = mapped_column(sa.String(1), unique=True, nullable=False)
+    code: Mapped[str] = mapped_column(sa.String(2), unique=True, nullable=False)
     description_fr: Mapped[str] = mapped_column(sa.String(100), unique=True, nullable=False)
     description_en: Mapped[str] = mapped_column(sa.String(100), unique=True, nullable=False)
     index: Mapped[int] = mapped_column(sa.Integer, nullable=False)
