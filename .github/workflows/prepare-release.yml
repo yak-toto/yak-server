@@ -69,7 +69,7 @@ jobs:
           GITHUB_EVENT_INPUTS_RELEASE_TYPE: ${{ github.event.inputs.release-type }}
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725
+        uses: peter-evans/create-pull-request@0979079bc20c05bbbb590a56c21c4e2b1d1f1bbe
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ steps.version-bump.outputs.branch-name }}
