@@ -73,7 +73,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ steps.version-bump.outputs.branch-name }}
-          base: main
           title: "Release ${{ steps.version-bump.outputs.new-version }}"
           body: |
             ## 🚀 Release ${{ steps.version-bump.outputs.new-version }}
