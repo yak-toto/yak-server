@@ -82,7 +82,8 @@ def retrieve_binary_bet_by_id(
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[BinaryBetResponse]:
     binary_bet = (
-        db.query(BinaryBetModel)
+        db
+        .query(BinaryBetModel)
         .options(
             selectinload(BinaryBetModel.match)
             .selectinload(MatchModel.group)
@@ -122,7 +123,8 @@ def modify_binary_bet_by_id(
         raise LockedBinaryBet
 
     binary_bet = (
-        db.query(BinaryBetModel)
+        db
+        .query(BinaryBetModel)
         .options(
             selectinload(BinaryBetModel.match)
             .selectinload(MatchModel.group)

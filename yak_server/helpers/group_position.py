@@ -115,7 +115,8 @@ def get_group_rank_with_code(
     group_id: "UUID",
 ) -> list[GroupPositionModel]:
     group_rank = (
-        db.query(GroupPositionModel)
+        db
+        .query(GroupPositionModel)
         .options(selectinload(GroupPositionModel.team))
         .filter_by(group_id=group_id, user_id=user.id)
     )
@@ -132,7 +133,8 @@ def get_group_rank_with_code(
         )
 
     score_bets = (
-        db.query(ScoreBetModel)
+        db
+        .query(ScoreBetModel)
         .options(selectinload(ScoreBetModel.match).selectinload(MatchModel.group))
         .join(ScoreBetModel.match)
         .where(MatchModel.user_id == user.id, MatchModel.group_id == group_id)

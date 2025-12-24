@@ -59,7 +59,8 @@ def retrieve_group_by_id(
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[GroupResponse]:
     group = (
-        db.query(GroupModel)
+        db
+        .query(GroupModel)
         .options(selectinload(GroupModel.phase))
         .filter_by(code=group_code)
         .first()

@@ -46,7 +46,8 @@ def compute_results_for_score_bet(db: "Session", admin: UserModel) -> list[Resul
     results: list[ResultForScoreBet] = []
 
     for real_score in (
-        db.query(ScoreBetModel)
+        db
+        .query(ScoreBetModel)
         .options(selectinload(ScoreBetModel.match))
         .join(ScoreBetModel.match)
         .where(MatchModel.user_id == admin.id)
@@ -54,7 +55,8 @@ def compute_results_for_score_bet(db: "Session", admin: UserModel) -> list[Resul
         result_for_score_bet = ResultForScoreBet()
 
         for user_score in (
-            db.query(ScoreBetModel)
+            db
+            .query(ScoreBetModel)
             .options(selectinload(ScoreBetModel.match))
             .join(ScoreBetModel.match)
             .where(
@@ -128,7 +130,8 @@ def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set
         chain(
             *(
                 (bet.match.team1_id, bet.match.team2_id)
-                for bet in db.query(BinaryBetModel)
+                for bet in db
+                .query(BinaryBetModel)
                 .options(selectinload(BinaryBetModel.match))
                 .join(BinaryBetModel.match)
                 .join(MatchModel.group)
@@ -142,7 +145,8 @@ def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set
 def winner_from_user(db: "Session", user: UserModel) -> set[UUID]:
     finale_bet = next(
         iter(
-            db.query(BinaryBetModel)
+            db
+            .query(BinaryBetModel)
             .options(
                 selectinload(BinaryBetModel.match).selectinload(MatchModel.team1),
                 selectinload(BinaryBetModel.match).selectinload(MatchModel.team2),

@@ -42,7 +42,8 @@ def compute_finale_phase_from_group_rank(
 
     groups_result = {
         group.code: get_group_rank_with_code(db, user, group.id)
-        for group in db.query(GroupModel)
+        for group in db
+        .query(GroupModel)
         .join(GroupModel.phase)
         .where(
             PhaseModel.code == rule_config.from_phase,
@@ -61,7 +62,8 @@ def compute_finale_phase_from_group_rank(
             team2 = groups_result[match_config.team2.group][match_config.team2.rank - 1].team
 
             binary_bet = (
-                db.query(BinaryBetModel)
+                db
+                .query(BinaryBetModel)
                 .options(selectinload(BinaryBetModel.match))
                 .join(BinaryBetModel.match)
                 .where(
