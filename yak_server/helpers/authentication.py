@@ -83,7 +83,8 @@ def signup_user(
     # Create group position records
     db.add_all(
         create_group_position(
-            db.query(ScoreBetModel)
+            db
+            .query(ScoreBetModel)
             .options(selectinload(ScoreBetModel.match))
             .join(ScoreBetModel.match)
             .filter_by(user_id=user.id),

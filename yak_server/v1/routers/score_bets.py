@@ -83,7 +83,8 @@ def retrieve_score_bet_by_id(
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[ScoreBetResponse]:
     score_bet = (
-        db.query(ScoreBetModel)
+        db
+        .query(ScoreBetModel)
         .options(
             selectinload(ScoreBetModel.match)
             .selectinload(MatchModel.group)
@@ -122,7 +123,8 @@ def modify_score_bet(
         raise LockedScoreBet
 
     score_bet = (
-        db.query(ScoreBetModel)
+        db
+        .query(ScoreBetModel)
         .options(
             selectinload(ScoreBetModel.match)
             .selectinload(MatchModel.group)

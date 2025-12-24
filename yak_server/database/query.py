@@ -17,7 +17,8 @@ def bets_from_group_code(
     group_code: str,
 ) -> tuple[GroupModel | None, Iterable[ScoreBetModel], Iterable[BinaryBetModel]]:
     group = (
-        db.query(GroupModel)
+        db
+        .query(GroupModel)
         .options(selectinload(GroupModel.phase))
         .filter_by(code=group_code)
         .first()
@@ -27,7 +28,8 @@ def bets_from_group_code(
         return None, [], []
 
     score_bets = (
-        db.query(ScoreBetModel)
+        db
+        .query(ScoreBetModel)
         .options(
             selectinload(ScoreBetModel.match).selectinload(MatchModel.team1),
             selectinload(ScoreBetModel.match).selectinload(MatchModel.team2),
@@ -38,7 +40,8 @@ def bets_from_group_code(
     )
 
     binary_bets = (
-        db.query(BinaryBetModel)
+        db
+        .query(BinaryBetModel)
         .options(
             selectinload(BinaryBetModel.match).selectinload(MatchModel.team1),
             selectinload(BinaryBetModel.match).selectinload(MatchModel.team2),
@@ -69,7 +72,8 @@ def bets_from_phase_code(
     groups = db.query(GroupModel).filter_by(phase_id=phase.id).order_by(GroupModel.index)
 
     binary_bets = (
-        db.query(BinaryBetModel)
+        db
+        .query(BinaryBetModel)
         .options(
             selectinload(BinaryBetModel.match).selectinload(MatchModel.team1),
             selectinload(BinaryBetModel.match).selectinload(MatchModel.team2),
@@ -81,7 +85,8 @@ def bets_from_phase_code(
     )
 
     score_bets = (
-        db.query(ScoreBetModel)
+        db
+        .query(ScoreBetModel)
         .options(
             selectinload(ScoreBetModel.match).selectinload(MatchModel.team1),
             selectinload(ScoreBetModel.match).selectinload(MatchModel.team2),

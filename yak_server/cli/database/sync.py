@@ -199,7 +199,8 @@ def synchronize_official_results(engine: "Engine") -> None:
 
         for match in matches:
             score_bet = (
-                db.query(ScoreBetModel)
+                db
+                .query(ScoreBetModel)
                 .join(ScoreBetModel.match)
                 .join(MatchModel.group)
                 .where(
@@ -215,7 +216,8 @@ def synchronize_official_results(engine: "Engine") -> None:
                 score_bet.score2 = match.team2.score
 
             binary_bet = (
-                db.query(BinaryBetModel)
+                db
+                .query(BinaryBetModel)
                 .options(selectinload(BinaryBetModel.match))
                 .join(BinaryBetModel.match)
                 .join(MatchModel.group)

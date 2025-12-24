@@ -34,7 +34,8 @@ def retrieve_score_board(
         result=[
             UserResult.from_instance(user, rank=rank)
             for rank, user in enumerate(
-                db.query(UserModel)
+                db
+                .query(UserModel)
                 .order_by(UserModel.points.desc())
                 .where(UserModel.role != Role.ADMIN),
                 1,
@@ -45,7 +46,8 @@ def retrieve_score_board(
 
 def compute_rank(db: Session, user_id: UUID) -> int | None:
     subq = (
-        db.query(
+        db
+        .query(
             UserModel,
             func.row_number().over(order_by=UserModel.points.desc()).label("rownum"),
         )

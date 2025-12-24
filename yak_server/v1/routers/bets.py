@@ -50,7 +50,8 @@ def retrieve_all_bets(
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[AllBetsResponse]:
     score_bets = (
-        db.query(ScoreBetModel)
+        db
+        .query(ScoreBetModel)
         .options(
             selectinload(ScoreBetModel.match).selectinload(MatchModel.team1),
             selectinload(ScoreBetModel.match).selectinload(MatchModel.team2),
@@ -62,7 +63,8 @@ def retrieve_all_bets(
     )
 
     binary_bets = (
-        db.query(BinaryBetModel)
+        db
+        .query(BinaryBetModel)
         .options(
             selectinload(BinaryBetModel.match).selectinload(MatchModel.team1),
             selectinload(BinaryBetModel.match).selectinload(MatchModel.team2),
@@ -203,7 +205,8 @@ def retrieve_group_rank_by_code(
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[GroupRankResponse]:
     group = (
-        db.query(GroupModel)
+        db
+        .query(GroupModel)
         .options(selectinload(GroupModel.phase))
         .filter_by(code=group_code)
         .first()
