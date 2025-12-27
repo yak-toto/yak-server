@@ -174,7 +174,7 @@
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Uruguay-64x43.png"
     },
     {
-        "code": "TK",
+        "code": "NZ",
         "description_fr": "Nouvelle-Z\u00e9lande",
         "description_en": "New Zealand",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_New_Zealand-64x32.png"
@@ -286,5 +286,41 @@
         "description_fr": "Suriname",
         "description_en": "Suriname",
         "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Suriname-64x43.png"
+    },
+    {
+        "code": "BA",
+        "description_fr": "Barrage A",
+        "description_en": "UEFA Path A winne",
+        "internal_flag_url": ""
+    },
+    {
+        "code": "BB",
+        "description_fr": "Barrage B",
+        "description_en": "UEFA Path B winne",
+        "internal_flag_url": ""
+    },
+    {
+        "code": "BC",
+        "description_fr": "Barrage C",
+        "description_en": "UEFA Path C winne",
+        "internal_flag_url": ""
+    },
+    {
+        "code": "BD",
+        "description_fr": "Barrage D",
+        "description_en": "UEFA Path D winne",
+        "internal_flag_url": ""
+    },
+    {
+        "code": "B1",
+        "description_fr": "Barrage 1",
+        "description_en": "IC Path 1 winner",
+        "internal_flag_url": ""
+    },
+    {
+        "code": "B2",
+        "description_fr": "Barrage 2",
+        "description_en": "IC Path 2 winner",
+        "internal_flag_url": ""
     }
 ]
