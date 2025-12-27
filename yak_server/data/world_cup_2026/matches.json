@@ -203,6 +203,13 @@
         "bet_type_from_match": "SCORE_BET"
     },
     {
+        "group_code": "E",
+        "index": 6,
+        "team1_code": "CW",
+        "team2_code": "CI",
+        "bet_type_from_match": "SCORE_BET"
+    },
+    {
         "group_code": "F",
         "index": 1,
         "team1_code": "NL",
@@ -317,8 +324,8 @@
     {
         "group_code": "H",
         "index": 5,
-        "team1_code": "SA",
-        "team2_code": "CV",
+        "team1_code": "CV",
+        "team2_code": "SA",
         "bet_type_from_match": "SCORE_BET"
     },
     {
