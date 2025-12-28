@@ -46,20 +46,6 @@ RUN uv run yak env app --no-debug \
       --jwt-refresh-expiration 604800 \
       --competition $COMPETITION
 
-# Clean up unnecessary files from site-packages
-RUN PYTHON_VERSION=$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")') \
-  && find .venv/lib/python${PYTHON_VERSION}/site-packages \
-    -type d \( \
-      -name "tests" -o \
-      -name "testing" -o \
-      -name "test" -o \
-      -name "doc" -o \
-      -name "docs" \
-    \) \
-    -exec rm -rf {} + \
-  && find .venv/lib/python${PYTHON_VERSION}/site-packages \
-    -type f -name "*.dist-info" -delete
-
 # ===========================
 # 2️⃣ Runtime Stage (uvicorn)
 # ===========================

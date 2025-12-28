@@ -1,10 +1,15 @@
 from datetime import datetime
 from functools import cache
 
-from pydantic import AwareDatetime, DirectoryPath, HttpUrl
+from pydantic import AwareDatetime, BaseModel, DirectoryPath, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .rules import Rules
+
+
+class CompetitionSettings(BaseModel):
+    description_fr: str
+    description_en: str
 
 
 class Settings(BaseSettings):
@@ -12,8 +17,11 @@ class Settings(BaseSettings):
     data_folder: DirectoryPath
     rules: Rules
     official_results_url: HttpUrl
+    competition_settings: CompetitionSettings
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="allow", env_nested_delimiter="__"
+    )
 
 
 @cache
