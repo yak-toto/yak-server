@@ -77,6 +77,8 @@ def write_app_env_file(
     env["OFFICIAL_RESULTS_URL"] = common_settings["official_results_url"]
 
     env["COOKIE_SECURE"] = debug is False
+    env["COMPETITION_SETTINGS__DESCRIPTION_FR"] = common_settings["competition"]["description_fr"]
+    env["COMPETITION_SETTINGS__DESCRIPTION_EN"] = common_settings["competition"]["description_en"]
 
     write_env_file(env, ".env")
 

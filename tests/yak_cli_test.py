@@ -45,6 +45,8 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
             "LOCK_DATETIME": str(datetime.now(timezone.utc)),
             "RULES": "{}",
             "OFFICIAL_RESULTS_URL": "https://en.wikipedia.org/wiki/2022_FIFA_World_Cup",
+            "COMPETITION_SETTINGS__DESCRIPTION_FR": "Coupe du monde 2022",
+            "COMPETITION_SETTINGS__DESCRIPTION_EN": "World Cup 2022",
         },
     )
 
