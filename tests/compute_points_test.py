@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from datetime import datetime, timezone
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
@@ -6,10 +7,10 @@ import pytest
 from click.testing import CliRunner
 from starlette.testclient import TestClient
 
-from testing.mock import MockSettings
 from testing.util import UserData, get_random_string, get_resources_path, patch_score_bets
 from yak_server.cli import app as cli_app
 from yak_server.cli.database import create_admin, initialize_database
+from yak_server.database.models import CompetitionConfigModel
 from yak_server.helpers.rules import Rules
 from yak_server.helpers.rules.compute_final_from_rank import (
     RuleComputeFinaleFromGroupRank,
@@ -17,7 +18,7 @@ from yak_server.helpers.rules.compute_final_from_rank import (
     Versus,
 )
 from yak_server.helpers.rules.compute_points import RuleComputePoints
-from yak_server.helpers.settings import get_settings
+from yak_server.helpers.settings import get_rules
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -69,7 +70,7 @@ def app_and_rules_for_compute_points(
         ),
     )
 
-    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(rules=rules)
+    app_with_valid_jwt_config.dependency_overrides[get_rules] = lambda: rules
 
     yield app_with_valid_jwt_config, rules
 
@@ -235,7 +236,17 @@ def test_compute_points(
     put_finale_phase(client, users_data[2].access_token, is_one_won=False)
 
     # Compute points again with cli
-    monkeypatch.setattr("yak_server.cli.database.get_settings", MockSettings(rules=rules))
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_settings",
+        lambda _: CompetitionConfigModel(
+            code="fake_code",
+            description_fr="description_fr",
+            description_en="description_en",
+            lock_datetime=datetime.now(tz=timezone.utc),
+            official_results_url="",
+            rules=rules.model_dump_json(),
+        ),
+    )
 
     runner = CliRunner()
 

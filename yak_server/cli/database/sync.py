@@ -171,14 +171,14 @@ def synchronize_official_results(engine: "Engine", official_results_url: HttpUrl
     if bs4 is None or lxml is None or httpx is None:
         raise SyncOfficialResultsNotAvailableError
 
+    local_session_maker = build_local_session_maker(engine)
+
     response = httpx.get(
         str(official_results_url),
         headers={"User-Agent": "YakServerWebScraper/1.0 (yaktoto648@gmail.com)"},
     )
 
     soup = bs4.BeautifulSoup(response.text, "lxml")
-
-    local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
         groups = [

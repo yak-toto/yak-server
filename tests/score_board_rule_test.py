@@ -1,15 +1,15 @@
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 import pytest
 
-from testing.mock import MockSettings
 from testing.util import get_random_string
 from yak_server.cli.database import (
     ComputePointsRuleNotDefinedError,
     compute_score_board,
     create_admin,
 )
-from yak_server.helpers.rules import Rules
+from yak_server.database.models import CompetitionConfigModel
 from yak_server.v1.helpers.errors import NoAdminUser
 
 if TYPE_CHECKING:
@@ -19,7 +19,17 @@ if TYPE_CHECKING:
 def test_score_board_rule_not_defined(
     monkeypatch: pytest.MonkeyPatch, engine_for_test_with_delete: "Engine"
 ) -> None:
-    monkeypatch.setattr("yak_server.cli.database.get_settings", MockSettings(rules=Rules()))
+    monkeypatch.setattr(
+        "yak_server.cli.database.get_competition_settings",
+        lambda _: CompetitionConfigModel(
+            code="fake_code",
+            description_fr="description_fr",
+            description_en="description_en",
+            lock_datetime=datetime.now(tz=timezone.utc),
+            official_results_url="",
+            rules="{}",
+        ),
+    )
 
     password_admin = get_random_string(10)
 

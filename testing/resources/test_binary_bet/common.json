@@ -1,0 +1,8 @@
+{
+    "lock_datetime": "2024-01-01T00:00:00.000000+00:00",
+    "official_results_url": "https://example.com",
+    "competition": {
+        "description_fr": "Test Competition",
+        "description_en": "Test Competition"
+    }
+}

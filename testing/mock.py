@@ -1,5 +1,4 @@
 import sys
-from typing import TYPE_CHECKING, Optional
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -10,24 +9,19 @@ from datetime import datetime
 
 from .util import get_resources_path
 
-if TYPE_CHECKING:
-    from yak_server.helpers.rules import Rules
-
 
 class MockSettings:
     def __init__(
         self,
         *,
         data_folder_relative: str | None = None,
-        rules: Optional["Rules"] = None,
-        official_results_url: str | None = None,
+        competition: str = "test_competition",
     ) -> None:
         self.data_folder = (
             get_resources_path(data_folder_relative) if data_folder_relative is not None else None
         )
 
-        self.rules = rules
-        self.official_results_url = official_results_url
+        self.competition = competition
 
     def __call__(self) -> Self:
         return self

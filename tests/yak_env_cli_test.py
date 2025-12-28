@@ -1,8 +1,6 @@
-import json
 from pathlib import Path
 from secrets import randbelow
 
-import pytest
 from click.testing import CliRunner
 from dotenv import dotenv_values
 
@@ -37,14 +35,10 @@ def test_yak_env_all() -> None:
         assert env["JWT_REFRESH_SECRET_KEY"] is not None
         assert len(env["JWT_REFRESH_SECRET_KEY"]) == 256
         assert env["COMPETITION"] == "world_cup_2022"
-        assert env["LOCK_DATETIME"] == "2022-11-20T17:00:00+01:00"
-        assert env["OFFICIAL_RESULTS_URL"] == "https://en.wikipedia.org/wiki/2022_FIFA_World_Cup"
         assert env["DATA_FOLDER"] is not None
         assert Path(env["DATA_FOLDER"]).samefile(
             Path(__file__).parents[1] / "yak_server" / "data" / "world_cup_2022",
         )
-        assert env["RULES"] is not None
-        assert len(json.loads(env["RULES"])) == 2
 
         env_db = dotenv_values(Path(".env.db"))
 
@@ -82,30 +76,17 @@ def test_yak_env_all_world_cup_2018() -> None:
 
         env = dotenv_values(Path(".env"))
 
-        assert env["RULES"] is not None
-        assert json.loads(env["RULES"]) == {}
-
-
-def test_yak_env_all_invalid_lockdatetime(monkeypatch: pytest.MonkeyPatch) -> None:
-    with runner.isolated_filesystem() as tmpdir:
-        date = "2022-11-12"
-
-        (Path(tmpdir) / "data" / "competition0").mkdir(parents=True)
-        (Path(tmpdir) / "data" / "competition0" / "common.json").write_text(
-            json.dumps({"lock_datetime": date, "official_results_url": ""}),
+        assert env["DEBUG"] == "1"
+        assert env["JWT_EXPIRATION_TIME"] == "1800"
+        assert env["JWT_SECRET_KEY"] is not None
+        assert len(env["JWT_SECRET_KEY"]) == 256
+        assert env["JWT_REFRESH_SECRET_KEY"] is not None
+        assert len(env["JWT_REFRESH_SECRET_KEY"]) == 256
+        assert env["COMPETITION"] == "world_cup_2018"
+        assert env["DATA_FOLDER"] is not None
+        assert Path(env["DATA_FOLDER"]).samefile(
+            Path(__file__).parents[1] / "yak_server" / "data" / "world_cup_2018",
         )
-
-        monkeypatch.setattr("yak_server.cli.env.__file__", (Path(tmpdir) / "e" / "e").resolve())
-
-        result = runner.invoke(
-            app,
-            ["env", "all"],
-            input="n\nlocalhost\nroot\ny\n3000\ndb\n1800\n1800\ncompetition0\n",
-            catch_exceptions=True,
-        )
-
-        assert result.exit_code == 1
-        assert "Input should have timezone info" in str(result.exception)
 
 
 def test_yak_env_db() -> None:
@@ -152,11 +133,7 @@ def test_yak_env_app() -> None:
         assert env["JWT_REFRESH_SECRET_KEY"] is not None
         assert len(env["JWT_REFRESH_SECRET_KEY"]) == 256
         assert env["COMPETITION"] == "world_cup_2018"
-        assert env["LOCK_DATETIME"] == "2018-06-14T18:00:00+03:00"
-        assert env["OFFICIAL_RESULTS_URL"] == "https://en.wikipedia.org/wiki/2018_FIFA_World_Cup"
         assert env["DATA_FOLDER"] is not None
         assert Path(env["DATA_FOLDER"]).samefile(
             Path(__file__).parents[1] / "yak_server" / "data" / "world_cup_2018",
         )
-        assert env["RULES"] is not None
-        assert len(json.loads(env["RULES"])) == 0

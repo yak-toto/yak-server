@@ -10,13 +10,13 @@ from psycopg import sql
 from sqlalchemy import Engine, create_engine
 
 from scripts.profiling import create_app as create_app_with_profiling
-from testing.mock import MockAuthenticationSettings, MockLockDatetime, MockSettings
+from testing.mock import MockAuthenticationSettings, MockLockDatetime
 from testing.util import get_random_string
 from yak_server import create_app
 from yak_server.cli.database import create_database, delete_database, drop_database
 from yak_server.database import compute_database_uri, get_postgres_settings
 from yak_server.helpers.rules import Rules
-from yak_server.helpers.settings import get_authentication_settings, get_lock_datetime, get_settings
+from yak_server.helpers.settings import get_authentication_settings, get_lock_datetime, get_rules
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -173,7 +173,7 @@ def app_with_null_jwt_refresh_expiration_time(_app: "FastAPI") -> Generator["Fas
 
 @pytest.fixture
 def app_with_empty_rules(app_with_valid_jwt_config: "FastAPI") -> Generator["FastAPI", None, None]:
-    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(rules=Rules())
+    app_with_valid_jwt_config.dependency_overrides[get_rules] = Rules
 
     yield app_with_valid_jwt_config
 

@@ -6,7 +6,6 @@ import pytest
 from click.testing import CliRunner
 from fastapi.testclient import TestClient
 
-from testing.mock import MockSettings
 from testing.util import get_random_string, get_resources_path
 from yak_server.cli import app as typer_app
 from yak_server.cli.database import create_admin, initialize_database
@@ -15,19 +14,17 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
     from sqlalchemy import Engine
 
-runner = CliRunner()
+runner = CliRunner(catch_exceptions=False)
 
 
 @dataclass
 class CompetitionData:
-    url: str
     folder: str
     excepted_score_bets: list[tuple[int | None, int | None]]
     excepted_binary_bets: list[bool | None]
 
 
 euro_2024_data = CompetitionData(
-    url="https://en.wikipedia.org/wiki/UEFA_Euro_2024",
     folder="euro_2024",
     excepted_score_bets=[
         (5, 1),
@@ -87,7 +84,6 @@ euro_2024_data = CompetitionData(
 )
 
 world_cup_2022_data = CompetitionData(
-    url="https://en.wikipedia.org/wiki/2022_FIFA_World_Cup",
     folder="world_cup_2022",
     excepted_score_bets=[
         (0, 2),
@@ -159,7 +155,6 @@ world_cup_2022_data = CompetitionData(
 )
 
 euro_2020_data = CompetitionData(
-    url="https://en.wikipedia.org/wiki/UEFA_Euro_2020",
     folder="euro_2020",
     excepted_score_bets=[
         (0, 3),
@@ -219,7 +214,6 @@ euro_2020_data = CompetitionData(
 )
 
 world_cup_2018_data = CompetitionData(
-    url="https://en.wikipedia.org/wiki/2018_FIFA_World_Cup",
     folder="world_cup_2018",
     excepted_score_bets=[
         (5, 0),
@@ -291,7 +285,6 @@ world_cup_2018_data = CompetitionData(
 )
 
 euro_2016_data = CompetitionData(
-    url="https://en.wikipedia.org/wiki/UEFA_Euro_2016",
     folder="euro_2016",
     excepted_score_bets=[
         (2, 1),
@@ -363,7 +356,6 @@ def idfn(value: CompetitionData) -> str:
 def test_db_sync(
     app_with_valid_jwt_config: "FastAPI",
     engine_for_test: "Engine",
-    monkeypatch: "pytest.MonkeyPatch",
     competition_data: CompetitionData,
 ) -> None:
     # Setup fastapi application and initialize database
@@ -390,11 +382,6 @@ def test_db_sync(
     access_token = response_signup.json()["result"]["access_token"]
 
     # Synchronize admin bets with official results
-    monkeypatch.setattr(
-        "yak_server.cli.get_settings",
-        MockSettings(official_results_url=competition_data.url),
-    )
-
     result = runner.invoke(typer_app, ["db", "sync"])
 
     assert result.exit_code == 0
