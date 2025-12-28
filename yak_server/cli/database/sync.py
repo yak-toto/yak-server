@@ -40,7 +40,7 @@ except ImportError:  # pragma: no cover
 def parse_score(content: str) -> tuple[int | None, int | None]:
     try:
         scores = next(next(content.children).children)
-    except AttributeError:
+    except AttributeError:  # pragma: no cover
         return None, None
 
     try:
