@@ -1,8 +1,5 @@
 from enum import Enum
-from typing import TYPE_CHECKING, Union
-
-if TYPE_CHECKING:
-    from yak_server.database.models import GroupModel, PhaseModel, TeamModel
+from typing import Protocol
 
 
 class Lang(str, Enum):
@@ -10,10 +7,12 @@ class Lang(str, Enum):
     en = "en"
 
 
-def get_language_description(
-    instance: Union["GroupModel", "PhaseModel", "TeamModel"],
-    lang: Lang,
-) -> str:
+class MultiLingualDescription(Protocol):
+    description_fr: str
+    description_en: str
+
+
+def get_language_description(instance: MultiLingualDescription, lang: Lang) -> str:
     if lang == Lang.fr:
         return instance.description_fr
 

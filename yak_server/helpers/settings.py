@@ -1,7 +1,7 @@
 from datetime import datetime
 from functools import cache
 
-from pydantic import AwareDatetime, HttpUrl
+from pydantic import AwareDatetime, DirectoryPath, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .rules import Rules
@@ -9,7 +9,7 @@ from .rules import Rules
 
 class Settings(BaseSettings):
     competition: str
-    data_folder: str
+    data_folder: DirectoryPath
     rules: Rules
     official_results_url: HttpUrl
 
