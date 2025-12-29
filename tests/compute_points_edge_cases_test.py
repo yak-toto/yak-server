@@ -8,7 +8,7 @@ from fastapi import status
 from starlette.testclient import TestClient
 
 from testing.mock import MockSettings
-from testing.util import UserData, get_random_string, patch_score_bets
+from testing.util import UserData, get_random_string, get_resources_path, patch_score_bets
 from yak_server.cli.database import create_admin, initialize_database
 from yak_server.database import build_local_session_maker
 from yak_server.database.models import Role, UserModel
@@ -58,17 +58,15 @@ def app_with_rules_and_score_board_config(
 
 
 def test_compute_points(
-    app_with_rules_and_score_board_config: "FastAPI",
-    engine_for_test: "Engine",
-    monkeypatch: "pytest.MonkeyPatch",
+    app_with_rules_and_score_board_config: "FastAPI", engine_for_test: "Engine"
 ) -> None:
     client = TestClient(app_with_rules_and_score_board_config)
 
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(data_folder_relative="test_compute_points_edge_cases_v1"),
+    initialize_database(
+        engine_for_test,
+        app_with_rules_and_score_board_config,
+        get_resources_path("test_compute_points_edge_cases_v1"),
     )
-    initialize_database(engine_for_test, app_with_rules_and_score_board_config)
 
     admin = UserData(
         name="admin",
@@ -411,15 +409,13 @@ def test_missing_first_phase_group(engine_for_test: "Engine") -> None:
 
 
 def test_no_bet_associated_to_first_phase_group(
-    app_with_valid_jwt_config: "FastAPI",
-    engine_for_test: "Engine",
-    monkeypatch: "pytest.MonkeyPatch",
+    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine"
 ) -> None:
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(data_folder_relative="test_no_bet_associated_to_first_phase_group"),
+    initialize_database(
+        engine_for_test,
+        app_with_valid_jwt_config,
+        get_resources_path("test_no_bet_associated_to_first_phase_group"),
     )
-    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     client = TestClient(app_with_valid_jwt_config)
 

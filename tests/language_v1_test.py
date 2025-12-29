@@ -3,28 +3,20 @@ from typing import TYPE_CHECKING
 
 from starlette.testclient import TestClient
 
-from testing.mock import MockSettings
-from testing.util import get_random_string
+from testing.util import get_random_string, get_resources_path
 from yak_server.cli.database import initialize_database
 
 if TYPE_CHECKING:
-    import pytest
     from fastapi import FastAPI
     from sqlalchemy import Engine
 
 
-def test_group(
-    app_with_valid_jwt_config: "FastAPI",
-    engine_for_test: "Engine",
-    monkeypatch: "pytest.MonkeyPatch",
-) -> None:
+def test_group(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
     client = TestClient(app_with_valid_jwt_config)
 
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(data_folder_relative="test_language"),
+    initialize_database(
+        engine_for_test, app_with_valid_jwt_config, get_resources_path("test_language")
     )
-    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     # Signup one random user
     user_name = get_random_string(6)

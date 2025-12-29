@@ -23,6 +23,7 @@ from yak_server.database.models import (
     UserModel,
 )
 from yak_server.helpers.authentication import NameAlreadyExistsError, signup_user
+from yak_server.helpers.rules.compute_points import RuleComputePoints as RuleComputePoints
 from yak_server.helpers.rules.compute_points import compute_points as compute_points_func
 from yak_server.helpers.settings import get_settings
 from yak_server.v1.helpers.errors import NoAdminUser
@@ -112,13 +113,11 @@ def fetch_group_id(group_code: str, db: "Session") -> UUID:
     return group.id
 
 
-def initialize_database(engine: "Engine", app: "FastAPI") -> None:
+def initialize_database(engine: "Engine", app: "FastAPI", data_folder: Path) -> None:
     local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
-        data_folder = get_settings().data_folder
-
-        phases = json.loads(Path(data_folder, "phases.json").read_text(encoding="utf-8"))
+        phases = json.loads((data_folder / "phases.json").read_text(encoding="utf-8"))
 
         for phase in phases:
             db.execute(
@@ -127,7 +126,7 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
 
         db.flush()
 
-        groups = json.loads(Path(data_folder, "groups.json").read_text(encoding="utf-8"))
+        groups = json.loads((data_folder / "groups.json").read_text(encoding="utf-8"))
 
         for group in groups:
             phase_code = group.pop("phase_code")
@@ -146,7 +145,7 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
 
         db.flush()
 
-        teams = json.loads(Path(data_folder, "teams.json").read_text(encoding="utf-8"))
+        teams = json.loads((data_folder / "teams.json").read_text(encoding="utf-8"))
 
         for team in teams:
             team["flag_url"] = ""
@@ -173,7 +172,7 @@ def initialize_database(engine: "Engine", app: "FastAPI") -> None:
             db.execute(update_flag_url_stmt)
             db.flush()
 
-        matches = json.loads(Path(data_folder, "matches.json").read_text(encoding="utf-8"))
+        matches = json.loads((data_folder / "matches.json").read_text(encoding="utf-8"))
 
         for match in matches:
             match["team1_id"] = fetch_team_id(match.pop("team1_code"), db)
