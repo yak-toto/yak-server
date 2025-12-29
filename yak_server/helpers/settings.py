@@ -1,17 +1,33 @@
 from datetime import datetime
 from functools import cache
+from typing import Annotated
 
-from pydantic import AwareDatetime, DirectoryPath, HttpUrl
+from fastapi import Depends
+from pydantic import DirectoryPath
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.orm import Session
 
+from yak_server.database.models import CompetitionConfigModel
+
+from .database import get_db
 from .rules import Rules
+
+
+class MissingCompetitionConfigError(Exception):
+    pass
+
+
+@cache
+def get_competition_settings(db: Annotated[Session, Depends(get_db)]) -> CompetitionConfigModel:
+    for competition_config in db.query(CompetitionConfigModel).all():
+        return competition_config
+
+    raise MissingCompetitionConfigError
 
 
 class Settings(BaseSettings):
     competition: str
     data_folder: DirectoryPath
-    rules: Rules
-    official_results_url: HttpUrl
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
 
@@ -21,15 +37,18 @@ def get_settings() -> Settings:
     return Settings()
 
 
-class LockDatetimeSettings(BaseSettings):
-    lock_datetime: AwareDatetime
-
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
+@cache
+def get_lock_datetime(
+    competition_settings: Annotated[CompetitionConfigModel, Depends(get_competition_settings)],
+) -> datetime:
+    return competition_settings.lock_datetime  # pragma: no cover
 
 
 @cache
-def get_lock_datetime() -> datetime:
-    return LockDatetimeSettings().lock_datetime  # pragma: no cover
+def get_rules(
+    competition_settings: Annotated[CompetitionConfigModel, Depends(get_competition_settings)],
+) -> Rules:
+    return Rules.model_validate_json(competition_settings.rules)
 
 
 class AuthenticationSettings(BaseSettings):

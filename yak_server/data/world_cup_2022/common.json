@@ -1,4 +1,8 @@
 {
     "lock_datetime": "2022-11-20T17:00:00.000000+01:00",
-    "official_results_url": "https://en.wikipedia.org/wiki/2022_FIFA_World_Cup"
+    "official_results_url": "https://en.wikipedia.org/wiki/2022_FIFA_World_Cup",
+    "competition": {
+        "description_fr": "Coupe du monde de football 2022",
+        "description_en": "2022 FIFA World Cup"
+    }
 }

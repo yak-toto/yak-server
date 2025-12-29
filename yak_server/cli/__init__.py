@@ -1,10 +1,11 @@
 import json
 
 import click
+from pydantic import HttpUrl
 
 from yak_server import create_app
-from yak_server.database import build_engine
-from yak_server.helpers.settings import get_settings
+from yak_server.database import build_engine, build_local_session_maker
+from yak_server.helpers.settings import get_competition_settings, get_settings
 
 from .database import (
     compute_score_board,
@@ -92,8 +93,13 @@ def make_db_app() -> click.Group:
         """Synchronize official results and push them to admin with web
         scraping the world cup wikipedia page"""
         engine = build_engine()
-        settings = get_settings()
-        synchronize_official_results(engine, settings.official_results_url)
+
+        local_session_maker = build_local_session_maker(engine)
+
+        with local_session_maker() as db:
+            competition_settings = get_competition_settings(db)
+
+        synchronize_official_results(engine, HttpUrl(competition_settings.official_results_url))
 
     return db_app
 
