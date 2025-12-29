@@ -2,6 +2,7 @@ import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from pydantic import HttpUrl
 from sqlalchemy.orm import selectinload
 
 from yak_server.database import build_local_session_maker
@@ -13,7 +14,6 @@ from yak_server.database.models import (
     TeamModel,
     UserModel,
 )
-from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
     from sqlalchemy import Engine
@@ -167,11 +167,9 @@ def extract_matches_from_html(groups: list[GroupContainer]) -> list[Match]:
     return matches
 
 
-def synchronize_official_results(engine: "Engine") -> None:
+def synchronize_official_results(engine: "Engine", official_results_url: HttpUrl) -> None:
     if bs4 is None or lxml is None or httpx is None:
         raise SyncOfficialResultsNotAvailableError
-
-    official_results_url = get_settings().official_results_url
 
     response = httpx.get(
         str(official_results_url),

@@ -4,6 +4,7 @@ import click
 
 from yak_server import create_app
 from yak_server.database import build_engine
+from yak_server.helpers.settings import get_settings
 
 from .database import (
     compute_score_board,
@@ -39,7 +40,8 @@ def make_db_app() -> click.Group:
         """Initialize database."""
         app = create_app()
         engine = build_engine()
-        initialize_database(engine, app)
+        settings = get_settings()
+        initialize_database(engine, app, settings.data_folder)
 
     @db_app.command()
     def drop() -> None:
@@ -90,7 +92,8 @@ def make_db_app() -> click.Group:
         """Synchronize official results and push them to admin with web
         scraping the world cup wikipedia page"""
         engine = build_engine()
-        synchronize_official_results(engine)
+        settings = get_settings()
+        synchronize_official_results(engine, settings.official_results_url)
 
     return db_app
 

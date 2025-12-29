@@ -7,7 +7,7 @@ from click.testing import CliRunner
 from fastapi.testclient import TestClient
 
 from testing.mock import MockSettings
-from testing.util import get_random_string
+from testing.util import get_random_string, get_resources_path
 from yak_server.cli import app as typer_app
 from yak_server.cli.database import create_admin, initialize_database
 
@@ -367,15 +367,11 @@ def test_db_sync(
     competition_data: CompetitionData,
 ) -> None:
     # Setup fastapi application and initialize database
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(
-            data_folder_relative=f"../../yak_server/data/{competition_data.folder}",
-            official_results_url=competition_data.url,
-        ),
+    initialize_database(
+        engine_for_test,
+        app_with_valid_jwt_config,
+        get_resources_path(f"../../yak_server/data/{competition_data.folder}"),
     )
-
-    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     # Signup admin user
     client = TestClient(app_with_valid_jwt_config)
@@ -395,7 +391,7 @@ def test_db_sync(
 
     # Synchronize admin bets with official results
     monkeypatch.setattr(
-        "yak_server.cli.database.sync.get_settings",
+        "yak_server.cli.get_settings",
         MockSettings(official_results_url=competition_data.url),
     )
 

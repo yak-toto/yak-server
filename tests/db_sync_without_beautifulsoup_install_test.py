@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 import pytest
+from pydantic import HttpUrl
 
 from yak_server.cli.database.sync import (
     SyncOfficialResultsNotAvailableError,
@@ -15,7 +16,7 @@ def test_db_sync(monkeypatch: "pytest.MonkeyPatch", engine_for_test: "Engine") -
     monkeypatch.setattr("yak_server.cli.database.sync.bs4", None)
 
     with pytest.raises(SyncOfficialResultsNotAvailableError) as exception:
-        synchronize_official_results(engine_for_test)
+        synchronize_official_results(engine_for_test, HttpUrl("https://fake.com"))
 
     assert str(exception.value) == (
         "Synchronize official results is not available without sync extra dependency installed. "

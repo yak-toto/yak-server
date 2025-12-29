@@ -7,7 +7,7 @@ from click.testing import CliRunner
 from starlette.testclient import TestClient
 
 from testing.mock import MockSettings
-from testing.util import UserData, get_random_string, patch_score_bets
+from testing.util import UserData, get_random_string, get_resources_path, patch_score_bets
 from yak_server.cli import app as cli_app
 from yak_server.cli.database import create_admin, initialize_database
 from yak_server.helpers.rules import Rules
@@ -85,11 +85,7 @@ def test_compute_points(
 
     client = TestClient(app)
 
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(data_folder_relative="test_compute_points_v1"),
-    )
-    initialize_database(engine_for_test, app)
+    initialize_database(engine_for_test, app, get_resources_path("test_compute_points_v1"))
 
     # Signup admin
     password = get_random_string(15)
@@ -239,7 +235,6 @@ def test_compute_points(
     put_finale_phase(client, users_data[2].access_token, is_one_won=False)
 
     # Compute points again with cli
-
     monkeypatch.setattr("yak_server.cli.database.get_settings", MockSettings(rules=rules))
 
     runner = CliRunner()

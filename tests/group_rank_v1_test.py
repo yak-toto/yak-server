@@ -4,27 +4,18 @@ from unittest.mock import ANY
 
 from starlette.testclient import TestClient
 
-from testing.mock import MockSettings
-from testing.util import get_random_string
+from testing.util import get_random_string, get_resources_path
 from yak_server.cli.database import initialize_database
 
 if TYPE_CHECKING:
-    import pytest
     from fastapi import FastAPI
     from sqlalchemy import Engine
 
 
-def test_group_rank(
-    app_with_valid_jwt_config: "FastAPI",
-    engine_for_test: "Engine",
-    monkeypatch: "pytest.MonkeyPatch",
-) -> None:
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(data_folder_relative="test_compute_points_v1"),
+def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
+    initialize_database(
+        engine_for_test, app_with_valid_jwt_config, get_resources_path("test_compute_points_v1")
     )
-
-    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     client = TestClient(app_with_valid_jwt_config)
 
@@ -442,16 +433,13 @@ def test_group_rank(
 
 
 def test_group_rank_team_not_defined(
-    app_with_valid_jwt_config: "FastAPI",
-    engine_for_test: "Engine",
-    monkeypatch: "pytest.MonkeyPatch",
+    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine"
 ) -> None:
-    monkeypatch.setattr(
-        "yak_server.cli.database.get_settings",
-        MockSettings(data_folder_relative="test_group_rank_team_not_defined"),
+    initialize_database(
+        engine_for_test,
+        app_with_valid_jwt_config,
+        get_resources_path("test_group_rank_team_not_defined"),
     )
-
-    initialize_database(engine_for_test, app_with_valid_jwt_config)
 
     client = TestClient(app_with_valid_jwt_config)
 
