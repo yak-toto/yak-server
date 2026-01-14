@@ -1,4 +1,5 @@
 import contextlib
+from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
@@ -6,11 +7,12 @@ from uuid import UUID, uuid4
 import sqlalchemy as sa
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
-from sqlalchemy import CheckConstraint, UniqueConstraint
+from sqlalchemy import CheckConstraint, DateTime, UniqueConstraint
 from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.dialects.postgresql import UUID as DB_UUID
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.sql import literal
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -399,3 +401,18 @@ class GroupPositionModel(Base):
     @hybrid_property
     def points(self) -> int:
         return self.won * 3 + self.drawn
+
+
+class CompetitionConfigModel(Base):
+    __tablename__ = "competition_config"
+
+    id = mapped_column(sa.Integer, primary_key=True, server_default=literal(1))
+
+    code: Mapped[str] = mapped_column(sa.String(20), nullable=False)
+    description_fr: Mapped[str] = mapped_column(sa.String(100), nullable=False)
+    description_en: Mapped[str] = mapped_column(sa.String(100), nullable=False)
+    lock_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    official_results_url: Mapped[str] = mapped_column(sa.String(500), nullable=False)
+    rules: Mapped[str] = mapped_column(sa.JSON, nullable=False)
+
+    __table_args__ = (CheckConstraint("id = 1", name="competition_config_singleton_chk"),)

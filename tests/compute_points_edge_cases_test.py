@@ -7,7 +7,6 @@ import pytest
 from fastapi import status
 from starlette.testclient import TestClient
 
-from testing.mock import MockSettings
 from testing.util import UserData, get_random_string, get_resources_path, patch_score_bets
 from yak_server.cli.database import create_admin, initialize_database
 from yak_server.database import build_local_session_maker
@@ -20,7 +19,7 @@ from yak_server.helpers.rules.compute_final_from_rank import (
     compute_finale_phase_from_group_rank,
 )
 from yak_server.helpers.rules.compute_points import RuleComputePoints
-from yak_server.helpers.settings import get_settings
+from yak_server.helpers.settings import get_rules
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -31,24 +30,22 @@ if TYPE_CHECKING:
 def app_with_rules_and_score_board_config(
     app_with_valid_jwt_config: "FastAPI",
 ) -> Generator["FastAPI", None, None]:
-    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
-        rules=Rules(
-            compute_finale_phase_from_group_rank=RuleComputeFinaleFromGroupRank(
-                to_group="2",
-                from_phase="GROUP",
-                versus=[
-                    Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="B")),
-                    Versus(team1=Team(rank=1, group="B"), team2=Team(rank=2, group="A")),
-                ],
-            ),
-            compute_points=RuleComputePoints(
-                base_correct_result=1,
-                multiplying_factor_correct_result=2,
-                base_correct_score=3,
-                multiplying_factor_correct_score=7,
-                team_qualified=10,
-                first_team_qualified=20,
-            ),
+    app_with_valid_jwt_config.dependency_overrides[get_rules] = lambda: Rules(
+        compute_finale_phase_from_group_rank=RuleComputeFinaleFromGroupRank(
+            to_group="2",
+            from_phase="GROUP",
+            versus=[
+                Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="B")),
+                Versus(team1=Team(rank=1, group="B"), team2=Team(rank=2, group="A")),
+            ],
+        ),
+        compute_points=RuleComputePoints(
+            base_correct_result=1,
+            multiplying_factor_correct_result=2,
+            base_correct_score=3,
+            multiplying_factor_correct_score=7,
+            team_qualified=10,
+            first_team_qualified=20,
         ),
     )
 

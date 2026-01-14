@@ -1,7 +1,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 import click
@@ -12,6 +12,7 @@ from yak_server.database import build_local_session_maker
 from yak_server.database.models import (
     Base,
     BinaryBetModel,
+    CompetitionConfigModel,
     GroupModel,
     GroupPositionModel,
     MatchModel,
@@ -23,8 +24,11 @@ from yak_server.database.models import (
     UserModel,
 )
 from yak_server.helpers.authentication import NameAlreadyExistsError, signup_user
+from yak_server.helpers.rules import RULE_MAPPING, Rules
 from yak_server.helpers.rules.compute_points import RuleComputePoints as RuleComputePoints
 from yak_server.helpers.rules.compute_points import compute_points as compute_points_func
+from yak_server.helpers.settings import get_competition_settings as get_competition_settings
+from yak_server.helpers.settings import get_rules as get_rules
 from yak_server.helpers.settings import get_settings
 from yak_server.v1.helpers.errors import NoAdminUser
 
@@ -113,11 +117,52 @@ def fetch_group_id(group_code: str, db: "Session") -> UUID:
     return group.id
 
 
+class RuleNotDefinedError(Exception):
+    def __init__(self, rule_id: UUID) -> None:
+        super().__init__(f"Rule not defined: {rule_id}")
+
+
+def load_rules(data_folder: Path) -> Rules:
+    rules_list: dict[str, Any] = {}
+
+    for rule_file in Path(data_folder, "rules").glob("*.json"):
+        rule_id = UUID(rule_file.stem)
+
+        if rule_id not in RULE_MAPPING:
+            raise RuleNotDefinedError(rule_id)
+
+        rule_name = RULE_MAPPING[rule_id].attribute
+
+        rules_list[rule_name] = json.loads(rule_file.read_text())
+
+    return Rules.model_validate(rules_list)
+
+
 def initialize_database(engine: "Engine", app: "FastAPI", data_folder: Path) -> None:
     local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
-        phases = json.loads((data_folder / "phases.json").read_text(encoding="utf-8"))
+        common = json.loads((Path(data_folder) / "common.json").read_text())
+        rules = load_rules(data_folder)
+
+        stmt = (
+            insert(CompetitionConfigModel)
+            .values(
+                code=get_settings().competition,
+                description_fr=common["competition"]["description_fr"],
+                description_en=common["competition"]["description_en"],
+                lock_datetime=common["lock_datetime"],
+                official_results_url=common["official_results_url"],
+                rules=rules.model_dump_json(exclude_unset=True),
+            )
+            .on_conflict_do_nothing()
+        )
+
+        db.execute(stmt)
+
+        db.flush()
+
+        phases = json.loads((Path(data_folder) / "phases.json").read_text(encoding="utf-8"))
 
         for phase in phases:
             db.execute(
@@ -198,6 +243,7 @@ def delete_database(engine: "Engine", *, debug: bool) -> None:
     local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
+        db.query(CompetitionConfigModel).delete()
         db.query(GroupPositionModel).delete()
         db.query(ScoreBetModel).delete()
         db.query(BinaryBetModel).delete()
@@ -263,7 +309,8 @@ def compute_score_board(engine: "Engine") -> None:
         if admin is None:
             raise NoAdminUser
 
-        rule_config = get_settings().rules.compute_points
+        competition_settings = get_competition_settings(db)
+        rule_config = get_rules(competition_settings).compute_points
 
         if rule_config is None:
             raise ComputePointsRuleNotDefinedError
