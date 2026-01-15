@@ -3,7 +3,7 @@ from functools import cache
 
 from sqlalchemy.orm import Session, sessionmaker
 
-from yak_server.database import build_engine, build_local_session_maker
+from yak_server.database.session import build_engine, build_local_session_maker
 
 
 @cache

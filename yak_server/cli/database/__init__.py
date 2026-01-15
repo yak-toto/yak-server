@@ -8,7 +8,6 @@ import click
 from sqlalchemy import update
 from sqlalchemy.dialects.postgresql import insert
 
-from yak_server.database import build_local_session_maker
 from yak_server.database.models import (
     Base,
     BinaryBetModel,
@@ -22,6 +21,7 @@ from yak_server.database.models import (
     TeamModel,
     UserModel,
 )
+from yak_server.database.session import build_local_session_maker
 from yak_server.helpers.authentication import NameAlreadyExistsError, signup_user
 from yak_server.helpers.rules.compute_points import RuleComputePoints as RuleComputePoints
 from yak_server.helpers.rules.compute_points import compute_points as compute_points_func

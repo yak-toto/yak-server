@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 from uuid import UUID
 
-from yak_server.database import PostgresSettings
+from yak_server.database.settings import PostgresSettings
 from yak_server.helpers.rules import RULE_MAPPING, Rules
 from yak_server.helpers.settings import LockDatetimeSettings
 
