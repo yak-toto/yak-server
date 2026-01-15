@@ -159,13 +159,13 @@ def test_db_migration_second_path(monkeypatch: "pytest.MonkeyPatch") -> None:
     with runner.isolated_filesystem():
         yak_server_module = (Path.cwd() / "yak-server" / "yak_server").resolve()
 
-        python_file_path = yak_server_module / "cli" / "database" / "__init__.py"
+        python_file_path = yak_server_module / "cli" / "migration.py"
         alembic_ini_path = yak_server_module / "alembic.ini"
 
         alembic_ini_path.parent.mkdir(parents=True)
         alembic_ini_path.touch()
 
-        monkeypatch.setattr("yak_server.cli.database.__file__", str(python_file_path))
+        monkeypatch.setattr("yak_server.cli.migration.__file__", str(python_file_path))
 
         result = runner.invoke(app, ["db", "migration", "-s"])
 
@@ -174,7 +174,7 @@ def test_db_migration_second_path(monkeypatch: "pytest.MonkeyPatch") -> None:
 
 
 def test_db_migration_cli_with_alembic_missing(monkeypatch: "pytest.MonkeyPatch") -> None:
-    monkeypatch.setattr("yak_server.cli.database.alembic", None)
+    monkeypatch.setattr("yak_server.cli.migration.alembic", None)
 
     result = runner.invoke(app, ["db", "migration"])
 

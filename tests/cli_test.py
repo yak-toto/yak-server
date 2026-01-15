@@ -5,10 +5,10 @@ import pytest
 from starlette.testclient import TestClient
 
 from testing.util import get_random_string
+from yak_server.cli.admin import create_admin
 from yak_server.cli.database import (
     RecordDeletionInProductionError,
     TableDropInProductionError,
-    create_admin,
     delete_database,
     drop_database,
 )

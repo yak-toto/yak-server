@@ -5,7 +5,7 @@ from uuid import uuid4
 from starlette.testclient import TestClient
 
 from testing.util import get_random_string
-from yak_server.cli.database import create_admin
+from yak_server.cli.admin import create_admin
 
 if TYPE_CHECKING:
     from fastapi import FastAPI

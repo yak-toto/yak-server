@@ -9,7 +9,8 @@ from starlette.testclient import TestClient
 from testing.mock import MockSettings
 from testing.util import UserData, get_random_string, get_resources_path, patch_score_bets
 from yak_server.cli import app as cli_app
-from yak_server.cli.database import create_admin, initialize_database
+from yak_server.cli.admin import create_admin
+from yak_server.cli.database import initialize_database
 from yak_server.helpers.rules import Rules
 from yak_server.helpers.rules.compute_final_from_rank import (
     RuleComputeFinaleFromGroupRank,
@@ -235,7 +236,7 @@ def test_compute_points(
     put_finale_phase(client, users_data[2].access_token, is_one_won=False)
 
     # Compute points again with cli
-    monkeypatch.setattr("yak_server.cli.database.get_settings", MockSettings(rules=rules))
+    monkeypatch.setattr("yak_server.cli.score_board.get_settings", MockSettings(rules=rules))
 
     runner = CliRunner()
 

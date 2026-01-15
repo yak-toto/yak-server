@@ -6,17 +6,12 @@ from yak_server import create_app
 from yak_server.database.session import build_engine
 from yak_server.helpers.settings import get_settings
 
-from .database import (
-    compute_score_board,
-    create_admin,
-    create_database,
-    delete_database,
-    drop_database,
-    initialize_database,
-    setup_migration,
-)
-from .database.sync import synchronize_official_results
+from .admin import create_admin
+from .database import create_database, delete_database, drop_database, initialize_database
 from .env import init_env, write_app_env_file, write_db_env_file
+from .migration import setup_migration
+from .score_board import compute_score_board
+from .sync import synchronize_official_results
 
 
 @click.group()

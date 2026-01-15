@@ -9,7 +9,8 @@ from starlette.testclient import TestClient
 
 from testing.mock import MockSettings
 from testing.util import UserData, get_random_string, get_resources_path, patch_score_bets
-from yak_server.cli.database import create_admin, initialize_database
+from yak_server.cli.admin import create_admin
+from yak_server.cli.database import initialize_database
 from yak_server.database.models import Role, UserModel
 from yak_server.database.session import build_local_session_maker
 from yak_server.helpers.rules import Rules
