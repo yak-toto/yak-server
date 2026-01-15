@@ -14,7 +14,8 @@ from testing.mock import MockAuthenticationSettings, MockLockDatetime, MockSetti
 from testing.util import get_random_string
 from yak_server import create_app
 from yak_server.cli.database import create_database, delete_database, drop_database
-from yak_server.database import compute_database_uri, get_postgres_settings
+from yak_server.database.session import compute_database_uri
+from yak_server.database.settings import get_postgres_settings
 from yak_server.helpers.rules import Rules
 from yak_server.helpers.settings import get_authentication_settings, get_lock_datetime, get_settings
 

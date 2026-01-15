@@ -3,7 +3,7 @@ import json
 import click
 
 from yak_server import create_app
-from yak_server.database import build_engine
+from yak_server.database.session import build_engine
 from yak_server.helpers.settings import get_settings
 
 from .database import (

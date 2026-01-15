@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from pydantic import HttpUrl
 from sqlalchemy.orm import selectinload
 
-from yak_server.database import build_local_session_maker
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
@@ -14,6 +13,7 @@ from yak_server.database.models import (
     TeamModel,
     UserModel,
 )
+from yak_server.database.session import build_local_session_maker
 
 if TYPE_CHECKING:
     from sqlalchemy import Engine
