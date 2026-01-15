@@ -9,7 +9,8 @@ from fastapi.testclient import TestClient
 from testing.mock import MockSettings
 from testing.util import get_random_string, get_resources_path
 from yak_server.cli import app as typer_app
-from yak_server.cli.database import create_admin, initialize_database
+from yak_server.cli.admin import create_admin
+from yak_server.cli.database import initialize_database
 
 if TYPE_CHECKING:
     from fastapi import FastAPI

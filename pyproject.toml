@@ -125,7 +125,7 @@ pretty = true
 plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
 exclude = '''(?x)(
     ^yak_server/database/migrations/.*?\.py$|
-    ^yak_server/cli/database/sync.py$
+    ^yak_server/cli/sync.py$
 )'''
 
 [tool.pytest.ini_options]

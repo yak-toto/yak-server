@@ -1,10 +1,8 @@
 import json
-import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-import click
 from sqlalchemy import update
 from sqlalchemy.dialects.postgresql import insert
 
@@ -16,30 +14,16 @@ from yak_server.database.models import (
     MatchModel,
     MatchReferenceModel,
     PhaseModel,
-    Role,
     ScoreBetModel,
     TeamModel,
     UserModel,
 )
 from yak_server.database.session import build_local_session_maker
-from yak_server.helpers.authentication import NameAlreadyExistsError, signup_user
-from yak_server.helpers.rules.compute_points import RuleComputePoints as RuleComputePoints
-from yak_server.helpers.rules.compute_points import compute_points as compute_points_func
-from yak_server.helpers.settings import get_settings
-from yak_server.v1.helpers.errors import NoAdminUser
-
-try:
-    import alembic
-except ImportError:  # pragma: no cover
-    # Very common pattern for optional dependency imports
-    alembic = None  # type: ignore[assignment]
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
     from sqlalchemy import Engine
     from sqlalchemy.orm import Session
-
-logger = logging.getLogger(__name__)
 
 
 class RecordDeletionInProductionError(Exception):
@@ -54,23 +38,6 @@ class TableDropInProductionError(Exception):
 
 def create_database(engine: "Engine") -> None:
     Base.metadata.create_all(bind=engine)
-
-
-def create_admin(password: str, engine: "Engine") -> None:
-    local_session_maker = build_local_session_maker(engine)
-
-    with local_session_maker() as db:
-        try:
-            _ = signup_user(
-                db,
-                name="admin",
-                first_name="admin",
-                last_name="admin",
-                password=password,
-                role=Role.ADMIN,
-            )
-        except NameAlreadyExistsError:
-            click.echo("Admin already exists")
 
 
 class MissingPhaseDuringInitError(Exception):
@@ -215,57 +182,3 @@ def drop_database(engine: "Engine", *, debug: bool) -> None:
         raise TableDropInProductionError
 
     Base.metadata.drop_all(bind=engine)
-
-
-def print_export_command(alembic_ini_path: Path) -> None:
-    click.echo(f"export ALEMBIC_CONFIG={alembic_ini_path}")
-
-
-def setup_migration(*, short: bool = False) -> None:
-    alembic_ini_path = (Path(__file__).parents[2] / "alembic.ini").resolve()
-
-    if not alembic_ini_path.exists():
-        alembic_ini_path = (Path(__file__).parents[3] / "alembic.ini").resolve()
-
-    if short is True:
-        print_export_command(alembic_ini_path)
-    else:
-        click.echo(
-            "To be able to run the database migration scripts, "
-            "you need to run the following command:",
-        )
-        print_export_command(alembic_ini_path)
-        click.echo()
-        click.echo(
-            "Follow this link for more information: "
-            "https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file",
-        )
-
-        if alembic is None:
-            click.echo()
-            click.echo(
-                "To enable migration using alembic, please run: "
-                "uv pip install yak-server[db_migration]",
-            )
-
-
-class ComputePointsRuleNotDefinedError(Exception):
-    def __init__(self) -> None:
-        super().__init__("Compute points rule is not defined.")
-
-
-def compute_score_board(engine: "Engine") -> None:
-    local_session_maker = build_local_session_maker(engine)
-
-    with local_session_maker() as db:
-        admin = db.query(UserModel).filter_by(name="admin").first()
-
-        if admin is None:
-            raise NoAdminUser
-
-        rule_config = get_settings().rules.compute_points
-
-        if rule_config is None:
-            raise ComputePointsRuleNotDefinedError
-
-        compute_points_func(db, admin, rule_config)

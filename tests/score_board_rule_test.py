@@ -4,11 +4,8 @@ import pytest
 
 from testing.mock import MockSettings
 from testing.util import get_random_string
-from yak_server.cli.database import (
-    ComputePointsRuleNotDefinedError,
-    compute_score_board,
-    create_admin,
-)
+from yak_server.cli.admin import create_admin
+from yak_server.cli.score_board import ComputePointsRuleNotDefinedError, compute_score_board
 from yak_server.helpers.rules import Rules
 from yak_server.v1.helpers.errors import NoAdminUser
 
@@ -19,7 +16,7 @@ if TYPE_CHECKING:
 def test_score_board_rule_not_defined(
     monkeypatch: pytest.MonkeyPatch, engine_for_test_with_delete: "Engine"
 ) -> None:
-    monkeypatch.setattr("yak_server.cli.database.get_settings", MockSettings(rules=Rules()))
+    monkeypatch.setattr("yak_server.cli.score_board.get_settings", MockSettings(rules=Rules()))
 
     password_admin = get_random_string(10)
 
