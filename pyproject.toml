@@ -36,7 +36,7 @@ dependencies = [
     "argon2-cffi ==25.1.0",
     "fastapi ==0.128.0",
     "click ==8.3.1",
-    "SQLAlchemy ==2.0.45",
+    "SQLAlchemy ==2.0.46",
     "pydantic-settings ==2.12.0",
 ]
 version = "0.59.9"
