@@ -31,18 +31,18 @@ if [ "$YAK_VERSION" = "unknown" ]; then
 fi
 
 # Build the Docker image
-echo "Building Docker image for competition: $COMPETITION"
-echo "Using yak version: $YAK_VERSION"
+IMAGE_NAME="yak-server:$YAK_VERSION-$COMPETITION"
+echo "Building Docker image: $IMAGE_NAME"
 
 docker buildx build \
     --load \
     --build-arg "COMPETITION=$COMPETITION" \
-    -t "yak_server:$YAK_VERSION-$COMPETITION" \
+    -t "$IMAGE_NAME" \
     "$PROJECT_ROOT"
 
 # Check if docker build was successful
 if [ $? -eq 0 ]; then
-    echo "Successfully built image: yak_server:$YAK_VERSION-$COMPETITION"
+    echo "Successfully built image: $IMAGE_NAME"
 else
     echo "Error: Docker build failed"
     exit 1
