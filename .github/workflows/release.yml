@@ -92,13 +92,12 @@ jobs:
       - name: Push Docker image to GHCR
         run: |
           IMAGE_NAME="yak-server:${VERSION}-${COMPETITION}"
-          docker tag "$IMAGE_NAME" "ghcr.io/${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY}:${VERSION}-${COMPETITION}"
-          docker push "ghcr.io/${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY}:${VERSION}-${COMPETITION}"
+          docker tag "$IMAGE_NAME" "ghcr.io/${GITHUB_REPOSITORY}:${VERSION}-${COMPETITION}"
+          docker push "ghcr.io/${GITHUB_REPOSITORY}:${VERSION}-${COMPETITION}"
         env:
           VERSION: ${{ steps.create-commits.outputs.new-version }}
           COMPETITION: ${{ env.COMPETITION }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
 
       - name: Create Release
         id: create-release
