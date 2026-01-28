@@ -82,6 +82,8 @@ ENV PATH="/app/.venv/bin:$PATH"
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:8000/api/health/ || exit 1
 
+LABEL org.opencontainers.image.source=https://github.com/yak-toto/yak-server
+
 EXPOSE 8000
 
 ENTRYPOINT ["docker-entrypoint.sh"]
