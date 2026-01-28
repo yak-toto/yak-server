@@ -92,7 +92,7 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:${{ steps.create-commits.outputs.new-version }}-${{ env.COMPETITION }}
           build-args: |
-            COMPETITION: ${{ env.COMPETITION }}
+            COMPETITION=${{ env.COMPETITION }}
 
       - name: Create Release
         id: create-release
