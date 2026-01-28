@@ -90,13 +90,9 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${GITHUB_REPOSITORY}:${VERSION}-${COMPETITION}
+            ghcr.io/${{ github.repository }}:${{ steps.create-commits.outputs.new-version }}-${{ env.COMPETITION }}
           build-args: |
             COMPETITION: ${{ env.COMPETITION }}
-        env:
-          VERSION: ${{ steps.create-commits.outputs.new-version }}
-          COMPETITION: ${{ env.COMPETITION }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
 
       - name: Create Release
         id: create-release
