@@ -25,9 +25,11 @@ jobs:
     permissions:
       id-token: write # <-- Required for publishing to PyPI
       contents: write # <-- Enables push
+      packages: write # <-- Required for pushing to GHCR
 
     env:
       python-version: "3.13"
+      COMPETITION: "euro_2024"
 
     steps:
       - name: Checkout code
@@ -71,6 +73,32 @@ jobs:
 
       - name: Publish
         uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+
+      - name: Log in to GHCR
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: bash scripts/build_image.sh "$COMPETITION"
+        env:
+          COMPETITION: ${{ env.COMPETITION }}
+
+      - name: Push Docker image to GHCR
+        run: |
+          IMAGE_NAME="yak-server:${VERSION}-${COMPETITION}"
+          docker tag "$IMAGE_NAME" "ghcr.io/${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY}:${VERSION}-${COMPETITION}"
+          docker push "ghcr.io/${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY}:${VERSION}-${COMPETITION}"
+        env:
+          VERSION: ${{ steps.create-commits.outputs.new-version }}
+          COMPETITION: ${{ env.COMPETITION }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
 
       - name: Create Release
         id: create-release
