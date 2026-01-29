@@ -1,5 +1,5 @@
 import psycopg
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import URL, Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from .settings import get_postgres_settings
@@ -7,8 +7,15 @@ from .settings import get_postgres_settings
 
 def compute_database_uri(
     client: str, host: str, user: str, password: str, port: int, db: str
-) -> str:
-    return f"postgresql+{client}://{user}:{password}@{host}:{port}/{db}"
+) -> URL:
+    return URL.create(
+        f"postgresql+{client}",
+        username=user,
+        password=password,
+        host=host,
+        port=port,
+        database=db,
+    )
 
 
 def build_engine() -> Engine:
