@@ -12,7 +12,7 @@ on:
           - major
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions: {}
@@ -29,7 +29,7 @@ jobs:
 
     env:
       python-version: "3.13"
-      COMPETITION: "euro_2024"
+      COMPETITION: "world_cup_2026"
 
     steps:
       - name: Checkout code
