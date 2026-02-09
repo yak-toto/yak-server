@@ -51,7 +51,7 @@ sync = ["beautifulsoup4[lxml] ==4.14.3", "httpx ==0.28.1"]
 server = ["uvicorn==0.40.0"]
 
 [project.scripts]
-yak = "yak_server.cli:app"
+yak = "yak_server.cli.main:app"
 
 [dependency-groups]
 dev = [
@@ -114,6 +114,7 @@ max-complexity = 12
 "yak_server/helpers/errors.py" = ["S105"]
 "tests/*" = ["S101", "PLR0914", "PLR2004"]
 "testing/*" = ["S101"]
+"yak_server/helpers/rules/__init__.py" = ["RUF067"]
 
 [tool.ruff.lint.pylint]
 max-args = 6
