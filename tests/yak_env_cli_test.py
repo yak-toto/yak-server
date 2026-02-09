@@ -160,3 +160,4 @@ def test_yak_env_app() -> None:
         )
         assert env["RULES"] is not None
         assert len(json.loads(env["RULES"])) == 0
+        assert env["COOKIE_SECURE"] == "False"

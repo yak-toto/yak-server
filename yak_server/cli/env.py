@@ -76,6 +76,8 @@ def write_app_env_file(
 
     env["OFFICIAL_RESULTS_URL"] = common_settings["official_results_url"]
 
+    env["COOKIE_SECURE"] = debug is False
+
     write_env_file(env, ".env")
 
 
