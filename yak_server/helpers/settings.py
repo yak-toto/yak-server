@@ -44,3 +44,16 @@ class AuthenticationSettings(BaseSettings):
 @cache
 def get_authentication_settings() -> AuthenticationSettings:
     return AuthenticationSettings()  # pragma: no cover
+
+
+class CookieSettings(BaseSettings):
+    cookie_secure: bool = True
+    cookie_domain: str = ""
+    allowed_origins: list[str] = []
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
+
+
+@cache
+def get_cookie_settings() -> CookieSettings:
+    return CookieSettings()  # pragma: no cover

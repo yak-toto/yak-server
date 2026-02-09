@@ -10,14 +10,24 @@ from psycopg import sql
 from sqlalchemy import Engine, create_engine
 
 from scripts.profiling import create_app as create_app_with_profiling
-from testing.mock import MockAuthenticationSettings, MockLockDatetime, MockSettings
+from testing.mock import (
+    MockAuthenticationSettings,
+    MockCookieSettings,
+    MockLockDatetime,
+    MockSettings,
+)
 from testing.util import get_random_string
 from yak_server import create_app
 from yak_server.cli.database import create_database, delete_database, drop_database
 from yak_server.database.session import compute_database_uri
 from yak_server.database.settings import get_postgres_settings
 from yak_server.helpers.rules import Rules
-from yak_server.helpers.settings import get_authentication_settings, get_lock_datetime, get_settings
+from yak_server.helpers.settings import (
+    get_authentication_settings,
+    get_cookie_settings,
+    get_lock_datetime,
+    get_settings,
+)
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -105,9 +115,10 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
     app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
-        jwt_secret_key=get_random_string(15),
-        jwt_refresh_secret_key=get_random_string(15),
+        jwt_secret_key=get_random_string(80),
+        jwt_refresh_secret_key=get_random_string(80),
     )
+    app.dependency_overrides[get_cookie_settings] = MockCookieSettings()
 
     app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
         datetime.now(timezone.utc) + timedelta(minutes=10),
@@ -123,9 +134,10 @@ def app_with_valid_jwt_config(_app: "FastAPI") -> Generator["FastAPI", None, Non
     _app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
-        jwt_secret_key=get_random_string(15),
-        jwt_refresh_secret_key=get_random_string(15),
+        jwt_secret_key=get_random_string(80),
+        jwt_refresh_secret_key=get_random_string(80),
     )
+    _app.dependency_overrides[get_cookie_settings] = MockCookieSettings()
 
     _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
         datetime.now(timezone.utc) + timedelta(minutes=10),
@@ -141,9 +153,10 @@ def app_with_null_jwt_expiration_time(_app: "FastAPI") -> Generator["FastAPI", N
     _app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
         jwt_expiration_time=0,
         jwt_refresh_expiration_time=200,
-        jwt_secret_key=get_random_string(15),
-        jwt_refresh_secret_key=get_random_string(15),
+        jwt_secret_key=get_random_string(80),
+        jwt_refresh_secret_key=get_random_string(80),
     )
+    _app.dependency_overrides[get_cookie_settings] = MockCookieSettings()
 
     _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
         datetime.now(timezone.utc) + timedelta(minutes=10),
@@ -159,9 +172,10 @@ def app_with_null_jwt_refresh_expiration_time(_app: "FastAPI") -> Generator["Fas
     _app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=3,
-        jwt_secret_key=get_random_string(15),
-        jwt_refresh_secret_key=get_random_string(15),
+        jwt_secret_key=get_random_string(80),
+        jwt_refresh_secret_key=get_random_string(80),
     )
+    _app.dependency_overrides[get_cookie_settings] = MockCookieSettings()
 
     _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
         datetime.now(timezone.utc) + timedelta(minutes=10),

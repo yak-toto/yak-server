@@ -85,6 +85,48 @@ def test_refresh_after_login(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response.status_code == HTTPStatus.OK
 
 
+def test_refresh_using_cookie(app_with_valid_jwt_config: "FastAPI") -> None:
+    client = TestClient(app_with_valid_jwt_config)
+
+    response = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": get_random_string(10),
+            "first_name": get_random_string(10),
+            "last_name": get_random_string(10),
+            "password": get_random_string(150),
+        },
+    )
+
+    assert response.status_code == HTTPStatus.CREATED
+
+    # Call refresh without a body — the refresh token cookie set by signup should be used
+    response = client.post("/api/v1/users/refresh")
+    assert response.status_code == HTTPStatus.CREATED
+
+    new_access_token = response.json()["result"]["access_token"]
+
+    response = client.get(
+        "/api/v1/bets",
+        headers={"Authorization": f"Bearer {new_access_token}"},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+
+def test_refresh_without_token(app_with_valid_jwt_config: "FastAPI") -> None:
+    client = TestClient(app_with_valid_jwt_config, cookies={})
+
+    response = client.post("/api/v1/users/refresh")
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {
+        "ok": False,
+        "error_code": HTTPStatus.UNAUTHORIZED,
+        "description": "Invalid access token, authentication required",
+    }
+
+
 def test_refresh_token_expired(app_with_null_jwt_refresh_expiration_time: "FastAPI") -> None:
     client = TestClient(app_with_null_jwt_refresh_expiration_time)
 
