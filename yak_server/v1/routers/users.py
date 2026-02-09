@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
@@ -12,6 +12,7 @@ from yak_server.helpers.authentication import (
     encode_bearer_token,
     signup_user,
 )
+from yak_server.helpers.cookies import clear_auth_cookies, set_auth_cookies
 from yak_server.helpers.database import get_db
 from yak_server.helpers.logging_helpers import (
     logged_in_successfully,
@@ -22,8 +23,18 @@ from yak_server.helpers.password_validator import (
     PasswordRequirements,
     PasswordRequirementsError,
 )
-from yak_server.helpers.settings import AuthenticationSettings, get_authentication_settings
-from yak_server.v1.helpers.auth import require_admin, require_user, user_from_token
+from yak_server.helpers.settings import (
+    AuthenticationSettings,
+    CookieSettings,
+    get_authentication_settings,
+    get_cookie_settings,
+)
+from yak_server.v1.helpers.auth import (
+    require_admin,
+    require_refresh_token,
+    require_user,
+    user_from_token,
+)
 from yak_server.v1.helpers.errors import (
     InvalidCredentials,
     NameAlreadyExists,
@@ -37,7 +48,6 @@ from yak_server.v1.models.users import (
     LoginOut,
     ModifyUserIn,
     PasswordRequirementsOut,
-    RefreshIn,
     RefreshOut,
     SignupIn,
     SignupOut,
@@ -59,8 +69,10 @@ router = APIRouter(prefix="/users", tags=["users"])
 )
 def signup(
     signup_in: SignupIn,
+    response: Response,
     db: Annotated[Session, Depends(get_db)],
     auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
+    cookie_settings: Annotated[CookieSettings, Depends(get_cookie_settings)],
 ) -> GenericOut[SignupOut]:
     try:
         user = signup_user(
@@ -80,23 +92,33 @@ def signup(
 
     logger.info(signed_up_successfully(user.name))
 
+    access_token = encode_bearer_token(
+        sub=user.id,
+        expiration_time=timedelta(seconds=auth_settings.jwt_expiration_time),
+        secret_key=auth_settings.jwt_secret_key,
+    )
+    refresh_token = encode_bearer_token(
+        sub=user.id,
+        expiration_time=timedelta(seconds=auth_settings.jwt_refresh_expiration_time),
+        secret_key=auth_settings.jwt_refresh_secret_key,
+    )
+
+    set_auth_cookies(
+        response=response,
+        access_token=access_token,
+        access_expires_in=auth_settings.jwt_expiration_time,
+        refresh_token=refresh_token,
+        refresh_expires_in=auth_settings.jwt_refresh_expiration_time,
+        settings=cookie_settings,
+    )
+
     return GenericOut(
         result=SignupOut(
             id=user.id,
             name=user.name,
-            access_token=encode_bearer_token(
-                sub=user.id,
-                expiration_time=timedelta(seconds=auth_settings.jwt_expiration_time),
-                secret_key=auth_settings.jwt_secret_key,
-            ),
+            access_token=access_token,
             access_expires_in=auth_settings.jwt_expiration_time,
-            refresh_token=encode_bearer_token(
-                sub=user.id,
-                expiration_time=timedelta(
-                    seconds=auth_settings.jwt_refresh_expiration_time,
-                ),
-                secret_key=auth_settings.jwt_refresh_secret_key,
-            ),
+            refresh_token=refresh_token,
             refresh_expires_in=auth_settings.jwt_refresh_expiration_time,
         ),
     )
@@ -131,8 +153,10 @@ def password_requirements() -> GenericOut[PasswordRequirementsOut]:
 )
 def login(
     login_in: LoginIn,
+    response: Response,
     db: Annotated[Session, Depends(get_db)],
     auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
+    cookie_settings: Annotated[CookieSettings, Depends(get_cookie_settings)],
 ) -> GenericOut[LoginOut]:
     user = UserModel.authenticate(db, login_in.name, login_in.password)
 
@@ -141,23 +165,33 @@ def login(
 
     logger.info(logged_in_successfully(user.name))
 
+    access_token = encode_bearer_token(
+        sub=user.id,
+        expiration_time=timedelta(seconds=auth_settings.jwt_expiration_time),
+        secret_key=auth_settings.jwt_secret_key,
+    )
+    refresh_token = encode_bearer_token(
+        sub=user.id,
+        expiration_time=timedelta(seconds=auth_settings.jwt_refresh_expiration_time),
+        secret_key=auth_settings.jwt_refresh_secret_key,
+    )
+
+    set_auth_cookies(
+        response=response,
+        access_token=access_token,
+        access_expires_in=auth_settings.jwt_expiration_time,
+        refresh_token=refresh_token,
+        refresh_expires_in=auth_settings.jwt_refresh_expiration_time,
+        settings=cookie_settings,
+    )
+
     return GenericOut(
         result=LoginOut(
             id=user.id,
             name=user.name,
-            access_token=encode_bearer_token(
-                sub=user.id,
-                expiration_time=timedelta(seconds=auth_settings.jwt_expiration_time),
-                secret_key=auth_settings.jwt_secret_key,
-            ),
+            access_token=access_token,
             access_expires_in=auth_settings.jwt_expiration_time,
-            refresh_token=encode_bearer_token(
-                sub=user.id,
-                expiration_time=timedelta(
-                    seconds=auth_settings.jwt_refresh_expiration_time,
-                ),
-                secret_key=auth_settings.jwt_refresh_secret_key,
-            ),
+            refresh_token=refresh_token,
             refresh_expires_in=auth_settings.jwt_refresh_expiration_time,
         ),
     )
@@ -172,27 +206,39 @@ def login(
     },
 )
 def refresh(
+    response: Response,
+    refresh_token_value: Annotated[str, Depends(require_refresh_token)],
     db: Annotated[Session, Depends(get_db)],
     auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
-    refresh_in: RefreshIn,
+    cookie_settings: Annotated[CookieSettings, Depends(get_cookie_settings)],
 ) -> GenericOut[RefreshOut]:
-    user = user_from_token(db, auth_settings.jwt_refresh_secret_key, refresh_in.refresh_token)
+    user = user_from_token(db, auth_settings.jwt_refresh_secret_key, refresh_token_value)
+
+    access_token = encode_bearer_token(
+        sub=user.id,
+        expiration_time=timedelta(seconds=auth_settings.jwt_expiration_time),
+        secret_key=auth_settings.jwt_secret_key,
+    )
+    new_refresh_token = encode_bearer_token(
+        sub=user.id,
+        expiration_time=timedelta(seconds=auth_settings.jwt_refresh_expiration_time),
+        secret_key=auth_settings.jwt_refresh_secret_key,
+    )
+
+    set_auth_cookies(
+        response=response,
+        access_token=access_token,
+        access_expires_in=auth_settings.jwt_expiration_time,
+        refresh_token=new_refresh_token,
+        refresh_expires_in=auth_settings.jwt_refresh_expiration_time,
+        settings=cookie_settings,
+    )
 
     return GenericOut(
         result=RefreshOut(
-            access_token=encode_bearer_token(
-                sub=user.id,
-                expiration_time=timedelta(seconds=auth_settings.jwt_expiration_time),
-                secret_key=auth_settings.jwt_secret_key,
-            ),
+            access_token=access_token,
             access_expires_in=auth_settings.jwt_expiration_time,
-            refresh_token=encode_bearer_token(
-                sub=user.id,
-                expiration_time=timedelta(
-                    seconds=auth_settings.jwt_refresh_expiration_time,
-                ),
-                secret_key=auth_settings.jwt_refresh_secret_key,
-            ),
+            refresh_token=new_refresh_token,
             refresh_expires_in=auth_settings.jwt_refresh_expiration_time,
         ),
     )
@@ -238,3 +284,17 @@ def current_user(
     user: Annotated[UserModel, Depends(require_user)],
 ) -> GenericOut[CurrentUserOut]:
     return GenericOut(result=CurrentUserOut.model_validate(user))
+
+
+@router.post(
+    "/logout",
+    responses={
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
+    },
+)
+def logout(
+    response: Response,
+    cookie_settings: Annotated[CookieSettings, Depends(get_cookie_settings)],
+) -> GenericOut[None]:
+    clear_auth_cookies(response, cookie_settings)
+    return GenericOut(result=None)

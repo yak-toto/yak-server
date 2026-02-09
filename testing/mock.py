@@ -44,6 +44,7 @@ class MockLockDatetime:
 class MockAuthenticationSettings:
     def __init__(
         self,
+        *,
         jwt_secret_key: str,
         jwt_refresh_secret_key: str,
         jwt_expiration_time: int,
@@ -53,6 +54,22 @@ class MockAuthenticationSettings:
         self.jwt_refresh_secret_key = jwt_refresh_secret_key
         self.jwt_expiration_time = jwt_expiration_time
         self.jwt_refresh_expiration_time = jwt_refresh_expiration_time
+
+    def __call__(self) -> Self:
+        return self
+
+
+class MockCookieSettings:
+    def __init__(
+        self,
+        *,
+        cookie_secure: bool = False,
+        cookie_domain: str = "",
+        allowed_origins: list[str] | None = None,
+    ) -> None:
+        self.cookie_secure = cookie_secure
+        self.cookie_domain = cookie_domain
+        self.allowed_origins = allowed_origins or []
 
     def __call__(self) -> Self:
         return self

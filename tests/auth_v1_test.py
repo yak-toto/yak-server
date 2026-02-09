@@ -59,13 +59,8 @@ def test_valid_auth(app_with_valid_jwt_config: "FastAPI") -> None:
         },
     }
 
-    auth_token = response_login.json()["result"]["access_token"]
-
     # current user tests
-    response_current_user = client.get(
-        "/api/v1/users/current",
-        headers={"Authorization": f"Bearer {auth_token}"},
-    )
+    response_current_user = client.get("/api/v1/users/current")
     assert response_current_user.status_code == HTTPStatus.OK
     assert response_current_user.json() == {
         "ok": True,
@@ -186,17 +181,6 @@ def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
 
     auth_token = response_signup.json()["result"]["access_token"]
 
-    response_get_all_bets = client.get(
-        "/api/v1/bets",
-        headers={"Authorization": f"Bear {auth_token}"},
-    )
-
-    assert response_get_all_bets.json() == {
-        "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Invalid access token, authentication required",
-    }
-
     response_get_all_bets_with_cropped_token = client.get(
         "/api/v1/bets",
         headers={"Authorization": f"Bearer {auth_token[:17]}{auth_token[12:]}"},
@@ -295,6 +279,52 @@ def test_invalid_login_body(app_with_valid_jwt_config: "FastAPI") -> None:
             {"field": "body -> name", "error": "Field required"},
             {"field": "body -> nme", "error": "Extra inputs are not permitted"},
         ],
+    }
+
+
+def test_no_token(app_with_valid_jwt_config: "FastAPI") -> None:
+    client = TestClient(app_with_valid_jwt_config, cookies={})
+
+    response = client.get(
+        "/api/v1/users/current",
+    )
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {
+        "ok": False,
+        "error_code": HTTPStatus.UNAUTHORIZED,
+        "description": "Invalid access token, authentication required",
+    }
+
+
+def test_logout(app_with_valid_jwt_config: "FastAPI") -> None:
+    client = TestClient(app_with_valid_jwt_config)
+
+    response_signup = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": get_random_string(6),
+            "first_name": get_random_string(2),
+            "last_name": get_random_string(8),
+            "password": get_random_string(8),
+        },
+    )
+
+    assert response_signup.status_code == HTTPStatus.CREATED
+
+    response_logout = client.post("/api/v1/users/logout")
+
+    assert response_logout.status_code == HTTPStatus.OK
+    assert response_logout.json() == {"ok": True, "result": None}
+
+    # After logout, cookies should be cleared, so accessing a protected endpoint should fail
+    response_current_user = client.get("/api/v1/users/current")
+
+    assert response_current_user.status_code == HTTPStatus.UNAUTHORIZED
+    assert response_current_user.json() == {
+        "ok": False,
+        "error_code": HTTPStatus.UNAUTHORIZED,
+        "description": "Invalid access token, authentication required",
     }
 
 

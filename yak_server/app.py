@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from . import health_check
 from .helpers.logging_helpers import setup_logging
+from .helpers.settings import CookieSettings
 from .v1.helpers.errors import set_exception_handler
 from .v1.routers import bets as bets_router
 from .v1.routers import binary_bets as binary_bets_router
@@ -61,9 +62,11 @@ def create_app() -> FastAPI:
     set_exception_handler(app)
 
     # Set CORS
+    cookie_settings = CookieSettings()
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=cookie_settings.allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
