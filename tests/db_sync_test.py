@@ -392,8 +392,7 @@ def test_db_sync(
 
     # Synchronize admin bets with official results
     monkeypatch.setattr(
-        "yak_server.cli.get_settings",
-        MockSettings(official_results_url=competition_data.url),
+        "yak_server.cli.main.get_settings", MockSettings(official_results_url=competition_data.url)
     )
 
     result = runner.invoke(typer_app, ["db", "sync"])
