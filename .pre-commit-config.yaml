@@ -44,7 +44,7 @@ repos:
         args: [--autofix, --indent, "4", --trailing-commas, --no-sort]
 
   - repo: https://github.com/adhtruong/mirrors-typos
-    rev: v1.43.3
+    rev: v1.43.4
     hooks:
       - id: typos
 
