@@ -1,0 +1,14 @@
+[
+    {
+        "code": "FR",
+        "description_fr": "Les Bleus",
+        "description_en": "The Blues",
+        "internal_flag_url": "https://updated-flag_france.com"
+    },
+    {
+        "code": "BR",
+        "description_fr": "Sele\u00e7\u00e3o",
+        "description_en": "The Selection",
+        "internal_flag_url": "https://updated-flag_brazil.com"
+    }
+]

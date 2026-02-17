@@ -323,6 +323,8 @@ class GroupModel(Base):
     phase_id: Mapped[UUID] = mapped_column(DB_UUID(), sa.ForeignKey("phase.id"), nullable=False)
     phase: Mapped["PhaseModel"] = relationship("PhaseModel", backref="groups", lazy="raise")
 
+    __table_args__ = (UniqueConstraint("index", name="uq_group_index"),)
+
 
 class PhaseModel(Base):
     __tablename__ = "phase"
@@ -331,6 +333,8 @@ class PhaseModel(Base):
     description_fr: Mapped[str] = mapped_column(sa.String(100), nullable=False)
     description_en: Mapped[str] = mapped_column(sa.String(100), nullable=False)
     index: Mapped[int] = mapped_column(sa.Integer, nullable=False)
+
+    __table_args__ = (UniqueConstraint("index", name="uq_phase_index"),)
 
 
 class GroupPositionModel(Base):
