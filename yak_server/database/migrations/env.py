@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 from alembic import context
 
-from yak_server.database import build_engine
 from yak_server.database.models import Base
+from yak_server.database.session import build_engine
 
 if TYPE_CHECKING:
     from sqlalchemy.sql.schema import MetaData

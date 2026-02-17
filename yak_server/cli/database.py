@@ -87,8 +87,12 @@ def initialize_database(engine: "Engine", app: "FastAPI", data_folder: Path) -> 
         phases = json.loads((data_folder / "phases.json").read_text(encoding="utf-8"))
 
         for phase in phases:
+            stmt = insert(PhaseModel).values(**phase)
             db.execute(
-                insert(PhaseModel).values(**phase).on_conflict_do_nothing(index_elements=["code"]),
+                stmt.on_conflict_do_update(
+                    index_elements=["code"],
+                    set_={col: stmt.excluded[col] for col in phase if col != "code"},
+                ),
             )
 
         db.flush()
@@ -106,8 +110,12 @@ def initialize_database(engine: "Engine", app: "FastAPI", data_folder: Path) -> 
             group["phase_id"] = phase.id
 
         for group in groups:
+            stmt = insert(GroupModel).values(**group)
             db.execute(
-                insert(GroupModel).values(**group).on_conflict_do_nothing(index_elements=["code"]),
+                stmt.on_conflict_do_update(
+                    index_elements=["code"],
+                    set_={col: stmt.excluded[col] for col in group if col != "code"},
+                ),
             )
 
         db.flush()
@@ -117,8 +125,12 @@ def initialize_database(engine: "Engine", app: "FastAPI", data_folder: Path) -> 
         for team in teams:
             team["flag_url"] = ""
 
+            stmt = insert(TeamModel).values(**team)
             db.execute(
-                insert(TeamModel).values(**team).on_conflict_do_nothing(index_elements=["code"]),
+                stmt.on_conflict_do_update(
+                    index_elements=["code"],
+                    set_={col: stmt.excluded[col] for col in team if col != "code"},
+                ),
             )
 
             db.flush()
@@ -147,10 +159,14 @@ def initialize_database(engine: "Engine", app: "FastAPI", data_folder: Path) -> 
             match["group_id"] = fetch_group_id(match.pop("group_code"), db)
 
         for match in matches:
+            stmt = insert(MatchReferenceModel).values(**match)
             db.execute(
-                insert(MatchReferenceModel)
-                .values(**match)
-                .on_conflict_do_nothing(index_elements=["group_id", "index"]),
+                stmt.on_conflict_do_update(
+                    index_elements=["group_id", "index"],
+                    set_={
+                        col: stmt.excluded[col] for col in match if col not in {"group_id", "index"}
+                    },
+                ),
             )
 
         db.flush()
