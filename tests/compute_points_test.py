@@ -92,8 +92,8 @@ def test_compute_points(
     password = get_random_string(15)
 
     admin = UserData(
-        first_name=get_random_string(10),
-        last_name=get_random_string(12),
+        first_name="admin",
+        last_name="admin",
         name="admin",
         scores=[(1, 2), (5, 1), (5, 5)],
     )
@@ -327,7 +327,20 @@ def test_compute_points(
     )
 
     assert get_results_response_admin.json() == {
-        "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "No results for admin user",
+        "ok": True,
+        "result": {
+            "rank": 0,
+            "first_name": admin.first_name,
+            "last_name": admin.last_name,
+            "full_name": f"{admin.first_name} {admin.last_name}",
+            "number_final_guess": 0,
+            "number_first_qualified_guess": 0,
+            "number_match_guess": 0,
+            "number_qualified_teams_guess": 0,
+            "number_quarter_final_guess": 0,
+            "number_score_guess": 0,
+            "number_semi_final_guess": 0,
+            "number_winner_guess": 0,
+            "points": 0.0,
+        },
     }
