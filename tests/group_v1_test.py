@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
+from uuid import uuid4
 
 from starlette.testclient import TestClient
 
@@ -61,6 +62,7 @@ def test_group(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
         "phase": expected_phase,
         "groups": [expected_group_without_phase],
     }
+    group_id = group_response.json()["result"]["groups"][0]["id"]
 
     # Check groups by phase with invalid phase identifier
     invalid_phase_code = get_random_string(5)
@@ -79,7 +81,7 @@ def test_group(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
 
     # Check GET /groups/{group_code}
     one_group_response = client.get(
-        "/api/v1/groups/A",
+        f"/api/v1/groups/{group_id}",
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
@@ -90,10 +92,10 @@ def test_group(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
     }
 
     # Check GET /groups/{groupCode} with invalid code
-    invalid_group_code = "B"
+    invalid_group_id = uuid4()
 
     group_response_with_invalid_code = client.get(
-        "/api/v1/groups/B",
+        f"/api/v1/groups/{invalid_group_id}",
         headers={"Authorization": f"Bearer {auth_token}"},
     )
 
@@ -101,7 +103,7 @@ def test_group(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
     assert group_response_with_invalid_code.json() == {
         "ok": False,
         "error_code": HTTPStatus.NOT_FOUND,
-        "description": f"Group not found: {invalid_group_code}",
+        "description": f"Group not found: {invalid_group_id}",
     }
 
     # Check GET /groups

@@ -44,6 +44,7 @@ def test_group_rank_and_modify_score_bet(
     )
 
     assert response_all_bets.status_code == HTTPStatus.OK
+    group_id = response_all_bets.json()["result"]["score_bets"][0]["group"]["id"]
 
     # Perform PATCH bets
     bet_ids = [score_bet["id"] for score_bet in response_all_bets.json()["result"]["score_bets"]]
@@ -66,7 +67,7 @@ def test_group_rank_and_modify_score_bet(
 
     # Retrieve group rank
     response_group_rank = client.get(
-        "/api/v1/bets/groups/rank/A",
+        f"/api/v1/bets/groups/rank/{group_id}",
         headers={"Authorization": f"Bearer {authentication_token}"},
     )
 
@@ -75,7 +76,7 @@ def test_group_rank_and_modify_score_bet(
     group_rank = response_group_rank.json()["result"]["group_rank"]
 
     response_group_by_bet = client.get(
-        "/api/v1/bets/groups/A",
+        f"/api/v1/bets/groups/{group_id}",
         headers={"Authorization": f"Bearer {authentication_token}"},
     )
 

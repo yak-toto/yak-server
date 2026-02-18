@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
+from pydantic import UUID4
 from sqlalchemy.orm import Session, selectinload
 
 from yak_server.database.models import (
@@ -12,7 +13,7 @@ from yak_server.database.models import (
     ScoreBetModel,
     UserModel,
 )
-from yak_server.database.query import bets_from_group_code, bets_from_phase_code
+from yak_server.database.query import bets_from_group_id, bets_from_phase_code
 from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.database import get_db
 from yak_server.helpers.group_position import get_group_rank_with_code
@@ -147,7 +148,7 @@ def retrieve_bets_by_phase_code(
 
 
 @router.get(
-    "/groups/{group_code}",
+    "/groups/{group_id}",
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
         status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
@@ -155,16 +156,16 @@ def retrieve_bets_by_phase_code(
     },
 )
 def retrieve_bets_by_group_code(
-    group_code: str,
+    group_id: UUID4,
     user: Annotated[UserModel, Depends(require_user)],
     db: Annotated[Session, Depends(get_db)],
     lock_datetime: Annotated[datetime, Depends(get_lock_datetime)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[BetsByGroupCodeResponse]:
-    group, score_bets, binary_bets = bets_from_group_code(db, user, group_code)
+    group, score_bets, binary_bets = bets_from_group_id(db, user, group_id)
 
     if group is None:
-        raise GroupNotFound(group_code)
+        raise GroupNotFound(group_id)
 
     return GenericOut(
         result=BetsByGroupCodeResponse(
@@ -191,7 +192,7 @@ def retrieve_bets_by_group_code(
 
 
 @router.get(
-    "/groups/rank/{group_code}",
+    "/groups/rank/{group_id}",
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
         status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
@@ -199,21 +200,17 @@ def retrieve_bets_by_group_code(
     },
 )
 def retrieve_group_rank_by_code(
-    group_code: str,
+    group_id: UUID4,
     user: Annotated[UserModel, Depends(require_user)],
     db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[GroupRankResponse]:
     group = (
-        db
-        .query(GroupModel)
-        .options(selectinload(GroupModel.phase))
-        .filter_by(code=group_code)
-        .first()
+        db.query(GroupModel).options(selectinload(GroupModel.phase)).filter_by(id=group_id).first()
     )
 
     if group is None:
-        raise GroupNotFound(group_code)
+        raise GroupNotFound(group_id)
 
     group_rank = get_group_rank_with_code(db, user, group.id)
 
