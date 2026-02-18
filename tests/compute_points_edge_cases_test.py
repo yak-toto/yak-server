@@ -63,11 +63,7 @@ def test_compute_points(
 ) -> None:
     client = TestClient(app_with_rules_and_score_board_config)
 
-    initialize_database(
-        engine_for_test,
-        app_with_rules_and_score_board_config,
-        get_resources_path("test_compute_points_edge_cases_v1"),
-    )
+    initialize_database(engine_for_test, get_resources_path("test_compute_points_edge_cases_v1"))
 
     admin = UserData(
         name="admin",
@@ -413,9 +409,7 @@ def test_no_bet_associated_to_first_phase_group(
     app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine"
 ) -> None:
     initialize_database(
-        engine_for_test,
-        app_with_valid_jwt_config,
-        get_resources_path("test_no_bet_associated_to_first_phase_group"),
+        engine_for_test, get_resources_path("test_no_bet_associated_to_first_phase_group")
     )
 
     client = TestClient(app_with_valid_jwt_config)

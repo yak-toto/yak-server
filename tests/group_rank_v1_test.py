@@ -14,9 +14,7 @@ if TYPE_CHECKING:
 
 
 def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
-    initialize_database(
-        engine_for_test, app_with_valid_jwt_config, get_resources_path("test_compute_points_v1")
-    )
+    initialize_database(engine_for_test, get_resources_path("test_compute_points_v1"))
 
     client = TestClient(app_with_valid_jwt_config)
 
@@ -445,11 +443,7 @@ def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
 def test_group_rank_team_not_defined(
     app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine"
 ) -> None:
-    initialize_database(
-        engine_for_test,
-        app_with_valid_jwt_config,
-        get_resources_path("test_group_rank_team_not_defined"),
-    )
+    initialize_database(engine_for_test, get_resources_path("test_group_rank_team_not_defined"))
 
     client = TestClient(app_with_valid_jwt_config)
 

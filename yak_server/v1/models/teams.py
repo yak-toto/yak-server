@@ -29,7 +29,7 @@ class TeamOut(BaseModel):
             id=team.id,
             code=team.code,
             description=get_language_description(team, lang),
-            flag=FlagOut(url=team.flag_url),
+            flag=FlagOut(url=team.internal_flag_url),
         )
 
 

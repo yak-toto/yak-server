@@ -17,9 +17,7 @@ if TYPE_CHECKING:
 
 
 def test_binary_bet(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
-    initialize_database(
-        engine_for_test, app_with_valid_jwt_config, get_resources_path("test_binary_bet")
-    )
+    initialize_database(engine_for_test, get_resources_path("test_binary_bet"))
 
     client = TestClient(app_with_valid_jwt_config)
 

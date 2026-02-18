@@ -369,9 +369,7 @@ def test_db_sync(
 ) -> None:
     # Setup fastapi application and initialize database
     initialize_database(
-        engine_for_test,
-        app_with_valid_jwt_config,
-        get_resources_path(f"../../yak_server/data/{competition_data.folder}"),
+        engine_for_test, get_resources_path(f"../../yak_server/data/{competition_data.folder}")
     )
 
     # Signup admin user

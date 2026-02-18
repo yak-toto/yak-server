@@ -15,9 +15,7 @@ if TYPE_CHECKING:
 
 
 def test_teams(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
-    initialize_database(
-        engine_for_test, app_with_valid_jwt_config, get_resources_path("test_teams_v1")
-    )
+    initialize_database(engine_for_test, get_resources_path("test_teams_v1"))
 
     client = TestClient(app_with_valid_jwt_config)
 
@@ -108,7 +106,7 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
 
     # Check flag fetching
     response_retrieve_flag = client.get(
-        response_one_team_by_code.json()["result"]["team"]["flag"]["url"],
+        f"/api/v1/teams/{response_one_team_by_code.json()['result']['team']['id']}/flag",
         follow_redirects=False,
     )
 
