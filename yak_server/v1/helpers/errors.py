@@ -113,14 +113,6 @@ class LockedBinaryBet(HTTPException):
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=LOCKED_BINARY_BET_MESSAGE)
 
 
-class NoResultsForAdminUser(HTTPException):
-    def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="No results for admin user",
-        )
-
-
 class GroupNotFound(HTTPException):
     def __init__(self, group_id: str | UUID) -> None:
         super().__init__(

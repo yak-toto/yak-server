@@ -1,13 +1,13 @@
 from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, NonNegativeInt, PositiveInt
+from pydantic import BaseModel, NonNegativeInt
 
 if TYPE_CHECKING:
     from yak_server.database.models import UserModel
 
 
 class UserResult(BaseModel):
-    rank: PositiveInt
+    rank: NonNegativeInt
     first_name: str
     last_name: str
     full_name: str
@@ -22,7 +22,7 @@ class UserResult(BaseModel):
     points: float
 
     @classmethod
-    def from_instance(cls, user: "UserModel", *, rank: PositiveInt) -> "UserResult":
+    def from_instance(cls, user: "UserModel", *, rank: NonNegativeInt) -> "UserResult":
         return cls(
             rank=rank,
             first_name=user.first_name,
