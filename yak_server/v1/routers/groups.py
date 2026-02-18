@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
+from pydantic import UUID4
 from sqlalchemy.orm import Session, selectinload
 
 from yak_server.database.models import GroupModel, PhaseModel, UserModel
@@ -45,7 +46,7 @@ def retrieve_all_groups(
 
 
 @router.get(
-    "/{group_code}",
+    "/{group_id}",
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
         status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
@@ -53,21 +54,17 @@ def retrieve_all_groups(
     },
 )
 def retrieve_group_by_id(
-    group_code: str,
+    group_id: UUID4,
     _: Annotated[UserModel, Depends(require_user)],
     db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[GroupResponse]:
     group = (
-        db
-        .query(GroupModel)
-        .options(selectinload(GroupModel.phase))
-        .filter_by(code=group_code)
-        .first()
+        db.query(GroupModel).options(selectinload(GroupModel.phase)).filter_by(id=group_id).first()
     )
 
     if group is None:
-        raise GroupNotFound(group_code)
+        raise GroupNotFound(group_id)
 
     return GenericOut(
         result=GroupResponse(

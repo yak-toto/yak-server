@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
+from uuid import uuid4
 
 from starlette.testclient import TestClient
 
@@ -33,9 +34,18 @@ def test_bets_by_groups(app_with_valid_jwt_config: "FastAPI", engine_for_test: "
 
     access_token = response_signup.json()["result"]["access_token"]
 
+    # Retrieve all groups
+    groups_response = client.get(
+        "/api/v1/groups",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+
+    assert groups_response.status_code == HTTPStatus.OK
+    group_id = groups_response.json()["result"]["groups"][0]["id"]
+
     # Success case
     bets_by_valid_group = client.get(
-        "/api/v1/bets/groups/A",
+        f"/api/v1/bets/groups/{group_id}",
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
@@ -121,7 +131,7 @@ def test_bets_by_groups(app_with_valid_jwt_config: "FastAPI", engine_for_test: "
         assert score_bet["team2"]["flag"]["url"] == f"/api/v1/teams/{score_bet['team2']['id']}/flag"
 
     # Error case : invalid group code
-    invalid_group_code = "B"
+    invalid_group_code = uuid4()
 
     bets_by_invalid_group_code = client.get(
         f"/api/v1/bets/groups/{invalid_group_code}",

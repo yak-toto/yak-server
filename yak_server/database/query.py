@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
+from pydantic import UUID4
 from sqlalchemy.orm import selectinload
 
 from .models import BinaryBetModel, GroupModel, MatchModel, PhaseModel, ScoreBetModel
@@ -11,17 +12,13 @@ if TYPE_CHECKING:
     from .models import UserModel
 
 
-def bets_from_group_code(
+def bets_from_group_id(
     db: "Session",
     user: "UserModel",
-    group_code: str,
+    group_id: UUID4,
 ) -> tuple[GroupModel | None, Iterable[ScoreBetModel], Iterable[BinaryBetModel]]:
     group = (
-        db
-        .query(GroupModel)
-        .options(selectinload(GroupModel.phase))
-        .filter_by(code=group_code)
-        .first()
+        db.query(GroupModel).options(selectinload(GroupModel.phase)).filter_by(id=group_id).first()
     )
 
     if group is None:

@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
+from uuid import uuid4
 
 from starlette.testclient import TestClient
 
@@ -56,8 +57,17 @@ def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
 
         assert response_patch_bet.status_code == HTTPStatus.OK
 
+    # Retrieve all groups
+    groups_response = client.get(
+        "/api/v1/groups",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+
+    assert groups_response.status_code == HTTPStatus.OK
+    group_id = groups_response.json()["result"]["groups"][0]["id"]
+
     response_group_result_response = client.get(
-        "/api/v1/bets/groups/rank/A",
+        f"/api/v1/bets/groups/rank/{group_id}",
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
@@ -114,7 +124,7 @@ def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
     ]
 
     # Error case : retrieve group rank with invalid code
-    invalid_group_code = get_random_string(2)
+    invalid_group_code = uuid4()
 
     response_group_rank_with_invalid_code = client.get(
         f"/api/v1/bets/groups/rank/{invalid_group_code}",
@@ -139,7 +149,7 @@ def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
     assert response_patch_bet.status_code == HTTPStatus.OK
 
     response_group_rank_response = client.get(
-        "/api/v1/bets/groups/rank/A",
+        f"/api/v1/bets/groups/rank/{group_id}",
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
@@ -207,7 +217,7 @@ def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
     assert response_patch_bet.status_code == HTTPStatus.OK
 
     response_group_rank_response = client.get(
-        "/api/v1/bets/groups/rank/A",
+        f"/api/v1/bets/groups/rank/{group_id}",
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
@@ -278,7 +288,7 @@ def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
     assert response_patch_bet.status_code == HTTPStatus.OK
 
     response_group_rank_response = client.get(
-        "/api/v1/bets/groups/rank/A",
+        f"/api/v1/bets/groups/rank/{group_id}",
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
@@ -345,7 +355,7 @@ def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
     assert response_patch_bet.status_code == HTTPStatus.OK
 
     response_group_rank_response = client.get(
-        "/api/v1/bets/groups/rank/A",
+        f"/api/v1/bets/groups/rank/{group_id}",
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
@@ -419,7 +429,7 @@ def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
     assert response_patch_bet.status_code == HTTPStatus.OK
 
     response_group_rank_response_1 = client.get(
-        "/api/v1/bets/groups/rank/A",
+        f"/api/v1/bets/groups/rank/{group_id}",
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
@@ -457,8 +467,16 @@ def test_group_rank_team_not_defined(
 
     access_token = response_signup.json()["result"]["access_token"]
 
+    groups_response = client.get(
+        "/api/v1/groups",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+
+    assert groups_response.status_code == HTTPStatus.OK
+    group_id = groups_response.json()["result"]["groups"][0]["id"]
+
     response_retrieve_bets_group = client.get(
-        "/api/v1/bets/groups/A",
+        f"/api/v1/bets/groups/{group_id}",
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
@@ -475,7 +493,7 @@ def test_group_rank_team_not_defined(
     assert response_modify_score_bet.status_code == HTTPStatus.OK
 
     response_group_result_response = client.get(
-        "/api/v1/bets/groups/rank/A",
+        f"/api/v1/bets/groups/rank/{group_id}",
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
