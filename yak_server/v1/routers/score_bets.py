@@ -45,7 +45,7 @@ def send_response(
                         id=score_bet.match.team1.id,
                         code=score_bet.match.team1.code,
                         description=get_language_description(score_bet.match.team1, lang),
-                        flag=FlagOut(url=score_bet.match.team1.flag_url),
+                        flag=FlagOut(url=score_bet.match.team1.internal_flag_url),
                         score=score_bet.score1,
                     )
                     if score_bet.match.team1 is not None
@@ -56,7 +56,7 @@ def send_response(
                         id=score_bet.match.team2.id,
                         code=score_bet.match.team2.code,
                         description=get_language_description(score_bet.match.team2, lang),
-                        flag=FlagOut(url=score_bet.match.team2.flag_url),
+                        flag=FlagOut(url=score_bet.match.team2.internal_flag_url),
                         score=score_bet.score2,
                     )
                     if score_bet.match.team2 is not None

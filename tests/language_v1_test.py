@@ -14,9 +14,7 @@ if TYPE_CHECKING:
 def test_group(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
     client = TestClient(app_with_valid_jwt_config)
 
-    initialize_database(
-        engine_for_test, app_with_valid_jwt_config, get_resources_path("test_language")
-    )
+    initialize_database(engine_for_test, get_resources_path("test_language"))
 
     # Signup one random user
     user_name = get_random_string(6)

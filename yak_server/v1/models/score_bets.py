@@ -42,7 +42,7 @@ class ScoreBetOut(BaseModel):
                     code=score_bet.match.team1.code,
                     description=get_language_description(score_bet.match.team1, lang),
                     score=score_bet.score1,
-                    flag=FlagOut(url=score_bet.match.team1.flag_url),
+                    flag=FlagOut(url=score_bet.match.team1.internal_flag_url),
                 )
                 if score_bet.match.team1 is not None
                 else None
@@ -53,7 +53,7 @@ class ScoreBetOut(BaseModel):
                     code=score_bet.match.team2.code,
                     description=get_language_description(score_bet.match.team2, lang),
                     score=score_bet.score2,
-                    flag=FlagOut(url=score_bet.match.team2.flag_url),
+                    flag=FlagOut(url=score_bet.match.team2.internal_flag_url),
                 )
                 if score_bet.match.team2 is not None
                 else None
@@ -90,7 +90,7 @@ class ScoreBetWithGroupIdOut(BaseModel):
                     code=score_bet.match.team1.code,
                     description=get_language_description(score_bet.match.team1, lang),
                     score=score_bet.score1,
-                    flag=FlagOut(url=score_bet.match.team1.flag_url),
+                    flag=FlagOut(url=score_bet.match.team1.internal_flag_url),
                 )
                 if score_bet.match.team1
                 else None
@@ -101,7 +101,7 @@ class ScoreBetWithGroupIdOut(BaseModel):
                     code=score_bet.match.team2.code,
                     description=get_language_description(score_bet.match.team2, lang),
                     score=score_bet.score2,
-                    flag=FlagOut(url=score_bet.match.team2.flag_url),
+                    flag=FlagOut(url=score_bet.match.team2.internal_flag_url),
                 )
                 if score_bet.match.team2
                 else None

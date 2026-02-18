@@ -28,10 +28,9 @@ def make_db_app() -> click.Group:
     @db_app.command()
     def init() -> None:
         """Initialize database."""
-        app = create_app()
         engine = build_engine()
         settings = get_settings()
-        initialize_database(engine, app, settings.data_folder)
+        initialize_database(engine, settings.data_folder)
 
     @db_app.command()
     def drop() -> None:

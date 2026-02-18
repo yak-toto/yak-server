@@ -86,7 +86,7 @@ def test_compute_points(
 
     client = TestClient(app)
 
-    initialize_database(engine_for_test, app, get_resources_path("test_compute_points_v1"))
+    initialize_database(engine_for_test, get_resources_path("test_compute_points_v1"))
 
     # Signup admin
     password = get_random_string(15)

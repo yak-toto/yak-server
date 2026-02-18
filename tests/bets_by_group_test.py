@@ -16,9 +16,7 @@ if TYPE_CHECKING:
 def test_bets_by_groups(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
     client = TestClient(app_with_valid_jwt_config)
 
-    initialize_database(
-        engine_for_test, app_with_valid_jwt_config, get_resources_path("test_compute_points_v1")
-    )
+    initialize_database(engine_for_test, get_resources_path("test_compute_points_v1"))
 
     response_signup = client.post(
         "/api/v1/users/signup",
@@ -126,9 +124,15 @@ def test_bets_by_groups(app_with_valid_jwt_config: "FastAPI", engine_for_test: "
         ],
     }
 
-    for score_bet in bets_by_valid_group.json()["result"]["score_bets"]:
-        assert score_bet["team1"]["flag"]["url"] == f"/api/v1/teams/{score_bet['team1']['id']}/flag"
-        assert score_bet["team2"]["flag"]["url"] == f"/api/v1/teams/{score_bet['team2']['id']}/flag"
+    assert len(bets_by_valid_group.json()["result"]["score_bets"]) == 3
+    assert [
+        (score_bet["team1"]["flag"]["url"], score_bet["team2"]["flag"]["url"])
+        for score_bet in bets_by_valid_group.json()["result"]["score_bets"]
+    ] == [
+        ("https://fake-team-flag_france.com", "https://fake-team-flag_ireland.com"),
+        ("https://fake-team-flag_france.com", "https://fake-team-flag_isle_of_man.com"),
+        ("https://fake-team-flag_ireland.com", "https://fake-team-flag_isle_of_man.com"),
+    ]
 
     # Error case : invalid group code
     invalid_group_code = uuid4()

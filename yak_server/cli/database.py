@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import update
 from sqlalchemy.dialects.postgresql import insert
 
 from yak_server.database.models import (
@@ -21,7 +20,6 @@ from yak_server.database.models import (
 from yak_server.database.session import build_local_session_maker
 
 if TYPE_CHECKING:
-    from fastapi import FastAPI
     from sqlalchemy import Engine
     from sqlalchemy.orm import Session
 
@@ -80,7 +78,7 @@ def fetch_group_id(group_code: str, db: "Session") -> UUID:
     return group.id
 
 
-def initialize_database(engine: "Engine", app: "FastAPI", data_folder: Path) -> None:
+def initialize_database(engine: "Engine", data_folder: Path) -> None:
     local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
@@ -123,7 +121,7 @@ def initialize_database(engine: "Engine", app: "FastAPI", data_folder: Path) -> 
         teams = json.loads((data_folder / "teams.json").read_text(encoding="utf-8"))
 
         for team in teams:
-            team["flag_url"] = ""
+            team["flag_url"] = team["internal_flag_url"]
 
             stmt = insert(TeamModel).values(**team)
             db.execute(
@@ -133,22 +131,6 @@ def initialize_database(engine: "Engine", app: "FastAPI", data_folder: Path) -> 
                 ),
             )
 
-            db.flush()
-
-            team_instance = db.query(TeamModel).filter_by(code=team["code"]).first()
-
-            if team_instance is None:  # pragma: no cover
-                raise MissingTeamDuringInitError(team_code=team["code"])
-
-            update_flag_url_stmt = (
-                update(TeamModel)
-                .where(TeamModel.code == team["code"])
-                .values(
-                    flag_url=app.url_path_for("retrieve_team_flag_by_id", team_id=team_instance.id),
-                )
-            )
-
-            db.execute(update_flag_url_stmt)
             db.flush()
 
         matches = json.loads((data_folder / "matches.json").read_text(encoding="utf-8"))

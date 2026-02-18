@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 import pytest
 
 from testing.util import get_resources_path
-from yak_server import create_app
 from yak_server.cli.database import (
     MissingGroupDuringInitError,
     MissingPhaseDuringInitError,
@@ -24,10 +23,8 @@ if TYPE_CHECKING:
 
 
 def test_missing_phase(engine_for_test: "Engine") -> None:
-    app = create_app()
-
     with pytest.raises(MissingPhaseDuringInitError) as exception:
-        initialize_database(engine_for_test, app, get_resources_path("test_missing_phase"))
+        initialize_database(engine_for_test, get_resources_path("test_missing_phase"))
 
     assert (
         str(exception.value) == "Error during database initialization: phase_code=GROUP not found."
@@ -35,38 +32,30 @@ def test_missing_phase(engine_for_test: "Engine") -> None:
 
 
 def test_missing_team1(engine_for_test: "Engine") -> None:
-    app = create_app()
-
     with pytest.raises(MissingTeamDuringInitError) as exception:
-        initialize_database(engine_for_test, app, get_resources_path("test_missing_team1"))
+        initialize_database(engine_for_test, get_resources_path("test_missing_team1"))
 
     assert str(exception.value) == "Error during database initialization: team_code=AD not found."
 
 
 def test_missing_team2(engine_for_test: "Engine") -> None:
-    app = create_app()
-
     with pytest.raises(MissingTeamDuringInitError) as exception:
-        initialize_database(engine_for_test, app, get_resources_path("test_missing_team2"))
+        initialize_database(engine_for_test, get_resources_path("test_missing_team2"))
 
     assert str(exception.value) == "Error during database initialization: team_code=BR not found."
 
 
 def test_missing_group(engine_for_test: "Engine") -> None:
-    app = create_app()
-
     with pytest.raises(MissingGroupDuringInitError) as exception:
-        initialize_database(engine_for_test, app, get_resources_path("test_missing_group"))
+        initialize_database(engine_for_test, get_resources_path("test_missing_group"))
 
     assert str(exception.value) == "Error during database initialization: group_code=A not found."
 
 
 def test_upsert(engine_for_test: "Engine") -> None:
-    app = create_app()
-
     # First initialization: insert records
     delete_database(engine_for_test, debug=True)
-    initialize_database(engine_for_test, app, get_resources_path("test_upsert"))
+    initialize_database(engine_for_test, get_resources_path("test_upsert"))
 
     local_session_maker = build_local_session_maker(engine_for_test)
 
@@ -94,7 +83,7 @@ def test_upsert(engine_for_test: "Engine") -> None:
         assert match.team2_id == brazil.id
 
     # Second initialization: upsert with updated data
-    initialize_database(engine_for_test, app, get_resources_path("test_upsert_updated"))
+    initialize_database(engine_for_test, get_resources_path("test_upsert_updated"))
 
     with local_session_maker() as db:
         # Phase should be updated
