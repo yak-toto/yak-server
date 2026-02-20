@@ -1,7 +1,7 @@
 # ===========================
 # 1️⃣ Build Stage (uv)
 # ===========================
-FROM python:3.14.3-alpine3.22 AS builder
+FROM ghcr.io/astral-sh/uv:0.9.18-python3.14-alpine3.22 AS builder
 
 ARG COMPETITION
 
@@ -9,10 +9,6 @@ ARG COMPETITION
 RUN [ -n "$COMPETITION" ] || (echo "COMPETITION is required!" && false)
 
 WORKDIR /app/
-
-# Install uv
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
-COPY --from=ghcr.io/astral-sh/uv:0.9.18 /uv /uvx /bin/
 
 # Enable bytecode compilation
 ENV UV_COMPILE_BYTECODE=1
