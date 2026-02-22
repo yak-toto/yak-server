@@ -40,4 +40,7 @@ def get_competition(
     },
 )
 def get_competition_logo(settings: Annotated[Settings, Depends(get_settings)]) -> FileResponse:
-    return FileResponse(f"{settings.data_folder}/logo.svg")
+    return FileResponse(
+        f"{settings.data_folder}/logo.svg",
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
