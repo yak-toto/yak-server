@@ -32,7 +32,7 @@ classifiers = [
 ]
 dependencies = [
     "PyJWT ==2.11.0",
-    "psycopg[binary] ==3.3.2",
+    "psycopg[binary] ==3.3.3",
     "argon2-cffi ==25.1.0",
     "fastapi ==0.129.0",
     "click ==8.3.1",
