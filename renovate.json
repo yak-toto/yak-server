@@ -36,6 +36,13 @@
         },
         {
             "matchManagers": [
+                "pep621"
+            ],
+            "automerge": true,
+            "automergeType": true
+        },
+        {
+            "matchManagers": [
                 "pre-commit"
             ],
             "automerge": true,
