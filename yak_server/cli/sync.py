@@ -184,11 +184,15 @@ def synchronize_official_results(engine: "Engine", official_results_url: HttpUrl
         groups = [
             GroupContainer(model=group, content=content.parent.parent)
             for group in db.query(GroupModel).order_by(GroupModel.index)
-            for content in soup.find(
-                "h3",
-                id=group.description_en.replace(" ", "_"),
-                string=group.description_en,
+            if (
+                heading := soup.find(
+                    "h3",
+                    id=group.description_en.replace(" ", "_"),
+                    string=group.description_en,
+                )
             )
+            is not None
+            for content in heading
         ]
 
         matches = extract_matches_from_html(groups)
