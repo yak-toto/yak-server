@@ -18,6 +18,7 @@ from .v1.routers import rules as rules_router
 from .v1.routers import score_bets as score_bets_router
 from .v1.routers import teams as teams_router
 from .v1.routers import users as users_router
+from .v1.routers import version as version_router
 
 GLOBAL_ENDPOINT = "api"
 VERSION1 = "v1"
@@ -45,6 +46,7 @@ def create_app() -> FastAPI:
 
     # Include health check router
     app.include_router(health_check.router, prefix=f"/{GLOBAL_ENDPOINT}")
+    app.include_router(version_router.router, prefix=f"/{GLOBAL_ENDPOINT}")
 
     # Include all routers
     v1_prefix = f"/{GLOBAL_ENDPOINT}/{VERSION1}"
