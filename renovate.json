@@ -39,7 +39,7 @@
                 "pep621"
             ],
             "automerge": true,
-            "automergeType": true
+            "automergeType": "pr"
         },
         {
             "matchManagers": [
@@ -47,6 +47,12 @@
             ],
             "automerge": true,
             "automergeType": "pr"
+        },
+        {
+            "matchUpdateTypes": [
+                "lockFileMaintenance"
+            ],
+            "minimumReleaseAge": null
         }
     ]
 }
