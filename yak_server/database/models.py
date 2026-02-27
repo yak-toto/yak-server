@@ -59,24 +59,6 @@ class UserModel(Base):
         nullable=False,
         default=0,
     )
-    number_quarter_final_guess: Mapped[int] = mapped_column(
-        sa.Integer,
-        CheckConstraint("number_quarter_final_guess>=0"),
-        nullable=False,
-        default=0,
-    )
-    number_semi_final_guess: Mapped[int] = mapped_column(
-        sa.Integer,
-        CheckConstraint("number_semi_final_guess>=0"),
-        nullable=False,
-        default=0,
-    )
-    number_final_guess: Mapped[int] = mapped_column(
-        sa.Integer,
-        CheckConstraint("number_final_guess>=0"),
-        nullable=False,
-        default=0,
-    )
     number_winner_guess: Mapped[int] = mapped_column(
         sa.Integer,
         CheckConstraint("number_winner_guess>=0"),
@@ -95,6 +77,14 @@ class UserModel(Base):
         "MatchModel",
         back_populates="user",
         lazy="dynamic",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
+
+    knockout_guesses: Mapped[list["UserKnockoutGuessModel"]] = relationship(
+        "UserKnockoutGuessModel",
+        back_populates="user",
+        lazy="raise",
         cascade="all, delete",
         passive_deletes=True,
     )
@@ -403,3 +393,35 @@ class GroupPositionModel(Base):
     @hybrid_property
     def points(self) -> int:
         return self.won * 3 + self.drawn
+
+
+class UserKnockoutGuessModel(Base):
+    __tablename__ = "user_knockout_guess"
+    id: Mapped[UUID] = mapped_column(DB_UUID(), primary_key=True, nullable=False, default=uuid4)
+
+    user_id: Mapped[UUID] = mapped_column(
+        DB_UUID(),
+        sa.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    user: Mapped["UserModel"] = relationship(
+        "UserModel",
+        back_populates="knockout_guesses",
+        lazy="raise",
+    )
+
+    group_id: Mapped[UUID] = mapped_column(
+        DB_UUID(),
+        sa.ForeignKey("group.id"),
+        nullable=False,
+    )
+    group: Mapped["GroupModel"] = relationship("GroupModel", lazy="raise")
+
+    count: Mapped[int] = mapped_column(
+        sa.Integer,
+        CheckConstraint("count>=0"),
+        nullable=False,
+        default=0,
+    )
+
+    __table_args__ = (UniqueConstraint("user_id", "group_id", name="uq_user_knockout_guess"),)

@@ -7,10 +7,13 @@ import jwt
 from sqlalchemy.orm import Session, selectinload
 
 from yak_server.database.models import (
+    GroupModel,
     MatchModel,
     MatchReferenceModel,
+    PhaseModel,
     Role,
     ScoreBetModel,
+    UserKnockoutGuessModel,
     UserModel,
 )
 
@@ -90,6 +93,12 @@ def signup_user(
             .filter_by(user_id=user.id),
         ),
     )
+
+    # Create knockout guess records for all final phase groups (not for admin)
+    if role != Role.ADMIN:
+        for group in db.query(GroupModel).join(GroupModel.phase).where(PhaseModel.code == "FINAL"):
+            db.add(UserKnockoutGuessModel(user_id=user.id, group_id=group.id, count=0))
+
     db.commit()
 
     return user

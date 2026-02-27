@@ -1,6 +1,7 @@
 from collections.abc import Generator
 from http import HTTPStatus
 from typing import TYPE_CHECKING
+from unittest.mock import ANY
 
 import pytest
 from click.testing import CliRunner
@@ -17,7 +18,7 @@ from yak_server.helpers.rules.compute_final_from_rank import (
     Team,
     Versus,
 )
-from yak_server.helpers.rules.compute_points import RuleComputePoints
+from yak_server.helpers.rules.compute_points import KnockoutRoundConfig, RuleComputePoints
 from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
@@ -67,6 +68,9 @@ def app_and_rules_for_compute_points(
             multiplying_factor_correct_score=7,
             team_qualified=10,
             first_team_qualified=20,
+            knockout_rounds=[KnockoutRoundConfig(group_code="1", points_per_team=120)],
+            winner_group_code="1",
+            winner_points=200,
         ),
     )
 
@@ -187,13 +191,13 @@ def test_compute_points(
             "first_name": users_data[2].first_name,
             "full_name": f"{users_data[2].first_name} {users_data[2].last_name}",
             "last_name": users_data[2].last_name,
-            "number_final_guess": 0,
             "number_first_qualified_guess": 1,
             "number_match_guess": 3,
             "number_qualified_teams_guess": 2,
-            "number_quarter_final_guess": 0,
             "number_score_guess": 0,
-            "number_semi_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0}
+            ],
             "number_winner_guess": 0,
             "points": 46.0,
         },
@@ -202,13 +206,13 @@ def test_compute_points(
             "first_name": users_data[0].first_name,
             "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
             "last_name": users_data[0].last_name,
-            "number_final_guess": 0,
             "number_first_qualified_guess": 0,
             "number_match_guess": 2,
             "number_qualified_teams_guess": 2,
-            "number_quarter_final_guess": 0,
             "number_score_guess": 2,
-            "number_semi_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0}
+            ],
             "number_winner_guess": 0,
             "points": 43.0,
         },
@@ -217,13 +221,13 @@ def test_compute_points(
             "first_name": users_data[1].first_name,
             "full_name": f"{users_data[1].first_name} {users_data[1].last_name}",
             "last_name": users_data[1].last_name,
-            "number_final_guess": 0,
             "number_first_qualified_guess": 0,
             "number_match_guess": 1,
             "number_qualified_teams_guess": 1,
-            "number_quarter_final_guess": 0,
             "number_score_guess": 0,
-            "number_semi_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0}
+            ],
             "number_winner_guess": 0,
             "points": 11.0,
         },
@@ -256,13 +260,13 @@ def test_compute_points(
             "first_name": users_data[0].first_name,
             "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
             "last_name": users_data[0].last_name,
-            "number_final_guess": 2,
             "number_first_qualified_guess": 0,
             "number_match_guess": 2,
             "number_qualified_teams_guess": 2,
-            "number_quarter_final_guess": 0,
             "number_score_guess": 2,
-            "number_semi_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 2}
+            ],
             "number_winner_guess": 1,
             "points": 483.0,
         },
@@ -271,13 +275,13 @@ def test_compute_points(
             "first_name": users_data[2].first_name,
             "full_name": f"{users_data[2].first_name} {users_data[2].last_name}",
             "last_name": users_data[2].last_name,
-            "number_final_guess": 2,
             "number_first_qualified_guess": 1,
             "number_match_guess": 3,
             "number_qualified_teams_guess": 2,
-            "number_quarter_final_guess": 0,
             "number_score_guess": 0,
-            "number_semi_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 2}
+            ],
             "number_winner_guess": 0,
             "points": 286.0,
         },
@@ -286,13 +290,13 @@ def test_compute_points(
             "first_name": users_data[1].first_name,
             "full_name": f"{users_data[1].first_name} {users_data[1].last_name}",
             "last_name": users_data[1].last_name,
-            "number_final_guess": 1,
             "number_first_qualified_guess": 0,
             "number_match_guess": 1,
             "number_qualified_teams_guess": 1,
-            "number_quarter_final_guess": 0,
             "number_score_guess": 0,
-            "number_semi_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 1}
+            ],
             "number_winner_guess": 0,
             "points": 131.0,
         },
@@ -309,13 +313,13 @@ def test_compute_points(
         "first_name": users_data[0].first_name,
         "last_name": users_data[0].last_name,
         "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
-        "number_final_guess": 2,
         "number_first_qualified_guess": 0,
         "number_match_guess": 2,
         "number_qualified_teams_guess": 2,
-        "number_quarter_final_guess": 0,
         "number_score_guess": 2,
-        "number_semi_final_guess": 0,
+        "knockout_rounds": [
+            {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 2}
+        ],
         "number_winner_guess": 1,
         "points": 483.0,
     }
@@ -333,13 +337,11 @@ def test_compute_points(
             "first_name": admin.first_name,
             "last_name": admin.last_name,
             "full_name": f"{admin.first_name} {admin.last_name}",
-            "number_final_guess": 0,
             "number_first_qualified_guess": 0,
             "number_match_guess": 0,
             "number_qualified_teams_guess": 0,
-            "number_quarter_final_guess": 0,
             "number_score_guess": 0,
-            "number_semi_final_guess": 0,
+            "knockout_rounds": [],
             "number_winner_guess": 0,
             "points": 0.0,
         },

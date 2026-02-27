@@ -15,6 +15,7 @@ from yak_server.database.models import (
     PhaseModel,
     Role,
     ScoreBetModel,
+    UserKnockoutGuessModel,
     UserModel,
 )
 from yak_server.helpers.group_position import get_group_rank_with_code
@@ -25,6 +26,11 @@ if TYPE_CHECKING:
     from yak_server.database.models import GroupPositionModel
 
 
+class KnockoutRoundConfig(BaseModel):
+    group_code: str
+    points_per_team: int
+
+
 class RuleComputePoints(BaseModel):
     base_correct_result: int
     multiplying_factor_correct_result: int
@@ -32,6 +38,9 @@ class RuleComputePoints(BaseModel):
     multiplying_factor_correct_score: int
     team_qualified: int
     first_team_qualified: int
+    knockout_rounds: list[KnockoutRoundConfig] = []
+    winner_group_code: str | None = None
+    winner_points: int = 0
 
 
 @dataclass
@@ -184,10 +193,11 @@ def compute_points(
         other_users,
     )
 
-    quarter_finals_team = team_from_group_code(db, admin, "4")
-    semi_finals_team = team_from_group_code(db, admin, "2")
-    final_team = team_from_group_code(db, admin, "1")
-    winner = winner_from_user(db, admin)
+    admin_knockout_teams = {
+        r.group_code: team_from_group_code(db, admin, r.group_code)
+        for r in rule_config.knockout_rounds
+    }
+    admin_winner = winner_from_user(db, admin) if rule_config.winner_group_code else set()
 
     numbers_of_players = other_users.count()
 
@@ -224,21 +234,30 @@ def compute_points(
         user.points += user.number_qualified_teams_guess * rule_config.team_qualified
         user.points += user.number_first_qualified_guess * rule_config.first_team_qualified
 
-        user.number_quarter_final_guess = len(
-            team_from_group_code(db, user, "4").intersection(quarter_finals_team),
-        )
-        user.number_semi_final_guess = len(
-            team_from_group_code(db, user, "2").intersection(semi_finals_team),
-        )
-        user.number_final_guess = len(
-            team_from_group_code(db, user, "1").intersection(final_team),
-        )
-        user.number_winner_guess = len(winner_from_user(db, user).intersection(winner))
+        for round_cfg in rule_config.knockout_rounds:
+            group = db.query(GroupModel).filter_by(code=round_cfg.group_code).first()
+            if group is None:
+                continue
+            count = len(
+                team_from_group_code(db, user, round_cfg.group_code).intersection(
+                    admin_knockout_teams[round_cfg.group_code]
+                ),
+            )
+            knockout_guess = (
+                db
+                .query(UserKnockoutGuessModel)
+                .filter_by(user_id=user.id, group_id=group.id)
+                .first()
+            )
+            if knockout_guess is None:
+                db.add(UserKnockoutGuessModel(user_id=user.id, group_id=group.id, count=count))
+            else:
+                knockout_guess.count = count
+            user.points += count * round_cfg.points_per_team
 
-        user.points += 30 * user.number_quarter_final_guess
-        user.points += 60 * user.number_semi_final_guess
-        user.points += 120 * user.number_final_guess
-        user.points += 200 * user.number_winner_guess
+        if rule_config.winner_group_code:
+            user.number_winner_guess = len(winner_from_user(db, user).intersection(admin_winner))
+            user.points += user.number_winner_guess * rule_config.winner_points
 
     db.commit()
 
