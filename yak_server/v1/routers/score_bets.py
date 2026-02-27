@@ -7,13 +7,14 @@ from pydantic import UUID4
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
-from yak_server.database.models import GroupModel, MatchModel, ScoreBetModel, UserModel
+from yak_server.database.models import GroupModel, MatchModel, Role, ScoreBetModel, UserModel
 from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.database import get_db
 from yak_server.helpers.group_position import set_recomputation_flag
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
 from yak_server.helpers.logging_helpers import modify_score_bet_successfully
-from yak_server.helpers.settings import get_lock_datetime
+from yak_server.helpers.rules.compute_points import compute_points
+from yak_server.helpers.settings import get_lock_datetime, get_settings
 from yak_server.v1.helpers.auth import require_user
 from yak_server.v1.helpers.errors import BetNotFound, LockedScoreBet, TeamNotFound
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
@@ -184,6 +185,12 @@ def modify_score_bet(
     set_recomputation_flag(db, score_bet.match.team2_id, user.id)
 
     db.commit()
+
+    if user.role == Role.ADMIN:
+        rule_config = get_settings().rules.compute_points
+        if rule_config is not None:
+            compute_points(db, user, rule_config)
+
     db.refresh(score_bet)
 
     return send_response(score_bet, locked=is_locked(user, lock_datetime), lang=lang)

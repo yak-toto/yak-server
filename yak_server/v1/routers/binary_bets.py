@@ -7,12 +7,13 @@ from pydantic import UUID4
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
-from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, UserModel
+from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, Role, UserModel
 from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.database import get_db
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
 from yak_server.helpers.logging_helpers import modify_binary_bet_successfully
-from yak_server.helpers.settings import get_lock_datetime
+from yak_server.helpers.rules.compute_points import compute_points
+from yak_server.helpers.settings import get_lock_datetime, get_settings
 from yak_server.v1.helpers.auth import require_user
 from yak_server.v1.helpers.errors import BetNotFound, LockedBinaryBet, TeamNotFound
 from yak_server.v1.models.binary_bets import BinaryBetOut, BinaryBetResponse, ModifyBinaryBetIn
@@ -181,6 +182,12 @@ def modify_binary_bet_by_id(
             raise TeamNotFound(modify_binary_bet_in.team2.id) from integrity_error  # type: ignore[arg-type]
 
     db.commit()
+
+    if user.role == Role.ADMIN:
+        rule_config = get_settings().rules.compute_points
+        if rule_config is not None:
+            compute_points(db, user, rule_config)
+
     db.refresh(binary_bet)
 
     return send_response(binary_bet, locked=is_locked(user, lock_datetime), lang=lang)
