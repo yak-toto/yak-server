@@ -1,3 +1,4 @@
+import secrets
 from collections.abc import Generator
 from http import HTTPStatus
 from typing import TYPE_CHECKING
@@ -19,7 +20,7 @@ from yak_server.helpers.rules.compute_final_from_rank import (
     Versus,
     compute_finale_phase_from_group_rank,
 )
-from yak_server.helpers.rules.compute_points import RuleComputePoints
+from yak_server.helpers.rules.compute_points import KnockoutRoundConfig, RuleComputePoints
 from yak_server.helpers.settings import get_rules
 
 if TYPE_CHECKING:
@@ -47,6 +48,12 @@ def app_with_rules_and_score_board_config(
             multiplying_factor_correct_score=7,
             team_qualified=10,
             first_team_qualified=20,
+            knockout_rounds=[
+                KnockoutRoundConfig(group_code="2", points_per_team=60),
+                KnockoutRoundConfig(group_code="1", points_per_team=120),
+            ],
+            winner_group_code="1",
+            winner_points=200,
         ),
     )
 
@@ -254,9 +261,10 @@ def test_compute_points(
             "number_score_guess": 0,
             "number_qualified_teams_guess": 1,
             "number_first_qualified_guess": 0,
-            "number_quarter_final_guess": 0,
-            "number_semi_final_guess": 0,
-            "number_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
+            ],
             "number_winner_guess": 0,
             "points": 16.0,
         },
@@ -269,9 +277,10 @@ def test_compute_points(
             "number_score_guess": 0,
             "number_qualified_teams_guess": 0,
             "number_first_qualified_guess": 0,
-            "number_quarter_final_guess": 0,
-            "number_semi_final_guess": 0,
-            "number_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
+            ],
             "number_winner_guess": 0,
             "points": 8.0,
         },
@@ -284,9 +293,10 @@ def test_compute_points(
             "number_score_guess": 0,
             "number_qualified_teams_guess": 0,
             "number_first_qualified_guess": 0,
-            "number_quarter_final_guess": 0,
-            "number_semi_final_guess": 0,
-            "number_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
+            ],
             "number_winner_guess": 0,
             "points": 5.0,
         },
@@ -334,9 +344,10 @@ def test_compute_points(
             "number_score_guess": 0,
             "number_qualified_teams_guess": 1,
             "number_first_qualified_guess": 0,
-            "number_quarter_final_guess": 0,
-            "number_semi_final_guess": 0,
-            "number_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
+            ],
             "number_winner_guess": 0,
             "points": 9.0,
         },
@@ -349,9 +360,10 @@ def test_compute_points(
             "number_score_guess": 0,
             "number_qualified_teams_guess": 0,
             "number_first_qualified_guess": 0,
-            "number_quarter_final_guess": 0,
-            "number_semi_final_guess": 0,
-            "number_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
+            ],
             "number_winner_guess": 0,
             "points": 6.0,
         },
@@ -364,13 +376,77 @@ def test_compute_points(
             "number_score_guess": 0,
             "number_qualified_teams_guess": 0,
             "number_first_qualified_guess": 0,
-            "number_quarter_final_guess": 0,
-            "number_semi_final_guess": 0,
-            "number_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
+            ],
             "number_winner_guess": 0,
             "points": 0.0,
         },
     ]
+
+
+def test_compute_points_skips_nonexistent_knockout_group(
+    app_with_rules_and_score_board_config: "FastAPI", engine_for_test: "Engine"
+) -> None:
+    app_with_rules_and_score_board_config.dependency_overrides[get_rules] = lambda: Rules(
+        compute_finale_phase_from_group_rank=RuleComputeFinaleFromGroupRank(
+            to_group="2",
+            from_phase="GROUP",
+            versus=[
+                Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="B")),
+                Versus(team1=Team(rank=1, group="B"), team2=Team(rank=2, group="A")),
+            ],
+        ),
+        compute_points=RuleComputePoints(
+            base_correct_result=1,
+            multiplying_factor_correct_result=2,
+            base_correct_score=3,
+            multiplying_factor_correct_score=7,
+            team_qualified=10,
+            first_team_qualified=20,
+            knockout_rounds=[
+                KnockoutRoundConfig(group_code="NONEXISTENT", points_per_team=60),
+            ],
+            winner_group_code="1",
+            winner_points=200,
+        ),
+    )
+
+    client = TestClient(app_with_rules_and_score_board_config)
+
+    initialize_database(engine_for_test, get_resources_path("test_compute_points_edge_cases_v1"))
+
+    password = get_random_string(15)
+    create_admin(password, engine_for_test)
+
+    response_login_admin = client.post(
+        "/api/v1/users/login",
+        json={"name": "admin", "password": password},
+    )
+    assert response_login_admin.status_code == HTTPStatus.CREATED
+    admin_token = response_login_admin.json()["result"]["access_token"]
+
+    patch_score_bets(
+        client, admin_token, [(secrets.randbelow(11), secrets.randbelow(11)) for _ in range(12)]
+    )
+
+    client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": get_random_string(8),
+            "first_name": get_random_string(8),
+            "last_name": get_random_string(8),
+            "password": get_random_string(15),
+        },
+    )
+
+    response = client.post(
+        "/api/v1/rules/62d46542-8cf1-4a3b-af77-a5086f10ac59",
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_missing_first_phase_group(engine_for_test: "Engine") -> None:

@@ -115,8 +115,7 @@ max-complexity = 12
 "yak_server/helpers/rules/__init__.py" = ["RUF067"]
 
 [tool.ruff.lint.pylint]
-max-args = 6
-max-returns = 7
+max-args = 7
 
 [tool.mypy]
 strict = true

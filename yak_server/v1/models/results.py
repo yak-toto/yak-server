@@ -2,8 +2,26 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, NonNegativeInt
 
+from yak_server.helpers.language import Lang
+
+from .groups import GroupOut
+
 if TYPE_CHECKING:
-    from yak_server.database.models import UserModel
+    from yak_server.database.models import UserKnockoutGuessModel, UserModel
+
+
+class KnockoutRoundResult(BaseModel):
+    group: GroupOut
+    count: NonNegativeInt
+
+    @classmethod
+    def from_instance(
+        cls, user_knockout_guess: "UserKnockoutGuessModel", *, lang: Lang
+    ) -> "KnockoutRoundResult":
+        return cls(
+            group=GroupOut.from_instance(user_knockout_guess.group, lang=lang),
+            count=user_knockout_guess.count,
+        )
 
 
 class UserResult(BaseModel):
@@ -15,14 +33,12 @@ class UserResult(BaseModel):
     number_score_guess: NonNegativeInt
     number_qualified_teams_guess: NonNegativeInt
     number_first_qualified_guess: NonNegativeInt
-    number_quarter_final_guess: NonNegativeInt
-    number_semi_final_guess: NonNegativeInt
-    number_final_guess: NonNegativeInt
+    knockout_rounds: list[KnockoutRoundResult]
     number_winner_guess: NonNegativeInt
     points: float
 
     @classmethod
-    def from_instance(cls, user: "UserModel", *, rank: NonNegativeInt) -> "UserResult":
+    def from_instance(cls, user: "UserModel", *, rank: NonNegativeInt, lang: Lang) -> "UserResult":
         return cls(
             rank=rank,
             first_name=user.first_name,
@@ -32,9 +48,10 @@ class UserResult(BaseModel):
             number_score_guess=user.number_score_guess,
             number_qualified_teams_guess=user.number_qualified_teams_guess,
             number_first_qualified_guess=user.number_first_qualified_guess,
-            number_quarter_final_guess=user.number_quarter_final_guess,
-            number_semi_final_guess=user.number_semi_final_guess,
-            number_final_guess=user.number_final_guess,
+            knockout_rounds=[
+                KnockoutRoundResult.from_instance(kg, lang=lang)
+                for kg in sorted(user.knockout_guesses, key=lambda kg: kg.group.index)
+            ],
             number_winner_guess=user.number_winner_guess,
             points=user.points,
         )

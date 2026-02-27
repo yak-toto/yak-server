@@ -10,8 +10,8 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_rule(app_with_empty_rules: "FastAPI") -> None:
-    client = TestClient(app_with_empty_rules)
+def test_rule(app_with_valid_jwt_config: "FastAPI") -> None:
+    client = TestClient(app_with_valid_jwt_config)
 
     response_signup = client.post(
         "/api/v1/users/signup",
