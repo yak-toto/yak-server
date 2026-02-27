@@ -74,8 +74,6 @@ def write_app_env_file(
 
     env["LOCK_DATETIME"] = lock_datetime_settings.lock_datetime.isoformat()
 
-    env["OFFICIAL_RESULTS_URL"] = common_settings["official_results_url"]
-
     env["COOKIE_SECURE"] = debug is False
     env["COMPETITION_SETTINGS__DESCRIPTION_FR"] = common_settings["competition"]["description_fr"]
     env["COMPETITION_SETTINGS__DESCRIPTION_EN"] = common_settings["competition"]["description_en"]

@@ -38,7 +38,6 @@ def test_yak_env_all() -> None:
         assert len(env["JWT_REFRESH_SECRET_KEY"]) == 256
         assert env["COMPETITION"] == "world_cup_2022"
         assert env["LOCK_DATETIME"] == "2022-11-20T17:00:00+01:00"
-        assert env["OFFICIAL_RESULTS_URL"] == "https://en.wikipedia.org/wiki/2022_FIFA_World_Cup"
         assert env["DATA_FOLDER"] is not None
         assert Path(env["DATA_FOLDER"]).samefile(
             Path(__file__).parents[1] / "yak_server" / "data" / "world_cup_2022",
@@ -92,7 +91,7 @@ def test_yak_env_all_invalid_lockdatetime(monkeypatch: pytest.MonkeyPatch) -> No
 
         (Path(tmpdir) / "data" / "competition0").mkdir(parents=True)
         (Path(tmpdir) / "data" / "competition0" / "common.json").write_text(
-            json.dumps({"lock_datetime": date, "official_results_url": ""}),
+            json.dumps({"lock_datetime": date}),
         )
 
         monkeypatch.setattr("yak_server.cli.env.__file__", (Path(tmpdir) / "e" / "e").resolve())
@@ -153,7 +152,6 @@ def test_yak_env_app() -> None:
         assert len(env["JWT_REFRESH_SECRET_KEY"]) == 256
         assert env["COMPETITION"] == "world_cup_2018"
         assert env["LOCK_DATETIME"] == "2018-06-14T18:00:00+03:00"
-        assert env["OFFICIAL_RESULTS_URL"] == "https://en.wikipedia.org/wiki/2018_FIFA_World_Cup"
         assert env["DATA_FOLDER"] is not None
         assert Path(env["DATA_FOLDER"]).samefile(
             Path(__file__).parents[1] / "yak_server" / "data" / "world_cup_2018",

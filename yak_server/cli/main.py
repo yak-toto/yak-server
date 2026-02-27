@@ -11,7 +11,6 @@ from .database import create_database, delete_database, drop_database, initializ
 from .env import init_env, write_app_env_file, write_db_env_file
 from .migration import setup_migration
 from .score_board import compute_score_board
-from .sync import synchronize_official_results
 
 
 def make_db_app() -> click.Group:
@@ -75,14 +74,6 @@ def make_db_app() -> click.Group:
         """Compute score board."""
         engine = build_engine()
         compute_score_board(engine)
-
-    @db_app.command()
-    def sync() -> None:
-        """Synchronize official results and push them to admin with web
-        scraping the world cup wikipedia page"""
-        engine = build_engine()
-        settings = get_settings()
-        synchronize_official_results(engine, settings.official_results_url)
 
     return db_app
 

@@ -21,7 +21,6 @@ class MockSettings:
         *,
         data_folder_relative: str | None = None,
         rules: Optional["Rules"] = None,
-        official_results_url: str | None = None,
         competition: str | None = None,
         competition_settings: Optional["CompetitionSettings"] = None,
     ) -> None:
@@ -30,7 +29,6 @@ class MockSettings:
         )
 
         self.rules = rules
-        self.official_results_url = official_results_url
         self.competition = competition
         self.competition_settings = competition_settings
 
