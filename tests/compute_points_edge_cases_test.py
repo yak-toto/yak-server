@@ -19,7 +19,7 @@ from yak_server.helpers.rules.compute_final_from_rank import (
     Versus,
     compute_finale_phase_from_group_rank,
 )
-from yak_server.helpers.rules.compute_points import RuleComputePoints
+from yak_server.helpers.rules.compute_points import KnockoutRoundConfig, RuleComputePoints
 from yak_server.helpers.settings import get_rules
 
 if TYPE_CHECKING:
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 @pytest.fixture
 def app_with_rules_and_score_board_config(
     app_with_valid_jwt_config: "FastAPI",
-) -> Generator["FastAPI", None, None]:
+) -> Generator["FastAPI"]:
     app_with_valid_jwt_config.dependency_overrides[get_rules] = lambda: Rules(
         compute_finale_phase_from_group_rank=RuleComputeFinaleFromGroupRank(
             to_group="2",
@@ -47,6 +47,12 @@ def app_with_rules_and_score_board_config(
             multiplying_factor_correct_score=7,
             team_qualified=10,
             first_team_qualified=20,
+            knockout_rounds=[
+                KnockoutRoundConfig(group_code="2", points_per_team=60),
+                KnockoutRoundConfig(group_code="1", points_per_team=120),
+            ],
+            winner_group_code="1",
+            winner_points=200,
         ),
     )
 
@@ -254,9 +260,10 @@ def test_compute_points(
             "number_score_guess": 0,
             "number_qualified_teams_guess": 1,
             "number_first_qualified_guess": 0,
-            "number_quarter_final_guess": 0,
-            "number_semi_final_guess": 0,
-            "number_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
+            ],
             "number_winner_guess": 0,
             "points": 16.0,
         },
@@ -269,9 +276,10 @@ def test_compute_points(
             "number_score_guess": 0,
             "number_qualified_teams_guess": 0,
             "number_first_qualified_guess": 0,
-            "number_quarter_final_guess": 0,
-            "number_semi_final_guess": 0,
-            "number_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
+            ],
             "number_winner_guess": 0,
             "points": 8.0,
         },
@@ -284,9 +292,10 @@ def test_compute_points(
             "number_score_guess": 0,
             "number_qualified_teams_guess": 0,
             "number_first_qualified_guess": 0,
-            "number_quarter_final_guess": 0,
-            "number_semi_final_guess": 0,
-            "number_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
+            ],
             "number_winner_guess": 0,
             "points": 5.0,
         },
@@ -334,9 +343,10 @@ def test_compute_points(
             "number_score_guess": 0,
             "number_qualified_teams_guess": 1,
             "number_first_qualified_guess": 0,
-            "number_quarter_final_guess": 0,
-            "number_semi_final_guess": 0,
-            "number_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
+            ],
             "number_winner_guess": 0,
             "points": 9.0,
         },
@@ -349,9 +359,10 @@ def test_compute_points(
             "number_score_guess": 0,
             "number_qualified_teams_guess": 0,
             "number_first_qualified_guess": 0,
-            "number_quarter_final_guess": 0,
-            "number_semi_final_guess": 0,
-            "number_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
+            ],
             "number_winner_guess": 0,
             "points": 6.0,
         },
@@ -364,9 +375,10 @@ def test_compute_points(
             "number_score_guess": 0,
             "number_qualified_teams_guess": 0,
             "number_first_qualified_guess": 0,
-            "number_quarter_final_guess": 0,
-            "number_semi_final_guess": 0,
-            "number_final_guess": 0,
+            "knockout_rounds": [
+                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
+                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
+            ],
             "number_winner_guess": 0,
             "points": 0.0,
         },

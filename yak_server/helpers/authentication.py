@@ -7,12 +7,15 @@ import jwt
 from sqlalchemy.orm import Session, selectinload
 
 from yak_server.database.models import (
+    GroupModel,
     MatchModel,
     MatchReferenceModel,
     Role,
     ScoreBetModel,
+    UserKnockoutGuessModel,
     UserModel,
 )
+from yak_server.helpers.rules.compute_points import RuleComputePoints
 
 from .errors import name_already_exists_message
 from .group_position import create_group_position
@@ -70,6 +73,7 @@ def signup_user(
     last_name: str,
     password: str,
     role: Role,
+    rule_config: RuleComputePoints | None,
 ) -> UserModel:
     # Check existing user in db
     existing_user = db.query(UserModel).filter_by(name=name).first()
@@ -109,6 +113,12 @@ def signup_user(
             .filter_by(user_id=user.id),
         ),
     )
+
+    if rule_config is not None and rule_config.knockout_rounds:
+        knockout_group_codes = {r.group_code for r in rule_config.knockout_rounds}
+        for group in db.query(GroupModel).filter(GroupModel.code.in_(knockout_group_codes)):
+            db.add(UserKnockoutGuessModel(user_id=user.id, group_id=group.id, count=0))
+
     db.commit()
 
     return user

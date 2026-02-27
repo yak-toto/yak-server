@@ -26,11 +26,13 @@ from yak_server.helpers.password_validator import (
     PasswordRequirements,
     PasswordRequirementsError,
 )
+from yak_server.helpers.rules import Rules
 from yak_server.helpers.settings import (
     AuthenticationSettings,
     CookieSettings,
     get_authentication_settings,
     get_cookie_settings,
+    get_rules,
 )
 from yak_server.v1.helpers.auth import (
     require_admin,
@@ -81,6 +83,7 @@ def signup(
     db: Annotated[Session, Depends(get_db)],
     auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
     cookie_settings: Annotated[CookieSettings, Depends(get_cookie_settings)],
+    rules: Annotated[Rules, Depends(get_rules)],
 ) -> GenericOut[SignupOut]:
     try:
         user = signup_user(
@@ -90,6 +93,7 @@ def signup(
             signup_in.last_name,
             signup_in.password,
             Role.USER,
+            rules.compute_points,
         )
     except PasswordRequirementsError as password_requirements_error:
         raise UnsatisfiedPasswordRequirements(
