@@ -47,7 +47,6 @@ Repository = "https://github.com/yak-toto/yak-server"
 
 [project.optional-dependencies]
 db_migration = ["alembic ==1.18.4"]
-sync = ["beautifulsoup4[lxml] ==4.14.3", "httpx ==0.28.1"]
 server = ["uvicorn==0.41.0"]
 
 [project.scripts]
@@ -65,9 +64,7 @@ dev = [
 ]
 type-checking = [
     "hatchling==1.28.0",
-    "lxml-stubs==0.5.1",
     "mypy==1.19.1",
-    "types-beautifulsoup4==4.12.0.20250516",
 ]
 
 [tool.hatch.version]
@@ -125,8 +122,7 @@ strict = true
 pretty = true
 plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
 exclude = '''(?x)(
-    ^yak_server/database/migrations/.*?\.py$|
-    ^yak_server/cli/sync.py$
+    ^yak_server/database/migrations/.*?\.py$
 )'''
 
 [tool.pytest.ini_options]
