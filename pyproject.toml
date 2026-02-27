@@ -34,7 +34,7 @@ dependencies = [
     "PyJWT ==2.11.0",
     "psycopg[binary] ==3.3.3",
     "argon2-cffi ==25.1.0",
-    "fastapi ==0.129.2",
+    "fastapi ==0.131.0",
     "click ==8.3.1",
     "SQLAlchemy ==2.0.46",
     "pydantic-settings ==2.13.1",
