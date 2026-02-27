@@ -22,6 +22,7 @@ def create_admin(password: str, engine: "Engine") -> None:
                 last_name="admin",
                 password=password,
                 role=Role.ADMIN,
+                rule_config=None,
             )
         except NameAlreadyExistsError:
             click.echo("Admin already exists")

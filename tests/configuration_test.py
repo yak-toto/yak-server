@@ -5,7 +5,7 @@ import pytest
 
 from yak_server.helpers.rules import Rules, load_rules
 from yak_server.helpers.rules.compute_final_from_rank import RuleComputeFinaleFromGroupRank
-from yak_server.helpers.rules.compute_points import RuleComputePoints
+from yak_server.helpers.rules.compute_points import KnockoutRoundConfig, RuleComputePoints
 from yak_server.helpers.settings import Settings, get_common_settings, get_lock_datetime, get_rules
 
 DATA_FOLDER = Path(__file__).parents[1] / "yak_server" / "data"
@@ -116,6 +116,13 @@ RULES_PARAMS = [
             multiplying_factor_correct_score=7,
             team_qualified=10,
             first_team_qualified=20,
+            knockout_rounds=[
+                KnockoutRoundConfig(group_code="4", points_per_team=30),
+                KnockoutRoundConfig(group_code="2", points_per_team=60),
+                KnockoutRoundConfig(group_code="1", points_per_team=120),
+            ],
+            winner_group_code="1",
+            winner_points=200,
         ),
         id="world_cup_2022",
     ),
@@ -129,6 +136,14 @@ RULES_PARAMS = [
             multiplying_factor_correct_score=7,
             team_qualified=10,
             first_team_qualified=20,
+            knockout_rounds=[
+                KnockoutRoundConfig(group_code="8", points_per_team=15),
+                KnockoutRoundConfig(group_code="4", points_per_team=30),
+                KnockoutRoundConfig(group_code="2", points_per_team=60),
+                KnockoutRoundConfig(group_code="1", points_per_team=120),
+            ],
+            winner_group_code="1",
+            winner_points=200,
         ),
         id="world_cup_2026",
     ),
