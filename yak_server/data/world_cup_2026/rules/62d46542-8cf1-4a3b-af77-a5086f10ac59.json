@@ -4,5 +4,29 @@
     "base_correct_score": 3,
     "multiplying_factor_correct_score": 7,
     "team_qualified": 10,
-    "first_team_qualified": 20
+    "first_team_qualified": 20,
+    "knockout_rounds": [
+        {
+            "group_code": "16",
+            "points_per_team": 0
+        },
+        {
+            "group_code": "8",
+            "points_per_team": 0
+        },
+        {
+            "group_code": "4",
+            "points_per_team": 30
+        },
+        {
+            "group_code": "2",
+            "points_per_team": 60
+        },
+        {
+            "group_code": "1",
+            "points_per_team": 120
+        }
+    ],
+    "winner_group_code": "1",
+    "winner_points": 200
 }
