@@ -8,7 +8,7 @@ from yak_server.v1.helpers.errors import NoAdminUser
 if TYPE_CHECKING:
     from sqlalchemy import Engine
 
-    from yak_server.helpers.settings import Settings
+    from yak_server.helpers.rules import Rules
 
 
 class ComputePointsRuleNotDefinedError(Exception):
@@ -16,7 +16,7 @@ class ComputePointsRuleNotDefinedError(Exception):
         super().__init__("Compute points rule is not defined.")
 
 
-def compute_score_board(engine: "Engine", settings: "Settings") -> None:
+def compute_score_board(engine: "Engine", rules: "Rules") -> None:
     local_session_maker = build_local_session_maker(engine)
 
     with local_session_maker() as db:
@@ -25,7 +25,7 @@ def compute_score_board(engine: "Engine", settings: "Settings") -> None:
         if admin is None:
             raise NoAdminUser
 
-        rule_config = settings.rules.compute_points
+        rule_config = rules.compute_points
 
         if rule_config is None:
             raise ComputePointsRuleNotDefinedError

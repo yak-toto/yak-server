@@ -11,7 +11,6 @@ from datetime import datetime
 from .util import get_resources_path
 
 if TYPE_CHECKING:
-    from yak_server.helpers.rules import Rules
     from yak_server.helpers.settings import CompetitionSettings
 
 
@@ -20,17 +19,27 @@ class MockSettings:
         self,
         *,
         data_folder_relative: str | None = None,
-        rules: Optional["Rules"] = None,
         competition: str | None = None,
-        competition_settings: Optional["CompetitionSettings"] = None,
     ) -> None:
         self.data_folder = (
             get_resources_path(data_folder_relative) if data_folder_relative is not None else None
         )
 
-        self.rules = rules
         self.competition = competition
-        self.competition_settings = competition_settings
+
+    def __call__(self) -> Self:
+        return self
+
+
+class MockCommonSettings:
+    def __init__(
+        self,
+        *,
+        lock_datetime: datetime,
+        competition: Optional["CompetitionSettings"] = None,
+    ) -> None:
+        self.lock_datetime = lock_datetime
+        self.competition = competition
 
     def __call__(self) -> Self:
         return self
