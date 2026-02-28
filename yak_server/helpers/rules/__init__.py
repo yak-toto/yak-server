@@ -1,5 +1,8 @@
+import json
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -41,6 +44,20 @@ RULE_MAPPING = {
         required_admin=True,
     ),
 }
+
+
+def load_rules(data_folder: Path) -> Rules:
+    rules_list: dict[str, Any] = {}
+
+    for rule_id, rule_metadata in RULE_MAPPING.items():
+        rule_config_path = data_folder / "rules" / f"{rule_id}.json"
+
+        if rule_config_path.exists():
+            rule_name = rule_metadata.attribute
+            rules_list[rule_name] = json.loads(rule_config_path.read_text())
+
+    return Rules.model_validate(rules_list)
+
 
 # Static check to make sure RULE_MAPPING and Rules attributes are same
 rule_mapping_attributes = {rule_metadata.attribute for rule_metadata in RULE_MAPPING.values()}

@@ -1,22 +1,17 @@
 from datetime import datetime
 from functools import cache
+from typing import Annotated
 
+from fastapi import Depends
 from pydantic import AwareDatetime, BaseModel, DirectoryPath
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from .rules import Rules
-
-
-class CompetitionSettings(BaseModel):
-    description_fr: str
-    description_en: str
+from .rules import Rules, load_rules
 
 
 class Settings(BaseSettings):
     competition: str
     data_folder: DirectoryPath
-    rules: Rules
-    competition_settings: CompetitionSettings
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="allow", env_nested_delimiter="__"
@@ -28,15 +23,33 @@ def get_settings() -> Settings:
     return Settings()
 
 
-class LockDatetimeSettings(BaseSettings):
-    lock_datetime: AwareDatetime
+class CompetitionSettings(BaseModel):
+    description_fr: str
+    description_en: str
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
+
+class CommonSettings(BaseModel):
+    lock_datetime: AwareDatetime
+    competition: CompetitionSettings
 
 
 @cache
-def get_lock_datetime() -> datetime:
-    return LockDatetimeSettings().lock_datetime  # pragma: no cover
+def get_common_settings(settings: Annotated[Settings, Depends(get_settings)]) -> CommonSettings:
+    common_file = settings.data_folder / "common.json"
+
+    return CommonSettings.model_validate_json(common_file.read_text())
+
+
+@cache
+def get_lock_datetime(
+    common_settings: Annotated[CommonSettings, Depends(get_common_settings)],
+) -> datetime:
+    return common_settings.lock_datetime
+
+
+@cache
+def get_rules(settings: Annotated[Settings, Depends(get_settings)]) -> Rules:
+    return load_rules(settings.data_folder)
 
 
 class AuthenticationSettings(BaseSettings):

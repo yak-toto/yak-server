@@ -1,10 +1,11 @@
+from datetime import datetime, timezone
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
 from starlette.testclient import TestClient
 
-from testing.mock import MockSettings
-from yak_server.helpers.settings import CompetitionSettings, get_settings
+from testing.mock import MockCommonSettings, MockSettings
+from yak_server.helpers.settings import CompetitionSettings, get_common_settings, get_settings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -14,7 +15,10 @@ def test_competition(app_with_valid_jwt_config: "FastAPI") -> None:
     app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
         data_folder_relative="test_competition_v1",
         competition="WORLD_CUP_2026",
-        competition_settings=CompetitionSettings(
+    )
+    app_with_valid_jwt_config.dependency_overrides[get_common_settings] = MockCommonSettings(
+        lock_datetime=datetime.now(timezone.utc),
+        competition=CompetitionSettings(
             description_fr="Coupe du monde 2026",
             description_en="World Cup 2026",
         ),
@@ -60,12 +64,7 @@ def test_competition(app_with_valid_jwt_config: "FastAPI") -> None:
 
 def test_competition_logo(app_with_valid_jwt_config: "FastAPI") -> None:
     app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
-        data_folder_relative="test_competition_v1",
-        competition="WORLD_CUP_2026",
-        competition_settings=CompetitionSettings(
-            description_fr="Coupe du monde 2026",
-            description_en="World Cup 2026",
-        ),
+        data_folder_relative="test_competition_v1", competition="WORLD_CUP_2026"
     )
 
     client = TestClient(app_with_valid_jwt_config)
