@@ -73,7 +73,8 @@ def make_db_app() -> click.Group:
     def score_board() -> None:
         """Compute score board."""
         engine = build_engine()
-        compute_score_board(engine)
+        settings = get_settings()
+        compute_score_board(engine, settings)
 
     return db_app
 

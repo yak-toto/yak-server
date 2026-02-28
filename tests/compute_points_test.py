@@ -236,7 +236,7 @@ def test_compute_points(
     put_finale_phase(client, users_data[2].access_token, is_one_won=False)
 
     # Compute points again with cli
-    monkeypatch.setattr("yak_server.cli.score_board.get_settings", MockSettings(rules=rules))
+    monkeypatch.setattr("yak_server.cli.main.get_settings", MockSettings(rules=rules))
 
     runner = CliRunner()
 
