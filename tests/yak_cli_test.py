@@ -42,7 +42,6 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
             "JWT_SECRET_KEY": get_random_string(128),
             "COMPETITION": "world_cup_2022",
             "DATA_FOLDER": data_folder,
-            "LOCK_DATETIME": str(datetime.now(timezone.utc)),
             "RULES": "{}",
             "COMPETITION_SETTINGS__DESCRIPTION_FR": "Coupe du monde 2022",
             "COMPETITION_SETTINGS__DESCRIPTION_EN": "World Cup 2022",
@@ -166,18 +165,20 @@ def test_db_migration_second_path(monkeypatch: "pytest.MonkeyPatch") -> None:
         alembic_ini_path.parent.mkdir(parents=True)
         alembic_ini_path.touch()
 
-        monkeypatch.setattr("yak_server.cli.migration.__file__", str(python_file_path))
+        with monkeypatch.context() as m:
+            m.setattr("yak_server.cli.migration.__file__", str(python_file_path))
 
-        result = runner.invoke(app, ["db", "migration", "-s"])
+            result = runner.invoke(app, ["db", "migration", "-s"])
 
         assert result.exit_code == 0
         assert result.output == f"export ALEMBIC_CONFIG={alembic_ini_path}\n"
 
 
 def test_db_migration_cli_with_alembic_missing(monkeypatch: "pytest.MonkeyPatch") -> None:
-    monkeypatch.setattr("yak_server.cli.migration.alembic", None)
+    with monkeypatch.context() as m:
+        m.setattr("yak_server.cli.migration.alembic", None)
 
-    result = runner.invoke(app, ["db", "migration"])
+        result = runner.invoke(app, ["db", "migration"])
 
     assert result.exit_code == 0
     assert (

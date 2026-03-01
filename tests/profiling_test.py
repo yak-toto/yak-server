@@ -38,9 +38,10 @@ def test_debug_profiling(app_with_profiler: "FastAPI") -> None:
 
 
 def test_profiling_without_yappi_installed(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("scripts.profiling.yappi", None)
+    with monkeypatch.context() as m:
+        m.setattr("scripts.profiling.yappi", None)
 
-    with pytest.raises(NotImplementedError) as exception:
-        create_app_with_profiler()
+        with pytest.raises(NotImplementedError) as exception:
+            create_app_with_profiler()
 
     assert str(exception.value) == "Profiling is not available without yappi installed."

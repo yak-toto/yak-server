@@ -14,7 +14,6 @@ from testing.mock import (
     MockAuthenticationSettings,
     MockCookieSettings,
     MockLockDatetime,
-    MockSettings,
 )
 from testing.util import get_random_string
 from yak_server import create_app
@@ -26,7 +25,7 @@ from yak_server.helpers.settings import (
     get_authentication_settings,
     get_cookie_settings,
     get_lock_datetime,
-    get_settings,
+    get_rules,
 )
 
 if TYPE_CHECKING:
@@ -188,7 +187,7 @@ def app_with_null_jwt_refresh_expiration_time(_app: "FastAPI") -> Generator["Fas
 
 @pytest.fixture
 def app_with_empty_rules(app_with_valid_jwt_config: "FastAPI") -> Generator["FastAPI", None, None]:
-    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(rules=Rules())
+    app_with_valid_jwt_config.dependency_overrides[get_rules] = Rules
 
     yield app_with_valid_jwt_config
 

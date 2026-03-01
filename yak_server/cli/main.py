@@ -4,6 +4,7 @@ import click
 
 from yak_server import create_app
 from yak_server.database.session import build_engine
+from yak_server.helpers.rules import load_rules
 from yak_server.helpers.settings import get_settings
 
 from .admin import create_admin
@@ -74,7 +75,7 @@ def make_db_app() -> click.Group:
         """Compute score board."""
         engine = build_engine()
         settings = get_settings()
-        compute_score_board(engine, settings)
+        compute_score_board(engine, load_rules(settings.data_folder))
 
     return db_app
 

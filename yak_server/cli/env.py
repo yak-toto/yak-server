@@ -1,4 +1,3 @@
-import json
 import secrets
 from enum import Enum
 from pathlib import Path
@@ -6,8 +5,6 @@ from typing import Any
 from uuid import UUID
 
 from yak_server.database.settings import PostgresSettings
-from yak_server.helpers.rules import RULE_MAPPING, Rules
-from yak_server.helpers.settings import LockDatetimeSettings
 
 
 class YesOrNo(str, Enum):
@@ -50,33 +47,7 @@ def write_app_env_file(
     data_folder = path / competition
     env["DATA_FOLDER"] = data_folder
 
-    # Load rules in environment
-    rules_list: dict[str, Any] = {}
-
-    for rule_file in Path(data_folder, "rules").glob("*.json"):
-        rule_id = UUID(rule_file.stem)
-
-        if rule_id not in RULE_MAPPING:
-            raise RuleNotDefinedError(rule_id)
-
-        rule_name = RULE_MAPPING[rule_id].attribute
-
-        rules_list[rule_name] = json.loads(rule_file.read_text())
-
-    rules = Rules.model_validate(rules_list)
-    env["RULES"] = rules.model_dump_json(exclude_unset=True)
-
-    # Load lock datetime
-    common_settings = json.loads((data_folder / "common.json").read_text())
-
-    # Validate lock datetime by instantiating pydantic model
-    lock_datetime_settings = LockDatetimeSettings(lock_datetime=common_settings["lock_datetime"])
-
-    env["LOCK_DATETIME"] = lock_datetime_settings.lock_datetime.isoformat()
-
     env["COOKIE_SECURE"] = debug is False
-    env["COMPETITION_SETTINGS__DESCRIPTION_FR"] = common_settings["competition"]["description_fr"]
-    env["COMPETITION_SETTINGS__DESCRIPTION_EN"] = common_settings["competition"]["description_en"]
 
     write_env_file(env, ".env")
 

@@ -18,7 +18,7 @@ from yak_server.helpers.rules.compute_final_from_rank import (
     Versus,
 )
 from yak_server.helpers.rules.compute_points import RuleComputePoints
-from yak_server.helpers.settings import get_settings
+from yak_server.helpers.settings import get_rules, get_settings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -70,7 +70,8 @@ def app_and_rules_for_compute_points(
         ),
     )
 
-    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(rules=rules)
+    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings()
+    app_with_valid_jwt_config.dependency_overrides[get_rules] = lambda: rules
 
     yield app_with_valid_jwt_config, rules
 
@@ -236,11 +237,12 @@ def test_compute_points(
     put_finale_phase(client, users_data[2].access_token, is_one_won=False)
 
     # Compute points again with cli
-    monkeypatch.setattr("yak_server.cli.main.get_settings", MockSettings(rules=rules))
-
     runner = CliRunner()
 
-    result = runner.invoke(cli_app, ["db", "score-board"])
+    with monkeypatch.context() as m:
+        m.setattr("yak_server.cli.main.get_settings", MockSettings)
+        m.setattr("yak_server.cli.main.load_rules", lambda _: rules)
+        result = runner.invoke(cli_app, ["db", "score-board"])
 
     assert result.exit_code == 0
 
