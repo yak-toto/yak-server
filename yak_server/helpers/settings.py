@@ -3,7 +3,7 @@ from functools import cache
 from typing import Annotated
 
 from fastapi import Depends
-from pydantic import AwareDatetime, BaseModel, DirectoryPath
+from pydantic import AwareDatetime, BaseModel, ConfigDict, DirectoryPath
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .rules import Rules, load_rules
@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     data_folder: DirectoryPath
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="allow", env_nested_delimiter="__"
+        env_file=".env", env_file_encoding="utf-8", extra="allow", frozen=True
     )
 
 
@@ -24,11 +24,15 @@ def get_settings() -> Settings:
 
 
 class CompetitionSettings(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     description_fr: str
     description_en: str
 
 
 class CommonSettings(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     lock_datetime: AwareDatetime
     competition: CompetitionSettings
 
