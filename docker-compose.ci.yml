@@ -20,6 +20,8 @@ services:
     ports:
       - "8000:8000"
     environment:
+      JWT_SECRET_KEY: FakeKey
+      JWT_REFRESH_SECRET_KEY: FakeRefreshKey
       ADMIN_PASSWORD: Test1234
       POSTGRES_HOST: postgres
       POSTGRES_USER: ci
