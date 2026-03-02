@@ -23,7 +23,7 @@ permissions: {}
 
 jobs:
   build-image:
-    name: Build Docker Image (euro_2024)
+    name: Build Docker Image (world_cup_2026)
     runs-on: ubuntu-latest
 
     permissions: {}

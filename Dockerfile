@@ -39,13 +39,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=scripts/build_hooks.py,target=scripts/build_hooks.py \
     uv sync --locked --no-dev --all-extras
 
-RUN uv run yak env app --no-debug \
-      # 30 minutes
-      --jwt-expiration 1800 \
-      # 7 days
-      --jwt-refresh-expiration 604800 \
-      --competition $COMPETITION
-
 # ===========================
 # 2️⃣ Runtime Stage (uvicorn)
 # ===========================
@@ -58,9 +51,15 @@ WORKDIR /app
 # Copy only what the final image needs to run
 COPY --from=builder /app/yak_server /app/yak_server
 COPY --from=builder /app/.venv /app/.venv
-COPY --from=builder /app/.env /app
 COPY --from=builder /app/alembic.ini /app/alembic.ini
 COPY docker-entrypoint.sh /usr/local/bin
+
+RUN echo "DEBUG=0" >> .env
+RUN echo "JWT_EXPIRATION_TIME=1800 # 30 minutes" >> .env
+RUN echo "JWT_REFRESH_EXPIRATION_TIME=604800 # 7 days" >> .env
+RUN echo "COMPETITION=${COMPETITION}" >> .env
+RUN echo "DATA_FOLDER=$(realpath ./yak_server/data/$COMPETITION)" >> .env
+RUN echo "COOKIE_SECURE=True" >> .env
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
