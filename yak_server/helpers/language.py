@@ -8,8 +8,11 @@ class Lang(str, Enum):
 
 
 class MultiLingualDescription(Protocol):
-    description_fr: str
-    description_en: str
+    @property
+    def description_fr(self) -> str: ...
+
+    @property
+    def description_en(self) -> str: ...
 
 
 def get_language_description(instance: MultiLingualDescription, lang: Lang) -> str:
