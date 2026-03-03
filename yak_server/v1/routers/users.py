@@ -3,7 +3,9 @@ from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response, status
+from fastapi_limiter.depends import RateLimiter
 from pydantic import UUID4
+from pyrate_limiter import Duration, Limiter, Rate  # type: ignore[attr-defined]
 from sqlalchemy.orm import Session
 
 from yak_server.database.models import RefreshTokenModel, Role, UserModel
@@ -58,14 +60,19 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
+signup_rate_limiter = RateLimiter(Limiter(Rate(5, Duration.MINUTE)))
+login_rate_limiter = RateLimiter(Limiter(Rate(5, Duration.MINUTE)))
+
 
 @router.post(
     "/signup",
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(signup_rate_limiter)],
     responses={
         status.HTTP_400_BAD_REQUEST: {"model": ErrorOut},
         status.HTTP_409_CONFLICT: {"model": ErrorOut},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
+        status.HTTP_429_TOO_MANY_REQUESTS: {"model": ErrorOut},
     },
 )
 def signup(
@@ -148,10 +155,12 @@ def password_requirements() -> GenericOut[PasswordRequirementsOut]:
 @router.post(
     "/login",
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(login_rate_limiter)],
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
         status.HTTP_409_CONFLICT: {"model": ErrorOut},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
+        status.HTTP_429_TOO_MANY_REQUESTS: {"model": ErrorOut},
     },
 )
 def login(
