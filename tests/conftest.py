@@ -6,7 +6,10 @@ from typing import TYPE_CHECKING
 
 import psycopg
 import pytest
+from fastapi import FastAPI
+from fastapi_limiter.depends import RateLimiter
 from psycopg import sql
+from pyrate_limiter import Duration, Limiter, Rate  # type: ignore[attr-defined]
 from sqlalchemy import Engine, create_engine
 
 from scripts.profiling import create_app as create_app_with_profiling
@@ -17,6 +20,7 @@ from testing.mock import (
 )
 from testing.util import get_random_string
 from yak_server import create_app
+from yak_server.app import global_rate_limiter
 from yak_server.cli.database import create_database, delete_database, drop_database
 from yak_server.database.session import compute_database_uri
 from yak_server.database.settings import get_postgres_settings
@@ -27,9 +31,23 @@ from yak_server.helpers.settings import (
     get_lock_datetime,
     get_rules,
 )
+from yak_server.v1.routers.users import login_rate_limiter, signup_rate_limiter
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
+
+
+def _apply_standard_overrides(app: "FastAPI") -> None:
+    app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
+        jwt_expiration_time=100,
+        jwt_refresh_expiration_time=200,
+        jwt_secret_key=get_random_string(80),
+        jwt_refresh_secret_key=get_random_string(80),
+    )
+    app.dependency_overrides[get_cookie_settings] = MockCookieSettings()
+    app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
+        datetime.now(timezone.utc) + timedelta(minutes=10),
+    )
 
 
 def create_test_database() -> Engine:
@@ -111,17 +129,12 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
 
     app = create_app_with_profiling()
 
-    app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
-        jwt_expiration_time=100,
-        jwt_refresh_expiration_time=200,
-        jwt_secret_key=get_random_string(80),
-        jwt_refresh_secret_key=get_random_string(80),
-    )
-    app.dependency_overrides[get_cookie_settings] = MockCookieSettings()
-
-    app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        datetime.now(timezone.utc) + timedelta(minutes=10),
-    )
+    _apply_standard_overrides(app)
+    # Rate limiters are module-level singletons shared with the main app —
+    # disable them to prevent cross-test state leakage.
+    app.dependency_overrides[global_rate_limiter] = lambda: None
+    app.dependency_overrides[signup_rate_limiter] = lambda: None
+    app.dependency_overrides[login_rate_limiter] = lambda: None
 
     yield app
 
@@ -129,18 +142,31 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
 
 
 @pytest.fixture
-def app_with_valid_jwt_config(_app: "FastAPI") -> Generator["FastAPI", None, None]:
-    _app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
-        jwt_expiration_time=100,
-        jwt_refresh_expiration_time=200,
-        jwt_secret_key=get_random_string(80),
-        jwt_refresh_secret_key=get_random_string(80),
+def limiter_signup_login() -> tuple[RateLimiter, RateLimiter]:
+    return (
+        RateLimiter(Limiter(Rate(5, Duration.MINUTE))),
+        RateLimiter(Limiter(Rate(5, Duration.MINUTE))),
     )
-    _app.dependency_overrides[get_cookie_settings] = MockCookieSettings()
 
-    _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        datetime.now(timezone.utc) + timedelta(minutes=10),
-    )
+
+@pytest.fixture
+def global_limiter() -> RateLimiter:
+    return RateLimiter(Limiter(Rate(200, Duration.MINUTE)))
+
+
+@pytest.fixture
+def app_with_rate_limiter(
+    _app: "FastAPI",
+    limiter_signup_login: tuple[RateLimiter, RateLimiter],
+    global_limiter: RateLimiter,
+) -> Generator["FastAPI", None, None]:
+    _apply_standard_overrides(_app)
+
+    _app.dependency_overrides[global_rate_limiter] = global_limiter
+
+    limiter_signup, limiter_login = limiter_signup_login
+    _app.dependency_overrides[signup_rate_limiter] = limiter_signup
+    _app.dependency_overrides[login_rate_limiter] = limiter_login
 
     yield _app
 
@@ -148,47 +174,44 @@ def app_with_valid_jwt_config(_app: "FastAPI") -> Generator["FastAPI", None, Non
 
 
 @pytest.fixture
-def app_with_null_jwt_expiration_time(_app: "FastAPI") -> Generator["FastAPI", None, None]:
-    _app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
-        jwt_expiration_time=0,
-        jwt_refresh_expiration_time=200,
-        jwt_secret_key=get_random_string(80),
-        jwt_refresh_secret_key=get_random_string(80),
-    )
-    _app.dependency_overrides[get_cookie_settings] = MockCookieSettings()
+def app_with_valid_jwt_config(app_with_rate_limiter: "FastAPI") -> "FastAPI":
+    app_with_rate_limiter.dependency_overrides[global_rate_limiter] = lambda: None
+    app_with_rate_limiter.dependency_overrides[signup_rate_limiter] = lambda: None
+    app_with_rate_limiter.dependency_overrides[login_rate_limiter] = lambda: None
 
-    _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        datetime.now(timezone.utc) + timedelta(minutes=10),
-    )
-
-    yield _app
-
-    _app.dependency_overrides.clear()
+    return app_with_rate_limiter
 
 
 @pytest.fixture
-def app_with_null_jwt_refresh_expiration_time(_app: "FastAPI") -> Generator["FastAPI", None, None]:
-    _app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
-        jwt_expiration_time=100,
-        jwt_refresh_expiration_time=3,
-        jwt_secret_key=get_random_string(80),
-        jwt_refresh_secret_key=get_random_string(80),
-    )
-    _app.dependency_overrides[get_cookie_settings] = MockCookieSettings()
-
-    _app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        datetime.now(timezone.utc) + timedelta(minutes=10),
+def app_with_null_jwt_expiration_time(app_with_valid_jwt_config: "FastAPI") -> "FastAPI":
+    app_with_valid_jwt_config.dependency_overrides[get_authentication_settings] = (
+        MockAuthenticationSettings(
+            jwt_expiration_time=0,
+            jwt_refresh_expiration_time=200,
+            jwt_secret_key=get_random_string(80),
+            jwt_refresh_secret_key=get_random_string(80),
+        )
     )
 
-    yield _app
-
-    _app.dependency_overrides.clear()
+    return app_with_valid_jwt_config
 
 
 @pytest.fixture
-def app_with_empty_rules(app_with_valid_jwt_config: "FastAPI") -> Generator["FastAPI", None, None]:
+def app_with_null_jwt_refresh_expiration_time(app_with_valid_jwt_config: "FastAPI") -> "FastAPI":
+    app_with_valid_jwt_config.dependency_overrides[get_authentication_settings] = (
+        MockAuthenticationSettings(
+            jwt_expiration_time=100,
+            jwt_refresh_expiration_time=3,
+            jwt_secret_key=get_random_string(80),
+            jwt_refresh_secret_key=get_random_string(80),
+        )
+    )
+
+    return app_with_valid_jwt_config
+
+
+@pytest.fixture
+def app_with_empty_rules(app_with_valid_jwt_config: "FastAPI") -> "FastAPI":
     app_with_valid_jwt_config.dependency_overrides[get_rules] = Rules
 
-    yield app_with_valid_jwt_config
-
-    app_with_valid_jwt_config.dependency_overrides.clear()
+    return app_with_valid_jwt_config

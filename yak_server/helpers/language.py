@@ -9,10 +9,10 @@ class Lang(str, Enum):
 
 class MultiLingualDescription(Protocol):
     @property
-    def description_fr(self) -> str: ...
+    def description_fr(self) -> str: ...  # pragma: no cover
 
     @property
-    def description_en(self) -> str: ...
+    def description_en(self) -> str: ...  # pragma: no cover
 
 
 def get_language_description(instance: MultiLingualDescription, lang: Lang) -> str:
