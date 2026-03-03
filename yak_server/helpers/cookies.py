@@ -28,7 +28,7 @@ def set_auth_cookies(
         key=REFRESH_TOKEN_COOKIE,
         value=refresh_token,
         max_age=refresh_expires_in,
-        path="/api/v1/users/refresh",
+        path="/api/v1/users",
         httponly=True,
         secure=settings.cookie_secure,
         samesite="lax",
@@ -47,7 +47,7 @@ def clear_auth_cookies(response: Response, settings: CookieSettings) -> None:
     )
     response.delete_cookie(
         key=REFRESH_TOKEN_COOKIE,
-        path="/api/v1/users/refresh",
+        path="/api/v1/users",
         httponly=True,
         secure=settings.cookie_secure,
         samesite="lax",

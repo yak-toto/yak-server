@@ -285,9 +285,7 @@ def test_invalid_login_body(app_with_valid_jwt_config: "FastAPI") -> None:
 def test_no_token(app_with_valid_jwt_config: "FastAPI") -> None:
     client = TestClient(app_with_valid_jwt_config, cookies={})
 
-    response = client.get(
-        "/api/v1/users/current",
-    )
+    response = client.get("/api/v1/users/current")
 
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {

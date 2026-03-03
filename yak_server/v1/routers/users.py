@@ -6,10 +6,11 @@ from fastapi import APIRouter, Depends, Response, status
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
-from yak_server.database.models import Role, UserModel
+from yak_server.database.models import RefreshTokenModel, Role, UserModel
 from yak_server.helpers.authentication import (
     NameAlreadyExistsError,
     encode_bearer_token,
+    encode_refresh_token,
     signup_user,
 )
 from yak_server.helpers.cookies import clear_auth_cookies, set_auth_cookies
@@ -33,7 +34,7 @@ from yak_server.v1.helpers.auth import (
     require_admin,
     require_refresh_token,
     require_user,
-    user_from_token,
+    user_from_refresh_token,
 )
 from yak_server.v1.helpers.errors import (
     InvalidCredentials,
@@ -97,11 +98,13 @@ def signup(
         expiration_time=timedelta(seconds=auth_settings.jwt_expiration_time),
         secret_key=auth_settings.jwt_secret_key,
     )
-    refresh_token = encode_bearer_token(
-        sub=user.id,
+    refresh_token, jti = encode_refresh_token(
         expiration_time=timedelta(seconds=auth_settings.jwt_refresh_expiration_time),
         secret_key=auth_settings.jwt_refresh_secret_key,
     )
+
+    db.add(RefreshTokenModel(id=jti, user_id=user.id, revoked=False, replaced_by_token=None))
+    db.commit()
 
     set_auth_cookies(
         response=response,
@@ -170,11 +173,13 @@ def login(
         expiration_time=timedelta(seconds=auth_settings.jwt_expiration_time),
         secret_key=auth_settings.jwt_secret_key,
     )
-    refresh_token = encode_bearer_token(
-        sub=user.id,
+    refresh_token, jti = encode_refresh_token(
         expiration_time=timedelta(seconds=auth_settings.jwt_refresh_expiration_time),
         secret_key=auth_settings.jwt_refresh_secret_key,
     )
+
+    db.add(RefreshTokenModel(id=jti, user_id=user.id, revoked=False, replaced_by_token=None))
+    db.commit()
 
     set_auth_cookies(
         response=response,
@@ -212,18 +217,29 @@ def refresh(
     auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
     cookie_settings: Annotated[CookieSettings, Depends(get_cookie_settings)],
 ) -> GenericOut[RefreshOut]:
-    user = user_from_token(db, auth_settings.jwt_refresh_secret_key, refresh_token_value)
+    user, old_jti = user_from_refresh_token(
+        db,
+        auth_settings.jwt_refresh_secret_key,
+        refresh_token_value,
+    )
 
     access_token = encode_bearer_token(
         sub=user.id,
         expiration_time=timedelta(seconds=auth_settings.jwt_expiration_time),
         secret_key=auth_settings.jwt_secret_key,
     )
-    new_refresh_token = encode_bearer_token(
-        sub=user.id,
+    new_refresh_token, new_jti = encode_refresh_token(
         expiration_time=timedelta(seconds=auth_settings.jwt_refresh_expiration_time),
         secret_key=auth_settings.jwt_refresh_secret_key,
     )
+
+    db.add(RefreshTokenModel(id=new_jti, user_id=user.id, revoked=False, replaced_by_token=None))
+    db.flush()
+    db.query(RefreshTokenModel).filter_by(id=old_jti).update({
+        "revoked": True,
+        "replaced_by_token": new_jti,
+    })
+    db.commit()
 
     set_auth_cookies(
         response=response,
@@ -294,7 +310,19 @@ def current_user(
 )
 def logout(
     response: Response,
+    db: Annotated[Session, Depends(get_db)],
+    auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
     cookie_settings: Annotated[CookieSettings, Depends(get_cookie_settings)],
+    refresh_token_value: Annotated[str, Depends(require_refresh_token)],
 ) -> GenericOut[None]:
+    _, current_jti = user_from_refresh_token(
+        db,
+        auth_settings.jwt_refresh_secret_key,
+        refresh_token_value,
+    )
+
+    db.query(RefreshTokenModel).filter_by(id=current_jti).update({"revoked": True})
+    db.commit()
+
     clear_auth_cookies(response, cookie_settings)
     return GenericOut(result=None)

@@ -5,6 +5,8 @@ INVALID_CREDENTIALS_MESSAGE = "Invalid credentials"
 UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE = "Unauthorized access to admin API"
 INVALID_TOKEN_MESSAGE = "Invalid access token, authentication required"
 EXPIRED_TOKEN_MESSAGE = "Expired access token, re-authentication required"
+INVALID_REFRESH_TOKEN_MESSAGE = "Invalid refresh token, re-authentication required"
+EXPIRED_REFRESH_TOKEN_MESSAGE = "Expired refresh token, re-authentication required"
 LOCKED_SCORE_BET_MESSAGE = "Cannot modify score bet, lock date is exceeded"
 LOCKED_BINARY_BET_MESSAGE = "Cannot modify binary bet, lock date is exceeded"
 

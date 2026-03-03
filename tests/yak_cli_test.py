@@ -1,5 +1,4 @@
 import json
-import os
 from http import HTTPStatus
 from importlib.metadata import version
 from pathlib import Path
@@ -83,7 +82,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
     user_id = response_login.json()["result"]["id"]
 
     # Check records deletion
-    result = runner.invoke(app, ["db", "delete"], env={**os.environ, "DEBUG": "1"})
+    result = runner.invoke(app, ["db", "delete"], env={"DEBUG": "1"})
 
     assert result.exit_code == 0
 

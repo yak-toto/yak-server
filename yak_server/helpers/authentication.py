@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import jwt
 from sqlalchemy.orm import Session, selectinload
@@ -32,6 +32,25 @@ def encode_bearer_token(
         },
         secret_key,
         algorithm="HS512",
+    )
+
+
+def encode_refresh_token(
+    expiration_time: timedelta,
+    secret_key: str,
+) -> tuple[str, UUID]:
+    jti = uuid4()
+    return (
+        jwt.encode(
+            {
+                "jti": str(jti),
+                "nbf": datetime.now(timezone.utc) - timedelta(seconds=3),
+                "exp": datetime.now(timezone.utc) + expiration_time,
+            },
+            secret_key,
+            algorithm="HS512",
+        ),
+        jti,
     )
 
 
