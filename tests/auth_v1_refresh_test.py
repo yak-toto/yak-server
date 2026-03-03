@@ -123,7 +123,20 @@ def test_refresh_without_token(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Invalid access token, authentication required",
+        "description": "Invalid refresh token, re-authentication required",
+    }
+
+
+def test_refresh_with_wrong_token(app_with_valid_jwt_config: "FastAPI") -> None:
+    client = TestClient(app_with_valid_jwt_config)
+
+    response = client.post("/api/v1/users/refresh", json={"refresh_token": "tttttt"})
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {
+        "ok": False,
+        "error_code": HTTPStatus.UNAUTHORIZED,
+        "description": "Invalid refresh token, re-authentication required",
     }
 
 
@@ -154,7 +167,7 @@ def test_refresh_token_expired(app_with_null_jwt_refresh_expiration_time: "FastA
     assert response.json() == {
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
-        "description": "Expired access token, re-authentication required",
+        "description": "Expired refresh token, re-authentication required",
     }
 
 
@@ -209,4 +222,67 @@ def test_refresh_token_cannot_access_protected_resources(
         "ok": False,
         "error_code": HTTPStatus.UNAUTHORIZED,
         "description": "Invalid access token, authentication required",
+    }
+
+
+def test_refresh_token_revoked_after_use(app_with_valid_jwt_config: "FastAPI") -> None:
+    """Test that a refresh token cannot be reused after it has been consumed."""
+    client = TestClient(app_with_valid_jwt_config)
+
+    response = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": get_random_string(10),
+            "first_name": get_random_string(10),
+            "last_name": get_random_string(10),
+            "password": get_random_string(150),
+        },
+    )
+
+    assert response.status_code == HTTPStatus.CREATED
+
+    refresh_token = response.json()["result"]["refresh_token"]
+
+    # First use of the refresh token — should succeed and rotate the token
+    response = client.post("/api/v1/users/refresh")
+    assert response.status_code == HTTPStatus.CREATED
+
+    # Second use of the same refresh token — should fail because the JTI was revoked
+    response = client.post("/api/v1/users/refresh", json={"refresh_token": refresh_token})
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {
+        "ok": False,
+        "error_code": HTTPStatus.UNAUTHORIZED,
+        "description": "Invalid refresh token, re-authentication required",
+    }
+
+
+def test_refresh_token_revoked_after_logout(app_with_valid_jwt_config: "FastAPI") -> None:
+    """Test that a refresh token cannot be used after the user has logged out."""
+    client = TestClient(app_with_valid_jwt_config)
+
+    response = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": get_random_string(10),
+            "first_name": get_random_string(10),
+            "last_name": get_random_string(10),
+            "password": get_random_string(150),
+        },
+    )
+
+    assert response.status_code == HTTPStatus.CREATED
+
+    refresh_token = response.json()["result"]["refresh_token"]
+
+    response = client.post("/api/v1/users/logout")
+    assert response.status_code == HTTPStatus.OK
+
+    # After logout the JTI is revoked — refresh should fail
+    response = client.post("/api/v1/users/refresh", json={"refresh_token": refresh_token})
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {
+        "ok": False,
+        "error_code": HTTPStatus.UNAUTHORIZED,
+        "description": "Invalid refresh token, re-authentication required",
     }

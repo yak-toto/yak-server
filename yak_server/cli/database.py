@@ -13,6 +13,7 @@ from yak_server.database.models import (
     MatchModel,
     MatchReferenceModel,
     PhaseModel,
+    RefreshTokenModel,
     ScoreBetModel,
     TeamModel,
     UserModel,
@@ -168,6 +169,7 @@ def delete_database(engine: "Engine", *, debug: bool) -> None:
         db.query(BinaryBetModel).delete()
         db.query(MatchReferenceModel).delete()
         db.query(MatchModel).delete()
+        db.query(RefreshTokenModel).delete()
         db.query(UserModel).delete()
         db.query(GroupModel).delete()
         db.query(PhaseModel).delete()

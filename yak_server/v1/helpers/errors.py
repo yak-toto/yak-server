@@ -10,8 +10,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from yak_server.helpers.errors import (
+    EXPIRED_REFRESH_TOKEN_MESSAGE,
     EXPIRED_TOKEN_MESSAGE,
     INVALID_CREDENTIALS_MESSAGE,
+    INVALID_REFRESH_TOKEN_MESSAGE,
     INVALID_TOKEN_MESSAGE,
     LOCKED_BINARY_BET_MESSAGE,
     LOCKED_SCORE_BET_MESSAGE,
@@ -137,6 +139,22 @@ class InvalidToken(HTTPException):
 class ExpiredToken(HTTPException):
     def __init__(self) -> None:
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=EXPIRED_TOKEN_MESSAGE)
+
+
+class InvalidRefreshToken(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=INVALID_REFRESH_TOKEN_MESSAGE,
+        )
+
+
+class ExpiredRefreshToken(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=EXPIRED_REFRESH_TOKEN_MESSAGE,
+        )
 
 
 class RuleNotFound(HTTPException):

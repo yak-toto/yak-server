@@ -1,4 +1,5 @@
 import contextlib
+from datetime import datetime, timezone
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
@@ -138,6 +139,25 @@ class UserModel(Base):
 
     def change_password(self, new_password: str) -> None:
         self.password = ph.hash(new_password)
+
+
+class RefreshTokenModel(Base):
+    __tablename__ = "refresh_token"
+
+    id: Mapped[UUID] = mapped_column(DB_UUID(), primary_key=True, nullable=False)
+    user_id: Mapped[UUID] = mapped_column(
+        DB_UUID(),
+        sa.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    revoked: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, default=False)
+    replaced_by_token: Mapped[UUID | None] = mapped_column(DB_UUID(), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
+    user: Mapped["UserModel"] = relationship("UserModel", foreign_keys=user_id, lazy="raise")
 
 
 class ScoreBetModel(Base):
