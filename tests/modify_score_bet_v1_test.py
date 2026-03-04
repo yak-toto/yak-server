@@ -88,7 +88,7 @@ def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", engine_for_test:
 
     assert response_locked_bet.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": HTTPStatus.FORBIDDEN,
         "description": "Cannot modify score bet, lock date is exceeded",
     }
 

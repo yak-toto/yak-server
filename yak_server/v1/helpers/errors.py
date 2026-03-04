@@ -107,12 +107,12 @@ class TeamNotFound(HTTPException):
 
 class LockedScoreBet(HTTPException):
     def __init__(self) -> None:
-        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=LOCKED_SCORE_BET_MESSAGE)
+        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=LOCKED_SCORE_BET_MESSAGE)
 
 
 class LockedBinaryBet(HTTPException):
     def __init__(self) -> None:
-        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=LOCKED_BINARY_BET_MESSAGE)
+        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=LOCKED_BINARY_BET_MESSAGE)
 
 
 class GroupNotFound(HTTPException):
