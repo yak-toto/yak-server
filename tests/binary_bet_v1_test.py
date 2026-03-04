@@ -85,10 +85,10 @@ def test_binary_bet(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
         json={"is_one_won": True},
     )
 
-    assert response_lock_bet.status_code == HTTPStatus.UNAUTHORIZED
+    assert response_lock_bet.status_code == HTTPStatus.FORBIDDEN
     assert response_lock_bet.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": HTTPStatus.FORBIDDEN,
         "description": "Cannot modify binary bet, lock date is exceeded",
     }
 
