@@ -48,6 +48,7 @@ def _apply_standard_overrides(app: "FastAPI") -> None:
     app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
         datetime.now(timezone.utc) + timedelta(minutes=10),
     )
+    app.dependency_overrides[get_rules] = Rules
 
 
 def create_test_database() -> Engine:
@@ -206,12 +207,5 @@ def app_with_null_jwt_refresh_expiration_time(app_with_valid_jwt_config: "FastAP
             jwt_refresh_secret_key=get_random_string(80),
         )
     )
-
-    return app_with_valid_jwt_config
-
-
-@pytest.fixture
-def app_with_empty_rules(app_with_valid_jwt_config: "FastAPI") -> "FastAPI":
-    app_with_valid_jwt_config.dependency_overrides[get_rules] = Rules
 
     return app_with_valid_jwt_config

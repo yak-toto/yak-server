@@ -3,10 +3,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
-from yak_server.database.models import Role, UserModel
+from yak_server.database.models import Role, UserKnockoutGuessModel, UserModel
 from yak_server.helpers.database import get_db
+from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang
 from yak_server.v1.helpers.auth import require_user
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.results import UserResult
@@ -28,13 +29,19 @@ router = APIRouter(tags=["results"])
 def retrieve_score_board(
     _: Annotated[UserModel, Depends(require_user)],
     db: Annotated[Session, Depends(get_db)],
+    lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[list[UserResult]]:
     return GenericOut(
         result=[
-            UserResult.from_instance(user, rank=rank)
+            UserResult.from_instance(user, rank=rank, lang=lang)
             for rank, user in enumerate(
                 db
                 .query(UserModel)
+                .options(
+                    selectinload(UserModel.knockout_guesses).selectinload(
+                        UserKnockoutGuessModel.group
+                    )
+                )
                 .order_by(UserModel.points.desc())
                 .where(UserModel.role != Role.ADMIN),
                 1,
@@ -72,9 +79,18 @@ def compute_rank(db: Session, user_id: UUID) -> int:
 def retrieve_user_results(
     user: Annotated[UserModel, Depends(require_user)],
     db: Annotated[Session, Depends(get_db)],
+    lang: Lang = DEFAULT_LANGUAGE,
 ) -> GenericOut[UserResult]:
     rank = compute_rank(db, user.id)
 
-    user_result = UserResult.from_instance(user, rank=rank)
+    user_with_guesses = (
+        db
+        .query(UserModel)
+        .options(
+            selectinload(UserModel.knockout_guesses).selectinload(UserKnockoutGuessModel.group)
+        )
+        .filter_by(id=user.id)
+        .one()
+    )
 
-    return GenericOut(result=user_result)
+    return GenericOut(result=UserResult.from_instance(user_with_guesses, rank=rank, lang=lang))
