@@ -4,12 +4,11 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from yak_server.v1.helpers.rate_limiting import instantiate_global_rate_limiter
-
 from . import health_check
 from .helpers.logging_helpers import setup_logging
 from .helpers.settings import CookieSettings
 from .v1.helpers.errors import set_exception_handler
+from .v1.helpers.rate_limiting import instantiate_global_rate_limiter
 from .v1.routers import bets as bets_router
 from .v1.routers import binary_bets as binary_bets_router
 from .v1.routers import competition as competition_router

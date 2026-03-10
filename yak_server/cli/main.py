@@ -115,6 +115,21 @@ def make_env_typer() -> click.Group:
         show_default=True,
     )
     @click.option(
+        "--redis-host",
+        prompt=True,
+        default="localhost",
+        show_default=True,
+        help="Redis host",
+    )
+    @click.option(
+        "--redis-password",
+        prompt=True,
+        hide_input=True,
+        required=True,
+        help="Redis password",
+    )
+    @click.option("--redis-port", prompt=True, default=6379, show_default=True, help="Redis port")
+    @click.option(
         "--jwt-expiration",
         "-j",
         prompt=True,
@@ -139,6 +154,9 @@ def make_env_typer() -> click.Group:
         password: str,
         port: int,
         database: str,
+        redis_host: str,
+        redis_password: str,
+        redis_port: int,
         jwt_expiration: int,
         jwt_refresh_expiration: int,
         competition: str,
@@ -149,11 +167,14 @@ def make_env_typer() -> click.Group:
             host,
             user,
             password,
-            competition,
+            port,
             database,
+            redis_host,
+            redis_password,
+            redis_port,
             jwt_expiration,
             jwt_refresh_expiration,
-            port,
+            competition,
         )
 
     @env_app.command()

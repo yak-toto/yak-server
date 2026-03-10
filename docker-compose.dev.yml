@@ -14,5 +14,19 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:8.6.1-alpine3.23
+    container_name: yaktoto-redis
+    env_file:
+      - .env.redis
+    command: sh -c "redis-server --requirepass $$REDIS_PASSWORD"
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   postgres_data:

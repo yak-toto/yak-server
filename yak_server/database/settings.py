@@ -20,3 +20,13 @@ class PostgresSettings(BaseSettings):
 @cache
 def get_postgres_settings() -> PostgresSettings:
     return PostgresSettings()
+
+
+class RedisSettings(BaseSettings):
+    host: str
+    password: str
+    port: int
+
+    model_config = SettingsConfigDict(
+        env_file=".env.redis", env_file_encoding="utf-8", env_prefix="redis_"
+    )

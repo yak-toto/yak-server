@@ -42,7 +42,10 @@ from yak_server.v1.helpers.errors import (
     UnsatisfiedPasswordRequirements,
     UserNotFound,
 )
-from yak_server.v1.helpers.rate_limiting import instantiate_auth_rate_limiter
+from yak_server.v1.helpers.rate_limiting import (
+    instantiate_login_rate_limiter,
+    instantiate_signup_rate_limiter,
+)
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.users import (
     CurrentUserOut,
@@ -59,8 +62,8 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-signup_rate_limiter = instantiate_auth_rate_limiter()
-login_rate_limiter = instantiate_auth_rate_limiter()
+signup_rate_limiter = instantiate_signup_rate_limiter()
+login_rate_limiter = instantiate_login_rate_limiter()
 
 
 @router.post(

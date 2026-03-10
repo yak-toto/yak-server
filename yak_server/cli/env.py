@@ -3,7 +3,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from yak_server.database.settings import PostgresSettings
+from yak_server.database.settings import PostgresSettings, RedisSettings
 
 
 class YesOrNo(str, Enum):
@@ -60,16 +60,31 @@ def write_db_env_file(host: str, user: str, password: str, port: int, db: str) -
     write_env_file(env_db, ".env.db")
 
 
+def write_redis_env_file(host: str, password: str, port: int) -> None:
+    RedisSettings(host=host, password=password, port=port)
+
+    env_redis = {
+        "REDIS_HOST": host,
+        "REDIS_PASSWORD": password,
+        "REDIS_PORT": port,
+    }
+    write_env_file(env_redis, ".env.redis")
+
+
 def init_env(  # noqa: PLR0913, PLR0917
     debug: bool,  # noqa: FBT001
     host: str,
     db_username: str,
     password: str,
-    competition: str,
+    port: int,
     database: str,
+    redis_host: str,
+    redis_password: str,
+    redis_port: int,
     jwt_expiration: int,
     jwt_refresh_expiration: int,
-    port: int,
+    competition: str,
 ) -> None:
     write_app_env_file(debug, jwt_expiration, jwt_refresh_expiration, competition)
     write_db_env_file(host, db_username, password, port, database)
+    write_redis_env_file(redis_host, redis_password, redis_port)

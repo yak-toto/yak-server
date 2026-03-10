@@ -3,10 +3,11 @@ set -e
 
 echo "Validating environment variables and settings"
 python -c "
-from yak_server.database.settings import PostgresSettings
+from yak_server.database.settings import PostgresSettings, RedisSettings
 from yak_server.helpers.settings import Settings, AuthenticationSettings, CookieSettings
 
 PostgresSettings()
+RedisSettings()
 Settings()
 AuthenticationSettings()
 CookieSettings()
