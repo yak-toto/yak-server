@@ -100,7 +100,7 @@ def test_bets(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -
     assert response_bet_with_invalid_id.status_code == HTTPStatus.NOT_FOUND
     assert response_bet_with_invalid_id.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "bet_not_found",
         "description": f"Bet not found: {invalid_bet_id}",
     }
 
@@ -256,6 +256,6 @@ def test_bets(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -
 
     assert response_by_phase_with_invalid_code.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "phase_not_found",
         "description": f"Phase not found: {invalid_phase_code}",
     }

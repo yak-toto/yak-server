@@ -88,7 +88,7 @@ def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", engine_for_test:
 
     assert response_locked_bet.json() == {
         "ok": False,
-        "error_code": HTTPStatus.FORBIDDEN,
+        "error_code": "locked_score_bet",
         "description": "Cannot modify score bet, lock date is exceeded",
     }
 
@@ -107,7 +107,7 @@ def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", engine_for_test:
 
     assert response_bet_not_found.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "bet_not_found",
         "description": f"Bet not found: {non_existing_bet_id}",
     }
 
@@ -120,7 +120,7 @@ def test_modify_score_bet(app_with_valid_jwt_config: "FastAPI", engine_for_test:
 
     assert response_new_score_negative.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
+        "error_code": "validation_error",
         "description": [
             {
                 "error": "Input should be greater than or equal to 0",

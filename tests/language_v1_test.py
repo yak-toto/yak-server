@@ -94,6 +94,6 @@ def test_group(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
     assert response_german_lang.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     assert response_german_lang.json() == {
         "description": [{"field": "query -> lang", "error": "Input should be 'fr' or 'en'"}],
-        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
+        "error_code": "validation_error",
         "ok": False,
     }

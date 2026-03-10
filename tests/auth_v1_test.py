@@ -112,7 +112,7 @@ def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_second_signup.status_code == HTTPStatus.CONFLICT
     assert response_second_signup.json() == {
         "ok": False,
-        "error_code": HTTPStatus.CONFLICT,
+        "error_code": "name_already_exists",
         "description": f"Name already exists: {user_name}",
     }
 
@@ -131,7 +131,7 @@ def test_login_wrong_name(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_login.status_code == HTTPStatus.UNAUTHORIZED
     assert response_login.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "invalid_credentials",
         "description": "Invalid credentials",
     }
 
@@ -161,7 +161,7 @@ def test_login_wrong_password(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_login.status_code == HTTPStatus.UNAUTHORIZED
     assert response_login.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "invalid_credentials",
         "description": "Invalid credentials",
     }
 
@@ -189,7 +189,7 @@ def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_get_all_bets_with_cropped_token.status_code == HTTPStatus.UNAUTHORIZED
     assert response_get_all_bets_with_cropped_token.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "invalid_token",
         "description": "Invalid access token, authentication required",
     }
 
@@ -222,7 +222,7 @@ def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI") -> None:
     assert response_current_user.status_code == HTTPStatus.UNAUTHORIZED
     assert response_current_user.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "expired_token",
         "description": "Expired access token, re-authentication required",
     }
 
@@ -249,7 +249,7 @@ def test_invalid_signup_body(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_signup.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     assert response_signup.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
+        "error_code": "validation_error",
         "description": [
             {"field": "body -> password", "error": "Field required"},
             {"field": "body -> passwor", "error": "Extra inputs are not permitted"},
@@ -274,7 +274,7 @@ def test_invalid_login_body(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_login.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     assert response_login.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
+        "error_code": "validation_error",
         "description": [
             {"field": "body -> name", "error": "Field required"},
             {"field": "body -> nme", "error": "Extra inputs are not permitted"},
@@ -290,7 +290,7 @@ def test_no_token(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "invalid_token",
         "description": "Invalid access token, authentication required",
     }
 
@@ -321,7 +321,7 @@ def test_logout(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_current_user.status_code == HTTPStatus.UNAUTHORIZED
     assert response_current_user.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "invalid_token",
         "description": "Invalid access token, authentication required",
     }
 
@@ -342,7 +342,7 @@ def test_non_compliant_password(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_signup.status_code == HTTPStatus.BAD_REQUEST
     assert response_signup.json() == {
         "ok": False,
-        "error_code": HTTPStatus.BAD_REQUEST,
+        "error_code": "unsatisfied_password_requirements",
         "description": (
             "Unsatisfied password requirements. Password is too short. Minimum size is 8."
         ),

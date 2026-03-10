@@ -1,5 +1,42 @@
+from enum import Enum
 from functools import partial
 from uuid import UUID
+
+
+class ErrorCode(str, Enum):
+    # Authentication
+    INVALID_CREDENTIALS = "invalid_credentials"
+    UNAUTHORIZED_ACCESS_TO_ADMIN_API = "unauthorized_access_to_admin_api"
+    NO_ADMIN_USER = "no_admin_user"
+    INVALID_TOKEN = "invalid_token"
+    EXPIRED_TOKEN = "expired_token"
+    INVALID_REFRESH_TOKEN = "invalid_refresh_token"
+    EXPIRED_REFRESH_TOKEN = "expired_refresh_token"
+
+    # Users
+    NAME_ALREADY_EXISTS = "name_already_exists"
+    USER_NOT_FOUND = "user_not_found"
+    UNSATISFIED_PASSWORD_REQUIREMENTS = "unsatisfied_password_requirements"
+
+    # Bets
+    BET_NOT_FOUND = "bet_not_found"
+    LOCKED_SCORE_BET = "locked_score_bet"
+    LOCKED_BINARY_BET = "locked_binary_bet"
+
+    # Resources
+    TEAM_NOT_FOUND = "team_not_found"
+    INVALID_TEAM_ID = "invalid_team_id"
+    GROUP_NOT_FOUND = "group_not_found"
+    PHASE_NOT_FOUND = "phase_not_found"
+    RULE_NOT_FOUND = "rule_not_found"
+
+    # Generic
+    VALIDATION_ERROR = "validation_error"
+    INTERNAL_SERVER_ERROR = "internal_server_error"
+    SERVICE_UNAVAILABLE = "service_unavailable"
+    RATE_LIMIT_EXCEEDED = "rate_limit_exceeded"
+    HTTP_EXCEPTION = "http_exception"
+
 
 INVALID_CREDENTIALS_MESSAGE = "Invalid credentials"
 UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE = "Unauthorized access to admin API"

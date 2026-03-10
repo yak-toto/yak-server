@@ -121,7 +121,7 @@ def test_modify_partial_score_bet(
     assert response_patch_wrong_team1_id.status_code == HTTPStatus.NOT_FOUND
     assert response_patch_wrong_team1_id.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "team_not_found",
         "description": f"Team not found: {wrong_team1_id}",
     }
 
@@ -137,6 +137,6 @@ def test_modify_partial_score_bet(
     assert response_patch_wrong_team2_id.status_code == HTTPStatus.NOT_FOUND
     assert response_patch_wrong_team2_id.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "team_not_found",
         "description": f"Team not found: {wrong_team2_id}",
     }

@@ -131,7 +131,7 @@ def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
 
     assert response_group_rank_with_invalid_code.json() == {
         "description": f"Group not found: {invalid_group_code}",
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "group_not_found",
         "ok": False,
     }
 

@@ -40,7 +40,7 @@ def test_rate_limiter_signup_login(app_with_rate_limiter: "FastAPI") -> None:
     assert response_signup.status_code == HTTPStatus.TOO_MANY_REQUESTS
     assert response_signup.json() == {
         "ok": False,
-        "error_code": HTTPStatus.TOO_MANY_REQUESTS,
+        "error_code": "rate_limit_exceeded",
         "description": "Rate limit exceeded. Please try again later.",
     }
 
@@ -61,7 +61,7 @@ def test_rate_limiter_signup_login(app_with_rate_limiter: "FastAPI") -> None:
     assert response_login.status_code == HTTPStatus.TOO_MANY_REQUESTS
     assert response_login.json() == {
         "ok": False,
-        "error_code": HTTPStatus.TOO_MANY_REQUESTS,
+        "error_code": "rate_limit_exceeded",
         "description": "Rate limit exceeded. Please try again later.",
     }
 
@@ -79,6 +79,6 @@ def test_rate_limiter_global(app_with_rate_limiter: "FastAPI") -> None:
     assert response.status_code == HTTPStatus.TOO_MANY_REQUESTS
     assert response.json() == {
         "ok": False,
-        "error_code": HTTPStatus.TOO_MANY_REQUESTS,
+        "error_code": "rate_limit_exceeded",
         "description": "Rate limit exceeded. Please try again later.",
     }

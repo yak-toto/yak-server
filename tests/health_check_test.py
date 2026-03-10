@@ -33,4 +33,8 @@ def test_health_check_ko(app_with_valid_jwt_config: "FastAPI") -> None:
     response = client.get("/api/health/")
 
     assert response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
-    assert response.json() == {"ok": False, "error_code": 503, "description": "Service Unavailable"}
+    assert response.json() == {
+        "ok": False,
+        "error_code": "service_unavailable",
+        "description": "Service Unavailable",
+    }
