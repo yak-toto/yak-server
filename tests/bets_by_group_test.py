@@ -144,6 +144,6 @@ def test_bets_by_groups(app_with_valid_jwt_config: "FastAPI", engine_for_test: "
 
     assert bets_by_invalid_group_code.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "group_not_found",
         "description": f"Group not found: {invalid_group_code}",
     }

@@ -85,7 +85,7 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
 
     assert response_one_team_with_invalid_id.json() == {
         "ok": False,
-        "error_code": HTTPStatus.BAD_REQUEST,
+        "error_code": "invalid_team_id",
         "description": (
             f"Invalid team id: {invalid_team_id}. Retry with a uuid or ISO 3166-1 alpha-2 code"
         ),
@@ -100,7 +100,7 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
 
     assert response_non_existing_team_id.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "team_not_found",
         "description": f"Team not found: {non_existing_team_id}",
     }
 
@@ -122,6 +122,6 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
     assert response_retrieve_flag_with_invalid_id.status_code == HTTPStatus.NOT_FOUND
     assert response_retrieve_flag_with_invalid_id.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "team_not_found",
         "description": f"Team not found: {invalid_team_id_with_flag}",
     }

@@ -89,7 +89,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI", engine_for_test: 
     assert response_wrong_input.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     assert response_wrong_input.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
+        "error_code": "validation_error",
         "description": [
             {"field": "body -> password", "error": "Field required"},
             {"field": "body -> name", "error": "Extra inputs are not permitted"},
@@ -106,5 +106,5 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI", engine_for_test: 
     )
 
     assert response_wrong_input.status_code == HTTPStatus.NOT_FOUND
-    assert response_wrong_input.json()["error_code"] == HTTPStatus.NOT_FOUND
+    assert response_wrong_input.json()["error_code"] == "user_not_found"
     assert response_wrong_input.json()["description"] == f"User not found: {invalid_user_id}"

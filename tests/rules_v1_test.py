@@ -35,6 +35,6 @@ def test_rule(app_with_empty_rules: "FastAPI") -> None:
     assert response_execute_rule.status_code == HTTPStatus.NOT_FOUND
     assert response_execute_rule.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "rule_not_found",
         "description": f"Rule not found: {invalid_rule_id}",
     }

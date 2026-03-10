@@ -27,4 +27,4 @@ def test_score_board_rule_admin_user_not_found(engine_for_test_with_delete: "Eng
     with pytest.raises(NoAdminUser) as exception:
         compute_score_board(engine_for_test_with_delete, Rules())
 
-    assert str(exception.value) == "401: No admin user found"
+    assert str(exception.value) == "No admin user found"

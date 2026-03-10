@@ -95,7 +95,7 @@ def test_cli(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_login_user_not_found.status_code == HTTPStatus.NOT_FOUND
     assert response_login_user_not_found.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "user_not_found",
         "description": f"User not found: {user_id}",
     }
 

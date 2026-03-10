@@ -57,7 +57,7 @@ def test_competition(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response_invalid_lang.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     assert response_invalid_lang.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNPROCESSABLE_ENTITY,
+        "error_code": "validation_error",
         "description": [{"field": "query -> lang", "error": "Input should be 'fr' or 'en'"}],
     }
 

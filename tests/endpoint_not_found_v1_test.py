@@ -15,6 +15,6 @@ def test_endpoint_not_found(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "http_exception",
         "description": "Not Found",
     }

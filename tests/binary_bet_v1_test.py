@@ -88,7 +88,7 @@ def test_binary_bet(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
     assert response_lock_bet.status_code == HTTPStatus.FORBIDDEN
     assert response_lock_bet.json() == {
         "ok": False,
-        "error_code": HTTPStatus.FORBIDDEN,
+        "error_code": "locked_binary_bet",
         "description": "Cannot modify binary bet, lock date is exceeded",
     }
 
@@ -117,7 +117,7 @@ def test_binary_bet(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
     assert response_with_invalid_bet_id.status_code == HTTPStatus.NOT_FOUND
     assert response_with_invalid_bet_id.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "bet_not_found",
         "description": f"Bet not found: {invalid_bet_id}",
     }
 
@@ -165,7 +165,7 @@ def test_binary_bet(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
     assert response_retrieve_with_invalid_bet_id.status_code == HTTPStatus.NOT_FOUND
     assert response_retrieve_with_invalid_bet_id.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "bet_not_found",
         "description": f"Bet not found: {invalid_bet_id}",
     }
 

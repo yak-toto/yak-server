@@ -122,7 +122,7 @@ def test_refresh_without_token(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "invalid_refresh_token",
         "description": "Invalid refresh token, re-authentication required",
     }
 
@@ -135,7 +135,7 @@ def test_refresh_with_wrong_token(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "invalid_refresh_token",
         "description": "Invalid refresh token, re-authentication required",
     }
 
@@ -166,7 +166,7 @@ def test_refresh_token_expired(app_with_null_jwt_refresh_expiration_time: "FastA
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "expired_refresh_token",
         "description": "Expired refresh token, re-authentication required",
     }
 
@@ -208,7 +208,7 @@ def test_refresh_token_cannot_access_protected_resources(
     assert response_with_refresh_token.status_code == HTTPStatus.UNAUTHORIZED
     assert response_with_refresh_token.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "invalid_token",
         "description": "Invalid access token, authentication required",
     }
 
@@ -220,7 +220,7 @@ def test_refresh_token_cannot_access_protected_resources(
     assert response_current_user_with_refresh.status_code == HTTPStatus.UNAUTHORIZED
     assert response_current_user_with_refresh.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "invalid_token",
         "description": "Invalid access token, authentication required",
     }
 
@@ -252,7 +252,7 @@ def test_refresh_token_revoked_after_use(app_with_valid_jwt_config: "FastAPI") -
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "invalid_refresh_token",
         "description": "Invalid refresh token, re-authentication required",
     }
 
@@ -283,6 +283,6 @@ def test_refresh_token_revoked_after_logout(app_with_valid_jwt_config: "FastAPI"
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "invalid_refresh_token",
         "description": "Invalid refresh token, re-authentication required",
     }

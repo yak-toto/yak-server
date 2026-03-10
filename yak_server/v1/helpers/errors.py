@@ -3,7 +3,7 @@ import traceback
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from fastapi import HTTPException, Request, status
+from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
@@ -19,6 +19,7 @@ from yak_server.helpers.errors import (
     LOCKED_SCORE_BET_MESSAGE,
     RATE_LIMIT_EXCEEDED_MESSAGE,
     UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE,
+    ErrorCode,
     bet_not_found_message,
     group_not_found_message,
     name_already_exists_message,
@@ -34,143 +35,182 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class InvalidCredentials(HTTPException):
+class YakHTTPException(Exception):  # noqa: N818
+    def __init__(self, status_code: int, detail: str, error_code: ErrorCode) -> None:
+        super().__init__(detail)
+        self.status_code = status_code
+        self.detail = detail
+        self.error_code = error_code
+
+
+class InvalidCredentials(YakHTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=INVALID_CREDENTIALS_MESSAGE,
+            error_code=ErrorCode.INVALID_CREDENTIALS,
         )
 
 
-class NameAlreadyExists(HTTPException):
+class NameAlreadyExists(YakHTTPException):
     def __init__(self, name: str) -> None:
         super().__init__(
             status_code=status.HTTP_409_CONFLICT,
             detail=name_already_exists_message(name),
+            error_code=ErrorCode.NAME_ALREADY_EXISTS,
         )
 
 
-class BetNotFound(HTTPException):
+class BetNotFound(YakHTTPException):
     def __init__(self, bet_id: UUID) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=bet_not_found_message(bet_id),
+            error_code=ErrorCode.BET_NOT_FOUND,
         )
 
 
-class UnsatisfiedPasswordRequirements(HTTPException):
+class UnsatisfiedPasswordRequirements(YakHTTPException):
     def __init__(self, detail: str) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Unsatisfied password requirements. {detail}",
+            error_code=ErrorCode.UNSATISFIED_PASSWORD_REQUIREMENTS,
         )
 
 
-class UserNotFound(HTTPException):
+class UserNotFound(YakHTTPException):
     def __init__(self, user_id: UUID) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=user_not_found_message(user_id),
+            error_code=ErrorCode.USER_NOT_FOUND,
         )
 
 
-class UnauthorizedAccessToAdminAPI(HTTPException):
+class UnauthorizedAccessToAdminAPI(YakHTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE,
+            error_code=ErrorCode.UNAUTHORIZED_ACCESS_TO_ADMIN_API,
         )
 
 
-class NoAdminUser(HTTPException):
+class NoAdminUser(YakHTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="No admin user found",
+            error_code=ErrorCode.NO_ADMIN_USER,
         )
 
 
-class InvalidTeamId(HTTPException):
+class InvalidTeamId(YakHTTPException):
     def __init__(self, team_id: str) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid team id: {team_id}. Retry with a uuid or ISO 3166-1 alpha-2 code",
+            error_code=ErrorCode.INVALID_TEAM_ID,
         )
 
 
-class TeamNotFound(HTTPException):
+class TeamNotFound(YakHTTPException):
     def __init__(self, team_id: str | UUID) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=team_not_found_message(team_id),
+            error_code=ErrorCode.TEAM_NOT_FOUND,
         )
 
 
-class LockedScoreBet(HTTPException):
+class LockedScoreBet(YakHTTPException):
     def __init__(self) -> None:
-        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=LOCKED_SCORE_BET_MESSAGE)
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=LOCKED_SCORE_BET_MESSAGE,
+            error_code=ErrorCode.LOCKED_SCORE_BET,
+        )
 
 
-class LockedBinaryBet(HTTPException):
+class LockedBinaryBet(YakHTTPException):
     def __init__(self) -> None:
-        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=LOCKED_BINARY_BET_MESSAGE)
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=LOCKED_BINARY_BET_MESSAGE,
+            error_code=ErrorCode.LOCKED_BINARY_BET,
+        )
 
 
-class GroupNotFound(HTTPException):
+class GroupNotFound(YakHTTPException):
     def __init__(self, group_id: str | UUID) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=group_not_found_message(group_id),
+            error_code=ErrorCode.GROUP_NOT_FOUND,
         )
 
 
-class PhaseNotFound(HTTPException):
+class PhaseNotFound(YakHTTPException):
     def __init__(self, phase_id: str | UUID) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=phase_not_found_message(phase_id),
+            error_code=ErrorCode.PHASE_NOT_FOUND,
         )
 
 
-class InvalidToken(HTTPException):
+class InvalidToken(YakHTTPException):
     def __init__(self) -> None:
-        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=INVALID_TOKEN_MESSAGE)
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=INVALID_TOKEN_MESSAGE,
+            error_code=ErrorCode.INVALID_TOKEN,
+        )
 
 
-class ExpiredToken(HTTPException):
+class ExpiredToken(YakHTTPException):
     def __init__(self) -> None:
-        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=EXPIRED_TOKEN_MESSAGE)
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=EXPIRED_TOKEN_MESSAGE,
+            error_code=ErrorCode.EXPIRED_TOKEN,
+        )
 
 
-class InvalidRefreshToken(HTTPException):
+class InvalidRefreshToken(YakHTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=INVALID_REFRESH_TOKEN_MESSAGE,
+            error_code=ErrorCode.INVALID_REFRESH_TOKEN,
         )
 
 
-class ExpiredRefreshToken(HTTPException):
+class ExpiredRefreshToken(YakHTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=EXPIRED_REFRESH_TOKEN_MESSAGE,
+            error_code=ErrorCode.EXPIRED_REFRESH_TOKEN,
         )
 
 
-class RuleNotFound(HTTPException):
+class RuleNotFound(YakHTTPException):
     def __init__(self, rule_id: UUID) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=rule_not_found_message(rule_id),
+            error_code=ErrorCode.RULE_NOT_FOUND,
         )
 
 
-class RateLimitExceeded(HTTPException):
+class RateLimitExceeded(YakHTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail=RATE_LIMIT_EXCEEDED_MESSAGE,
+            error_code=ErrorCode.RATE_LIMIT_EXCEEDED,
         )
 
 
@@ -199,7 +239,7 @@ def set_exception_handler(app: "FastAPI") -> None:
             status_code=http_exception.status_code,
             content={
                 "ok": False,
-                "error_code": http_exception.status_code,
+                "error_code": ErrorCode.HTTP_EXCEPTION,
                 "description": http_exception.detail,
             },
         )
@@ -215,12 +255,32 @@ def set_exception_handler(app: "FastAPI") -> None:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
                 "ok": False,
-                "error_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "error_code": ErrorCode.INTERNAL_SERVER_ERROR,
                 "description": (
                     f"{type(exception).__name__}: {exception!s}"
                     if app.debug
                     else "Unexpected error"
                 ),
+            },
+        )
+
+    @app.exception_handler(YakHTTPException)
+    def yak_http_exception_handler(
+        _: Request, yak_http_exception: YakHTTPException
+    ) -> JSONResponse:
+        log_traceback(yak_http_exception)
+
+        logger.info(
+            "An expected exception occurs:"
+            f" {type(yak_http_exception).__name__} {yak_http_exception}",
+        )
+
+        return JSONResponse(
+            status_code=yak_http_exception.status_code,
+            content={
+                "ok": False,
+                "error_code": yak_http_exception.error_code,
+                "description": yak_http_exception.detail,
             },
         )
 
@@ -247,7 +307,7 @@ def set_exception_handler(app: "FastAPI") -> None:
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             content={
                 "ok": False,
-                "error_code": status.HTTP_422_UNPROCESSABLE_CONTENT,
+                "error_code": ErrorCode.VALIDATION_ERROR,
                 "description": errors,
             },
         )
@@ -262,7 +322,7 @@ def set_exception_handler(app: "FastAPI") -> None:
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={
                 "ok": False,
-                "error_code": status.HTTP_503_SERVICE_UNAVAILABLE,
+                "error_code": ErrorCode.SERVICE_UNAVAILABLE,
                 "description": "Service Unavailable",
             },
         )

@@ -172,7 +172,7 @@ def test_compute_points(
     assert response_compute_points_unauthorized.status_code == HTTPStatus.UNAUTHORIZED
     assert response_compute_points_unauthorized.json() == {
         "ok": False,
-        "error_code": HTTPStatus.UNAUTHORIZED,
+        "error_code": "unauthorized_access_to_admin_api",
         "description": "Unauthorized access to admin API",
     }
 

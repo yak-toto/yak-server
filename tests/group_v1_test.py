@@ -73,7 +73,7 @@ def test_group(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
     assert group_response_invalid_phase_code.status_code == HTTPStatus.NOT_FOUND
     assert group_response_invalid_phase_code.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "phase_not_found",
         "description": f"Phase not found: {invalid_phase_code}",
     }
 
@@ -100,7 +100,7 @@ def test_group(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
     assert group_response_with_invalid_code.status_code == HTTPStatus.NOT_FOUND
     assert group_response_with_invalid_code.json() == {
         "ok": False,
-        "error_code": HTTPStatus.NOT_FOUND,
+        "error_code": "group_not_found",
         "description": f"Group not found: {invalid_group_id}",
     }
 
