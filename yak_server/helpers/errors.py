@@ -9,6 +9,7 @@ INVALID_REFRESH_TOKEN_MESSAGE = "Invalid refresh token, re-authentication requir
 EXPIRED_REFRESH_TOKEN_MESSAGE = "Expired refresh token, re-authentication required"
 LOCKED_SCORE_BET_MESSAGE = "Cannot modify score bet, lock date is exceeded"
 LOCKED_BINARY_BET_MESSAGE = "Cannot modify binary bet, lock date is exceeded"
+RATE_LIMIT_EXCEEDED_MESSAGE = "Rate limit exceeded. Please try again later."
 
 
 def name_already_exists_message(user_name: str) -> str:

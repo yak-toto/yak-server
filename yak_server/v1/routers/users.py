@@ -3,9 +3,7 @@ from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response, status
-from fastapi_limiter.depends import RateLimiter
 from pydantic import UUID4
-from pyrate_limiter import Duration, Limiter, Rate  # type: ignore[attr-defined]
 from sqlalchemy.orm import Session
 
 from yak_server.database.models import RefreshTokenModel, Role, UserModel
@@ -44,6 +42,7 @@ from yak_server.v1.helpers.errors import (
     UnsatisfiedPasswordRequirements,
     UserNotFound,
 )
+from yak_server.v1.helpers.rate_limiting import instantiate_auth_rate_limiter
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.users import (
     CurrentUserOut,
@@ -60,8 +59,8 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-signup_rate_limiter = RateLimiter(Limiter(Rate(5, Duration.MINUTE)))
-login_rate_limiter = RateLimiter(Limiter(Rate(5, Duration.MINUTE)))
+signup_rate_limiter = instantiate_auth_rate_limiter()
+login_rate_limiter = instantiate_auth_rate_limiter()
 
 
 @router.post(

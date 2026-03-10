@@ -7,9 +7,7 @@ from typing import TYPE_CHECKING
 import psycopg
 import pytest
 from fastapi import FastAPI
-from fastapi_limiter.depends import RateLimiter
 from psycopg import sql
-from pyrate_limiter import Duration, Limiter, Rate  # type: ignore[attr-defined]
 from sqlalchemy import Engine, create_engine
 
 from scripts.profiling import create_app as create_app_with_profiling
@@ -30,6 +28,10 @@ from yak_server.helpers.settings import (
     get_cookie_settings,
     get_lock_datetime,
     get_rules,
+)
+from yak_server.v1.helpers.rate_limiting import (
+    instantiate_auth_rate_limiter,
+    instantiate_global_rate_limiter,
 )
 from yak_server.v1.routers.users import login_rate_limiter, signup_rate_limiter
 
@@ -142,31 +144,12 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
 
 
 @pytest.fixture
-def limiter_signup_login() -> tuple[RateLimiter, RateLimiter]:
-    return (
-        RateLimiter(Limiter(Rate(5, Duration.MINUTE))),
-        RateLimiter(Limiter(Rate(5, Duration.MINUTE))),
-    )
-
-
-@pytest.fixture
-def global_limiter() -> RateLimiter:
-    return RateLimiter(Limiter(Rate(200, Duration.MINUTE)))
-
-
-@pytest.fixture
-def app_with_rate_limiter(
-    _app: "FastAPI",
-    limiter_signup_login: tuple[RateLimiter, RateLimiter],
-    global_limiter: RateLimiter,
-) -> Generator["FastAPI", None, None]:
+def app_with_rate_limiter(_app: "FastAPI") -> Generator["FastAPI", None, None]:
     _apply_standard_overrides(_app)
 
-    _app.dependency_overrides[global_rate_limiter] = global_limiter
-
-    limiter_signup, limiter_login = limiter_signup_login
-    _app.dependency_overrides[signup_rate_limiter] = limiter_signup
-    _app.dependency_overrides[login_rate_limiter] = limiter_login
+    _app.dependency_overrides[global_rate_limiter] = instantiate_global_rate_limiter()
+    _app.dependency_overrides[signup_rate_limiter] = instantiate_auth_rate_limiter()
+    _app.dependency_overrides[login_rate_limiter] = instantiate_auth_rate_limiter()
 
     yield _app
 

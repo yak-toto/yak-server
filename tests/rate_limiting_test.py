@@ -41,7 +41,7 @@ def test_rate_limiter_signup_login(app_with_rate_limiter: "FastAPI") -> None:
     assert response_signup.json() == {
         "ok": False,
         "error_code": HTTPStatus.TOO_MANY_REQUESTS,
-        "description": "Too Many Requests",
+        "description": "Rate limit exceeded. Please try again later.",
     }
 
     # Make 6 login request, 6th should return 429 TOO MANY REQUEST
@@ -62,7 +62,7 @@ def test_rate_limiter_signup_login(app_with_rate_limiter: "FastAPI") -> None:
     assert response_login.json() == {
         "ok": False,
         "error_code": HTTPStatus.TOO_MANY_REQUESTS,
-        "description": "Too Many Requests",
+        "description": "Rate limit exceeded. Please try again later.",
     }
 
 
@@ -77,3 +77,8 @@ def test_rate_limiter_global(app_with_rate_limiter: "FastAPI") -> None:
     response = client.get("/api/health")
 
     assert response.status_code == HTTPStatus.TOO_MANY_REQUESTS
+    assert response.json() == {
+        "ok": False,
+        "error_code": HTTPStatus.TOO_MANY_REQUESTS,
+        "description": "Rate limit exceeded. Please try again later.",
+    }
