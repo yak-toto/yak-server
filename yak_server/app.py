@@ -2,9 +2,9 @@ from importlib.metadata import version
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_limiter.depends import RateLimiter
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pyrate_limiter import Duration, Limiter, Rate  # type: ignore[attr-defined]
+
+from yak_server.v1.helpers.rate_limiting import instantiate_global_rate_limiter
 
 from . import health_check
 from .helpers.logging_helpers import setup_logging
@@ -32,7 +32,7 @@ class Config(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
 
 
-global_rate_limiter = RateLimiter(Limiter(Rate(200, Duration.MINUTE)))
+global_rate_limiter = instantiate_global_rate_limiter()
 
 
 def create_app() -> FastAPI:

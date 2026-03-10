@@ -17,6 +17,7 @@ from yak_server.helpers.errors import (
     INVALID_TOKEN_MESSAGE,
     LOCKED_BINARY_BET_MESSAGE,
     LOCKED_SCORE_BET_MESSAGE,
+    RATE_LIMIT_EXCEEDED_MESSAGE,
     UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE,
     bet_not_found_message,
     group_not_found_message,
@@ -162,6 +163,14 @@ class RuleNotFound(HTTPException):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=rule_not_found_message(rule_id),
+        )
+
+
+class RateLimitExceeded(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=RATE_LIMIT_EXCEEDED_MESSAGE,
         )
 
 
