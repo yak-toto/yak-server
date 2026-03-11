@@ -2,15 +2,16 @@ from typing import TYPE_CHECKING, Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
-from yak_server.database.models import Role, UserKnockoutGuessModel, UserModel
+from yak_server.database.models import GroupModel, Role, UserKnockoutGuessModel, UserModel
 from yak_server.helpers.database import get_db
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang
 from yak_server.v1.helpers.auth import require_user
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
-from yak_server.v1.models.results import UserResult
+from yak_server.v1.models.groups import GroupOut
+from yak_server.v1.models.results import ScoreBoardResponse, ScoreBoardUserResult, UserResult
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -30,23 +31,33 @@ def retrieve_score_board(
     _: Annotated[UserModel, Depends(require_user)],
     db: Annotated[Session, Depends(get_db)],
     lang: Lang = DEFAULT_LANGUAGE,
-) -> GenericOut[list[UserResult]]:
+) -> GenericOut[ScoreBoardResponse]:
+    knockout_groups = (
+        db
+        .query(GroupModel)
+        .where(GroupModel.id.in_(select(UserKnockoutGuessModel.group_id).distinct()))
+        .order_by(GroupModel.index)
+        .all()
+    )
+
+    users = list(
+        db
+        .query(UserModel)
+        .options(
+            selectinload(UserModel.knockout_guesses).selectinload(UserKnockoutGuessModel.group)
+        )
+        .order_by(UserModel.points.desc())
+        .where(UserModel.role != Role.ADMIN)
+    )
+
     return GenericOut(
-        result=[
-            UserResult.from_instance(user, rank=rank, lang=lang)
-            for rank, user in enumerate(
-                db
-                .query(UserModel)
-                .options(
-                    selectinload(UserModel.knockout_guesses).selectinload(
-                        UserKnockoutGuessModel.group
-                    )
-                )
-                .order_by(UserModel.points.desc())
-                .where(UserModel.role != Role.ADMIN),
-                1,
-            )
-        ],
+        result=ScoreBoardResponse(
+            groups=[GroupOut.from_instance(g, lang=lang) for g in knockout_groups],
+            results=[
+                ScoreBoardUserResult.from_instance(user, rank=rank)
+                for rank, user in enumerate(users, 1)
+            ],
+        )
     )
 
 

@@ -186,53 +186,50 @@ def test_compute_points(
         headers={"Authorization": f"Bearer {users_data[0].access_token}"},
     )
 
-    assert score_board_response.json()["result"] == [
-        {
-            "rank": 1,
-            "first_name": users_data[2].first_name,
-            "full_name": f"{users_data[2].first_name} {users_data[2].last_name}",
-            "last_name": users_data[2].last_name,
-            "number_first_qualified_guess": 1,
-            "number_match_guess": 3,
-            "number_qualified_teams_guess": 2,
-            "number_score_guess": 0,
-            "knockout_rounds": [
-                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0}
-            ],
-            "number_winner_guess": 0,
-            "points": 46.0,
-        },
-        {
-            "rank": 2,
-            "first_name": users_data[0].first_name,
-            "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
-            "last_name": users_data[0].last_name,
-            "number_first_qualified_guess": 0,
-            "number_match_guess": 2,
-            "number_qualified_teams_guess": 2,
-            "number_score_guess": 2,
-            "knockout_rounds": [
-                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0}
-            ],
-            "number_winner_guess": 0,
-            "points": 43.0,
-        },
-        {
-            "rank": 3,
-            "first_name": users_data[1].first_name,
-            "full_name": f"{users_data[1].first_name} {users_data[1].last_name}",
-            "last_name": users_data[1].last_name,
-            "number_first_qualified_guess": 0,
-            "number_match_guess": 1,
-            "number_qualified_teams_guess": 1,
-            "number_score_guess": 0,
-            "knockout_rounds": [
-                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0}
-            ],
-            "number_winner_guess": 0,
-            "points": 11.0,
-        },
-    ]
+    assert score_board_response.json()["result"] == {
+        "groups": [{"id": ANY, "code": "1", "description": "Final"}],
+        "results": [
+            {
+                "rank": 1,
+                "first_name": users_data[2].first_name,
+                "full_name": f"{users_data[2].first_name} {users_data[2].last_name}",
+                "last_name": users_data[2].last_name,
+                "number_first_qualified_guess": 1,
+                "number_match_guess": 3,
+                "number_qualified_teams_guess": 2,
+                "number_score_guess": 0,
+                "knockout_rounds": [{"group_id": ANY, "count": 0}],
+                "number_winner_guess": 0,
+                "points": 46.0,
+            },
+            {
+                "rank": 2,
+                "first_name": users_data[0].first_name,
+                "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
+                "last_name": users_data[0].last_name,
+                "number_first_qualified_guess": 0,
+                "number_match_guess": 2,
+                "number_qualified_teams_guess": 2,
+                "number_score_guess": 2,
+                "knockout_rounds": [{"group_id": ANY, "count": 0}],
+                "number_winner_guess": 0,
+                "points": 43.0,
+            },
+            {
+                "rank": 3,
+                "first_name": users_data[1].first_name,
+                "full_name": f"{users_data[1].first_name} {users_data[1].last_name}",
+                "last_name": users_data[1].last_name,
+                "number_first_qualified_guess": 0,
+                "number_match_guess": 1,
+                "number_qualified_teams_guess": 1,
+                "number_score_guess": 0,
+                "knockout_rounds": [{"group_id": ANY, "count": 0}],
+                "number_winner_guess": 0,
+                "points": 11.0,
+            },
+        ],
+    }
 
     # Push finale phase bets
     put_finale_phase(client, admin.access_token, is_one_won=True)
@@ -256,53 +253,50 @@ def test_compute_points(
         headers={"Authorization": f"Bearer {users_data[0].access_token}"},
     )
 
-    assert score_board_response_after_finale_phase.json()["result"] == [
-        {
-            "rank": 1,
-            "first_name": users_data[0].first_name,
-            "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
-            "last_name": users_data[0].last_name,
-            "number_first_qualified_guess": 0,
-            "number_match_guess": 2,
-            "number_qualified_teams_guess": 2,
-            "number_score_guess": 2,
-            "knockout_rounds": [
-                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 2}
-            ],
-            "number_winner_guess": 1,
-            "points": 483.0,
-        },
-        {
-            "rank": 2,
-            "first_name": users_data[2].first_name,
-            "full_name": f"{users_data[2].first_name} {users_data[2].last_name}",
-            "last_name": users_data[2].last_name,
-            "number_first_qualified_guess": 1,
-            "number_match_guess": 3,
-            "number_qualified_teams_guess": 2,
-            "number_score_guess": 0,
-            "knockout_rounds": [
-                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 2}
-            ],
-            "number_winner_guess": 0,
-            "points": 286.0,
-        },
-        {
-            "rank": 3,
-            "first_name": users_data[1].first_name,
-            "full_name": f"{users_data[1].first_name} {users_data[1].last_name}",
-            "last_name": users_data[1].last_name,
-            "number_first_qualified_guess": 0,
-            "number_match_guess": 1,
-            "number_qualified_teams_guess": 1,
-            "number_score_guess": 0,
-            "knockout_rounds": [
-                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 1}
-            ],
-            "number_winner_guess": 0,
-            "points": 131.0,
-        },
-    ]
+    assert score_board_response_after_finale_phase.json()["result"] == {
+        "groups": [{"id": ANY, "code": "1", "description": "Final"}],
+        "results": [
+            {
+                "rank": 1,
+                "first_name": users_data[0].first_name,
+                "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
+                "last_name": users_data[0].last_name,
+                "number_first_qualified_guess": 0,
+                "number_match_guess": 2,
+                "number_qualified_teams_guess": 2,
+                "number_score_guess": 2,
+                "knockout_rounds": [{"group_id": ANY, "count": 2}],
+                "number_winner_guess": 1,
+                "points": 483.0,
+            },
+            {
+                "rank": 2,
+                "first_name": users_data[2].first_name,
+                "full_name": f"{users_data[2].first_name} {users_data[2].last_name}",
+                "last_name": users_data[2].last_name,
+                "number_first_qualified_guess": 1,
+                "number_match_guess": 3,
+                "number_qualified_teams_guess": 2,
+                "number_score_guess": 0,
+                "knockout_rounds": [{"group_id": ANY, "count": 2}],
+                "number_winner_guess": 0,
+                "points": 286.0,
+            },
+            {
+                "rank": 3,
+                "first_name": users_data[1].first_name,
+                "full_name": f"{users_data[1].first_name} {users_data[1].last_name}",
+                "last_name": users_data[1].last_name,
+                "number_first_qualified_guess": 0,
+                "number_match_guess": 1,
+                "number_qualified_teams_guess": 1,
+                "number_score_guess": 0,
+                "knockout_rounds": [{"group_id": ANY, "count": 1}],
+                "number_winner_guess": 0,
+                "points": 131.0,
+            },
+        ],
+    }
 
     # Success case : check user GET /results call
     get_results_response = client.get(
