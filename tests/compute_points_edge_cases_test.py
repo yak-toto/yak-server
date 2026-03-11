@@ -251,56 +251,62 @@ def test_compute_points(
         headers={"Authorization": f"Bearer {users_data[0].access_token}"},
     )
 
-    assert score_board_response.json()["result"] == [
-        {
-            "rank": 1,
-            "first_name": users_data[0].first_name,
-            "last_name": users_data[0].last_name,
-            "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
-            "number_match_guess": 2,
-            "number_score_guess": 0,
-            "number_qualified_teams_guess": 1,
-            "number_first_qualified_guess": 0,
-            "knockout_rounds": [
-                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
-                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
-            ],
-            "number_winner_guess": 0,
-            "points": 16.0,
-        },
-        {
-            "rank": 2,
-            "first_name": users_data[2].first_name,
-            "last_name": users_data[2].last_name,
-            "full_name": f"{users_data[2].first_name} {users_data[2].last_name}",
-            "number_match_guess": 3,
-            "number_score_guess": 0,
-            "number_qualified_teams_guess": 0,
-            "number_first_qualified_guess": 0,
-            "knockout_rounds": [
-                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
-                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
-            ],
-            "number_winner_guess": 0,
-            "points": 8.0,
-        },
-        {
-            "rank": 3,
-            "first_name": users_data[1].first_name,
-            "last_name": users_data[1].last_name,
-            "full_name": f"{users_data[1].first_name} {users_data[1].last_name}",
-            "number_match_guess": 2,
-            "number_score_guess": 0,
-            "number_qualified_teams_guess": 0,
-            "number_first_qualified_guess": 0,
-            "knockout_rounds": [
-                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
-                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
-            ],
-            "number_winner_guess": 0,
-            "points": 5.0,
-        },
-    ]
+    assert score_board_response.json()["result"] == {
+        "groups": [
+            {"id": ANY, "code": "2", "description": "Demi-finale"},
+            {"id": ANY, "code": "1", "description": "Final"},
+        ],
+        "results": [
+            {
+                "rank": 1,
+                "first_name": users_data[0].first_name,
+                "last_name": users_data[0].last_name,
+                "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
+                "number_match_guess": 2,
+                "number_score_guess": 0,
+                "number_qualified_teams_guess": 1,
+                "number_first_qualified_guess": 0,
+                "knockout_rounds": [
+                    {"group_id": ANY, "count": 0},
+                    {"group_id": ANY, "count": 0},
+                ],
+                "number_winner_guess": 0,
+                "points": 16.0,
+            },
+            {
+                "rank": 2,
+                "first_name": users_data[2].first_name,
+                "last_name": users_data[2].last_name,
+                "full_name": f"{users_data[2].first_name} {users_data[2].last_name}",
+                "number_match_guess": 3,
+                "number_score_guess": 0,
+                "number_qualified_teams_guess": 0,
+                "number_first_qualified_guess": 0,
+                "knockout_rounds": [
+                    {"group_id": ANY, "count": 0},
+                    {"group_id": ANY, "count": 0},
+                ],
+                "number_winner_guess": 0,
+                "points": 8.0,
+            },
+            {
+                "rank": 3,
+                "first_name": users_data[1].first_name,
+                "last_name": users_data[1].last_name,
+                "full_name": f"{users_data[1].first_name} {users_data[1].last_name}",
+                "number_match_guess": 2,
+                "number_score_guess": 0,
+                "number_qualified_teams_guess": 0,
+                "number_first_qualified_guess": 0,
+                "knockout_rounds": [
+                    {"group_id": ANY, "count": 0},
+                    {"group_id": ANY, "count": 0},
+                ],
+                "number_winner_guess": 0,
+                "points": 5.0,
+            },
+        ],
+    }
 
     # Patch admin score bets so all groups are not filled
     patch_score_bets(
@@ -334,56 +340,62 @@ def test_compute_points(
         headers={"Authorization": f"Bearer {users_data[0].access_token}"},
     )
 
-    assert score_board_response.json()["result"] == [
-        {
-            "rank": 1,
-            "first_name": users_data[0].first_name,
-            "last_name": users_data[0].last_name,
-            "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
-            "number_match_guess": 3,
-            "number_score_guess": 0,
-            "number_qualified_teams_guess": 1,
-            "number_first_qualified_guess": 0,
-            "knockout_rounds": [
-                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
-                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
-            ],
-            "number_winner_guess": 0,
-            "points": 9.0,
-        },
-        {
-            "rank": 2,
-            "first_name": users_data[1].first_name,
-            "last_name": users_data[1].last_name,
-            "full_name": f"{users_data[1].first_name} {users_data[1].last_name}",
-            "number_match_guess": 2,
-            "number_score_guess": 0,
-            "number_qualified_teams_guess": 0,
-            "number_first_qualified_guess": 0,
-            "knockout_rounds": [
-                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
-                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
-            ],
-            "number_winner_guess": 0,
-            "points": 6.0,
-        },
-        {
-            "rank": 3,
-            "first_name": users_data[2].first_name,
-            "last_name": users_data[2].last_name,
-            "full_name": f"{users_data[2].first_name} {users_data[2].last_name}",
-            "number_match_guess": 0,
-            "number_score_guess": 0,
-            "number_qualified_teams_guess": 0,
-            "number_first_qualified_guess": 0,
-            "knockout_rounds": [
-                {"group": {"id": ANY, "code": "2", "description": "Demi-finale"}, "count": 0},
-                {"group": {"id": ANY, "code": "1", "description": "Final"}, "count": 0},
-            ],
-            "number_winner_guess": 0,
-            "points": 0.0,
-        },
-    ]
+    assert score_board_response.json()["result"] == {
+        "groups": [
+            {"id": ANY, "code": "2", "description": "Demi-finale"},
+            {"id": ANY, "code": "1", "description": "Final"},
+        ],
+        "results": [
+            {
+                "rank": 1,
+                "first_name": users_data[0].first_name,
+                "last_name": users_data[0].last_name,
+                "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
+                "number_match_guess": 3,
+                "number_score_guess": 0,
+                "number_qualified_teams_guess": 1,
+                "number_first_qualified_guess": 0,
+                "knockout_rounds": [
+                    {"group_id": ANY, "count": 0},
+                    {"group_id": ANY, "count": 0},
+                ],
+                "number_winner_guess": 0,
+                "points": 9.0,
+            },
+            {
+                "rank": 2,
+                "first_name": users_data[1].first_name,
+                "last_name": users_data[1].last_name,
+                "full_name": f"{users_data[1].first_name} {users_data[1].last_name}",
+                "number_match_guess": 2,
+                "number_score_guess": 0,
+                "number_qualified_teams_guess": 0,
+                "number_first_qualified_guess": 0,
+                "knockout_rounds": [
+                    {"group_id": ANY, "count": 0},
+                    {"group_id": ANY, "count": 0},
+                ],
+                "number_winner_guess": 0,
+                "points": 6.0,
+            },
+            {
+                "rank": 3,
+                "first_name": users_data[2].first_name,
+                "last_name": users_data[2].last_name,
+                "full_name": f"{users_data[2].first_name} {users_data[2].last_name}",
+                "number_match_guess": 0,
+                "number_score_guess": 0,
+                "number_qualified_teams_guess": 0,
+                "number_first_qualified_guess": 0,
+                "knockout_rounds": [
+                    {"group_id": ANY, "count": 0},
+                    {"group_id": ANY, "count": 0},
+                ],
+                "number_winner_guess": 0,
+                "points": 0.0,
+            },
+        ],
+    }
 
 
 def test_compute_points_skips_nonexistent_knockout_group(
