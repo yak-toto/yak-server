@@ -1693,7 +1693,7 @@ wheels = [
 
 [[package]]
 name = "yak-server"
-version = "0.76.1"
+version = "0.76.2"
 source = { editable = "." }
 dependencies = [
     { name = "argon2-cffi" },
