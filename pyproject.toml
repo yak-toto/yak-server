@@ -40,7 +40,7 @@ dependencies = [
     "SQLAlchemy ==2.0.48",
     "pydantic-settings ==2.13.1",
 ]
-version = "0.76.2"
+version = "0.76.3"
 
 [project.urls]
 Homepage = "https://github.com/yak-toto/yak-server"
