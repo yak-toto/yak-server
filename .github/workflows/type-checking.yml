@@ -9,7 +9,8 @@ on:
       - "yak_server/**"
       - "tests/**"
       - "pyproject.toml"
-      - ".github/workflows/type_checking.yml"
+      - "uv.lock"
+      - ".github/workflows/type-checking.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
