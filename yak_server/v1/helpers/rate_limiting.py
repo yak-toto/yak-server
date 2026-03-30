@@ -1,6 +1,6 @@
 from fastapi import Request, Response
 from fastapi_limiter.depends import RateLimiter
-from pyrate_limiter import Duration, Limiter, Rate  # type: ignore[attr-defined]
+from pyrate_limiter import Duration, Limiter, Rate
 
 from yak_server.v1.helpers.errors import RateLimitExceeded
 
