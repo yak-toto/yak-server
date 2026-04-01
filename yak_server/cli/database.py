@@ -121,8 +121,15 @@ def initialize_database(engine: "Engine", data_folder: Path) -> None:
 
         teams = json.loads((data_folder / "teams.json").read_text(encoding="utf-8"))
 
+        flags_dir = data_folder.parent / "flags"
+
         for team in teams:
-            team["flag_url"] = team["internal_flag_url"]
+            flag_path = team["internal_flag_path"]
+
+            if flag_path and not (flags_dir / flag_path).is_file():
+                team["internal_flag_path"] = ""
+
+            team["flag_url"] = ""
 
             stmt = insert(TeamModel).values(**team)
             db.execute(

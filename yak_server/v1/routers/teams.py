@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
@@ -9,6 +9,7 @@ from yak_server.database.models import TeamModel
 from yak_server.helpers.database import get_db
 from yak_server.helpers.format import is_iso_3166_1_alpha_2_code, is_uuid4
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang
+from yak_server.helpers.settings import Settings, get_settings
 from yak_server.v1.helpers.errors import InvalidTeamId, TeamNotFound
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.teams import AllTeamsResponse, OneTeamResponse, TeamOut
@@ -71,10 +72,13 @@ def retrieve_team_by_id(
 def retrieve_team_flag_by_id(
     team_id: UUID4,
     db: Annotated[Session, Depends(get_db)],
-) -> RedirectResponse:
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> FileResponse:
     team = db.query(TeamModel).filter_by(id=team_id).first()
 
     if not team:
         raise TeamNotFound(team_id)
 
-    return RedirectResponse(team.internal_flag_url)
+    flag_path = settings.data_folder.parent / "flags" / team.internal_flag_path
+
+    return FileResponse(flag_path, headers={"Cache-Control": "public, max-age=86400"})

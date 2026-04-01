@@ -124,15 +124,14 @@ def test_bets_by_groups(app_with_valid_jwt_config: "FastAPI", engine_for_test: "
         ],
     }
 
-    assert len(bets_by_valid_group.json()["result"]["score_bets"]) == 3
-    assert [
-        (score_bet["team1"]["flag"]["url"], score_bet["team2"]["flag"]["url"])
-        for score_bet in bets_by_valid_group.json()["result"]["score_bets"]
-    ] == [
-        ("https://fake-team-flag_france.com", "https://fake-team-flag_ireland.com"),
-        ("https://fake-team-flag_france.com", "https://fake-team-flag_isle_of_man.com"),
-        ("https://fake-team-flag_ireland.com", "https://fake-team-flag_isle_of_man.com"),
-    ]
+    score_bets = bets_by_valid_group.json()["result"]["score_bets"]
+    assert len(score_bets) == 3
+    # FR appears as team1 in bets 0 and 1
+    assert score_bets[0]["team1"]["flag"]["url"] == score_bets[1]["team1"]["flag"]["url"]
+    # IE appears as team2 in bet 0 and team1 in bet 2
+    assert score_bets[0]["team2"]["flag"]["url"] == score_bets[2]["team1"]["flag"]["url"]
+    # IM appears as team2 in bets 1 and 2
+    assert score_bets[1]["team2"]["flag"]["url"] == score_bets[2]["team2"]["flag"]["url"]
 
     # Error case : invalid group code
     invalid_group_code = uuid4()

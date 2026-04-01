@@ -319,7 +319,7 @@ class TeamModel(Base):
     description_fr: Mapped[str] = mapped_column(sa.String(100), unique=True, nullable=False)
     description_en: Mapped[str] = mapped_column(sa.String(100), unique=True, nullable=False)
     flag_url: Mapped[str] = mapped_column(sa.String(100), nullable=False)
-    internal_flag_url: Mapped[str] = mapped_column(sa.String(300), nullable=False)
+    internal_flag_path: Mapped[str] = mapped_column(sa.String(300), nullable=False)
 
 
 class GroupModel(Base):

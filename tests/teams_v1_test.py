@@ -6,8 +6,10 @@ from uuid import uuid4
 
 from starlette.testclient import TestClient
 
+from testing.mock import MockSettings
 from testing.util import get_resources_path
 from yak_server.cli.database import initialize_database
+from yak_server.helpers.settings import get_settings
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -16,6 +18,11 @@ if TYPE_CHECKING:
 
 def test_teams(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
     initialize_database(engine_for_test, get_resources_path("test_teams_v1"))
+
+    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings(
+        data_folder_relative="test_teams_v1",
+        competition="test_teams_v1",
+    )
 
     client = TestClient(app_with_valid_jwt_config)
 
@@ -110,7 +117,7 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
         follow_redirects=False,
     )
 
-    assert response_retrieve_flag.status_code == HTTPStatus.TEMPORARY_REDIRECT
+    assert response_retrieve_flag.status_code == HTTPStatus.OK
 
     # Check flag fetching with invalid team id
     invalid_team_id_with_flag = uuid4()
