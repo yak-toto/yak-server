@@ -3,192 +3,192 @@
         "code": "GB-WLS",
         "description_fr": "Pays de Galles",
         "description_en": "Wales",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Wales-64x38.png"
+        "internal_flag_path": "gb-wls.png"
     },
     {
         "code": "CM",
         "description_fr": "Cameroun",
         "description_en": "Cameroon",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Cameroon-64x43.png"
+        "internal_flag_path": "cm.png"
     },
     {
         "code": "JP",
         "description_fr": "Japon",
         "description_en": "Japan",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Japan-64x43.png"
+        "internal_flag_path": "jp.png"
     },
     {
         "code": "AU",
         "description_fr": "Australie",
         "description_en": "Australia",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Australia-64x32.png"
+        "internal_flag_path": "au.png"
     },
     {
         "code": "CR",
         "description_fr": "Costa Rica",
         "description_en": "Costa Rica",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Costa_Rica-64x38.png"
+        "internal_flag_path": "cr.png"
     },
     {
         "code": "QA",
         "description_fr": "Qatar",
         "description_en": "Qatar",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Qatar-64x25.png"
+        "internal_flag_path": "qa.png"
     },
     {
         "code": "BE",
         "description_fr": "Belgique",
         "description_en": "Belgium",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Belgium-64x56.png"
+        "internal_flag_path": "be.png"
     },
     {
         "code": "GH",
         "description_fr": "Ghana",
         "description_en": "Ghana",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Ghana-64x43.png"
+        "internal_flag_path": "gh.png"
     },
     {
         "code": "US",
         "description_fr": "\u00c9tats-Unis",
         "description_en": "United States",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_United_States-64x34.png"
+        "internal_flag_path": "us.png"
     },
     {
         "code": "RS",
         "description_fr": "Serbie",
         "description_en": "Serbia",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Serbia-64x43.png"
+        "internal_flag_path": "rs.png"
     },
     {
         "code": "DE",
         "description_fr": "Allemagne",
         "description_en": "Germany",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Germany-64x38.png"
+        "internal_flag_path": "de.png"
     },
     {
         "code": "PL",
         "description_fr": "Pologne",
         "description_en": "Poland",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Poland-64x40.png"
+        "internal_flag_path": "pl.png"
     },
     {
         "code": "UY",
         "description_fr": "Uruguay",
         "description_en": "Uruguay",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Uruguay-64x43.png"
+        "internal_flag_path": "uy.png"
     },
     {
         "code": "MX",
         "description_fr": "Mexique",
         "description_en": "Mexico",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Mexico-64x37.png"
+        "internal_flag_path": "mx.png"
     },
     {
         "code": "CA",
         "description_fr": "Canada",
         "description_en": "Canada",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Canada-64x32.png"
+        "internal_flag_path": "ca.png"
     },
     {
         "code": "SA",
         "description_fr": "Arabie Saoudite",
         "description_en": "Saudi Arabia",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Saudi_Arabia-64x43.png"
+        "internal_flag_path": "sa.png"
     },
     {
         "code": "KR",
         "description_fr": "Cor\u00e9e du Sud",
         "description_en": "South Korea",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_South_Korea-64x43.png"
+        "internal_flag_path": "kr.png"
     },
     {
         "code": "FR",
         "description_fr": "France",
         "description_en": "France",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_France-64x43.png"
+        "internal_flag_path": "fr.png"
     },
     {
         "code": "EC",
         "description_fr": "\u00c9quateur",
         "description_en": "Ecuador",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Ecuador-64x43.png"
+        "internal_flag_path": "ec.png"
     },
     {
         "code": "NL",
         "description_fr": "Pays-Bas",
         "description_en": "Netherlands",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Netherlands-64x43.png"
+        "internal_flag_path": "nl.png"
     },
     {
         "code": "GB-ENG",
         "description_fr": "Angleterre",
         "description_en": "England",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_England-64x38.png"
+        "internal_flag_path": "gb-eng.png"
     },
     {
         "code": "IR",
         "description_fr": "Iran",
         "description_en": "Iran",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Iran-64x37.png"
+        "internal_flag_path": "ir.png"
     },
     {
         "code": "AR",
         "description_fr": "Argentine",
         "description_en": "Argentina",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Argentina-64x40.png"
+        "internal_flag_path": "ar.png"
     },
     {
         "code": "SN",
         "description_fr": "S\u00e9n\u00e9gal",
         "description_en": "Senegal",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Senegal-64x43.png"
+        "internal_flag_path": "sn.png"
     },
     {
         "code": "HR",
         "description_fr": "Croatie",
         "description_en": "Croatia",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Croatia-64x32.png"
+        "internal_flag_path": "hr.png"
     },
     {
         "code": "BR",
         "description_fr": "Br\u00e9sil",
         "description_en": "Brazil",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Brazil-64x45.png"
+        "internal_flag_path": "br.png"
     },
     {
         "code": "MA",
         "description_fr": "Maroc",
         "description_en": "Morocco",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Morocco-64x43.png"
+        "internal_flag_path": "ma.png"
     },
     {
         "code": "ES",
         "description_fr": "Espagne",
         "description_en": "Spain",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Spain-64x43.png"
+        "internal_flag_path": "es.png"
     },
     {
         "code": "PT",
         "description_fr": "Portugal",
         "description_en": "Portugal",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Portugal-64x43.png"
+        "internal_flag_path": "pt.png"
     },
     {
         "code": "CH",
         "description_fr": "Suisse",
         "description_en": "Switzerland",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Switzerland-64x64.png"
+        "internal_flag_path": "ch.png"
     },
     {
         "code": "DK",
         "description_fr": "Danemark",
         "description_en": "Denmark",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Denmark-64x48.png"
+        "internal_flag_path": "dk.png"
     },
     {
         "code": "TN",
         "description_fr": "Tunisie",
         "description_en": "Tunisia",
-        "internal_flag_url": "https://flagdownload.com/wp-content/uploads/Flag_of_Tunisia-64x43.png"
+        "internal_flag_path": "tn.png"
     }
 ]
