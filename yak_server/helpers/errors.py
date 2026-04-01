@@ -25,6 +25,7 @@ class ErrorCode(str, Enum):
 
     # Resources
     TEAM_NOT_FOUND = "team_not_found"
+    TEAM_FLAG_NOT_FOUND = "team_flag_not_found"
     INVALID_TEAM_ID = "invalid_team_id"
     GROUP_NOT_FOUND = "group_not_found"
     PHASE_NOT_FOUND = "phase_not_found"
@@ -64,4 +65,5 @@ phase_not_found_message = partial(generic_not_found_message, resource_name="Phas
 rule_not_found_message = partial(generic_not_found_message, resource_name="Rule")
 score_bet_not_found_message = partial(generic_not_found_message, resource_name="Score bet")
 team_not_found_message = partial(generic_not_found_message, resource_name="Team")
+team_flag_not_found_message = partial(generic_not_found_message, resource_name="Team flag")
 user_not_found_message = partial(generic_not_found_message, resource_name="User")

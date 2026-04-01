@@ -25,6 +25,7 @@ from yak_server.helpers.errors import (
     name_already_exists_message,
     phase_not_found_message,
     rule_not_found_message,
+    team_flag_not_found_message,
     team_not_found_message,
     user_not_found_message,
 )
@@ -121,6 +122,15 @@ class TeamNotFound(YakHTTPException):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=team_not_found_message(team_id),
             error_code=ErrorCode.TEAM_NOT_FOUND,
+        )
+
+
+class TeamFlagNotFound(YakHTTPException):
+    def __init__(self, team_id: str | UUID) -> None:
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=team_flag_not_found_message(team_id),
+            error_code=ErrorCode.TEAM_FLAG_NOT_FOUND,
         )
 
 

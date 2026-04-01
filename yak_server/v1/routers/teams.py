@@ -10,7 +10,7 @@ from yak_server.helpers.database import get_db
 from yak_server.helpers.format import is_iso_3166_1_alpha_2_code, is_uuid4
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang
 from yak_server.helpers.settings import Settings, get_settings
-from yak_server.v1.helpers.errors import InvalidTeamId, TeamNotFound
+from yak_server.v1.helpers.errors import InvalidTeamId, TeamFlagNotFound, TeamNotFound
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.teams import AllTeamsResponse, OneTeamResponse, TeamOut
 
@@ -80,5 +80,8 @@ def retrieve_team_flag_by_id(
         raise TeamNotFound(team_id)
 
     flag_path = settings.data_folder.parent / "flags" / team.internal_flag_path
+
+    if not flag_path.is_file():
+        raise TeamFlagNotFound(team_id)
 
     return FileResponse(flag_path, headers={"Cache-Control": "public, max-age=86400"})

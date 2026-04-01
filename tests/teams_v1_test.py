@@ -119,6 +119,19 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
 
     assert response_retrieve_flag.status_code == HTTPStatus.OK
 
+    # Check flag fetching for a team whose flag file is missing on disk
+    # GR has a fake flag path blanked to "" by initialize_database
+    gr_id = client.get("api/v1/teams/GR").json()["result"]["team"]["id"]
+
+    response_retrieve_missing_flag = client.get(f"/api/v1/teams/{gr_id}/flag")
+
+    assert response_retrieve_missing_flag.status_code == HTTPStatus.NOT_FOUND
+    assert response_retrieve_missing_flag.json() == {
+        "ok": False,
+        "error_code": "team_flag_not_found",
+        "description": f"Team flag not found: {gr_id}",
+    }
+
     # Check flag fetching with invalid team id
     invalid_team_id_with_flag = uuid4()
 
