@@ -1,143 +1,167 @@
 [
     {
+        "index": 1,
         "code": "FR",
         "description_fr": "France",
         "description_en": "France",
         "internal_flag_path": "fr.png"
     },
     {
+        "index": 2,
         "code": "CH",
         "description_fr": "Suisse",
         "description_en": "Switzerland",
         "internal_flag_path": "ch.png"
     },
     {
+        "index": 3,
         "code": "AL",
         "description_fr": "Albanie",
         "description_en": "Albania",
         "internal_flag_path": "al.png"
     },
     {
+        "index": 4,
         "code": "RO",
         "description_fr": "Roumanie",
         "description_en": "Romania",
         "internal_flag_path": "ro.png"
     },
     {
+        "index": 5,
         "code": "GB-WLS",
         "description_fr": "Pays de Galles",
         "description_en": "Wales",
         "internal_flag_path": "gb-wls.png"
     },
     {
+        "index": 6,
         "code": "GB-ENG",
         "description_fr": "Angleterre",
         "description_en": "England",
         "internal_flag_path": "gb-eng.png"
     },
     {
+        "index": 7,
         "code": "SK",
         "description_fr": "Slovaquie",
         "description_en": "Slovakia",
         "internal_flag_path": "sk.png"
     },
     {
+        "index": 8,
         "code": "RU",
         "description_fr": "Russie",
         "description_en": "Russia",
         "internal_flag_path": "ru.png"
     },
     {
+        "index": 9,
         "code": "DE",
         "description_fr": "Allemagne",
         "description_en": "Germany",
         "internal_flag_path": "de.png"
     },
     {
+        "index": 10,
         "code": "PL",
         "description_fr": "Pologne",
         "description_en": "Poland",
         "internal_flag_path": "pl.png"
     },
     {
+        "index": 11,
         "code": "GB-NIR",
         "description_fr": "Irlande du Nord",
         "description_en": "Northern Ireland",
         "internal_flag_path": "gb-nir.png"
     },
     {
+        "index": 12,
         "code": "UA",
         "description_fr": "Ukraine",
         "description_en": "Ukraine",
         "internal_flag_path": "ua.png"
     },
     {
+        "index": 13,
         "code": "HR",
         "description_fr": "Croatie",
         "description_en": "Croatia",
         "internal_flag_path": "hr.png"
     },
     {
+        "index": 14,
         "code": "ES",
         "description_fr": "Espagne",
         "description_en": "Spain",
         "internal_flag_path": "es.png"
     },
     {
+        "index": 15,
         "code": "TR",
         "description_fr": "Turquie",
         "description_en": "Turkey",
         "internal_flag_path": "tr.png"
     },
     {
+        "index": 16,
         "code": "CZ",
         "description_fr": "R\u00e9publique tch\u00e8que",
         "description_en": "Czech Republic",
         "internal_flag_path": "cz.png"
     },
     {
+        "index": 17,
         "code": "IT",
         "description_fr": "Italie",
         "description_en": "Italy",
         "internal_flag_path": "it.png"
     },
     {
+        "index": 18,
         "code": "BE",
         "description_fr": "Belgique",
         "description_en": "Belgium",
         "internal_flag_path": "be.png"
     },
     {
+        "index": 19,
         "code": "IE",
         "description_fr": "Irlande",
         "description_en": "Republic of Ireland",
         "internal_flag_path": "ie.png"
     },
     {
+        "index": 20,
         "code": "SE",
         "description_fr": "Su\u00e8de",
         "description_en": "Sweden",
         "internal_flag_path": "se.png"
     },
     {
+        "index": 21,
         "code": "HU",
         "description_fr": "Hongrie",
         "description_en": "Hungary",
         "internal_flag_path": "hu.png"
     },
     {
+        "index": 22,
         "code": "IS",
         "description_fr": "Islande",
         "description_en": "Iceland",
         "internal_flag_path": "is.png"
     },
     {
+        "index": 23,
         "code": "PT",
         "description_fr": "Portugal",
         "description_en": "Portugal",
         "internal_flag_path": "pt.png"
     },
     {
+        "index": 24,
         "code": "AT",
         "description_fr": "Autriche",
         "description_en": "Austria",

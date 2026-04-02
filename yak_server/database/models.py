@@ -320,6 +320,9 @@ class TeamModel(Base):
     description_en: Mapped[str] = mapped_column(sa.String(100), unique=True, nullable=False)
     flag_url: Mapped[str] = mapped_column(sa.String(100), nullable=False)
     internal_flag_path: Mapped[str] = mapped_column(sa.String(300), nullable=False)
+    index: Mapped[int] = mapped_column(sa.Integer, nullable=False)
+
+    __table_args__ = (UniqueConstraint("index", name="uq_team_index"),)
 
 
 class GroupModel(Base):

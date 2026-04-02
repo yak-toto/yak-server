@@ -216,6 +216,7 @@ def _populate_group_stage(
                 description_en=f"Team {code}{pos_idx}",
                 flag_url="",
                 internal_flag_path="",
+                index=group_idx * 10 + pos_idx,
             )
             db.add(team)
             db.flush()
