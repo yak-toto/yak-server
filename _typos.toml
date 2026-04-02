@@ -8,5 +8,4 @@ extend-ignore-re = [
     "\"Tha",
     "passwor",
     "BA",
-    "ba",
 ]
