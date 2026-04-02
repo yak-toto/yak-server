@@ -4,6 +4,8 @@
         "index": 1,
         "team1_code": "FR",
         "team2_code": "GR",
+        "team1_index": 1,
+        "team2_index": 2,
         "bet_type_from_match": "BINARY_BET"
     }
 ]
