@@ -4,34 +4,44 @@
         "index": 1,
         "team1_code": "FR",
         "team2_code": "IE",
-        "bet_type_from_match": "SCORE_BET"
+        "bet_type_from_match": "SCORE_BET",
+        "team1_index": 1,
+        "team2_index": 2
     },
     {
         "group_code": "A",
         "index": 2,
         "team1_code": "FR",
         "team2_code": "IM",
-        "bet_type_from_match": "SCORE_BET"
+        "bet_type_from_match": "SCORE_BET",
+        "team1_index": 1,
+        "team2_index": 3
     },
     {
         "group_code": "A",
         "index": 3,
         "team1_code": "IE",
         "team2_code": "IM",
-        "bet_type_from_match": "SCORE_BET"
+        "bet_type_from_match": "SCORE_BET",
+        "team1_index": 2,
+        "team2_index": 3
     },
     {
         "group_code": "A",
         "index": 4,
         "team1_code": null,
         "team2_code": null,
-        "bet_type_from_match": "BINARY_BET"
+        "bet_type_from_match": "BINARY_BET",
+        "team1_index": null,
+        "team2_index": null
     },
     {
         "group_code": "1",
         "index": 1,
         "team1_code": null,
         "team2_code": null,
-        "bet_type_from_match": "BINARY_BET"
+        "bet_type_from_match": "BINARY_BET",
+        "team1_index": null,
+        "team2_index": null
     }
 ]

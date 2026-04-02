@@ -4,6 +4,8 @@
         "index": 1,
         "team1_code": "BR",
         "team2_code": "FR",
-        "bet_type_from_match": "SCORE_BET"
+        "bet_type_from_match": "SCORE_BET",
+        "team1_index": 2,
+        "team2_index": 1
     }
 ]
