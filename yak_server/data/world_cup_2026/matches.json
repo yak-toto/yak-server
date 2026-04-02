@@ -10,13 +10,13 @@
         "group_code": "A",
         "index": 2,
         "team1_code": "KR",
-        "team2_code": "CZ",
+        "team2_code": "BD",
         "bet_type_from_match": "SCORE_BET"
     },
     {
         "group_code": "A",
         "index": 3,
-        "team1_code": "CZ",
+        "team1_code": "BD",
         "team2_code": "ZA",
         "bet_type_from_match": "SCORE_BET"
     },
@@ -30,7 +30,7 @@
     {
         "group_code": "A",
         "index": 5,
-        "team1_code": "CZ",
+        "team1_code": "BD",
         "team2_code": "MX",
         "bet_type_from_match": "SCORE_BET"
     },
@@ -136,13 +136,13 @@
         "group_code": "D",
         "index": 2,
         "team1_code": "AU",
-        "team2_code": "TR",
+        "team2_code": "BC",
         "bet_type_from_match": "SCORE_BET"
     },
     {
         "group_code": "D",
         "index": 3,
-        "team1_code": "TR",
+        "team1_code": "BC",
         "team2_code": "PY",
         "bet_type_from_match": "SCORE_BET"
     },
@@ -156,7 +156,7 @@
     {
         "group_code": "D",
         "index": 5,
-        "team1_code": "TR",
+        "team1_code": "BC",
         "team2_code": "US",
         "bet_type_from_match": "SCORE_BET"
     },
@@ -219,7 +219,7 @@
     {
         "group_code": "F",
         "index": 2,
-        "team1_code": "SE",
+        "team1_code": "BB",
         "team2_code": "TN",
         "bet_type_from_match": "SCORE_BET"
     },
@@ -227,7 +227,7 @@
         "group_code": "F",
         "index": 3,
         "team1_code": "NL",
-        "team2_code": "SE",
+        "team2_code": "BB",
         "bet_type_from_match": "SCORE_BET"
     },
     {
@@ -241,7 +241,7 @@
         "group_code": "F",
         "index": 5,
         "team1_code": "JP",
-        "team2_code": "SE",
+        "team2_code": "BB",
         "bet_type_from_match": "SCORE_BET"
     },
     {
@@ -345,7 +345,7 @@
     {
         "group_code": "I",
         "index": 2,
-        "team1_code": "IQ",
+        "team1_code": "B2",
         "team2_code": "NO",
         "bet_type_from_match": "SCORE_BET"
     },
@@ -353,7 +353,7 @@
         "group_code": "I",
         "index": 3,
         "team1_code": "FR",
-        "team2_code": "IQ",
+        "team2_code": "B2",
         "bet_type_from_match": "SCORE_BET"
     },
     {
@@ -374,7 +374,7 @@
         "group_code": "I",
         "index": 6,
         "team1_code": "SN",
-        "team2_code": "IQ",
+        "team2_code": "B2",
         "bet_type_from_match": "SCORE_BET"
     },
     {
@@ -423,7 +423,7 @@
         "group_code": "K",
         "index": 1,
         "team1_code": "PT",
-        "team2_code": "CD",
+        "team2_code": "B1",
         "bet_type_from_match": "SCORE_BET"
     },
     {
@@ -444,7 +444,7 @@
         "group_code": "K",
         "index": 4,
         "team1_code": "CO",
-        "team2_code": "CD",
+        "team2_code": "B1",
         "bet_type_from_match": "SCORE_BET"
     },
     {
@@ -457,7 +457,7 @@
     {
         "group_code": "K",
         "index": 6,
-        "team1_code": "CD",
+        "team1_code": "B1",
         "team2_code": "UZ",
         "bet_type_from_match": "SCORE_BET"
     },
