@@ -89,8 +89,8 @@ def initialize_database(engine: "Engine", data_folder: Path) -> None:
             stmt = insert(PhaseModel).values(**phase)
             db.execute(
                 stmt.on_conflict_do_update(
-                    index_elements=["code"],
-                    set_={col: stmt.excluded[col] for col in phase if col != "code"},
+                    index_elements=["index"],
+                    set_={col: stmt.excluded[col] for col in phase if col != "index"},
                 ),
             )
 
@@ -112,8 +112,8 @@ def initialize_database(engine: "Engine", data_folder: Path) -> None:
             stmt = insert(GroupModel).values(**group)
             db.execute(
                 stmt.on_conflict_do_update(
-                    index_elements=["code"],
-                    set_={col: stmt.excluded[col] for col in group if col != "code"},
+                    index_elements=["index"],
+                    set_={col: stmt.excluded[col] for col in group if col != "index"},
                 ),
             )
 
@@ -134,8 +134,8 @@ def initialize_database(engine: "Engine", data_folder: Path) -> None:
             stmt = insert(TeamModel).values(**team)
             db.execute(
                 stmt.on_conflict_do_update(
-                    index_elements=["code"],
-                    set_={col: stmt.excluded[col] for col in team if col != "code"},
+                    index_elements=["index"],
+                    set_={col: stmt.excluded[col] for col in team if col != "index"},
                 ),
             )
 

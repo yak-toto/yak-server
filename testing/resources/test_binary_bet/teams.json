@@ -1,17 +1,20 @@
 [
     {
+        "index": 1,
         "code": "FR",
         "description_fr": "France",
         "description_en": "France",
         "internal_flag_path": "url"
     },
     {
+        "index": 2,
         "code": "GR",
         "description_fr": "Allemagne",
         "description_en": "Germany",
         "internal_flag_path": "url"
     },
     {
+        "index": 3,
         "code": "ES",
         "description_fr": "Espagne",
         "description_en": "Spain",

@@ -1,191 +1,223 @@
 [
     {
+        "index": 1,
         "code": "GB-WLS",
         "description_fr": "Pays de Galles",
         "description_en": "Wales",
         "internal_flag_path": "gb-wls.png"
     },
     {
+        "index": 2,
         "code": "CM",
         "description_fr": "Cameroun",
         "description_en": "Cameroon",
         "internal_flag_path": "cm.png"
     },
     {
+        "index": 3,
         "code": "JP",
         "description_fr": "Japon",
         "description_en": "Japan",
         "internal_flag_path": "jp.png"
     },
     {
+        "index": 4,
         "code": "AU",
         "description_fr": "Australie",
         "description_en": "Australia",
         "internal_flag_path": "au.png"
     },
     {
+        "index": 5,
         "code": "CR",
         "description_fr": "Costa Rica",
         "description_en": "Costa Rica",
         "internal_flag_path": "cr.png"
     },
     {
+        "index": 6,
         "code": "QA",
         "description_fr": "Qatar",
         "description_en": "Qatar",
         "internal_flag_path": "qa.png"
     },
     {
+        "index": 7,
         "code": "BE",
         "description_fr": "Belgique",
         "description_en": "Belgium",
         "internal_flag_path": "be.png"
     },
     {
+        "index": 8,
         "code": "GH",
         "description_fr": "Ghana",
         "description_en": "Ghana",
         "internal_flag_path": "gh.png"
     },
     {
+        "index": 9,
         "code": "US",
         "description_fr": "\u00c9tats-Unis",
         "description_en": "United States",
         "internal_flag_path": "us.png"
     },
     {
+        "index": 10,
         "code": "RS",
         "description_fr": "Serbie",
         "description_en": "Serbia",
         "internal_flag_path": "rs.png"
     },
     {
+        "index": 11,
         "code": "DE",
         "description_fr": "Allemagne",
         "description_en": "Germany",
         "internal_flag_path": "de.png"
     },
     {
+        "index": 12,
         "code": "PL",
         "description_fr": "Pologne",
         "description_en": "Poland",
         "internal_flag_path": "pl.png"
     },
     {
+        "index": 13,
         "code": "UY",
         "description_fr": "Uruguay",
         "description_en": "Uruguay",
         "internal_flag_path": "uy.png"
     },
     {
+        "index": 14,
         "code": "MX",
         "description_fr": "Mexique",
         "description_en": "Mexico",
         "internal_flag_path": "mx.png"
     },
     {
+        "index": 15,
         "code": "CA",
         "description_fr": "Canada",
         "description_en": "Canada",
         "internal_flag_path": "ca.png"
     },
     {
+        "index": 16,
         "code": "SA",
         "description_fr": "Arabie Saoudite",
         "description_en": "Saudi Arabia",
         "internal_flag_path": "sa.png"
     },
     {
+        "index": 17,
         "code": "KR",
         "description_fr": "Cor\u00e9e du Sud",
         "description_en": "South Korea",
         "internal_flag_path": "kr.png"
     },
     {
+        "index": 18,
         "code": "FR",
         "description_fr": "France",
         "description_en": "France",
         "internal_flag_path": "fr.png"
     },
     {
+        "index": 19,
         "code": "EC",
         "description_fr": "\u00c9quateur",
         "description_en": "Ecuador",
         "internal_flag_path": "ec.png"
     },
     {
+        "index": 20,
         "code": "NL",
         "description_fr": "Pays-Bas",
         "description_en": "Netherlands",
         "internal_flag_path": "nl.png"
     },
     {
+        "index": 21,
         "code": "GB-ENG",
         "description_fr": "Angleterre",
         "description_en": "England",
         "internal_flag_path": "gb-eng.png"
     },
     {
+        "index": 22,
         "code": "IR",
         "description_fr": "Iran",
         "description_en": "Iran",
         "internal_flag_path": "ir.png"
     },
     {
+        "index": 23,
         "code": "AR",
         "description_fr": "Argentine",
         "description_en": "Argentina",
         "internal_flag_path": "ar.png"
     },
     {
+        "index": 24,
         "code": "SN",
         "description_fr": "S\u00e9n\u00e9gal",
         "description_en": "Senegal",
         "internal_flag_path": "sn.png"
     },
     {
+        "index": 25,
         "code": "HR",
         "description_fr": "Croatie",
         "description_en": "Croatia",
         "internal_flag_path": "hr.png"
     },
     {
+        "index": 26,
         "code": "BR",
         "description_fr": "Br\u00e9sil",
         "description_en": "Brazil",
         "internal_flag_path": "br.png"
     },
     {
+        "index": 27,
         "code": "MA",
         "description_fr": "Maroc",
         "description_en": "Morocco",
         "internal_flag_path": "ma.png"
     },
     {
+        "index": 28,
         "code": "ES",
         "description_fr": "Espagne",
         "description_en": "Spain",
         "internal_flag_path": "es.png"
     },
     {
+        "index": 29,
         "code": "PT",
         "description_fr": "Portugal",
         "description_en": "Portugal",
         "internal_flag_path": "pt.png"
     },
     {
+        "index": 30,
         "code": "CH",
         "description_fr": "Suisse",
         "description_en": "Switzerland",
         "internal_flag_path": "ch.png"
     },
     {
+        "index": 31,
         "code": "DK",
         "description_fr": "Danemark",
         "description_en": "Denmark",
         "internal_flag_path": "dk.png"
     },
     {
+        "index": 32,
         "code": "TN",
         "description_fr": "Tunisie",
         "description_en": "Tunisia",

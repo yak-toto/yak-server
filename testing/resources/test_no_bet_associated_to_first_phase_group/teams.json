@@ -1,11 +1,13 @@
 [
     {
+        "index": 1,
         "code": "HR",
         "description_fr": "Croatie",
         "description_en": "Croatia",
         "internal_flag_path": "https://fake-team-flag_croatia.com"
     },
     {
+        "index": 2,
         "code": "FI",
         "description_fr": "Finlande",
         "description_en": "Finland",
