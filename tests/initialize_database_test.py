@@ -35,14 +35,14 @@ def test_missing_team1(engine_for_test: "Engine") -> None:
     with pytest.raises(MissingTeamDuringInitError) as exception:
         initialize_database(engine_for_test, get_resources_path("test_missing_team1"))
 
-    assert str(exception.value) == "Error during database initialization: team_code=AD not found."
+    assert str(exception.value) == "Error during database initialization: team_index=2 not found."
 
 
 def test_missing_team2(engine_for_test: "Engine") -> None:
     with pytest.raises(MissingTeamDuringInitError) as exception:
         initialize_database(engine_for_test, get_resources_path("test_missing_team2"))
 
-    assert str(exception.value) == "Error during database initialization: team_code=BR not found."
+    assert str(exception.value) == "Error during database initialization: team_index=2 not found."
 
 
 def test_missing_group(engine_for_test: "Engine") -> None:

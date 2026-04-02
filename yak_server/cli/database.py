@@ -47,8 +47,10 @@ class MissingPhaseDuringInitError(Exception):
 
 
 class MissingTeamDuringInitError(Exception):
-    def __init__(self, team_code: str) -> None:
-        super().__init__(f"Error during database initialization: team_code={team_code} not found.")
+    def __init__(self, team_index: int) -> None:
+        super().__init__(
+            f"Error during database initialization: team_index={team_index} not found."
+        )
 
 
 class MissingGroupDuringInitError(Exception):
@@ -58,14 +60,14 @@ class MissingGroupDuringInitError(Exception):
         )
 
 
-def fetch_team_id(team_code: str | None, db: "Session") -> UUID | None:
-    if team_code is None:
+def fetch_team_id(team_index: int | None, db: "Session") -> UUID | None:
+    if team_index is None:
         return None
 
-    team = db.query(TeamModel).filter_by(code=team_code).first()
+    team = db.query(TeamModel).filter_by(index=team_index).first()
 
     if team is None:
-        raise MissingTeamDuringInitError(team_code)
+        raise MissingTeamDuringInitError(team_index)
 
     return team.id
 
@@ -144,8 +146,10 @@ def initialize_database(engine: "Engine", data_folder: Path) -> None:
         matches = json.loads((data_folder / "matches.json").read_text(encoding="utf-8"))
 
         for match in matches:
-            match["team1_id"] = fetch_team_id(match.pop("team1_code"), db)
-            match["team2_id"] = fetch_team_id(match.pop("team2_code"), db)
+            match.pop("team1_code", None)
+            match.pop("team2_code", None)
+            match["team1_id"] = fetch_team_id(match.pop("team1_index"), db)
+            match["team2_id"] = fetch_team_id(match.pop("team2_index"), db)
             match["group_id"] = fetch_group_id(match.pop("group_code"), db)
 
         for match in matches:

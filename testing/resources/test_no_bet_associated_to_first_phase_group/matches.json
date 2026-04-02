@@ -4,13 +4,17 @@
         "index": 1,
         "team1_code": "HR",
         "team2_code": "FI",
-        "bet_type_from_match": "SCORE_BET"
+        "bet_type_from_match": "SCORE_BET",
+        "team1_index": 1,
+        "team2_index": 2
     },
     {
         "group_code": "1",
         "index": 1,
         "team1_code": null,
         "team2_code": null,
-        "bet_type_from_match": "SCORE_BET"
+        "bet_type_from_match": "SCORE_BET",
+        "team1_index": null,
+        "team2_index": null
     }
 ]
