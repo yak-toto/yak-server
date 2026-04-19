@@ -301,20 +301,6 @@
         "internal_flag_path": "bo.png"
     },
     {
-        "index": 44,
-        "code": "CD",
-        "description_fr": "R\u00e9publique d\u00e9mocratique du Congo",
-        "description_en": "Democratic Republic of Congo",
-        "internal_flag_path": "cd.png"
-    },
-    {
-        "index": 45,
-        "code": "IQ",
-        "description_fr": "Irak",
-        "description_en": "Iraq",
-        "internal_flag_path": "iq.png"
-    },
-    {
         "index": 46,
         "code": "JM",
         "description_fr": "Jama\u00efque",
@@ -338,43 +324,43 @@
     {
         "index": 49,
         "code": "BA",
-        "description_fr": "Barrage A",
-        "description_en": "UEFA Path A winner",
-        "internal_flag_path": ""
+        "description_fr": "Bosnie-Herz\u00e9govine",
+        "description_en": "Bosnia and Herzegovina",
+        "internal_flag_path": "ba.png"
     },
     {
         "index": 50,
-        "code": "BB",
-        "description_fr": "Barrage B",
-        "description_en": "UEFA Path B winner",
-        "internal_flag_path": ""
+        "code": "SE",
+        "description_fr": "Su\u00e8de",
+        "description_en": "Sweden",
+        "internal_flag_path": "se.png"
     },
     {
         "index": 51,
-        "code": "BC",
-        "description_fr": "Barrage C",
-        "description_en": "UEFA Path C winner",
-        "internal_flag_path": ""
+        "code": "TR",
+        "description_fr": "Turquie",
+        "description_en": "Turkey",
+        "internal_flag_path": "tr.png"
     },
     {
         "index": 52,
-        "code": "BD",
-        "description_fr": "Barrage D",
-        "description_en": "UEFA Path D winner",
-        "internal_flag_path": ""
+        "code": "CZ",
+        "description_fr": "Tch\u00e9quie",
+        "description_en": "Czech Republic",
+        "internal_flag_path": "cz.png"
     },
     {
         "index": 53,
-        "code": "B1",
-        "description_fr": "Barrage 1",
-        "description_en": "IC Path 1 winner",
-        "internal_flag_path": ""
+        "code": "CD",
+        "description_fr": "RD Congo",
+        "description_en": "DR Congo",
+        "internal_flag_path": "cd.png"
     },
     {
         "index": 54,
-        "code": "B2",
-        "description_fr": "Barrage 2",
-        "description_en": "IC Path 2 winner",
-        "internal_flag_path": ""
+        "code": "IQ",
+        "description_fr": "Irak",
+        "description_en": "Iraq",
+        "internal_flag_path": "iq.png"
     }
 ]
