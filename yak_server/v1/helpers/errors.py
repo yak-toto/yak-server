@@ -107,15 +107,6 @@ class NoAdminUser(YakHTTPException):
         )
 
 
-class InvalidTeamId(YakHTTPException):
-    def __init__(self, team_id: str) -> None:
-        super().__init__(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid team id: {team_id}. Retry with a uuid or ISO 3166-1 alpha-2 code",
-            error_code=ErrorCode.INVALID_TEAM_ID,
-        )
-
-
 class TeamNotFound(YakHTTPException):
     def __init__(self, team_id: str | UUID) -> None:
         super().__init__(
