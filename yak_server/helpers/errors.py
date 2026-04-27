@@ -26,7 +26,6 @@ class ErrorCode(str, Enum):
     # Resources
     TEAM_NOT_FOUND = "team_not_found"
     TEAM_FLAG_NOT_FOUND = "team_flag_not_found"
-    INVALID_TEAM_ID = "invalid_team_id"
     GROUP_NOT_FOUND = "group_not_found"
     PHASE_NOT_FOUND = "phase_not_found"
     RULE_NOT_FOUND = "rule_not_found"
