@@ -36,7 +36,7 @@ dependencies = [
     "argon2-cffi ==25.1.0",
     "fastapi ==0.136.0",
     "fastapi-limiter==0.2.0",
-    "click ==8.3.2",
+    "click ==8.3.3",
     "SQLAlchemy ==2.0.49",
     "pydantic-settings ==2.14.0",
 ]
