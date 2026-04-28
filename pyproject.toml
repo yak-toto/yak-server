@@ -48,7 +48,7 @@ Repository = "https://github.com/yak-toto/yak-server"
 
 [project.optional-dependencies]
 db_migration = ["alembic ==1.18.4"]
-server = ["uvicorn==0.45.0"]
+server = ["uvicorn==0.46.0"]
 
 [project.scripts]
 yak = "yak_server.cli.main:app"
@@ -60,7 +60,7 @@ dev = [
     "pytest==9.0.3",
     "pytest-cov==7.1.0",
     "pytest-env==1.6.0",
-    "uvicorn[standard]==0.45.0",
+    "uvicorn[standard]==0.46.0",
     "yappi==1.7.6",
 ]
 type-checking = [
