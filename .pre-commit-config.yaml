@@ -45,7 +45,7 @@ repos:
         exclude: "^uv.lock$"
 
   - repo: https://github.com/adhtruong/mirrors-typos
-    rev: v1.45.2
+    rev: v1.46.0
     hooks:
       - id: typos
 
