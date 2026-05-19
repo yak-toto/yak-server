@@ -303,8 +303,10 @@ def test_static_slot_assigns_correct_team(engine_for_test_with_delete: "Engine")
         assert updated_match.team2_id == team_b2_id
 
 
-def test_static_slot_skipped_when_incomplete(engine_for_test_with_delete: "Engine") -> None:
-    """Static match is not updated when either group has not finished playing."""
+def test_static_slot_partial_fill_when_one_group_incomplete(
+    engine_for_test_with_delete: "Engine",
+) -> None:
+    """Completed group fills its team slot; incomplete group leaves its slot None."""
     local_session_maker = build_local_session_maker(engine_for_test_with_delete)
 
     with local_session_maker() as db:
@@ -321,6 +323,64 @@ def test_static_slot_skipped_when_incomplete(engine_for_test_with_delete: "Engin
         )
         assert top_pos is not None
         top_pos.won = 2
+
+        finale_phase = PhaseModel(
+            code="FINALE", description_fr="Finale", description_en="Finale", index=2
+        )
+        db.add(finale_phase)
+        db.flush()
+
+        finale_group = GroupModel(
+            code="8",
+            description_fr="Groupe 8",
+            description_en="Group 8",
+            index=3,
+            phase_id=finale_phase.id,
+        )
+        db.add(finale_group)
+        db.flush()
+
+        match = MatchModel(group_id=finale_group.id, index=1, user_id=user.id)
+        db.add(match)
+        db.flush()
+        db.add(BinaryBetModel(match_id=match.id))
+        db.flush()
+
+        match_id = match.id
+
+        rule = RuleComputeFinaleFromGroupRank(
+            to_group="8",
+            from_phase="GROUP",
+            versus=[Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="B"))],
+        )
+        compute_finale_phase_from_group_rank(db, user, rule)
+
+        updated_match = db.query(MatchModel).filter_by(id=match_id).first()
+        assert updated_match is not None
+        assert updated_match.team1_id is not None  # group A is complete
+        assert updated_match.team2_id is None  # group B is incomplete
+
+
+def test_static_slot_skipped_when_both_groups_incomplete(
+    engine_for_test_with_delete: "Engine",
+) -> None:
+    """Match is not updated when both groups have not finished playing."""
+    local_session_maker = build_local_session_maker(engine_for_test_with_delete)
+
+    with local_session_maker() as db:
+        user, _ = _populate_group_stage(db, {"A": 6, "B": 6})
+
+        for group_code in ("A", "B"):
+            group = db.query(GroupModel).filter_by(code=group_code).first()
+            assert group is not None
+            top_pos = (
+                db
+                .query(GroupPositionModel)
+                .filter_by(group_id=group.id, user_id=user.id, won=3)
+                .first()
+            )
+            assert top_pos is not None
+            top_pos.won = 2
 
         finale_phase = PhaseModel(
             code="FINALE", description_fr="Finale", description_en="Finale", index=2
@@ -414,10 +474,10 @@ def test_dynamic_slot_assigns_correct_team(engine_for_test_with_delete: "Engine"
         assert updated_match.team2_id == team_f3_id
 
 
-def test_dynamic_slot_skipped_when_groups_incomplete(
+def test_dynamic_slot_none_static_slot_fills_when_group_complete(
     engine_for_test_with_delete: "Engine",
 ) -> None:
-    """Dynamic slot is not updated when any group has not finished playing."""
+    """Dynamic slot stays None when lookup unresolved; static slot fills independently."""
     local_session_maker = build_local_session_maker(engine_for_test_with_delete)
 
     with local_session_maker() as db:
@@ -473,5 +533,73 @@ def test_dynamic_slot_skipped_when_groups_incomplete(
 
         updated_match = db.query(MatchModel).filter_by(id=match_id).first()
         assert updated_match is not None
-        assert updated_match.team1_id is None
-        assert updated_match.team2_id is None
+        assert updated_match.team1_id is not None  # group E complete → rank 1 filled
+        assert updated_match.team2_id is None  # dynamic slot, lookup not resolved
+
+
+def test_stale_team_cleared_when_group_becomes_incomplete(
+    engine_for_test_with_delete: "Engine",
+) -> None:
+    """Previously assigned team is cleared when its group later becomes incomplete."""
+    local_session_maker = build_local_session_maker(engine_for_test_with_delete)
+
+    with local_session_maker() as db:
+        user, teams_by_group = _populate_group_stage(db, {"A": 6, "B": 6})
+
+        finale_phase = PhaseModel(
+            code="FINALE", description_fr="Finale", description_en="Finale", index=2
+        )
+        db.add(finale_phase)
+        db.flush()
+
+        finale_group = GroupModel(
+            code="8",
+            description_fr="Groupe 8",
+            description_en="Group 8",
+            index=3,
+            phase_id=finale_phase.id,
+        )
+        db.add(finale_group)
+        db.flush()
+
+        match = MatchModel(group_id=finale_group.id, index=1, user_id=user.id)
+        db.add(match)
+        db.flush()
+        db.add(BinaryBetModel(match_id=match.id))
+        db.flush()
+
+        match_id = match.id
+        team_b2_id = teams_by_group["B"][1].id
+
+        rule = RuleComputeFinaleFromGroupRank(
+            to_group="8",
+            from_phase="GROUP",
+            versus=[Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="B"))],
+        )
+
+        # First run: both groups complete — both teams should be assigned.
+        compute_finale_phase_from_group_rank(db, user, rule)
+        first_result = db.query(MatchModel).filter_by(id=match_id).first()
+        assert first_result is not None
+        assert first_result.team1_id is not None
+        assert first_result.team2_id == team_b2_id
+
+        # Simulate a bet being cleared in group A: make the top position incomplete.
+        group_a = db.query(GroupModel).filter_by(code="A").first()
+        assert group_a is not None
+        top_pos = (
+            db
+            .query(GroupPositionModel)
+            .filter_by(group_id=group_a.id, user_id=user.id, won=3)
+            .first()
+        )
+        assert top_pos is not None
+        top_pos.won = 2  # played drops from 3 to 2 → group A incomplete
+        db.flush()
+
+        # Second run: group A is now incomplete — team1 must be cleared to None.
+        compute_finale_phase_from_group_rank(db, user, rule)
+        updated_match = db.query(MatchModel).filter_by(id=match_id).first()
+        assert updated_match is not None
+        assert updated_match.team1_id is None  # stale value cleared
+        assert updated_match.team2_id == team_b2_id  # group B still complete

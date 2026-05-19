@@ -224,7 +224,13 @@ def test_compute_points(
                     "id": ANY,
                     "locked": False,
                     "group": {"id": semi_finals_id},
-                    "team1": None,
+                    "team1": {
+                        "id": ANY,
+                        "code": "IM",
+                        "description": "Île de Man",
+                        "flag": {"url": ANY},
+                        "won": None,
+                    },
                     "team2": None,
                 },
                 {
@@ -232,7 +238,13 @@ def test_compute_points(
                     "locked": False,
                     "group": {"id": semi_finals_id},
                     "team1": None,
-                    "team2": None,
+                    "team2": {
+                        "id": ANY,
+                        "code": "FR",
+                        "description": "France",
+                        "flag": {"url": ANY},
+                        "won": None,
+                    },
                 },
                 {
                     "id": ANY,

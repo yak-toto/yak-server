@@ -1,4 +1,3 @@
-from itertools import chain
 from typing import TYPE_CHECKING
 
 from fastapi import status
@@ -9,6 +8,8 @@ from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, P
 from yak_server.helpers.group_position import get_group_rank_with_code
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
     from sqlalchemy.orm import Session
 
     from yak_server.database.models import GroupPositionModel, UserModel
@@ -33,6 +34,16 @@ class RuleComputeFinaleFromGroupRank(BaseModel):
     versus: list[Versus]
     third_place_lookup: dict[str, list[str]] | None = None
     third_place_matchup: list[int] | None = None
+
+
+def _resolved_team_id(
+    groups_result: dict[str, list["GroupPositionModel"]],
+    team_config: Team,
+) -> "UUID | None":
+    ranking = groups_result[team_config.group]
+    if not all(t.played == len(ranking) - 1 for t in ranking):
+        return None
+    return ranking[team_config.rank - 1].team.id
 
 
 def _resolve_third_place_assignment(
@@ -113,26 +124,25 @@ def compute_finale_phase_from_group_rank(
         team2_is_dynamic = team2_config.rank == THIRD_PLACE_RANK and not team2_config.group
 
         if team1_is_dynamic or team2_is_dynamic:
-            # Dynamic match: skip until all groups are complete and lookup is resolved
             if index not in third_place_assignment:
-                continue
-            resolved_group = third_place_assignment[index]
-            team1_group = resolved_group if team1_is_dynamic else team1_config.group
-            team2_group = resolved_group if team2_is_dynamic else team2_config.group
-        else:
-            team1_group = team1_config.group
-            team2_group = team2_config.group
-            if not all(
-                team.played == len(groups_result[team1_group]) - 1
-                for team in chain(
-                    groups_result[team1_group],
-                    groups_result[team2_group],
+                # Dynamic slot unknown until all groups complete; static slot fills independently.
+                team1_id: UUID | None = (
+                    None if team1_is_dynamic else _resolved_team_id(groups_result, team1_config)
                 )
-            ):
-                continue
-
-        team1 = groups_result[team1_group][team1_config.rank - 1].team
-        team2 = groups_result[team2_group][team2_config.rank - 1].team
+                team2_id: UUID | None = (
+                    None if team2_is_dynamic else _resolved_team_id(groups_result, team2_config)
+                )
+            else:
+                resolved_group = third_place_assignment[index]
+                team1_group = resolved_group if team1_is_dynamic else team1_config.group
+                team2_group = resolved_group if team2_is_dynamic else team2_config.group
+                team1_id = groups_result[team1_group][team1_config.rank - 1].team.id
+                team2_id = groups_result[team2_group][team2_config.rank - 1].team.id
+        else:
+            # Static match: each slot is independent — fill as soon as its group is done,
+            # clear back to None if the group becomes incomplete again (e.g. a bet is reset).
+            team1_id = _resolved_team_id(groups_result, team1_config)
+            team2_id = _resolved_team_id(groups_result, team2_config)
 
         binary_bet = (
             db
@@ -148,8 +158,8 @@ def compute_finale_phase_from_group_rank(
         )
 
         if binary_bet is not None:
-            binary_bet.match.team1_id = team1.id
-            binary_bet.match.team2_id = team2.id
+            binary_bet.match.team1_id = team1_id
+            binary_bet.match.team2_id = team2_id
 
         db.flush()
 
