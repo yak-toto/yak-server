@@ -37,7 +37,7 @@ jobs:
           enable-cache: false
 
       - name: Install dependencies
-        run: uv sync --all-extras --group type-checking
+        run: uv sync --group type-checking
 
       - name: Run type checking
         run: uv run mypy .

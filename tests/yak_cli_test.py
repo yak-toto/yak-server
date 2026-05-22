@@ -171,19 +171,6 @@ def test_db_migration_second_path(monkeypatch: "pytest.MonkeyPatch") -> None:
         assert result.output == f"export ALEMBIC_CONFIG={alembic_ini_path}\n"
 
 
-def test_db_migration_cli_with_alembic_missing(monkeypatch: "pytest.MonkeyPatch") -> None:
-    with monkeypatch.context() as m:
-        m.setattr("yak_server.cli.migration.alembic", None)
-
-        result = runner.invoke(app, ["db", "migration"])
-
-    assert result.exit_code == 0
-    assert (
-        "To enable migration using alembic, please run: uv pip install yak-server[db_migration]"
-        in result.output
-    )
-
-
 def test_get_openapi_spec() -> None:
     """
     Test that the OpenAPI spec is generated correctly.
