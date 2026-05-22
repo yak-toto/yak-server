@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:18.4-alpine3.22
+    image: postgres:18.4-alpine3.23
     environment:
       POSTGRES_USER: ci
       POSTGRES_PASSWORD: test

@@ -1,7 +1,7 @@
 # ===========================
 # 1️⃣ Build Stage (uv)
 # ===========================
-FROM python:3.14.5-alpine3.22 AS builder
+FROM python:3.14.5-alpine3.23 AS builder
 
 ARG COMPETITION
 
@@ -42,7 +42,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # ===========================
 # 2️⃣ Runtime Stage (uvicorn)
 # ===========================
-FROM python:3.14.5-alpine3.22 AS runtime
+FROM python:3.14.5-alpine3.23 AS runtime
 
 ARG COMPETITION
 
