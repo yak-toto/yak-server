@@ -97,11 +97,12 @@ jobs:
 
       - name: Create Release
         id: create-release
-        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
-        with:
-          artifacts: "dist/*"
-          generateReleaseNotes: true
-          tag: ${{ steps.create-commits.outputs.new-version }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.create-commits.outputs.new-version }}
+        run: |
+          RELEASE_URL=$(gh release create "${TAG}" dist/* --generate-notes --title "${TAG}")
+          echo "html_url=${RELEASE_URL}" >> "$GITHUB_OUTPUT"
 
       - name: Send Release Notification to Telegram
         if: success()
