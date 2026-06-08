@@ -19,7 +19,12 @@ from yak_server.v1.helpers.errors import BetNotFound, LockedScoreBet, TeamNotFou
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.groups import GroupOut
 from yak_server.v1.models.phases import PhaseOut
-from yak_server.v1.models.score_bets import ModifyScoreBetIn, ScoreBetOut, ScoreBetResponse
+from yak_server.v1.models.score_bets import (
+    BulkModifyScoreBetItem,
+    ModifyScoreBetIn,
+    ScoreBetOut,
+    ScoreBetResponse,
+)
 from yak_server.v1.models.teams import FlagOut, TeamWithScoreOut
 
 logger = logging.getLogger(__name__)
@@ -64,6 +69,98 @@ def send_response(
                 ),
             ),
         ),
+    )
+
+
+@router.patch(
+    "",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
+    },
+)
+def bulk_modify_score_bets(  # noqa: C901
+    score_bets_in: list[BulkModifyScoreBetItem],
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[UserModel, Depends(require_user)],
+    lock_datetime: Annotated[datetime, Depends(get_lock_datetime)],
+    lang: Lang = DEFAULT_LANGUAGE,
+) -> GenericOut[list[ScoreBetResponse]]:
+    if is_locked(user, lock_datetime):
+        raise LockedScoreBet
+
+    requested_ids = [item.id for item in score_bets_in]
+
+    score_bets = (
+        db
+        .query(ScoreBetModel)
+        .options(
+            selectinload(ScoreBetModel.match)
+            .selectinload(MatchModel.group)
+            .selectinload(GroupModel.phase),
+            selectinload(ScoreBetModel.match).selectinload(MatchModel.team1),
+            selectinload(ScoreBetModel.match).selectinload(MatchModel.team2),
+        )
+        .join(ScoreBetModel.match)
+        .where(MatchModel.user_id == user.id, ScoreBetModel.id.in_(requested_ids))
+        .with_for_update()
+        .all()
+    )
+
+    score_bets_by_id = {sb.id: sb for sb in score_bets}
+    missing = [rid for rid in requested_ids if rid not in score_bets_by_id]
+    if missing:
+        raise BetNotFound(missing[0])
+
+    team_ids: set[UUID4 | None] = set()
+
+    for item in score_bets_in:
+        score_bet = score_bets_by_id[item.id]
+
+        logger.info(
+            modify_score_bet_successfully(
+                user.name,
+                score_bet,
+                item.team1.score if item.team1 else None,
+                item.team2.score if item.team2 else None,
+            ),
+        )
+
+        if item.team1 is not None:
+            if "id" in item.team1.model_fields_set:
+                score_bet.match.team1_id = item.team1.id
+            if "score" in item.team1.model_fields_set:
+                score_bet.score1 = item.team1.score
+
+        if item.team2 is not None:
+            if "id" in item.team2.model_fields_set:
+                score_bet.match.team2_id = item.team2.id
+            if "score" in item.team2.model_fields_set:
+                score_bet.score2 = item.team2.score
+
+        team_ids.add(score_bet.match.team1_id)
+        team_ids.add(score_bet.match.team2_id)
+
+    try:
+        db.flush()
+    except IntegrityError as integrity_error:
+        db.rollback()
+        raise BetNotFound(score_bets_in[0].id) from integrity_error
+
+    for team_id in team_ids:
+        set_recomputation_flag(db, team_id, user.id)
+
+    db.commit()
+    for score_bet in score_bets:
+        db.refresh(score_bet)
+
+    locked = is_locked(user, lock_datetime)
+    return GenericOut(
+        result=[
+            send_response(score_bets_by_id[rid], locked=locked, lang=lang).result
+            for rid in requested_ids
+        ],
     )
 
 
