@@ -120,3 +120,11 @@ class ModifyScoreBetIn(BaseModel):
     team2: TeamModifyScoreBetIn | None = None
 
     model_config = ConfigDict(extra="forbid")
+
+
+class BulkModifyScoreBetItem(BaseModel):
+    id: UUID4
+    team1: TeamModifyScoreBetIn | None = None
+    team2: TeamModifyScoreBetIn | None = None
+
+    model_config = ConfigDict(extra="forbid")
