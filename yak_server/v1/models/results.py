@@ -58,7 +58,7 @@ class UserResult(BaseModel):
                 for kg in sorted(user.knockout_guesses, key=lambda kg: kg.group.index)
             ],
             number_winner_guess=user.number_winner_guess,
-            points=user.points,
+            points=round(user.points, 2),
         )
 
 
@@ -91,7 +91,7 @@ class ScoreBoardUserResult(BaseModel):
                 for kg in sorted(user.knockout_guesses, key=lambda kg: kg.group.index)
             ],
             number_winner_guess=user.number_winner_guess,
-            points=user.points,
+            points=round(user.points, 2),
         )
 
 
