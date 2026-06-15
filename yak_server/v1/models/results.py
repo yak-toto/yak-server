@@ -31,6 +31,7 @@ class KnockoutRoundCount(BaseModel):
 
 class UserResult(BaseModel):
     rank: NonNegativeInt
+    number_of_players: NonNegativeInt
     first_name: str
     last_name: str
     full_name: str
@@ -43,9 +44,17 @@ class UserResult(BaseModel):
     points: float
 
     @classmethod
-    def from_instance(cls, user: "UserModel", *, rank: NonNegativeInt, lang: Lang) -> "UserResult":
+    def from_instance(
+        cls,
+        user: "UserModel",
+        *,
+        rank: NonNegativeInt,
+        number_of_players: NonNegativeInt,
+        lang: Lang,
+    ) -> "UserResult":
         return cls(
             rank=rank,
+            number_of_players=number_of_players,
             first_name=user.first_name,
             last_name=user.last_name,
             full_name=user.full_name,

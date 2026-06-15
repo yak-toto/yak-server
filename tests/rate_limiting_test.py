@@ -1,7 +1,6 @@
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from testing.util import get_random_string
