@@ -104,4 +104,10 @@ def retrieve_user_results(
         .one()
     )
 
-    return GenericOut(result=UserResult.from_instance(user_with_guesses, rank=rank, lang=lang))
+    number_of_players = db.query(func.count(UserModel.id)).where(UserModel.name != "admin").scalar()
+
+    return GenericOut(
+        result=UserResult.from_instance(
+            user_with_guesses, rank=rank, number_of_players=number_of_players, lang=lang
+        )
+    )

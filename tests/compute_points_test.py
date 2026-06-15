@@ -306,6 +306,7 @@ def test_compute_points(
 
     assert get_results_response.json()["result"] == {
         "rank": 1,
+        "number_of_players": 3,
         "first_name": users_data[0].first_name,
         "last_name": users_data[0].last_name,
         "full_name": f"{users_data[0].first_name} {users_data[0].last_name}",
@@ -330,6 +331,7 @@ def test_compute_points(
         "ok": True,
         "result": {
             "rank": 0,
+            "number_of_players": 3,
             "first_name": admin.first_name,
             "last_name": admin.last_name,
             "full_name": f"{admin.first_name} {admin.last_name}",

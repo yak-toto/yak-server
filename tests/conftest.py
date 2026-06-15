@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 
 import psycopg
 import pytest
-from fastapi import FastAPI
 from psycopg import sql
 from sqlalchemy import Engine, create_engine
 
@@ -80,7 +79,7 @@ def create_test_database() -> Engine:
     return create_engine(database_url, pool_recycle=7200, pool_pre_ping=True)
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def engine_for_test() -> Generator[Engine, None, None]:
     engine = create_test_database()
 
