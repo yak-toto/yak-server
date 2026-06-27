@@ -1,9 +1,7 @@
-from collections.abc import Generator
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
 
-import pytest
 from click.testing import CliRunner
 from starlette.testclient import TestClient
 
@@ -13,15 +11,9 @@ from yak_server.cli import app as cli_app
 from yak_server.cli.admin import create_admin
 from yak_server.cli.database import initialize_database
 from yak_server.helpers.rules import Rules
-from yak_server.helpers.rules.compute_final_from_rank import (
-    RuleComputeFinaleFromGroupRank,
-    Team,
-    Versus,
-)
-from yak_server.helpers.rules.compute_points import KnockoutRoundConfig, RuleComputePoints
-from yak_server.helpers.settings import get_rules, get_settings
 
 if TYPE_CHECKING:
+    import pytest
     from fastapi import FastAPI
     from sqlalchemy import Engine
 
@@ -49,37 +41,6 @@ def put_finale_phase(client: TestClient, access_token: str, *, is_one_won: bool 
     )
 
     assert response_patch_finale_phase.status_code == HTTPStatus.OK
-
-
-@pytest.fixture
-def app_and_rules_for_compute_points(
-    app_with_valid_jwt_config: "FastAPI",
-) -> Generator[tuple["FastAPI", Rules], None, None]:
-    rules = Rules(
-        compute_finale_phase_from_group_rank=RuleComputeFinaleFromGroupRank(
-            to_group="1",
-            from_phase="GROUP",
-            versus=[Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="A"))],
-        ),
-        compute_points=RuleComputePoints(
-            base_correct_result=1,
-            multiplying_factor_correct_result=2,
-            base_correct_score=3,
-            multiplying_factor_correct_score=7,
-            team_qualified=10,
-            first_team_qualified=20,
-            knockout_rounds=[KnockoutRoundConfig(group_code="1", points_per_team=120)],
-            winner_group_code="1",
-            winner_points=200,
-        ),
-    )
-
-    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings()
-    app_with_valid_jwt_config.dependency_overrides[get_rules] = lambda: rules
-
-    yield app_with_valid_jwt_config, rules
-
-    app_with_valid_jwt_config.dependency_overrides.clear()
 
 
 def test_compute_points(

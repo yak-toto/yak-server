@@ -14,6 +14,7 @@ from testing.mock import (
     MockAuthenticationSettings,
     MockCookieSettings,
     MockLockDatetime,
+    MockSettings,
 )
 from testing.util import get_random_string
 from yak_server import create_app
@@ -22,11 +23,18 @@ from yak_server.cli.database import create_database, delete_database, drop_datab
 from yak_server.database.session import compute_database_uri
 from yak_server.database.settings import get_postgres_settings
 from yak_server.helpers.rules import Rules
+from yak_server.helpers.rules.compute_final_from_rank import (
+    RuleComputeFinaleFromGroupRank,
+    Team,
+    Versus,
+)
+from yak_server.helpers.rules.compute_points import KnockoutRoundConfig, RuleComputePoints
 from yak_server.helpers.settings import (
     get_authentication_settings,
     get_cookie_settings,
     get_lock_datetime,
     get_rules,
+    get_settings,
 )
 from yak_server.v1.helpers.rate_limiting import (
     instantiate_auth_rate_limiter,
@@ -191,3 +199,34 @@ def app_with_null_jwt_refresh_expiration_time(app_with_valid_jwt_config: "FastAP
     )
 
     return app_with_valid_jwt_config
+
+
+@pytest.fixture
+def app_and_rules_for_compute_points(
+    app_with_valid_jwt_config: "FastAPI",
+) -> Generator[tuple["FastAPI", Rules], None, None]:
+    rules = Rules(
+        compute_finale_phase_from_group_rank=RuleComputeFinaleFromGroupRank(
+            to_group="1",
+            from_phase="GROUP",
+            versus=[Versus(team1=Team(rank=1, group="A"), team2=Team(rank=2, group="A"))],
+        ),
+        compute_points=RuleComputePoints(
+            base_correct_result=1,
+            multiplying_factor_correct_result=2,
+            base_correct_score=3,
+            multiplying_factor_correct_score=7,
+            team_qualified=10,
+            first_team_qualified=20,
+            knockout_rounds=[KnockoutRoundConfig(group_code="1", points_per_team=120)],
+            winner_group_code="1",
+            winner_points=200,
+        ),
+    )
+
+    app_with_valid_jwt_config.dependency_overrides[get_settings] = MockSettings()
+    app_with_valid_jwt_config.dependency_overrides[get_rules] = lambda: rules
+
+    yield app_with_valid_jwt_config, rules
+
+    app_with_valid_jwt_config.dependency_overrides.clear()

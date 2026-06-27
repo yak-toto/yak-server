@@ -40,3 +40,17 @@ def execute_rule(
     rule_metadata.function(db, user, getattr(rules, rule_metadata.attribute))
 
     return GenericOut(result="")
+
+
+@router.get(
+    "",
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
+        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
+    },
+)
+def retrieve_rules_configuration(
+    _: Annotated[UserModel, Depends(require_user)], rules: Annotated[Rules, Depends(get_rules)]
+) -> GenericOut[Rules]:
+    return GenericOut(result=rules)
