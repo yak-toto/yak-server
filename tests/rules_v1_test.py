@@ -4,10 +4,14 @@ from uuid import uuid4
 
 from starlette.testclient import TestClient
 
-from testing.util import get_random_string
+from testing.util import get_random_string, get_resources_path
+from yak_server.cli.admin import create_admin
+from yak_server.cli.database import initialize_database
+from yak_server.helpers.rules import Rules
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
+    from sqlalchemy import Engine
 
 
 def test_rule(app_with_valid_jwt_config: "FastAPI") -> None:
@@ -38,3 +42,33 @@ def test_rule(app_with_valid_jwt_config: "FastAPI") -> None:
         "error_code": "rule_not_found",
         "description": f"Rule not found: {invalid_rule_id}",
     }
+
+
+def test_retrieve_rules(
+    app_and_rules_for_compute_points: tuple["FastAPI", Rules],
+    engine_for_test: "Engine",
+) -> None:
+    app, rules = app_and_rules_for_compute_points
+
+    client = TestClient(app)
+
+    initialize_database(engine_for_test, get_resources_path("test_compute_points_v1"))
+
+    # Signup admin
+    password = get_random_string(15)
+
+    create_admin(password, engine_for_test)
+
+    response_login_admin = client.post(
+        "/api/v1/users/login",
+        json={
+            "name": "admin",
+            "password": password,
+        },
+    )
+
+    assert response_login_admin.status_code == HTTPStatus.CREATED
+
+    response_retrieve_rules = client.get("/api/v1/rules")
+
+    assert response_retrieve_rules.json() == {"ok": True, "result": rules.model_dump()}
