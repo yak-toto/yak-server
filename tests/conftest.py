@@ -221,6 +221,7 @@ def app_and_rules_for_compute_points(
             knockout_rounds=[KnockoutRoundConfig(group_code="1", points_per_team=120)],
             winner_group_code="1",
             winner_points=200,
+            first_knockout_group_code="1",
         ),
     )
 

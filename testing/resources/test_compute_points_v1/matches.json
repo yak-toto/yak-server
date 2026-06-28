@@ -27,15 +27,6 @@
         "team2_index": 3
     },
     {
-        "group_code": "A",
-        "index": 4,
-        "team1_code": null,
-        "team2_code": null,
-        "bet_type_from_match": "BINARY_BET",
-        "team1_index": null,
-        "team2_index": null
-    },
-    {
         "group_code": "1",
         "index": 1,
         "team1_code": null,

@@ -54,12 +54,23 @@ def app_with_rules_and_score_board_config(
             ],
             winner_group_code="1",
             winner_points=200,
+            first_knockout_group_code="2",
         ),
     )
 
     yield app_with_valid_jwt_config
 
     app_with_valid_jwt_config.dependency_overrides.clear()
+
+
+def call_compute_final_from_group_rank(client: TestClient, access_token: str) -> None:
+    # Calling the rule to compute final phase
+    response_final_phase_from_group_rank = client.post(
+        "/api/v1/rules/492345de-8d4a-45b6-8b94-d219f2b0c3e9",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+
+    assert response_final_phase_from_group_rank.status_code == HTTPStatus.OK
 
 
 def test_compute_points(
@@ -104,6 +115,8 @@ def test_compute_points(
 
     # Patch score bet admin
     patch_score_bets(client, admin.access_token, admin.scores)
+
+    call_compute_final_from_group_rank(client, admin.access_token)
 
     # Signup 3 players and patch their scores
     users_data = [
@@ -182,6 +195,8 @@ def test_compute_points(
         user.access_token = response_signup.json()["result"]["access_token"]
 
         patch_score_bets(client, user.access_token, user.scores)
+
+        call_compute_final_from_group_rank(client, user.access_token)
 
     # Success case : compute_points call
     response_compute_points = client.post(
@@ -434,6 +449,7 @@ def test_compute_points_skips_nonexistent_knockout_group(
             ],
             winner_group_code="1",
             winner_points=200,
+            first_knockout_group_code="2",
         ),
     )
 
