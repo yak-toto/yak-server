@@ -48,22 +48,14 @@ def test_bets_by_groups(app_with_valid_jwt_config: "FastAPI", engine_for_test: "
     )
 
     assert bets_by_valid_group.json()["result"] == {
-        "binary_bets": [
-            {
-                "id": ANY,
-                "locked": False,
-                "team1": None,
-                "team2": None,
-            },
-        ],
-        "group": {
-            "code": "A",
-            "description": "Groupe A",
-            "id": ANY,
-        },
         "phase": {
             "code": "GROUP",
             "description": "Phase de groupes",
+            "id": ANY,
+        },
+        "group": {
+            "code": "A",
+            "description": "Groupe A",
             "id": ANY,
         },
         "score_bets": [
@@ -122,6 +114,7 @@ def test_bets_by_groups(app_with_valid_jwt_config: "FastAPI", engine_for_test: "
                 },
             },
         ],
+        "binary_bets": [],
     }
 
     score_bets = bets_by_valid_group.json()["result"]["score_bets"]

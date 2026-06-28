@@ -24,5 +24,6 @@
         }
     ],
     "winner_group_code": "1",
-    "winner_points": 200
+    "winner_points": 200,
+    "first_knockout_group_code": "16"
 }

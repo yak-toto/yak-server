@@ -42,6 +42,7 @@ class RuleComputePoints(BaseModel):
     knockout_rounds: list[KnockoutRoundConfig]
     winner_group_code: str
     winner_points: int
+    first_knockout_group_code: str
 
 
 @dataclass
@@ -104,6 +105,7 @@ def compute_results_for_group_rank(
     db: "Session",
     admin: UserModel,
     other_users: Iterable[UserModel],
+    admin_knockout_teams: set[UUID],
 ) -> dict[UUID, ResultForGroupRank]:
     result_groups: dict[UUID, ResultForGroupRank] = {}
 
@@ -112,7 +114,10 @@ def compute_results_for_group_rank(
 
         if all_results_filled_in_group(group_result_admin):
             admin_first_team_id = group_result_admin[0].team.id
-            admin_second_team_id = group_result_admin[1].team.id
+
+            admin_qualified_ids = {
+                pos.team.id for pos in group_result_admin if pos.team.id in admin_knockout_teams
+            }
 
             for other_user in other_users:
                 if other_user.id not in result_groups:
@@ -121,15 +126,14 @@ def compute_results_for_group_rank(
                 group_result_user = get_group_rank_with_code(db, other_user, group.id)
 
                 if all_results_filled_in_group(group_result_user):
-                    user_first_team_id = group_result_user[0].team.id
-                    user_second_team_id = group_result_user[1].team.id
+                    n = len(admin_qualified_ids)
+                    user_predicted_ids = {pos.team.id for pos in group_result_user[:n]}
 
                     result_groups[other_user.id].number_qualified_teams_guess += len(
-                        {user_first_team_id, user_second_team_id}
-                        & {admin_first_team_id, admin_second_team_id},
+                        user_predicted_ids & admin_qualified_ids,
                     )
 
-                    if user_first_team_id == admin_first_team_id:
+                    if group_result_user[0].team.id == admin_first_team_id:
                         result_groups[other_user.id].number_first_qualified_guess += 1
 
     return result_groups
@@ -188,10 +192,15 @@ def compute_points(
 
     other_users = db.query(UserModel).where(UserModel.role == Role.USER)
 
+    admin_first_knockout_teams = team_from_group_code(
+        db, admin, rule_config.first_knockout_group_code
+    )
+
     result_groups: dict[UUID, ResultForGroupRank] = compute_results_for_group_rank(
         db,
         admin,
         other_users,
+        admin_knockout_teams=admin_first_knockout_teams,
     )
 
     admin_knockout_teams = {

@@ -43,6 +43,16 @@ def put_finale_phase(client: TestClient, access_token: str, *, is_one_won: bool 
     assert response_patch_finale_phase.status_code == HTTPStatus.OK
 
 
+def compute_final_from_group_rank(client: TestClient, access_token: str) -> None:
+    # Calling the rule to compute final phase
+    response_final_phase_from_group_rank = client.post(
+        "/api/v1/rules/492345de-8d4a-45b6-8b94-d219f2b0c3e9",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+
+    assert response_final_phase_from_group_rank.status_code == HTTPStatus.OK
+
+
 def test_compute_points(
     app_and_rules_for_compute_points: tuple["FastAPI", Rules],
     engine_for_test: "Engine",
@@ -80,6 +90,8 @@ def test_compute_points(
 
     # Patch admin scores
     patch_score_bets(client, admin.access_token, admin.scores)
+
+    compute_final_from_group_rank(client, admin.access_token)
 
     # Signup 3 players and patch their scores
     users_data = [
@@ -120,6 +132,8 @@ def test_compute_points(
 
         patch_score_bets(client, user_data.access_token, user_data.scores)
 
+        compute_final_from_group_rank(client, user_data.access_token)
+
     # Success case : compute_points call
     response_compute_points = client.post(
         "/api/v1/rules/62d46542-8cf1-4a3b-af77-a5086f10ac59",
@@ -159,9 +173,9 @@ def test_compute_points(
                 "number_match_guess": 3,
                 "number_qualified_teams_guess": 2,
                 "number_score_guess": 0,
-                "knockout_rounds": [{"group_id": ANY, "count": 0}],
+                "knockout_rounds": [{"group_id": ANY, "count": 2}],
                 "number_winner_guess": 0,
-                "points": 46.0,
+                "points": 286.0,
             },
             {
                 "rank": 2,
@@ -172,9 +186,9 @@ def test_compute_points(
                 "number_match_guess": 2,
                 "number_qualified_teams_guess": 2,
                 "number_score_guess": 2,
-                "knockout_rounds": [{"group_id": ANY, "count": 0}],
+                "knockout_rounds": [{"group_id": ANY, "count": 2}],
                 "number_winner_guess": 0,
-                "points": 43.0,
+                "points": 283.0,
             },
             {
                 "rank": 3,
@@ -185,9 +199,9 @@ def test_compute_points(
                 "number_match_guess": 1,
                 "number_qualified_teams_guess": 1,
                 "number_score_guess": 0,
-                "knockout_rounds": [{"group_id": ANY, "count": 0}],
+                "knockout_rounds": [{"group_id": ANY, "count": 1}],
                 "number_winner_guess": 0,
-                "points": 11.0,
+                "points": 131.0,
             },
         ],
     }
