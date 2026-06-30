@@ -1,6 +1,5 @@
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from itertools import chain
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -140,20 +139,23 @@ def compute_results_for_group_rank(
 
 
 def team_from_group_code(db: "Session", user: UserModel, group_code: str) -> set[UUID]:
-    return set(
-        chain(
-            *(
-                (bet.match.team1_id, bet.match.team2_id)
-                for bet in db
-                .query(BinaryBetModel)
-                .options(selectinload(BinaryBetModel.match))
-                .join(BinaryBetModel.match)
-                .join(MatchModel.group)
-                .where(MatchModel.user_id == user.id, GroupModel.code == group_code)
-                if bet.match.team1_id is not None and bet.match.team2_id is not None
-            ),
-        ),
-    )
+    results: set[UUID] = set()
+
+    for bet in (
+        db
+        .query(BinaryBetModel)
+        .options(selectinload(BinaryBetModel.match))
+        .join(BinaryBetModel.match)
+        .join(MatchModel.group)
+        .where(MatchModel.user_id == user.id, GroupModel.code == group_code)
+    ):
+        if bet.match.team1_id is not None:
+            results.add(bet.match.team1_id)
+
+        if bet.match.team2_id is not None:
+            results.add(bet.match.team2_id)
+
+    return results
 
 
 def winner_from_user(db: "Session", user: UserModel) -> set[UUID]:

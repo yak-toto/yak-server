@@ -294,11 +294,11 @@ def test_compute_points(
                 "number_qualified_teams_guess": 1,
                 "number_first_qualified_guess": 0,
                 "knockout_rounds": [
-                    {"group_id": ANY, "count": 0},
+                    {"group_id": ANY, "count": 1},
                     {"group_id": ANY, "count": 0},
                 ],
                 "number_winner_guess": 0,
-                "points": 16.0,
+                "points": 76.0,
             },
             {
                 "rank": 2,
@@ -383,7 +383,7 @@ def test_compute_points(
                 "number_qualified_teams_guess": 1,
                 "number_first_qualified_guess": 0,
                 "knockout_rounds": [
-                    {"group_id": ANY, "count": 0},
+                    {"group_id": ANY, "count": 1},
                     {"group_id": ANY, "count": 0},
                 ],
                 "number_winner_guess": 0,
