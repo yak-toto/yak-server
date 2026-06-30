@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from importlib.metadata import version
 from typing import TYPE_CHECKING
+from unittest.mock import ANY
 
 from starlette.testclient import TestClient
 
@@ -14,4 +15,7 @@ def test_get_version(app_with_valid_jwt_config: "FastAPI") -> None:
     response = client.get("/api/version")
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {"ok": True, "result": {"version": version("yak-server")}}
+    assert response.json() == {
+        "ok": True,
+        "result": {"version": version("yak-server"), "schema_hash": ANY},
+    }
