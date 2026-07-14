@@ -36,7 +36,7 @@ dependencies = [
     "argon2-cffi ==25.1.0",
     "fastapi ==0.136.3",
     "fastapi-limiter==0.2.0",
-    "uvicorn==0.50.2",
+    "uvicorn==0.51.0",
     "click ==8.4.2",
     "SQLAlchemy ==2.0.51",
     "alembic ==1.18.5",
@@ -58,7 +58,7 @@ dev = [
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
     "pytest-env==1.6.0",
-    "uvicorn[standard]==0.50.2",
+    "uvicorn[standard]==0.51.0",
     "yappi==1.7.6",
 ]
 type-checking = [
