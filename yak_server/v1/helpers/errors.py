@@ -6,6 +6,7 @@ from uuid import UUID
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded as SlowApiRateLimitExceeded
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -284,6 +285,10 @@ def set_exception_handler(app: "FastAPI") -> None:
                 "description": yak_http_exception.detail,
             },
         )
+
+    @app.exception_handler(SlowApiRateLimitExceeded)
+    def rate_limit_exceeded_handler(request: Request, _: SlowApiRateLimitExceeded) -> JSONResponse:
+        return yak_http_exception_handler(request, RateLimitExceeded())
 
     @app.exception_handler(RequestValidationError)
     def request_validator_error_handler(

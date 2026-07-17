@@ -1,17 +1,19 @@
-from fastapi import Request, Response
-from fastapi_limiter.depends import RateLimiter
-from pyrate_limiter import Duration, Limiter, Rate
+from fastapi import Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
-from yak_server.v1.helpers.errors import RateLimitExceeded
+limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
 
-
-def rate_limiting_callback(_: Request, __: Response) -> None:
-    raise RateLimitExceeded
+auth_rate_limit = limiter.limit("5/minute")
 
 
-def instantiate_global_rate_limiter() -> RateLimiter:
-    return RateLimiter(Limiter(Rate(200, Duration.MINUTE)), callback=rate_limiting_callback)
+def global_rate_limit(request: Request) -> None:
+    """Enforce ``limiter``'s default limits for every request.
 
-
-def instantiate_auth_rate_limiter() -> RateLimiter:
-    return RateLimiter(Limiter(Rate(5, Duration.MINUTE)), callback=rate_limiting_callback)
+    slowapi's own ``SlowAPIMiddleware`` looks up the matching route by
+    walking ``app.routes``, which no longer works since FastAPI wraps
+    included routers in ``_IncludedRouter`` objects that aren't routes
+    themselves. Calling the limiter directly, keyed off the request path,
+    sidesteps that route lookup entirely.
+    """
+    limiter._check_request_limit(request, None, in_middleware=False)  # noqa: SLF001

@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Request, Response, status
 from pydantic import UUID4
 from sqlalchemy.orm import Session
 
@@ -44,7 +44,7 @@ from yak_server.v1.helpers.errors import (
     UnsatisfiedPasswordRequirements,
     UserNotFound,
 )
-from yak_server.v1.helpers.rate_limiting import instantiate_auth_rate_limiter
+from yak_server.v1.helpers.rate_limiting import auth_rate_limit
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.users import (
     CurrentUserOut,
@@ -61,14 +61,10 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-signup_rate_limiter = instantiate_auth_rate_limiter()
-login_rate_limiter = instantiate_auth_rate_limiter()
-
 
 @router.post(
     "/signup",
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(signup_rate_limiter)],
     responses={
         status.HTTP_400_BAD_REQUEST: {"model": ErrorOut},
         status.HTTP_409_CONFLICT: {"model": ErrorOut},
@@ -76,7 +72,9 @@ login_rate_limiter = instantiate_auth_rate_limiter()
         status.HTTP_429_TOO_MANY_REQUESTS: {"model": ErrorOut},
     },
 )
+@auth_rate_limit
 def signup(
+    request: Request,  # noqa: ARG001
     signup_in: SignupIn,
     response: Response,
     db: Annotated[Session, Depends(get_db)],
@@ -158,7 +156,6 @@ def password_requirements() -> GenericOut[PasswordRequirementsOut]:
 @router.post(
     "/login",
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(login_rate_limiter)],
     responses={
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
         status.HTTP_409_CONFLICT: {"model": ErrorOut},
@@ -166,7 +163,9 @@ def password_requirements() -> GenericOut[PasswordRequirementsOut]:
         status.HTTP_429_TOO_MANY_REQUESTS: {"model": ErrorOut},
     },
 )
+@auth_rate_limit
 def login(
+    request: Request,  # noqa: ARG001
     login_in: LoginIn,
     response: Response,
     db: Annotated[Session, Depends(get_db)],
