@@ -18,7 +18,6 @@ from testing.mock import (
 )
 from testing.util import get_random_string
 from yak_server import create_app
-from yak_server.app import global_rate_limiter
 from yak_server.cli.database import create_database, delete_database, drop_database
 from yak_server.database.session import compute_database_uri
 from yak_server.database.settings import get_postgres_settings
@@ -36,11 +35,7 @@ from yak_server.helpers.settings import (
     get_rules,
     get_settings,
 )
-from yak_server.v1.helpers.rate_limiting import (
-    instantiate_auth_rate_limiter,
-    instantiate_global_rate_limiter,
-)
-from yak_server.v1.routers.users import login_rate_limiter, signup_rate_limiter
+from yak_server.v1.helpers.rate_limiting import limiter
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -140,14 +135,13 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
     app = create_app_with_profiling()
 
     _apply_standard_overrides(app)
-    # Rate limiters are module-level singletons shared with the main app —
-    # disable them to prevent cross-test state leakage.
-    app.dependency_overrides[global_rate_limiter] = lambda: None
-    app.dependency_overrides[signup_rate_limiter] = lambda: None
-    app.dependency_overrides[login_rate_limiter] = lambda: None
+    # The limiter is a module-level singleton shared with the main app —
+    # disable it to prevent cross-test state leakage.
+    limiter.enabled = False
 
     yield app
 
+    limiter.enabled = False
     app.dependency_overrides.clear()
 
 
@@ -155,20 +149,18 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
 def app_with_rate_limiter(_app: "FastAPI") -> Generator["FastAPI", None, None]:
     _apply_standard_overrides(_app)
 
-    _app.dependency_overrides[global_rate_limiter] = instantiate_global_rate_limiter()
-    _app.dependency_overrides[signup_rate_limiter] = instantiate_auth_rate_limiter()
-    _app.dependency_overrides[login_rate_limiter] = instantiate_auth_rate_limiter()
+    limiter.reset()
+    limiter.enabled = True
 
     yield _app
 
+    limiter.enabled = False
     _app.dependency_overrides.clear()
 
 
 @pytest.fixture
 def app_with_valid_jwt_config(app_with_rate_limiter: "FastAPI") -> "FastAPI":
-    app_with_rate_limiter.dependency_overrides[global_rate_limiter] = lambda: None
-    app_with_rate_limiter.dependency_overrides[signup_rate_limiter] = lambda: None
-    app_with_rate_limiter.dependency_overrides[login_rate_limiter] = lambda: None
+    limiter.enabled = False
 
     return app_with_rate_limiter
 

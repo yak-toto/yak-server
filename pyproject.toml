@@ -35,7 +35,7 @@ dependencies = [
     "psycopg[binary] ==3.3.4",
     "argon2-cffi ==25.1.0",
     "fastapi ==0.136.3",
-    "fastapi-limiter==0.2.0",
+    "slowapi==0.1.10",
     "uvicorn==0.51.0",
     "click ==8.4.2",
     "SQLAlchemy ==2.0.51",
