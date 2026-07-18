@@ -34,7 +34,7 @@ dependencies = [
     "PyJWT ==2.13.0",
     "psycopg[binary] ==3.3.4",
     "argon2-cffi ==25.1.0",
-    "fastapi ==0.136.3",
+    "fastapi ==0.139.0",
     "slowapi==0.1.10",
     "uvicorn==0.51.0",
     "click ==8.4.2",
