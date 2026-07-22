@@ -131,7 +131,7 @@ def make_env_typer() -> click.Group:
         help="JWT refresh expiration time in seconds",
     )
     @click.option("--competition", "-c", prompt=True, help="Competition name", required=True)
-    def all(  # noqa: A001, PLR0913
+    def all(  # ruff:ignore[builtin-variable-shadowing, too-many-arguments]
         *,
         debug: bool,
         host: str,

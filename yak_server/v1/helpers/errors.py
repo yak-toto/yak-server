@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class YakHTTPException(Exception):  # noqa: N818
+class YakHTTPException(Exception):  # ruff:ignore[error-suffix-on-exception-name]
     def __init__(self, status_code: int, detail: str, error_code: ErrorCode) -> None:
         super().__init__(detail)
         self.status_code = status_code

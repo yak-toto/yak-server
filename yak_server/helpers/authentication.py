@@ -57,7 +57,7 @@ def encode_refresh_token(
     )
 
 
-def decode_bearer_token(token: str, secret_key: str) -> Any:  # noqa: ANN401
+def decode_bearer_token(token: str, secret_key: str) -> Any:  # ruff:ignore[any-type]
     return jwt.decode(token, secret_key, algorithms=["HS512"])
 
 

@@ -2,8 +2,8 @@ from fastapi import Response
 
 from .settings import CookieSettings
 
-ACCESS_TOKEN_COOKIE = "access_token"  # noqa: S105 - This is not a secret, just the name of the cookie.
-REFRESH_TOKEN_COOKIE = "refresh_token"  # noqa: S105 - This is not a secret, just the name of the cookie.
+ACCESS_TOKEN_COOKIE = "access_token"  # ruff:ignore[hardcoded-password-string] - This is not a secret, just the name of the cookie.
+REFRESH_TOKEN_COOKIE = "refresh_token"  # ruff:ignore[hardcoded-password-string] - This is not a secret, just the name of the cookie.
 
 
 def set_auth_cookies(

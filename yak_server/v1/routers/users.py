@@ -74,7 +74,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 )
 @auth_rate_limit
 def signup(
-    request: Request,  # noqa: ARG001
+    request: Request,  # ruff:ignore[unused-function-argument]
     signup_in: SignupIn,
     response: Response,
     db: Annotated[Session, Depends(get_db)],
@@ -165,7 +165,7 @@ def password_requirements() -> GenericOut[PasswordRequirementsOut]:
 )
 @auth_rate_limit
 def login(
-    request: Request,  # noqa: ARG001
+    request: Request,  # ruff:ignore[unused-function-argument]
     login_in: LoginIn,
     response: Response,
     db: Annotated[Session, Depends(get_db)],

@@ -19,7 +19,7 @@ def write_env_file(env: dict[str, Any], filename: str) -> None:
 
 
 def write_app_env_file(
-    debug: bool,  # noqa: FBT001
+    debug: bool,  # ruff:ignore[boolean-type-hint-positional-argument]
     jwt_expiration_time: int,
     jwt_refresh_expiration_time: int,
     competition: str,
@@ -60,8 +60,8 @@ def write_db_env_file(host: str, user: str, password: str, port: int, db: str) -
     write_env_file(env_db, ".env.db")
 
 
-def init_env(  # noqa: PLR0913, PLR0917
-    debug: bool,  # noqa: FBT001
+def init_env(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
+    debug: bool,  # ruff:ignore[boolean-type-hint-positional-argument]
     host: str,
     db_username: str,
     password: str,
