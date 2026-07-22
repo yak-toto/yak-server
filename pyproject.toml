@@ -93,24 +93,24 @@ ignore = [
     # docstring
     "D",
     # shadow builtins
-    "G004",
+    "logging-f-string",
     # copyright
-    "CPY001",
+    "missing-copyright-notice",
     # from __future__ import annotations
-    "FA100",
+    "future-rewritable-type-annotation",
     # formatter compatiblity
-    "COM812",
+    "missing-trailing-comma",
 ]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 12
 
 [tool.ruff.lint.per-file-ignores]
-"yak_server/database/migrations/*" = ["ANN001", "ANN201"]
-"yak_server/helpers/errors.py" = ["S105"]
-"tests/*" = ["S101", "PLR0914", "PLR2004", "PLC2701"]
-"testing/*" = ["S101"]
-"yak_server/helpers/rules/__init__.py" = ["RUF067"]
+"yak_server/database/migrations/*" = ["missing-type-function-argument", "missing-return-type-undocumented-public-function"]
+"yak_server/helpers/errors.py" = ["hardcoded-password-string"]
+"tests/*" = ["assert", "too-many-locals", "magic-value-comparison", "import-private-name"]
+"testing/*" = ["assert"]
+"yak_server/helpers/rules/__init__.py" = ["non-empty-init-module"]
 
 [tool.ruff.lint.pylint]
 max-args = 7

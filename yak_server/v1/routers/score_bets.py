@@ -80,7 +80,7 @@ def send_response(
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
     },
 )
-def bulk_modify_score_bets(  # noqa: C901
+def bulk_modify_score_bets(  # ruff:ignore[complex-structure]
     score_bets_in: list[BulkModifyScoreBetItem],
     db: Annotated[Session, Depends(get_db)],
     user: Annotated[UserModel, Depends(require_user)],

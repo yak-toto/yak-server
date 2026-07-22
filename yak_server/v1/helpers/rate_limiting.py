@@ -16,4 +16,4 @@ def global_rate_limit(request: Request) -> None:
     themselves. Calling the limiter directly, keyed off the request path,
     sidesteps that route lookup entirely.
     """
-    limiter._check_request_limit(request, None, in_middleware=False)  # noqa: SLF001
+    limiter._check_request_limit(request, None, in_middleware=False)  # ruff:ignore[private-member-access]
