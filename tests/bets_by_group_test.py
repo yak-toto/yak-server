@@ -13,7 +13,9 @@ if TYPE_CHECKING:
     from sqlalchemy import Engine
 
 
-def test_bets_by_groups(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
+def test_bets_by_groups(
+    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine", signup_token: str
+) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     initialize_database(engine_for_test, get_resources_path("test_compute_points_v1"))
@@ -25,6 +27,7 @@ def test_bets_by_groups(app_with_valid_jwt_config: "FastAPI", engine_for_test: "
             "first_name": get_random_string(6),
             "last_name": get_random_string(6),
             "password": get_random_string(9),
+            "signup_token": signup_token,
         },
     )
 

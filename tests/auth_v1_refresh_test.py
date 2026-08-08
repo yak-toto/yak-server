@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_refresh_after_signup(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_refresh_after_signup(app_with_valid_jwt_config: "FastAPI", signup_token: str) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     response = client.post(
@@ -20,6 +20,7 @@ def test_refresh_after_signup(app_with_valid_jwt_config: "FastAPI") -> None:
             "first_name": get_random_string(10),
             "last_name": get_random_string(10),
             "password": get_random_string(150),
+            "signup_token": signup_token,
         },
     )
 
@@ -41,7 +42,7 @@ def test_refresh_after_signup(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response.status_code == HTTPStatus.OK
 
 
-def test_refresh_after_login(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_refresh_after_login(app_with_valid_jwt_config: "FastAPI", signup_token: str) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     name = get_random_string(10)
@@ -54,6 +55,7 @@ def test_refresh_after_login(app_with_valid_jwt_config: "FastAPI") -> None:
             "first_name": get_random_string(10),
             "last_name": get_random_string(10),
             "password": password,
+            "signup_token": signup_token,
         },
     )
 
@@ -85,7 +87,7 @@ def test_refresh_after_login(app_with_valid_jwt_config: "FastAPI") -> None:
     assert response.status_code == HTTPStatus.OK
 
 
-def test_refresh_using_cookie(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_refresh_using_cookie(app_with_valid_jwt_config: "FastAPI", signup_token: str) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     response = client.post(
@@ -95,6 +97,7 @@ def test_refresh_using_cookie(app_with_valid_jwt_config: "FastAPI") -> None:
             "first_name": get_random_string(10),
             "last_name": get_random_string(10),
             "password": get_random_string(150),
+            "signup_token": signup_token,
         },
     )
 
@@ -140,7 +143,9 @@ def test_refresh_with_wrong_token(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_refresh_token_expired(app_with_null_jwt_refresh_expiration_time: "FastAPI") -> None:
+def test_refresh_token_expired(
+    app_with_null_jwt_refresh_expiration_time: "FastAPI", signup_token: str
+) -> None:
     client = TestClient(app_with_null_jwt_refresh_expiration_time)
 
     # Login to get the refresh token
@@ -151,6 +156,7 @@ def test_refresh_token_expired(app_with_null_jwt_refresh_expiration_time: "FastA
             "first_name": get_random_string(10),
             "last_name": get_random_string(10),
             "password": get_random_string(150),
+            "signup_token": signup_token,
         },
     )
 
@@ -172,7 +178,7 @@ def test_refresh_token_expired(app_with_null_jwt_refresh_expiration_time: "FastA
 
 
 def test_refresh_token_cannot_access_protected_resources(
-    app_with_valid_jwt_config: "FastAPI",
+    app_with_valid_jwt_config: "FastAPI", signup_token: str
 ) -> None:
     """Test that refresh tokens cannot be used to access protected endpoints."""
     client = TestClient(app_with_valid_jwt_config)
@@ -185,6 +191,7 @@ def test_refresh_token_cannot_access_protected_resources(
             "first_name": get_random_string(10),
             "last_name": get_random_string(10),
             "password": get_random_string(150),
+            "signup_token": signup_token,
         },
     )
 
@@ -225,7 +232,9 @@ def test_refresh_token_cannot_access_protected_resources(
     }
 
 
-def test_refresh_token_revoked_after_use(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_refresh_token_revoked_after_use(
+    app_with_valid_jwt_config: "FastAPI", signup_token: str
+) -> None:
     """Test that a refresh token cannot be reused after it has been consumed."""
     client = TestClient(app_with_valid_jwt_config)
 
@@ -236,6 +245,7 @@ def test_refresh_token_revoked_after_use(app_with_valid_jwt_config: "FastAPI") -
             "first_name": get_random_string(10),
             "last_name": get_random_string(10),
             "password": get_random_string(150),
+            "signup_token": signup_token,
         },
     )
 
@@ -257,7 +267,9 @@ def test_refresh_token_revoked_after_use(app_with_valid_jwt_config: "FastAPI") -
     }
 
 
-def test_refresh_token_revoked_after_logout(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_refresh_token_revoked_after_logout(
+    app_with_valid_jwt_config: "FastAPI", signup_token: str
+) -> None:
     """Test that a refresh token cannot be used after the user has logged out."""
     client = TestClient(app_with_valid_jwt_config)
 
@@ -268,6 +280,7 @@ def test_refresh_token_revoked_after_logout(app_with_valid_jwt_config: "FastAPI"
             "first_name": get_random_string(10),
             "last_name": get_random_string(10),
             "password": get_random_string(150),
+            "signup_token": signup_token,
         },
     )
 

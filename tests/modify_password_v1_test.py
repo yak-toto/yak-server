@@ -12,7 +12,9 @@ if TYPE_CHECKING:
     from sqlalchemy import Engine
 
 
-def test_modify_password(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
+def test_modify_password(
+    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine", signup_token: str
+) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     password = get_random_string(9)
@@ -39,6 +41,7 @@ def test_modify_password(app_with_valid_jwt_config: "FastAPI", engine_for_test: 
             "first_name": "Guillaume",
             "last_name": "Le Pape",
             "password": get_random_string(18),
+            "signup_token": signup_token,
         },
     )
 

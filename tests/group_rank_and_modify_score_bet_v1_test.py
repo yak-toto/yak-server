@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 def test_group_rank_and_modify_score_bet(
-    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine"
+    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine", signup_token: str
 ) -> None:
     initialize_database(engine_for_test, get_resources_path("test_modify_bet_v2"))
 
@@ -28,6 +28,7 @@ def test_group_rank_and_modify_score_bet(
             "first_name": get_random_string(10),
             "last_name": get_random_string(10),
             "password": get_random_string(12),
+            "signup_token": signup_token,
         },
     )
 

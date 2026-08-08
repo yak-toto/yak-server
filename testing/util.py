@@ -22,6 +22,10 @@ def get_random_string(length: int) -> str:
     )
 
 
+def get_random_signup_token() -> str:
+    return "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+
+
 @dataclass
 class UserData:
     first_name: str

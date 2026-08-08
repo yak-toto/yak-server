@@ -11,7 +11,9 @@ if TYPE_CHECKING:
     from sqlalchemy import Engine
 
 
-def test_group(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
+def test_group(
+    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine", signup_token: str
+) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     initialize_database(engine_for_test, get_resources_path("test_language"))
@@ -29,6 +31,7 @@ def test_group(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
             "first_name": first_name,
             "last_name": last_name,
             "password": password,
+            "signup_token": signup_token,
         },
     )
 

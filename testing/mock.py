@@ -61,11 +61,13 @@ class MockAuthenticationSettings:
         jwt_refresh_secret_key: str,
         jwt_expiration_time: int,
         jwt_refresh_expiration_time: int,
+        signup_token: str,
     ) -> None:
         self.jwt_secret_key = jwt_secret_key
         self.jwt_refresh_secret_key = jwt_refresh_secret_key
         self.jwt_expiration_time = jwt_expiration_time
         self.jwt_refresh_expiration_time = jwt_refresh_expiration_time
+        self.signup_token = signup_token
 
     def __call__(self) -> Self:
         return self

@@ -8,7 +8,12 @@ import pytest
 from fastapi import status
 from starlette.testclient import TestClient
 
-from testing.util import UserData, get_random_string, get_resources_path, patch_score_bets
+from testing.util import (
+    UserData,
+    get_random_string,
+    get_resources_path,
+    patch_score_bets,
+)
 from yak_server.cli.admin import create_admin
 from yak_server.cli.database import initialize_database
 from yak_server.database.models import Role, UserModel
@@ -74,7 +79,7 @@ def call_compute_final_from_group_rank(client: TestClient, access_token: str) ->
 
 
 def test_compute_points(
-    app_with_rules_and_score_board_config: "FastAPI", engine_for_test: "Engine"
+    app_with_rules_and_score_board_config: "FastAPI", engine_for_test: "Engine", signup_token: str
 ) -> None:
     client = TestClient(app_with_rules_and_score_board_config)
 
@@ -187,6 +192,7 @@ def test_compute_points(
                 "last_name": user.last_name,
                 "name": user.name,
                 "password": get_random_string(85),
+                "signup_token": signup_token,
             },
         )
 
@@ -426,7 +432,7 @@ def test_compute_points(
 
 
 def test_compute_points_skips_nonexistent_knockout_group(
-    app_with_rules_and_score_board_config: "FastAPI", engine_for_test: "Engine"
+    app_with_rules_and_score_board_config: "FastAPI", engine_for_test: "Engine", signup_token: str
 ) -> None:
     app_with_rules_and_score_board_config.dependency_overrides[get_rules] = lambda: Rules(
         compute_finale_phase_from_group_rank=RuleComputeFinaleFromGroupRank(
@@ -478,6 +484,7 @@ def test_compute_points_skips_nonexistent_knockout_group(
             "first_name": get_random_string(8),
             "last_name": get_random_string(8),
             "password": get_random_string(15),
+            "signup_token": signup_token,
         },
     )
 
@@ -519,7 +526,7 @@ def test_missing_first_phase_group(engine_for_test: "Engine") -> None:
 
 
 def test_no_bet_associated_to_first_phase_group(
-    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine"
+    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine", signup_token: str
 ) -> None:
     initialize_database(
         engine_for_test, get_resources_path("test_no_bet_associated_to_first_phase_group")
@@ -534,6 +541,7 @@ def test_no_bet_associated_to_first_phase_group(
             "first_name": "fake",
             "last_name": "user",
             "password": get_random_string(15),
+            "signup_token": signup_token,
         },
     )
 

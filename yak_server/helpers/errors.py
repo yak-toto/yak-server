@@ -17,6 +17,7 @@ class ErrorCode(str, Enum):
     NAME_ALREADY_EXISTS = "name_already_exists"
     USER_NOT_FOUND = "user_not_found"
     UNSATISFIED_PASSWORD_REQUIREMENTS = "unsatisfied_password_requirements"
+    INVALID_SIGNUP_TOKEN = "invalid_signup_token"
 
     # Bets
     BET_NOT_FOUND = "bet_not_found"
@@ -39,6 +40,7 @@ class ErrorCode(str, Enum):
 
 
 INVALID_CREDENTIALS_MESSAGE = "Invalid credentials"
+INVALID_SIGNUP_TOKEN_MESSAGE = "Invalid signup token"
 UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE = "Unauthorized access to admin API"
 INVALID_TOKEN_MESSAGE = "Invalid access token, authentication required"
 EXPIRED_TOKEN_MESSAGE = "Expired access token, re-authentication required"

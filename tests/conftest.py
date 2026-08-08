@@ -16,7 +16,7 @@ from testing.mock import (
     MockLockDatetime,
     MockSettings,
 )
-from testing.util import get_random_string
+from testing.util import get_random_signup_token, get_random_string
 from yak_server import create_app
 from yak_server.cli.database import create_database, delete_database, drop_database
 from yak_server.database.session import compute_database_uri
@@ -41,12 +41,18 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def _apply_standard_overrides(app: "FastAPI") -> None:
+@pytest.fixture
+def signup_token() -> str:
+    return get_random_signup_token()
+
+
+def _apply_standard_overrides(app: "FastAPI", signup_token: str) -> None:
     app.dependency_overrides[get_authentication_settings] = MockAuthenticationSettings(
         jwt_expiration_time=100,
         jwt_refresh_expiration_time=200,
         jwt_secret_key=get_random_string(80),
         jwt_refresh_secret_key=get_random_string(80),
+        signup_token=signup_token,
     )
     app.dependency_overrides[get_cookie_settings] = MockCookieSettings()
     app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
@@ -129,12 +135,12 @@ def _app(
 
 
 @pytest.fixture
-def app_with_profiler() -> Generator["FastAPI", None, None]:
+def app_with_profiler(signup_token: str) -> Generator["FastAPI", None, None]:
     os.environ["DEBUG"] = "1"
 
     app = create_app_with_profiling()
 
-    _apply_standard_overrides(app)
+    _apply_standard_overrides(app, signup_token)
     # The limiter is a module-level singleton shared with the main app —
     # disable it to prevent cross-test state leakage.
     limiter.enabled = False
@@ -146,8 +152,8 @@ def app_with_profiler() -> Generator["FastAPI", None, None]:
 
 
 @pytest.fixture
-def app_with_rate_limiter(_app: "FastAPI") -> Generator["FastAPI", None, None]:
-    _apply_standard_overrides(_app)
+def app_with_rate_limiter(_app: "FastAPI", signup_token: str) -> Generator["FastAPI", None, None]:
+    _apply_standard_overrides(_app, signup_token)
 
     limiter.reset()
     limiter.enabled = True
@@ -166,13 +172,16 @@ def app_with_valid_jwt_config(app_with_rate_limiter: "FastAPI") -> "FastAPI":
 
 
 @pytest.fixture
-def app_with_null_jwt_expiration_time(app_with_valid_jwt_config: "FastAPI") -> "FastAPI":
+def app_with_null_jwt_expiration_time(
+    app_with_valid_jwt_config: "FastAPI", signup_token: str
+) -> "FastAPI":
     app_with_valid_jwt_config.dependency_overrides[get_authentication_settings] = (
         MockAuthenticationSettings(
             jwt_expiration_time=0,
             jwt_refresh_expiration_time=200,
             jwt_secret_key=get_random_string(80),
             jwt_refresh_secret_key=get_random_string(80),
+            signup_token=signup_token,
         )
     )
 
@@ -180,13 +189,16 @@ def app_with_null_jwt_expiration_time(app_with_valid_jwt_config: "FastAPI") -> "
 
 
 @pytest.fixture
-def app_with_null_jwt_refresh_expiration_time(app_with_valid_jwt_config: "FastAPI") -> "FastAPI":
+def app_with_null_jwt_refresh_expiration_time(
+    app_with_valid_jwt_config: "FastAPI", signup_token: str
+) -> "FastAPI":
     app_with_valid_jwt_config.dependency_overrides[get_authentication_settings] = (
         MockAuthenticationSettings(
             jwt_expiration_time=100,
             jwt_refresh_expiration_time=3,
             jwt_secret_key=get_random_string(80),
             jwt_refresh_secret_key=get_random_string(80),
+            signup_token=signup_token,
         )
     )
 

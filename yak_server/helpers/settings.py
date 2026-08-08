@@ -3,7 +3,7 @@ from functools import cache
 from typing import Annotated
 
 from fastapi import Depends
-from pydantic import AwareDatetime, BaseModel, ConfigDict, DirectoryPath
+from pydantic import AwareDatetime, BaseModel, ConfigDict, DirectoryPath, StringConstraints
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .rules import Rules, load_rules
@@ -56,11 +56,22 @@ def get_rules(settings: Annotated[Settings, Depends(get_settings)]) -> Rules:
     return load_rules(settings.data_folder)
 
 
+SignupTokenType = Annotated[
+    str,
+    StringConstraints(
+        pattern=r"^[A-Z0-9]{6}$",
+        min_length=6,
+        max_length=6,
+    ),
+]
+
+
 class AuthenticationSettings(BaseSettings):
     jwt_secret_key: str
     jwt_refresh_secret_key: str
     jwt_expiration_time: int
     jwt_refresh_expiration_time: int
+    signup_token: SignupTokenType
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
 

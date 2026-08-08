@@ -6,7 +6,12 @@ from click.testing import CliRunner
 from starlette.testclient import TestClient
 
 from testing.mock import MockSettings
-from testing.util import UserData, get_random_string, get_resources_path, patch_score_bets
+from testing.util import (
+    UserData,
+    get_random_string,
+    get_resources_path,
+    patch_score_bets,
+)
 from yak_server.cli import app as cli_app
 from yak_server.cli.admin import create_admin
 from yak_server.cli.database import initialize_database
@@ -57,6 +62,7 @@ def test_compute_points(
     app_and_rules_for_compute_points: tuple["FastAPI", Rules],
     engine_for_test: "Engine",
     monkeypatch: "pytest.MonkeyPatch",
+    signup_token: str,
 ) -> None:
     app, rules = app_and_rules_for_compute_points
 
@@ -123,6 +129,7 @@ def test_compute_points(
                 "first_name": user_data.first_name,
                 "last_name": user_data.last_name,
                 "password": get_random_string(18),
+                "signup_token": signup_token,
             },
         )
 
