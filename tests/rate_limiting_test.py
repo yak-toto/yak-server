@@ -9,14 +9,19 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_rate_limiter_signup_login(app_with_rate_limiter: "FastAPI") -> None:
+def test_rate_limiter_signup_login(app_with_rate_limiter: "FastAPI", signup_token: str) -> None:
     client = TestClient(app_with_rate_limiter)
 
     login_request_bodies = [
         {"name": get_random_string(10), "password": get_random_string(150)} for _ in range(5)
     ]
     signup_request_bodies = [
-        {**login_request, "first_name": get_random_string(10), "last_name": get_random_string(10)}
+        {
+            **login_request,
+            "first_name": get_random_string(10),
+            "last_name": get_random_string(10),
+            "signup_token": signup_token,
+        }
         for login_request in login_request_bodies
     ]
 
@@ -33,6 +38,7 @@ def test_rate_limiter_signup_login(app_with_rate_limiter: "FastAPI") -> None:
             "first_name": get_random_string(10),
             "last_name": get_random_string(10),
             "password": get_random_string(150),
+            "signup_token": signup_token,
         },
     )
 

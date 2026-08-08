@@ -28,6 +28,7 @@ services:
       POSTGRES_PASSWORD: test
       POSTGRES_PORT: 5432
       POSTGRES_DB: test
+      SIGNUP_TOKEN: AAAAAA
     depends_on:
       postgres:
         condition: service_healthy

@@ -6,6 +6,7 @@ class SignupIn(BaseModel):
     first_name: str
     last_name: str
     password: str
+    signup_token: str
 
     model_config = ConfigDict(extra="forbid")
 

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_valid_auth(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_valid_auth(app_with_valid_jwt_config: "FastAPI", signup_token: str) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(6)
@@ -26,6 +26,7 @@ def test_valid_auth(app_with_valid_jwt_config: "FastAPI") -> None:
             "first_name": first_name,
             "last_name": last_name,
             "password": password,
+            "signup_token": signup_token,
         },
     )
     assert response_signup.status_code == HTTPStatus.CREATED
@@ -68,7 +69,7 @@ def test_valid_auth(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_double_signup(app_with_valid_jwt_config: "FastAPI", signup_token: str) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(6)
@@ -84,6 +85,7 @@ def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
             "first_name": first_name,
             "last_name": last_name,
             "password": password,
+            "signup_token": signup_token,
         },
     )
     assert response_signup.status_code == HTTPStatus.CREATED
@@ -107,6 +109,7 @@ def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
             "first_name": get_random_string(10),
             "last_name": get_random_string(12),
             "password": get_random_string(8),
+            "signup_token": signup_token,
         },
     )
     assert response_second_signup.status_code == HTTPStatus.CONFLICT
@@ -114,6 +117,28 @@ def test_double_signup(app_with_valid_jwt_config: "FastAPI") -> None:
         "ok": False,
         "error_code": "name_already_exists",
         "description": f"Name already exists: {user_name}",
+    }
+
+
+def test_signup_wrong_token(app_with_valid_jwt_config: "FastAPI") -> None:
+    client = TestClient(app_with_valid_jwt_config)
+
+    response_signup = client.post(
+        "/api/v1/users/signup",
+        json={
+            "name": get_random_string(6),
+            "first_name": get_random_string(6),
+            "last_name": get_random_string(6),
+            "password": get_random_string(8),
+            "signup_token": "WRONG1",
+        },
+    )
+
+    assert response_signup.status_code == HTTPStatus.FORBIDDEN
+    assert response_signup.json() == {
+        "ok": False,
+        "error_code": "invalid_signup_token",
+        "description": "Invalid signup token",
     }
 
 
@@ -136,7 +161,7 @@ def test_login_wrong_name(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_login_wrong_password(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_login_wrong_password(app_with_valid_jwt_config: "FastAPI", signup_token: str) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     user_name = get_random_string(6)
@@ -148,6 +173,7 @@ def test_login_wrong_password(app_with_valid_jwt_config: "FastAPI") -> None:
             "first_name": get_random_string(10),
             "last_name": get_random_string(11),
             "password": get_random_string(12),
+            "signup_token": signup_token,
         },
     )
 
@@ -166,7 +192,7 @@ def test_login_wrong_password(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_invalid_token(app_with_valid_jwt_config: "FastAPI", signup_token: str) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     response_signup = client.post(
@@ -176,6 +202,7 @@ def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
             "first_name": get_random_string(2),
             "last_name": get_random_string(8),
             "password": get_random_string(8),
+            "signup_token": signup_token,
         },
     )
 
@@ -194,7 +221,7 @@ def test_invalid_token(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI") -> None:
+def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI", signup_token: str) -> None:
     client = TestClient(app_with_null_jwt_expiration_time)
 
     user_name = get_random_string(6)
@@ -207,6 +234,7 @@ def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI") -> None:
             "first_name": get_random_string(2),
             "last_name": get_random_string(8),
             "password": password,
+            "signup_token": signup_token,
         },
     )
 
@@ -227,7 +255,7 @@ def test_expired_token(app_with_null_jwt_expiration_time: "FastAPI") -> None:
     }
 
 
-def test_invalid_signup_body(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_invalid_signup_body(app_with_valid_jwt_config: "FastAPI", signup_token: str) -> None:
     name = get_random_string(10)
     first_name = get_random_string(12)
     last_name = get_random_string(6)
@@ -243,6 +271,7 @@ def test_invalid_signup_body(app_with_valid_jwt_config: "FastAPI") -> None:
             "first_name": first_name,
             "last_name": last_name,
             "passwor": password,
+            "signup_token": signup_token,
         },
     )
 
@@ -295,7 +324,7 @@ def test_no_token(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_logout(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_logout(app_with_valid_jwt_config: "FastAPI", signup_token: str) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     response_signup = client.post(
@@ -305,6 +334,7 @@ def test_logout(app_with_valid_jwt_config: "FastAPI") -> None:
             "first_name": get_random_string(2),
             "last_name": get_random_string(8),
             "password": get_random_string(8),
+            "signup_token": signup_token,
         },
     )
 
@@ -326,7 +356,7 @@ def test_logout(app_with_valid_jwt_config: "FastAPI") -> None:
     }
 
 
-def test_non_compliant_password(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_non_compliant_password(app_with_valid_jwt_config: "FastAPI", signup_token: str) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     response_signup = client.post(
@@ -336,6 +366,7 @@ def test_non_compliant_password(app_with_valid_jwt_config: "FastAPI") -> None:
             "first_name": get_random_string(2),
             "last_name": get_random_string(8),
             "password": get_random_string(6),
+            "signup_token": signup_token,
         },
     )
 

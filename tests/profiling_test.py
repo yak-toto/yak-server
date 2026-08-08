@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def test_debug_profiling(app_with_profiler: "FastAPI") -> None:
+def test_debug_profiling(app_with_profiler: "FastAPI", signup_token: str) -> None:
     client = TestClient(app_with_profiler)
 
     user_name = get_random_string(6)
@@ -25,6 +25,7 @@ def test_debug_profiling(app_with_profiler: "FastAPI") -> None:
             "first_name": get_random_string(10),
             "last_name": get_random_string(12),
             "password": get_random_string(18),
+            "signup_token": signup_token,
         },
     )
 

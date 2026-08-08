@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from sqlalchemy import Engine
 
 
-def test_rule(app_with_valid_jwt_config: "FastAPI") -> None:
+def test_rule(app_with_valid_jwt_config: "FastAPI", signup_token: str) -> None:
     client = TestClient(app_with_valid_jwt_config)
 
     response_signup = client.post(
@@ -24,6 +24,7 @@ def test_rule(app_with_valid_jwt_config: "FastAPI") -> None:
             "first_name": get_random_string(6),
             "last_name": get_random_string(6),
             "password": get_random_string(13),
+            "signup_token": signup_token,
         },
     )
 

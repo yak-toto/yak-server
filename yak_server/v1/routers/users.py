@@ -1,5 +1,6 @@
 import logging
 from datetime import timedelta
+from secrets import compare_digest
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, Response, status
@@ -40,6 +41,7 @@ from yak_server.v1.helpers.auth import (
 )
 from yak_server.v1.helpers.errors import (
     InvalidCredentials,
+    InvalidSignupToken,
     NameAlreadyExists,
     UnsatisfiedPasswordRequirements,
     UserNotFound,
@@ -67,6 +69,7 @@ router = APIRouter(prefix="/users", tags=["users"])
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_400_BAD_REQUEST: {"model": ErrorOut},
+        status.HTTP_403_FORBIDDEN: {"model": ErrorOut},
         status.HTTP_409_CONFLICT: {"model": ErrorOut},
         status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
         status.HTTP_429_TOO_MANY_REQUESTS: {"model": ErrorOut},
@@ -82,6 +85,9 @@ def signup(
     cookie_settings: Annotated[CookieSettings, Depends(get_cookie_settings)],
     rules: Annotated[Rules, Depends(get_rules)],
 ) -> GenericOut[SignupOut]:
+    if not compare_digest(signup_in.signup_token, auth_settings.signup_token):
+        raise InvalidSignupToken
+
     try:
         user = signup_user(
             db,

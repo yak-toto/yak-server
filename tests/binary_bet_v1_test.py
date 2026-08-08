@@ -16,7 +16,9 @@ if TYPE_CHECKING:
     from sqlalchemy import Engine
 
 
-def test_binary_bet(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
+def test_binary_bet(
+    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine", signup_token: str
+) -> None:
     initialize_database(engine_for_test, get_resources_path("test_binary_bet"))
 
     client = TestClient(app_with_valid_jwt_config)
@@ -28,6 +30,7 @@ def test_binary_bet(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
             "first_name": get_random_string(6),
             "last_name": get_random_string(12),
             "password": get_random_string(10),
+            "signup_token": signup_token,
         },
     )
 

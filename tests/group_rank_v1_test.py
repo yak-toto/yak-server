@@ -13,7 +13,9 @@ if TYPE_CHECKING:
     from sqlalchemy import Engine
 
 
-def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") -> None:
+def test_group_rank(
+    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine", signup_token: str
+) -> None:
     initialize_database(engine_for_test, get_resources_path("test_compute_points_v1"))
 
     client = TestClient(app_with_valid_jwt_config)
@@ -25,6 +27,7 @@ def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
             "first_name": get_random_string(10),
             "last_name": get_random_string(10),
             "password": get_random_string(10),
+            "signup_token": signup_token,
         },
     )
 
@@ -441,7 +444,7 @@ def test_group_rank(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engi
 
 
 def test_group_rank_team_not_defined(
-    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine"
+    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine", signup_token: str
 ) -> None:
     initialize_database(engine_for_test, get_resources_path("test_group_rank_team_not_defined"))
 
@@ -454,6 +457,7 @@ def test_group_rank_team_not_defined(
             "first_name": get_random_string(10),
             "last_name": get_random_string(10),
             "password": get_random_string(10),
+            "signup_token": signup_token,
         },
     )
 

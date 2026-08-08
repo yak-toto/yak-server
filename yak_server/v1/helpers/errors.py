@@ -15,6 +15,7 @@ from yak_server.helpers.errors import (
     EXPIRED_TOKEN_MESSAGE,
     INVALID_CREDENTIALS_MESSAGE,
     INVALID_REFRESH_TOKEN_MESSAGE,
+    INVALID_SIGNUP_TOKEN_MESSAGE,
     INVALID_TOKEN_MESSAGE,
     LOCKED_BINARY_BET_MESSAGE,
     LOCKED_SCORE_BET_MESSAGE,
@@ -51,6 +52,15 @@ class InvalidCredentials(YakHTTPException):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=INVALID_CREDENTIALS_MESSAGE,
             error_code=ErrorCode.INVALID_CREDENTIALS,
+        )
+
+
+class InvalidSignupToken(YakHTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=INVALID_SIGNUP_TOKEN_MESSAGE,
+            error_code=ErrorCode.INVALID_SIGNUP_TOKEN,
         )
 
 

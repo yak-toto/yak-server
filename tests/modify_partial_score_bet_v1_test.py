@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 def test_modify_partial_score_bet(
-    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine"
+    app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine", signup_token: str
 ) -> None:
     initialize_database(engine_for_test, get_resources_path("test_modify_bet_v2"))
 
@@ -26,6 +26,7 @@ def test_modify_partial_score_bet(
             "first_name": get_random_string(5),
             "last_name": get_random_string(8),
             "password": get_random_string(15),
+            "signup_token": signup_token,
         },
     )
 

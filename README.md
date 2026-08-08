@@ -48,6 +48,12 @@ JWT_SECRET_KEY=9292f79e10ed7ed03ffad66d196217c4
 JWT_EXPIRATION_TIME=1800
 ```
 
+Signup is gated behind an invite token to prevent unwanted account creation. Set `SIGNUP_TOKEN` to a short alphanumeric value in `.env` and share it out-of-band with people you want to allow to sign up; it must be sent as the `signup_token` field in the signup request body.
+
+```text
+SIGNUP_TOKEN=A1B2C3
+```
+
 Also, automatic backup can be done through `yak_server/cli/backup_database` script. It can be run using `yak db backup`.
 
 Finally, fastapi needs some configuration to start. Last thing, for development environment, debug needs to be activated with a additional environment variable:
