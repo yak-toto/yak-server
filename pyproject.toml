@@ -39,7 +39,7 @@ dependencies = [
     "uvicorn==0.52.1",
     "click ==8.4.2",
     "SQLAlchemy ==2.0.51",
-    "alembic ==1.19.0",
+    "alembic ==1.19.1",
     "pydantic-settings ==2.15.0",
 ]
 version = "0.94.0"
