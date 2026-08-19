@@ -1,7 +1,7 @@
 import contextlib
 import os
 from collections.abc import Generator
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 import psycopg
@@ -56,7 +56,7 @@ def _apply_standard_overrides(app: "FastAPI", signup_token: str) -> None:
     )
     app.dependency_overrides[get_cookie_settings] = MockCookieSettings()
     app.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        datetime.now(timezone.utc) + timedelta(minutes=10),
+        datetime.now(UTC) + timedelta(minutes=10),
     )
     app.dependency_overrides[get_rules] = Rules
 

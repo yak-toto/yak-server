@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Protocol
 
 
-class Lang(str, Enum):
+class Lang(StrEnum):
     fr = "fr"
     en = "en"
 

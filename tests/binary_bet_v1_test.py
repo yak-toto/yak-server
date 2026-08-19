@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from unittest.mock import ANY
@@ -79,7 +79,7 @@ def test_binary_bet(
 
     # Error case : locked bet
     app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        datetime.now(timezone.utc) - timedelta(minutes=10),
+        datetime.now(UTC) - timedelta(minutes=10),
     )
 
     response_lock_bet = client.patch(
@@ -96,7 +96,7 @@ def test_binary_bet(
     }
 
     app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        datetime.now(timezone.utc) + timedelta(minutes=10),
+        datetime.now(UTC) + timedelta(minutes=10),
     )
 
     # Error case : Invalid input
