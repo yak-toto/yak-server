@@ -42,7 +42,7 @@ dependencies = [
     "alembic ==1.19.1",
     "pydantic-settings ==2.15.0",
 ]
-version = "0.94.0"
+version = "0.94.1"
 
 [project.urls]
 Homepage = "https://github.com/yak-toto/yak-server"
