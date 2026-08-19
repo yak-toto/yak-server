@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any
 from uuid import UUID, uuid4
@@ -30,8 +30,8 @@ def encode_bearer_token(
     return jwt.encode(
         {
             "sub": str(sub),
-            "nbf": datetime.now(timezone.utc) - timedelta(seconds=3),
-            "exp": datetime.now(timezone.utc) + expiration_time,
+            "nbf": datetime.now(UTC) - timedelta(seconds=3),
+            "exp": datetime.now(UTC) + expiration_time,
         },
         secret_key,
         algorithm="HS512",
@@ -47,8 +47,8 @@ def encode_refresh_token(
         jwt.encode(
             {
                 "jti": str(jti),
-                "nbf": datetime.now(timezone.utc) - timedelta(seconds=3),
-                "exp": datetime.now(timezone.utc) + expiration_time,
+                "nbf": datetime.now(UTC) - timedelta(seconds=3),
+                "exp": datetime.now(UTC) + expiration_time,
             },
             secret_key,
             algorithm="HS512",

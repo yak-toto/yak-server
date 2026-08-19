@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 from functools import partial
 from uuid import UUID
 
 
-class ErrorCode(str, Enum):
+class ErrorCode(StrEnum):
     # Authentication
     INVALID_CREDENTIALS = "invalid_credentials"
     UNAUTHORIZED_ACCESS_TO_ADMIN_API = "unauthorized_access_to_admin_api"

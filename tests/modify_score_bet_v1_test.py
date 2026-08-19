@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from http import HTTPStatus
 from secrets import SystemRandom, randbelow
 from typing import TYPE_CHECKING
@@ -80,7 +80,7 @@ def test_modify_score_bet(
 
     # Error case : check locked bet
     app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        datetime.now(timezone.utc) - timedelta(minutes=10),
+        datetime.now(UTC) - timedelta(minutes=10),
     )
 
     response_locked_bet = client.patch(
@@ -96,7 +96,7 @@ def test_modify_score_bet(
     }
 
     app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        datetime.now(timezone.utc) + timedelta(minutes=10),
+        datetime.now(UTC) + timedelta(minutes=10),
     )
 
     # Error case : check bet not found

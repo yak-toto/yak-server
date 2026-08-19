@@ -1,12 +1,12 @@
 import secrets
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
 from yak_server.database.settings import PostgresSettings
 
 
-class YesOrNo(str, Enum):
+class YesOrNo(StrEnum):
     y = "y"
     n = "n"
 

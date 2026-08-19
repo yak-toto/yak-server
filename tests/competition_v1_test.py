@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
@@ -17,7 +17,7 @@ def test_competition(app_with_valid_jwt_config: "FastAPI") -> None:
         competition="WORLD_CUP_2026",
     )
     app_with_valid_jwt_config.dependency_overrides[get_common_settings] = MockCommonSettings(
-        lock_datetime=datetime.now(timezone.utc),
+        lock_datetime=datetime.now(UTC),
         competition=CompetitionSettings(
             description_fr="Coupe du monde 2026",
             description_en="World Cup 2026",

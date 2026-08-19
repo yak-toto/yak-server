@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 from uuid import uuid4
@@ -78,7 +78,7 @@ def test_bulk_modify_score_bets(
 
     # Error case: locked bets
     app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        datetime.now(timezone.utc) - timedelta(minutes=10),
+        datetime.now(UTC) - timedelta(minutes=10),
     )
 
     response_locked = client.patch("/api/v1/score_bets", json=payload, headers=headers)
@@ -90,7 +90,7 @@ def test_bulk_modify_score_bets(
     }
 
     app_with_valid_jwt_config.dependency_overrides[get_lock_datetime] = MockLockDatetime(
-        datetime.now(timezone.utc) + timedelta(minutes=10),
+        datetime.now(UTC) + timedelta(minutes=10),
     )
 
     # Error case: one unknown bet id in the list

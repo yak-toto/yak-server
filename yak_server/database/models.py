@@ -1,5 +1,5 @@
 import contextlib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
@@ -145,7 +145,7 @@ class RefreshTokenModel(Base):
     created_at: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
     user: Mapped["UserModel"] = relationship("UserModel", foreign_keys=user_id, lazy="raise")
 

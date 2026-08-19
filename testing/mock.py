@@ -1,12 +1,5 @@
-import sys
-from typing import TYPE_CHECKING, Optional
-
-if sys.version_info >= (3, 11):
-    from typing import Self
-else:
-    from typing_extensions import Self
-
 from datetime import datetime
+from typing import TYPE_CHECKING, Optional, Self
 
 from .util import get_resources_path
 
