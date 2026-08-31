@@ -13,7 +13,7 @@ permissions: {}
 jobs:
   notify-telegram:
     name: Send PR Notification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: telegram_bot
 
     permissions: {}
