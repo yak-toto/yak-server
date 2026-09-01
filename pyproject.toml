@@ -36,7 +36,7 @@ dependencies = [
     "fastapi ==0.141.1",
     "slowapi==0.1.10",
     "uvicorn==0.52.4",
-    "click ==8.4.2",
+    "click ==8.5.0",
     "SQLAlchemy ==2.0.52",
     "alembic ==1.19.1",
     "pydantic-settings ==2.15.0",
