@@ -30,7 +30,7 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP",
 ]
 dependencies = [
-    "PyJWT ==2.13.0",
+    "PyJWT ==2.14.0",
     "psycopg[binary] ==3.3.5",
     "argon2-cffi ==25.1.0",
     "fastapi ==0.141.1",
