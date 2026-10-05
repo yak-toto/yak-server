@@ -32,7 +32,7 @@ classifiers = [
 dependencies = [
     "PyJWT ==2.15.1",
     "argon2-cffi ==25.1.0",
-    "fastapi ==0.141.1",
+    "fastapi ==0.142.2",
     "slowapi==0.1.10",
     "uvicorn==0.54.0",
     "click ==8.5.0",
