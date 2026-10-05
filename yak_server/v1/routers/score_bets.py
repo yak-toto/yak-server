@@ -4,7 +4,6 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from yak_server.database.models import GroupModel, MatchModel, ScoreBetModel, UserModel
@@ -15,7 +14,8 @@ from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_des
 from yak_server.helpers.logging_helpers import modify_score_bet_successfully
 from yak_server.helpers.settings import get_lock_datetime
 from yak_server.v1.helpers.auth import require_user
-from yak_server.v1.helpers.errors import BetNotFound, LockedScoreBet, TeamNotFound
+from yak_server.v1.helpers.errors import BetNotFound, LockedScoreBet
+from yak_server.v1.helpers.teams import validate_team_id
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.groups import GroupOut
 from yak_server.v1.models.phases import PhaseOut
@@ -113,6 +113,10 @@ def bulk_modify_score_bets(  # ruff:ignore[complex-structure]
     if missing:
         raise BetNotFound(missing[0])
 
+    for item in score_bets_in:
+        validate_team_id(db, getattr(item.team1, "id", None))
+        validate_team_id(db, getattr(item.team2, "id", None))
+
     team_ids: set[UUID4 | None] = set()
 
     for item in score_bets_in:
@@ -142,11 +146,7 @@ def bulk_modify_score_bets(  # ruff:ignore[complex-structure]
         team_ids.add(score_bet.match.team1_id)
         team_ids.add(score_bet.match.team2_id)
 
-    try:
-        db.flush()
-    except IntegrityError as integrity_error:
-        db.rollback()
-        raise BetNotFound(score_bets_in[0].id) from integrity_error
+    db.flush()
 
     for team_id in team_ids:
         set_recomputation_flag(db, team_id, user.id)
@@ -238,6 +238,10 @@ def modify_score_bet(
     if not score_bet:
         raise BetNotFound(bet_id)
 
+    for team in (modify_score_bet_in.team1, modify_score_bet_in.team2):
+        if team is not None and "id" in team.model_fields_set:
+            validate_team_id(db, team.id)
+
     logger.info(
         modify_score_bet_successfully(
             user.name,
@@ -251,28 +255,12 @@ def modify_score_bet(
         if "id" in modify_score_bet_in.team1.model_fields_set:
             score_bet.match.team1_id = modify_score_bet_in.team1.id
 
-            try:
-                db.flush()
-            except IntegrityError as integrity_error:
-                db.rollback()
-                # team1.id is not None due to: "id" in modify_score_bet_in.team1.model_fields_set
-                # being true
-                raise TeamNotFound(modify_score_bet_in.team1.id) from integrity_error  # type: ignore[arg-type]
-
         if "score" in modify_score_bet_in.team1.model_fields_set:
             score_bet.score1 = modify_score_bet_in.team1.score
 
     if modify_score_bet_in.team2 is not None:
         if "id" in modify_score_bet_in.team2.model_fields_set:
             score_bet.match.team2_id = modify_score_bet_in.team2.id
-
-            try:
-                db.flush()
-            except IntegrityError as integrity_error:
-                db.rollback()
-                # team2.id is not None due to: "id" in modify_score_bet_in.team2.model_fields_set
-                # being true
-                raise TeamNotFound(modify_score_bet_in.team2.id) from integrity_error  # type: ignore[arg-type]
 
         if "score" in modify_score_bet_in.team2.model_fields_set:
             score_bet.score2 = modify_score_bet_in.team2.score

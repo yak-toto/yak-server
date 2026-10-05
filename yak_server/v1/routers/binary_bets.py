@@ -4,17 +4,22 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
-from yak_server.database.models import BinaryBetModel, GroupModel, MatchModel, UserModel
+from yak_server.database.models import (
+    BinaryBetModel,
+    GroupModel,
+    MatchModel,
+    UserModel,
+)
 from yak_server.helpers.bet_locking import is_locked
 from yak_server.helpers.database import get_db
 from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
 from yak_server.helpers.logging_helpers import modify_binary_bet_successfully
 from yak_server.helpers.settings import get_lock_datetime
 from yak_server.v1.helpers.auth import require_user
-from yak_server.v1.helpers.errors import BetNotFound, LockedBinaryBet, TeamNotFound
+from yak_server.v1.helpers.errors import BetNotFound, LockedBinaryBet
+from yak_server.v1.helpers.teams import validate_team_id
 from yak_server.v1.models.binary_bets import BinaryBetOut, BinaryBetResponse, ModifyBinaryBetIn
 from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
 from yak_server.v1.models.groups import GroupOut
@@ -141,6 +146,10 @@ def modify_binary_bet_by_id(
     if not binary_bet:
         raise BetNotFound(bet_id)
 
+    for team in (modify_binary_bet_in.team1, modify_binary_bet_in.team2):
+        if team is not None and "id" in team.model_fields_set:
+            validate_team_id(db, team.id)
+
     logger.info(
         modify_binary_bet_successfully(
             user.name,
@@ -158,27 +167,11 @@ def modify_binary_bet_by_id(
     ):
         binary_bet.match.team1_id = modify_binary_bet_in.team1.id
 
-        try:
-            db.flush()
-        except IntegrityError as integrity_error:
-            db.rollback()
-            # team1.id is not None due to: "id" in modify_binary_bet_in.team1.model_fields_set
-            # being true
-            raise TeamNotFound(modify_binary_bet_in.team1.id) from integrity_error  # type: ignore[arg-type]
-
     if (
         modify_binary_bet_in.team2 is not None
         and "id" in modify_binary_bet_in.team2.model_fields_set
     ):
         binary_bet.match.team2_id = modify_binary_bet_in.team2.id
-
-        try:
-            db.flush()
-        except IntegrityError as integrity_error:
-            db.rollback()
-            # team2.id is not None due to: "id" in modify_binary_bet_in.team2.model_fields_set
-            # being true
-            raise TeamNotFound(modify_binary_bet_in.team2.id) from integrity_error  # type: ignore[arg-type]
 
     db.commit()
     db.refresh(binary_bet)
