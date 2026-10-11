@@ -12,7 +12,7 @@ alias bi := build_image
 
 setup:
     just install
-    uv run pre-commit install --install-hooks
+    uv run prek install --install-hooks
 
 install:
     uv sync --all-groups
@@ -39,16 +39,16 @@ run_profiling:
     uv run uvicorn --reload --factory scripts.profiling:create_app
 
 check:
-    uv run pre-commit run -a
+    uv run prek run -a
 
 fmt:
-    uv run pre-commit run -a ruff-format
+    uv run prek run -a ruff-format
 
 lint:
-    uv run pre-commit run -a ruff-check
+    uv run prek run -a ruff-check
 
 update_deps:
-    uv run pre-commit autoupdate
+    uv run prek autoupdate
     uv lock -U
 
 build_image COMPETITION:
