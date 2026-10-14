@@ -1932,7 +1932,7 @@ wheels = [
 
 [[package]]
 name = "yak-server"
-version = "0.94.10"
+version = "0.94.11"
 source = { editable = "." }
 dependencies = [
     { name = "alembic" },
