@@ -38,7 +38,7 @@ dependencies = [
     "click ==8.5.0",
     "SQLAlchemy[postgresql-psycopgbinary] ==2.1.4",
     "alembic ==1.20.0",
-    "pydantic-settings ==2.15.0",
+    "pydantic-settings ==2.16.0",
 ]
 version = "0.94.11"
 
