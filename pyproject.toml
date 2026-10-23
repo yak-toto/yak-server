@@ -55,7 +55,7 @@ dev = [
     "prek==0.5.5",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
-    "pytest-env==1.8.0",
+    "pytest-env==1.8.1",
     "uvicorn[standard]==0.54.0",
     "yappi==1.7.6",
 ]
