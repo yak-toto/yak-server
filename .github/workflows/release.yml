@@ -21,7 +21,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-24.04
-    environment: telegram_bot
+    environment: release
 
     permissions:
       id-token: write # <-- Required for publishing to PyPI
