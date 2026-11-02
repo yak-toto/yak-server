@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling ==1.32.4"]
+requires = ["hatchling ==1.33.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -60,7 +60,7 @@ dev = [
     "yappi==1.7.6",
 ]
 type-checking = [
-    "hatchling==1.32.4",
+    "hatchling==1.33.0",
     "mypy==2.4.0",
 ]
 
