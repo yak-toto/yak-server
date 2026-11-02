@@ -53,7 +53,7 @@ yak = "yak_server.cli.main:app"
 dev = [
     "httpx2==2.16.0",
     "prek==0.5.7",
-    "pytest==9.1.1",
+    "pytest==9.2.0",
     "pytest-cov==7.1.0",
     "pytest-env==1.8.3",
     "uvicorn[standard]==0.54.0",
