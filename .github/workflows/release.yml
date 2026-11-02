@@ -29,7 +29,7 @@ jobs:
       packages: write # <-- Required for pushing to GHCR
 
     env:
-      python-version: "3.13"
+      python-version: "3.15"
       COMPETITION: "world_cup_2026"
 
     steps:
