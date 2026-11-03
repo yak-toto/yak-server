@@ -61,7 +61,7 @@ dev = [
 ]
 type-checking = [
     "hatchling==1.33.0",
-    "mypy==2.4.0",
+    "mypy==2.4.1",
 ]
 
 [tool.hatch.version]
