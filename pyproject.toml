@@ -52,7 +52,7 @@ yak = "yak_server.cli.main:app"
 [dependency-groups]
 dev = [
     "httpx2==2.16.0",
-    "prek==0.5.7",
+    "prek==0.5.9",
     "pytest==9.2.0",
     "pytest-cov==7.1.0",
     "pytest-env==1.8.3",
