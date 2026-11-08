@@ -125,3 +125,21 @@ jobs:
               \"text\": \"${FULL_MESSAGE}\",
               \"disable_web_page_preview\": true
             }"
+
+      - name: Send Release Notification to ntfy
+        if: success()
+        env:
+          NTFY_URL: ${{ secrets.NTFY_URL }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+          RELEASE_TAG: ${{ steps.create-commits.outputs.new-version }}
+          RELEASE_URL: ${{ steps.create-release.outputs.html_url }}
+          REPO: ${{ github.repository }}
+        run: |-
+          curl -fsS -o /dev/null \
+            -H "Authorization: Bearer ${NTFY_TOKEN}" \
+            -H "Title: New release ${RELEASE_TAG}" \
+            -H "Tags: tada,package" \
+            -H "Click: ${RELEASE_URL}" \
+            -H "Actions: view, PyPI, https://pypi.org/project/yak-server/${RELEASE_TAG}/" \
+            -d "${REPO} ${RELEASE_TAG} is out" \
+            "${NTFY_URL}"
