@@ -139,7 +139,6 @@ jobs:
             -H "Authorization: Bearer ${NTFY_TOKEN}" \
             -H "Title: New release ${RELEASE_TAG}" \
             -H "Tags: tada,package" \
-            -H "Click: ${RELEASE_URL}" \
-            -H "Actions: view, PyPI, https://pypi.org/project/yak-server/${RELEASE_TAG}/" \
+            -H "Actions: view, GitHub, ${RELEASE_URL}; view, PyPI, https://pypi.org/project/yak-server/${RELEASE_TAG}/" \
             -d "${REPO} ${RELEASE_TAG} is out" \
             "${NTFY_URL}"
