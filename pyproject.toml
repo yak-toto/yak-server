@@ -37,11 +37,11 @@ dependencies = [
     "slowapi==0.1.10",
     "uvicorn==0.54.0",
     "click ==8.5.0",
-    "SQLAlchemy[postgresql-psycopgbinary] ==2.1.6",
+    "SQLAlchemy[postgresql-psycopgbinary] ==2.1.8",
     "alembic ==1.20.1",
     "pydantic-settings ==2.16.2",
 ]
-version = "0.94.16"
+version = "0.94.25"
 
 [project.urls]
 Homepage = "https://github.com/yak-toto/yak-server"
@@ -53,10 +53,10 @@ yak = "yak_server.cli.main:app"
 [dependency-groups]
 dev = [
     "httpx2==2.16.0",
-    "prek==0.5.7",
+    "prek==0.5.10",
     "pytest==9.2.0",
     "pytest-cov==7.1.0",
-    "pytest-env==1.8.3",
+    "pytest-env==1.8.5",
     "uvicorn[standard]==0.54.0",
     "yappi==1.7.6",
 ]
