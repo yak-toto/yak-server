@@ -64,6 +64,11 @@ RUN echo "COOKIE_SECURE=True" >> .env
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
 
+# Run as an unprivileged user to reduce the blast radius of a compromise.
+RUN addgroup -S yak && adduser -S -G yak -h /app yak \
+    && chown -R yak:yak /app
+USER yak
+
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD ["wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8000/api/health/"]
 
@@ -73,4 +78,4 @@ EXPOSE 8000
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-CMD ["uvicorn", "--factory", "yak_server:create_app", "--host", "0.0.0.0", "--workers", "4", "--port", "8000", "--timeout-keep-alive", "65"]
+CMD ["uvicorn", "--factory", "yak_server:create_app", "--host", "0.0.0.0", "--workers", "4", "--port", "8000", "--timeout-keep-alive", "65", "--proxy-headers"]
