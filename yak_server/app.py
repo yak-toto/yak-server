@@ -36,11 +36,13 @@ def create_app() -> FastAPI:
     # Initialize fastapi application
     config = Config()
 
+    # Only expose the interactive docs and OpenAPI schema when running in debug mode.
+    # In production this avoids publishing the full API surface (and server version).
     app = FastAPI(
         debug=config.debug,
-        docs_url=f"/{GLOBAL_ENDPOINT}/docs",
-        redoc_url=f"/{GLOBAL_ENDPOINT}/redoc",
-        openapi_url=f"/{GLOBAL_ENDPOINT}/openapi.json",
+        docs_url=f"/{GLOBAL_ENDPOINT}/docs" if config.debug else None,
+        redoc_url=f"/{GLOBAL_ENDPOINT}/redoc" if config.debug else None,
+        openapi_url=f"/{GLOBAL_ENDPOINT}/openapi.json" if config.debug else None,
         version=version("yak-server"),
         title="Yak API",
         description="Yak API",

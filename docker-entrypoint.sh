@@ -19,7 +19,7 @@ echo "Initialize database"
 yak db init
 
 echo "Creating admin user"
-yak db admin --password $ADMIN_PASSWORD
+yak db admin
 
 echo "Container setup done!"
 

@@ -49,6 +49,7 @@ def make_db_app() -> click.Group:
     @db_app.command()
     @click.option(
         "--password",
+        envvar="ADMIN_PASSWORD",
         prompt=True,
         hide_input=True,
         confirmation_prompt=True,
