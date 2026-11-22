@@ -125,5 +125,5 @@ def test_team_invalid_id(app_with_valid_jwt_config: "FastAPI") -> None:
 
     response = client.get("/api/v1/teams/not-a-uuid")
 
-    assert response.status_code == HTTPStatus.UNPROCESSABLE_CONTENT
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     assert response.json()["error_code"] == "validation_error"
