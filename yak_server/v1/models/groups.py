@@ -24,6 +24,10 @@ class GroupOut(BaseModel):
         return cls(id=group.id, code=group.code, description=get_language_description(group, lang))
 
 
+class GroupIdOut(BaseModel):
+    id: UUID4
+
+
 class Phase(BaseModel):
     id: UUID4
 

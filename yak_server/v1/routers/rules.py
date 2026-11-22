@@ -1,33 +1,28 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 from pydantic import UUID4
-from sqlalchemy.orm import Session
 
-from yak_server.database.models import Role, UserModel
-from yak_server.helpers.database import get_db
+from yak_server.database.models import Role
+from yak_server.helpers.database import SessionDep
 from yak_server.helpers.rules import RULE_MAPPING, Rules
-from yak_server.helpers.settings import get_rules
-from yak_server.v1.helpers.auth import require_user
+from yak_server.helpers.settings import RulesDep
+from yak_server.v1.helpers.auth import CurrentUserDep
 from yak_server.v1.helpers.errors import RuleNotFound, UnauthorizedAccessToAdminAPI
-from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
+from yak_server.v1.helpers.responses import error_responses
+from yak_server.v1.models.generic import GenericOut
 
-router = APIRouter(prefix="/rules", tags=["rules"])
-
-
-@router.post(
-    "/{rule_id}",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-    },
+router = APIRouter(
+    prefix="/rules",
+    tags=["rules"],
+    responses=error_responses(status.HTTP_401_UNAUTHORIZED),
 )
+
+
+@router.post("/{rule_id}", responses=error_responses(status.HTTP_404_NOT_FOUND))
 def execute_rule(
     rule_id: UUID4,
-    db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(require_user)],
-    rules: Annotated[Rules, Depends(get_rules)],
+    db: SessionDep,
+    user: CurrentUserDep,
+    rules: RulesDep,
 ) -> GenericOut[str]:
     rule_metadata = RULE_MAPPING.get(rule_id)
 
@@ -42,15 +37,6 @@ def execute_rule(
     return GenericOut(result="")
 
 
-@router.get(
-    "",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-    },
-)
-def retrieve_rules_configuration(
-    _: Annotated[UserModel, Depends(require_user)], rules: Annotated[Rules, Depends(get_rules)]
-) -> GenericOut[Rules]:
+@router.get("")
+def retrieve_rules_configuration(_: CurrentUserDep, rules: RulesDep) -> GenericOut[Rules]:
     return GenericOut(result=rules)

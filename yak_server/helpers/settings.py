@@ -92,3 +92,11 @@ class CookieSettings(BaseSettings):
 @cache
 def get_cookie_settings() -> CookieSettings:
     return CookieSettings()  # pragma: no cover
+
+
+SettingsDep = Annotated[Settings, Depends(get_settings)]
+CommonSettingsDep = Annotated[CommonSettings, Depends(get_common_settings)]
+LockDatetimeDep = Annotated[datetime, Depends(get_lock_datetime)]
+RulesDep = Annotated[Rules, Depends(get_rules)]
+AuthSettingsDep = Annotated[AuthenticationSettings, Depends(get_authentication_settings)]
+CookieSettingsDep = Annotated[CookieSettings, Depends(get_cookie_settings)]

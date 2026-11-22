@@ -10,8 +10,8 @@ from sqlalchemy.orm import Session, joinedload
 from yak_server.database.models import RefreshTokenModel, UserModel
 from yak_server.helpers.authentication import Permission, decode_bearer_token, has_permission
 from yak_server.helpers.cookies import ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE
-from yak_server.helpers.database import get_db
-from yak_server.helpers.settings import AuthenticationSettings, get_authentication_settings
+from yak_server.helpers.database import SessionDep
+from yak_server.helpers.settings import AuthSettingsDep
 from yak_server.v1.models.users import RefreshIn
 
 from .errors import (
@@ -82,8 +82,8 @@ def require_permission(
     required_permission: Permission,
     request: Request,
     access_token: Annotated[HTTPAuthorizationCredentials | None, Depends(security)],
-    db: Annotated[Session, Depends(get_db)],
-    auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
+    db: SessionDep,
+    auth_settings: AuthSettingsDep,
 ) -> UserModel:
     token = _extract_token(request, access_token)
 
@@ -101,6 +101,9 @@ def require_permission(
 require_user = partial(require_permission, Permission.USER)
 require_admin = partial(require_permission, Permission.ADMIN)
 
+CurrentUserDep = Annotated[UserModel, Depends(require_user)]
+AdminUserDep = Annotated[UserModel, Depends(require_admin)]
+
 
 def require_refresh_token(request: Request, refresh_in: RefreshIn | None = None) -> str:
     if refresh_in and refresh_in.refresh_token:
@@ -112,3 +115,6 @@ def require_refresh_token(request: Request, refresh_in: RefreshIn | None = None)
         raise InvalidRefreshToken
 
     return token
+
+
+RefreshTokenDep = Annotated[str, Depends(require_refresh_token)]

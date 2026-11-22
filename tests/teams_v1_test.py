@@ -118,3 +118,12 @@ def test_teams(app_with_valid_jwt_config: "FastAPI", engine_for_test: "Engine") 
         "error_code": "team_not_found",
         "description": f"Team not found: {invalid_team_id_with_flag}",
     }
+
+
+def test_team_invalid_id(app_with_valid_jwt_config: "FastAPI") -> None:
+    client = TestClient(app_with_valid_jwt_config)
+
+    response = client.get("/api/v1/teams/not-a-uuid")
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_CONTENT
+    assert response.json()["error_code"] == "validation_error"

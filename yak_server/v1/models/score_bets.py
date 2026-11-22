@@ -4,7 +4,7 @@ from pydantic import UUID4, BaseModel, ConfigDict, PositiveInt
 
 from yak_server.helpers.language import Lang, get_language_description
 
-from .groups import GroupIn, GroupOut
+from .groups import GroupIdOut, GroupIn, GroupOut
 from .phases import PhaseOut
 from .teams import FlagOut, TeamIn, TeamModifyScoreBetIn, TeamWithScoreOut
 
@@ -61,14 +61,10 @@ class ScoreBetOut(BaseModel):
         )
 
 
-class Group(BaseModel):
-    id: UUID4
-
-
 class ScoreBetWithGroupIdOut(BaseModel):
     id: UUID4
     locked: bool
-    group: Group
+    group: GroupIdOut
     team1: TeamWithScoreOut | None = None
     team2: TeamWithScoreOut | None = None
 
@@ -83,7 +79,7 @@ class ScoreBetWithGroupIdOut(BaseModel):
         return cls(
             id=score_bet.id,
             locked=locked,
-            group=Group(id=score_bet.match.group_id),
+            group=GroupIdOut(id=score_bet.match.group_id),
             team1=(
                 TeamWithScoreOut(
                     id=score_bet.match.team1.id,
@@ -113,6 +109,20 @@ class ScoreBetResponse(BaseModel):
     phase: PhaseOut
     group: GroupOut
     score_bet: ScoreBetOut
+
+    @classmethod
+    def from_instance(
+        cls,
+        score_bet: "ScoreBetModel",
+        *,
+        locked: bool,
+        lang: Lang,
+    ) -> "ScoreBetResponse":
+        return cls(
+            phase=PhaseOut.from_instance(score_bet.match.group.phase, lang=lang),
+            group=GroupOut.from_instance(score_bet.match.group, lang=lang),
+            score_bet=ScoreBetOut.from_instance(score_bet, locked=locked, lang=lang),
+        )
 
 
 class ModifyScoreBetIn(BaseModel):

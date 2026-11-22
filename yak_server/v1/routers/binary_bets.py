@@ -1,90 +1,42 @@
 import logging
-from datetime import datetime
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 from pydantic import UUID4
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import selectinload
 
 from yak_server.database.models import (
     BinaryBetModel,
     GroupModel,
     MatchModel,
-    UserModel,
 )
 from yak_server.helpers.bet_locking import is_locked
-from yak_server.helpers.database import get_db
-from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
+from yak_server.helpers.database import SessionDep
+from yak_server.helpers.language import DEFAULT_LANGUAGE, LangQuery
 from yak_server.helpers.logging_helpers import modify_binary_bet_successfully
-from yak_server.helpers.settings import get_lock_datetime
-from yak_server.v1.helpers.auth import require_user
+from yak_server.helpers.settings import LockDatetimeDep
+from yak_server.v1.helpers.auth import CurrentUserDep
 from yak_server.v1.helpers.errors import BetNotFound, LockedBinaryBet
+from yak_server.v1.helpers.responses import error_responses
 from yak_server.v1.helpers.teams import validate_team_id
-from yak_server.v1.models.binary_bets import BinaryBetOut, BinaryBetResponse, ModifyBinaryBetIn
-from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
-from yak_server.v1.models.groups import GroupOut
-from yak_server.v1.models.phases import PhaseOut
-from yak_server.v1.models.teams import FlagOut, TeamWithWonOut
+from yak_server.v1.models.binary_bets import BinaryBetResponse, ModifyBinaryBetIn
+from yak_server.v1.models.generic import GenericOut
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/binary_bets", tags=["binary_bets"])
-
-
-def send_response(
-    binary_bet: BinaryBetModel,
-    *,
-    locked: bool,
-    lang: Lang,
-) -> GenericOut[BinaryBetResponse]:
-    return GenericOut(
-        result=BinaryBetResponse(
-            phase=PhaseOut.from_instance(binary_bet.match.group.phase, lang=lang),
-            group=GroupOut.from_instance(binary_bet.match.group, lang=lang),
-            binary_bet=BinaryBetOut(
-                id=binary_bet.id,
-                locked=locked,
-                team1=(
-                    TeamWithWonOut(
-                        id=binary_bet.match.team1.id,
-                        code=binary_bet.match.team1.code,
-                        description=get_language_description(binary_bet.match.team1, lang),
-                        flag=FlagOut(url=f"/api/v1/teams/{binary_bet.match.team1.id}/flag"),
-                        won=binary_bet.bet_from_is_one_won()[0],
-                    )
-                    if binary_bet.match.team1 is not None
-                    else None
-                ),
-                team2=(
-                    TeamWithWonOut(
-                        id=binary_bet.match.team2.id,
-                        code=binary_bet.match.team2.code,
-                        description=get_language_description(binary_bet.match.team2, lang),
-                        flag=FlagOut(url=f"/api/v1/teams/{binary_bet.match.team2.id}/flag"),
-                        won=binary_bet.bet_from_is_one_won()[1],
-                    )
-                    if binary_bet.match.team2 is not None
-                    else None
-                ),
-            ),
-        ),
-    )
-
-
-@router.get(
-    "/{bet_id}",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-    },
+router = APIRouter(
+    prefix="/binary_bets",
+    tags=["binary_bets"],
+    responses=error_responses(status.HTTP_401_UNAUTHORIZED, status.HTTP_404_NOT_FOUND),
 )
+
+
+@router.get("/{bet_id}")
 def retrieve_binary_bet_by_id(
     bet_id: UUID4,
-    db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(require_user)],
-    lock_datetime: Annotated[datetime, Depends(get_lock_datetime)],
-    lang: Lang = DEFAULT_LANGUAGE,
+    db: SessionDep,
+    user: CurrentUserDep,
+    lock_datetime: LockDatetimeDep,
+    lang: LangQuery = DEFAULT_LANGUAGE,
 ) -> GenericOut[BinaryBetResponse]:
     binary_bet = (
         db
@@ -105,24 +57,21 @@ def retrieve_binary_bet_by_id(
     if not binary_bet:
         raise BetNotFound(bet_id)
 
-    return send_response(binary_bet, locked=is_locked(user, lock_datetime), lang=lang)
+    return GenericOut(
+        result=BinaryBetResponse.from_instance(
+            binary_bet, locked=is_locked(user, lock_datetime), lang=lang
+        ),
+    )
 
 
-@router.patch(
-    "/{bet_id}",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-    },
-)
+@router.patch("/{bet_id}", responses=error_responses(status.HTTP_403_FORBIDDEN))
 def modify_binary_bet_by_id(
     bet_id: UUID4,
     modify_binary_bet_in: ModifyBinaryBetIn,
-    db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(require_user)],
-    lock_datetime: Annotated[datetime, Depends(get_lock_datetime)],
-    lang: Lang = DEFAULT_LANGUAGE,
+    db: SessionDep,
+    user: CurrentUserDep,
+    lock_datetime: LockDatetimeDep,
+    lang: LangQuery = DEFAULT_LANGUAGE,
 ) -> GenericOut[BinaryBetResponse]:
     if is_locked(user, lock_datetime):
         raise LockedBinaryBet
@@ -176,4 +125,8 @@ def modify_binary_bet_by_id(
     db.commit()
     db.refresh(binary_bet)
 
-    return send_response(binary_bet, locked=is_locked(user, lock_datetime), lang=lang)
+    return GenericOut(
+        result=BinaryBetResponse.from_instance(
+            binary_bet, locked=is_locked(user, lock_datetime), lang=lang
+        ),
+    )

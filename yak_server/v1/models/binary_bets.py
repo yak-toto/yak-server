@@ -4,7 +4,7 @@ from pydantic import UUID4, BaseModel, ConfigDict, PositiveInt
 
 from yak_server.helpers.language import Lang, get_language_description
 
-from .groups import GroupIn, GroupOut
+from .groups import GroupIdOut, GroupIn, GroupOut
 from .phases import PhaseOut
 from .teams import FlagOut, TeamIn, TeamModifyBinaryBetIn, TeamWithWonOut
 
@@ -62,14 +62,10 @@ class BinaryBetOut(BaseModel):
         )
 
 
-class Group(BaseModel):
-    id: UUID4
-
-
 class BinaryBetWithGroupIdOut(BaseModel):
     id: UUID4
     locked: bool
-    group: Group
+    group: GroupIdOut
     team1: TeamWithWonOut | None = None
     team2: TeamWithWonOut | None = None
 
@@ -84,7 +80,7 @@ class BinaryBetWithGroupIdOut(BaseModel):
         return cls(
             id=binary_bet.id,
             locked=locked,
-            group=Group(id=binary_bet.match.group_id),
+            group=GroupIdOut(id=binary_bet.match.group_id),
             team1=(
                 TeamWithWonOut(
                     id=binary_bet.match.team1.id,
@@ -114,6 +110,20 @@ class BinaryBetResponse(BaseModel):
     phase: PhaseOut
     group: GroupOut
     binary_bet: BinaryBetOut
+
+    @classmethod
+    def from_instance(
+        cls,
+        binary_bet: "BinaryBetModel",
+        *,
+        locked: bool,
+        lang: Lang,
+    ) -> "BinaryBetResponse":
+        return cls(
+            phase=PhaseOut.from_instance(binary_bet.match.group.phase, lang=lang),
+            group=GroupOut.from_instance(binary_bet.match.group, lang=lang),
+            binary_bet=BinaryBetOut.from_instance(binary_bet, locked=locked, lang=lang),
+        )
 
 
 class ModifyBinaryBetIn(BaseModel):

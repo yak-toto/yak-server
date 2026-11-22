@@ -3,10 +3,10 @@ import json
 from copy import deepcopy
 from typing import Any
 
-from fastapi import APIRouter, FastAPI, status
+from fastapi import APIRouter, FastAPI
 from fastapi.requests import Request
 
-from yak_server.v1.models.generic import GenericOut, ValidationErrorOut
+from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.version import VersionOut
 
 router = APIRouter(prefix="/version", tags=["version"])
@@ -25,7 +25,7 @@ def extract_metadata(app: "FastAPI") -> tuple[str, str]:
     return version, hash_json(schema)
 
 
-@router.get("", responses={status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut}})
+@router.get("")
 def get_version(request: Request) -> GenericOut[VersionOut]:
     version, schema_hash = extract_metadata(request.app)
 
