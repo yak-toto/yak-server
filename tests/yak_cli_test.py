@@ -145,7 +145,7 @@ def test_db_migration_cli_short_option() -> None:
     assert result_with_short_name.output == result.output
 
 
-def test_db_migration_second_path(monkeypatch: "pytest.MonkeyPatch") -> None:
+def test_db_migration_second_path(monkeypatch: "pytest.MonkeyPatch", tmp_path: Path) -> None:
     """
     .
     └── yak-server
@@ -153,22 +153,21 @@ def test_db_migration_second_path(monkeypatch: "pytest.MonkeyPatch") -> None:
             └── alembic.ini
     """
 
-    with runner.isolated_filesystem():
-        yak_server_module = (Path.cwd() / "yak-server" / "yak_server").resolve()
+    yak_server_module = (tmp_path / "yak-server" / "yak_server").resolve()
 
-        python_file_path = yak_server_module / "cli" / "migration.py"
-        alembic_ini_path = yak_server_module / "alembic.ini"
+    python_file_path = yak_server_module / "cli" / "migration.py"
+    alembic_ini_path = yak_server_module / "alembic.ini"
 
-        alembic_ini_path.parent.mkdir(parents=True)
-        alembic_ini_path.touch()
+    alembic_ini_path.parent.mkdir(parents=True)
+    alembic_ini_path.touch()
 
-        with monkeypatch.context() as m:
-            m.setattr("yak_server.cli.migration.__file__", str(python_file_path))
+    with monkeypatch.context() as m:
+        m.setattr("yak_server.cli.migration.__file__", str(python_file_path))
 
-            result = runner.invoke(app, ["db", "migration", "-s"])
+        result = runner.invoke(app, ["db", "migration", "-s"])
 
-        assert result.exit_code == 0
-        assert result.output == f"export ALEMBIC_CONFIG={alembic_ini_path}\n"
+    assert result.exit_code == 0
+    assert result.output == f"export ALEMBIC_CONFIG={alembic_ini_path}\n"
 
 
 def test_get_openapi_spec() -> None:
