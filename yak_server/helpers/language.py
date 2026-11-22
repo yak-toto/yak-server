@@ -1,5 +1,7 @@
 from enum import StrEnum
-from typing import Protocol
+from typing import Annotated, Protocol
+
+from fastapi import Query
 
 
 class Lang(StrEnum):
@@ -23,3 +25,5 @@ def get_language_description(instance: MultiLingualDescription, lang: Lang) -> s
 
 
 DEFAULT_LANGUAGE = Lang.fr
+
+LangQuery = Annotated[Lang, Query()]

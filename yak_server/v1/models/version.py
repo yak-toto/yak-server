@@ -1,8 +1,6 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 
 class VersionOut(BaseModel):
     version: str
     schema_hash: str
-
-    model_config = ConfigDict(extra="forbid")

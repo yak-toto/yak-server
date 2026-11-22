@@ -11,15 +11,13 @@ class SignupIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class SignupOut(BaseModel):
+class AuthenticatedUserOut(BaseModel):
     id: UUID4
     name: str
     access_token: str
     access_expires_in: int
     refresh_token: str
     refresh_expires_in: int
-
-    model_config = ConfigDict(extra="forbid")
 
 
 class PasswordRequirementsOut(BaseModel):
@@ -29,23 +27,11 @@ class PasswordRequirementsOut(BaseModel):
     digit: bool
     no_space: bool
 
-    model_config = ConfigDict(extra="forbid")
-
 
 class LoginIn(BaseModel):
     name: str
     password: str
 
-    model_config = ConfigDict(extra="forbid")
-
-
-class LoginOut(BaseModel):
-    id: UUID4
-    name: str
-    access_token: str
-    access_expires_in: int
-    refresh_token: str
-    refresh_expires_in: int
     model_config = ConfigDict(extra="forbid")
 
 
@@ -60,8 +46,6 @@ class RefreshOut(BaseModel):
     access_expires_in: int
     refresh_token: str
     refresh_expires_in: int
-
-    model_config = ConfigDict(extra="forbid")
 
 
 class CurrentUserOut(BaseModel):

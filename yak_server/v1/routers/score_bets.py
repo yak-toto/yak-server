@@ -1,91 +1,43 @@
 import logging
-from datetime import datetime
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
 from pydantic import UUID4
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import selectinload
 
-from yak_server.database.models import GroupModel, MatchModel, ScoreBetModel, UserModel
+from yak_server.database.models import GroupModel, MatchModel, ScoreBetModel
 from yak_server.helpers.bet_locking import is_locked
-from yak_server.helpers.database import get_db
+from yak_server.helpers.database import SessionDep
 from yak_server.helpers.group_position import set_recomputation_flag
-from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang, get_language_description
+from yak_server.helpers.language import DEFAULT_LANGUAGE, LangQuery
 from yak_server.helpers.logging_helpers import modify_score_bet_successfully
-from yak_server.helpers.settings import get_lock_datetime
-from yak_server.v1.helpers.auth import require_user
+from yak_server.helpers.settings import LockDatetimeDep
+from yak_server.v1.helpers.auth import CurrentUserDep
 from yak_server.v1.helpers.errors import BetNotFound, LockedScoreBet
+from yak_server.v1.helpers.responses import error_responses
 from yak_server.v1.helpers.teams import validate_team_id
-from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
-from yak_server.v1.models.groups import GroupOut
-from yak_server.v1.models.phases import PhaseOut
+from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.score_bets import (
     BulkModifyScoreBetItem,
     ModifyScoreBetIn,
-    ScoreBetOut,
     ScoreBetResponse,
 )
-from yak_server.v1.models.teams import FlagOut, TeamWithScoreOut
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/score_bets", tags=["score_bets"])
-
-
-def send_response(
-    score_bet: ScoreBetModel,
-    *,
-    locked: bool,
-    lang: Lang,
-) -> GenericOut[ScoreBetResponse]:
-    return GenericOut(
-        result=ScoreBetResponse(
-            phase=PhaseOut.from_instance(score_bet.match.group.phase, lang=lang),
-            group=GroupOut.from_instance(score_bet.match.group, lang=lang),
-            score_bet=ScoreBetOut(
-                id=score_bet.id,
-                locked=locked,
-                team1=(
-                    TeamWithScoreOut(
-                        id=score_bet.match.team1.id,
-                        code=score_bet.match.team1.code,
-                        description=get_language_description(score_bet.match.team1, lang),
-                        flag=FlagOut(url=f"/api/v1/teams/{score_bet.match.team1.id}/flag"),
-                        score=score_bet.score1,
-                    )
-                    if score_bet.match.team1 is not None
-                    else None
-                ),
-                team2=(
-                    TeamWithScoreOut(
-                        id=score_bet.match.team2.id,
-                        code=score_bet.match.team2.code,
-                        description=get_language_description(score_bet.match.team2, lang),
-                        flag=FlagOut(url=f"/api/v1/teams/{score_bet.match.team2.id}/flag"),
-                        score=score_bet.score2,
-                    )
-                    if score_bet.match.team2 is not None
-                    else None
-                ),
-            ),
-        ),
-    )
-
-
-@router.patch(
-    "",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-    },
+router = APIRouter(
+    prefix="/score_bets",
+    tags=["score_bets"],
+    responses=error_responses(status.HTTP_401_UNAUTHORIZED, status.HTTP_404_NOT_FOUND),
 )
+
+
+@router.patch("", responses=error_responses(status.HTTP_403_FORBIDDEN))
 def bulk_modify_score_bets(  # ruff:ignore[complex-structure]
     score_bets_in: list[BulkModifyScoreBetItem],
-    db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(require_user)],
-    lock_datetime: Annotated[datetime, Depends(get_lock_datetime)],
-    lang: Lang = DEFAULT_LANGUAGE,
+    db: SessionDep,
+    user: CurrentUserDep,
+    lock_datetime: LockDatetimeDep,
+    lang: LangQuery = DEFAULT_LANGUAGE,
 ) -> GenericOut[list[ScoreBetResponse]]:
     if is_locked(user, lock_datetime):
         raise LockedScoreBet
@@ -158,26 +110,19 @@ def bulk_modify_score_bets(  # ruff:ignore[complex-structure]
     locked = is_locked(user, lock_datetime)
     return GenericOut(
         result=[
-            send_response(score_bets_by_id[rid], locked=locked, lang=lang).result
+            ScoreBetResponse.from_instance(score_bets_by_id[rid], locked=locked, lang=lang)
             for rid in requested_ids
         ],
     )
 
 
-@router.get(
-    "/{bet_id}",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-    },
-)
+@router.get("/{bet_id}")
 def retrieve_score_bet_by_id(
     bet_id: UUID4,
-    db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(require_user)],
-    lock_datetime: Annotated[datetime, Depends(get_lock_datetime)],
-    lang: Lang = DEFAULT_LANGUAGE,
+    db: SessionDep,
+    user: CurrentUserDep,
+    lock_datetime: LockDatetimeDep,
+    lang: LangQuery = DEFAULT_LANGUAGE,
 ) -> GenericOut[ScoreBetResponse]:
     score_bet = (
         db
@@ -197,24 +142,21 @@ def retrieve_score_bet_by_id(
     if not score_bet:
         raise BetNotFound(bet_id)
 
-    return send_response(score_bet, locked=is_locked(user, lock_datetime), lang=lang)
+    return GenericOut(
+        result=ScoreBetResponse.from_instance(
+            score_bet, locked=is_locked(user, lock_datetime), lang=lang
+        ),
+    )
 
 
-@router.patch(
-    "/{bet_id}",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-    },
-)
+@router.patch("/{bet_id}", responses=error_responses(status.HTTP_403_FORBIDDEN))
 def modify_score_bet(
     bet_id: UUID4,
     modify_score_bet_in: ModifyScoreBetIn,
-    db: Annotated[Session, Depends(get_db)],
-    user: Annotated[UserModel, Depends(require_user)],
-    lock_datetime: Annotated[datetime, Depends(get_lock_datetime)],
-    lang: Lang = DEFAULT_LANGUAGE,
+    db: SessionDep,
+    user: CurrentUserDep,
+    lock_datetime: LockDatetimeDep,
+    lang: LangQuery = DEFAULT_LANGUAGE,
 ) -> GenericOut[ScoreBetResponse]:
     if is_locked(user, lock_datetime):
         raise LockedScoreBet
@@ -271,4 +213,8 @@ def modify_score_bet(
     db.commit()
     db.refresh(score_bet)
 
-    return send_response(score_bet, locked=is_locked(user, lock_datetime), lang=lang)
+    return GenericOut(
+        result=ScoreBetResponse.from_instance(
+            score_bet, locked=is_locked(user, lock_datetime), lang=lang
+        ),
+    )

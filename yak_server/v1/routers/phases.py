@@ -1,31 +1,27 @@
-from typing import Annotated
-
 from fastapi import APIRouter, Depends, status
 from pydantic import UUID4
-from sqlalchemy.orm import Session
 
-from yak_server.database.models import PhaseModel, UserModel
-from yak_server.helpers.database import get_db
-from yak_server.helpers.language import DEFAULT_LANGUAGE, Lang
+from yak_server.database.models import PhaseModel
+from yak_server.helpers.database import SessionDep
+from yak_server.helpers.language import DEFAULT_LANGUAGE, LangQuery
 from yak_server.v1.helpers.auth import require_user
 from yak_server.v1.helpers.errors import PhaseNotFound
-from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
+from yak_server.v1.helpers.responses import error_responses
+from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.phases import PhaseOut
 
-router = APIRouter(prefix="/phases", tags=["phases"])
-
-
-@router.get(
-    "/",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-    },
+router = APIRouter(
+    prefix="/phases",
+    tags=["phases"],
+    dependencies=[Depends(require_user)],
+    responses=error_responses(status.HTTP_401_UNAUTHORIZED),
 )
+
+
+@router.get("")
 def retrieve_all_phases(
-    _: Annotated[UserModel, Depends(require_user)],
-    db: Annotated[Session, Depends(get_db)],
-    lang: Lang = DEFAULT_LANGUAGE,
+    db: SessionDep,
+    lang: LangQuery = DEFAULT_LANGUAGE,
 ) -> GenericOut[list[PhaseOut]]:
     return GenericOut(
         result=[
@@ -37,17 +33,12 @@ def retrieve_all_phases(
 
 @router.get(
     "/{phase_id}",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-    },
+    responses=error_responses(status.HTTP_404_NOT_FOUND),
 )
 def retrieve_phase(
     phase_id: UUID4,
-    _: Annotated[UserModel, Depends(require_user)],
-    db: Annotated[Session, Depends(get_db)],
-    lang: Lang = DEFAULT_LANGUAGE,
+    db: SessionDep,
+    lang: LangQuery = DEFAULT_LANGUAGE,
 ) -> GenericOut[PhaseOut]:
     phase = db.query(PhaseModel).filter_by(id=phase_id).first()
 

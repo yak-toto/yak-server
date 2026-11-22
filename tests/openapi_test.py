@@ -25,7 +25,7 @@ def test_check_response_models(app_with_valid_jwt_config: "FastAPI") -> None:
     openapi_schema = openapi_schema_response.json()
 
     for path, item in openapi_schema["paths"].items():
-        if path == "/api/health/":
+        if path == "/api/health":
             assert item["get"]["tags"] == ["health"]
 
             assert "200" in item["get"]["responses"]

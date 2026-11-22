@@ -1,11 +1,9 @@
 import logging
 from datetime import timedelta
 from secrets import compare_digest
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi import APIRouter, Request, Response, status
 from pydantic import UUID4
-from sqlalchemy.orm import Session
 
 from yak_server.database.models import RefreshTokenModel, Role, UserModel
 from yak_server.helpers.authentication import (
@@ -15,7 +13,7 @@ from yak_server.helpers.authentication import (
     signup_user,
 )
 from yak_server.helpers.cookies import clear_auth_cookies, set_auth_cookies
-from yak_server.helpers.database import get_db
+from yak_server.helpers.database import SessionDep
 from yak_server.helpers.logging_helpers import (
     logged_in_successfully,
     modify_password_successfully,
@@ -25,18 +23,11 @@ from yak_server.helpers.password_validator import (
     PasswordRequirements,
     PasswordRequirementsError,
 )
-from yak_server.helpers.rules import Rules
-from yak_server.helpers.settings import (
-    AuthenticationSettings,
-    CookieSettings,
-    get_authentication_settings,
-    get_cookie_settings,
-    get_rules,
-)
+from yak_server.helpers.settings import AuthSettingsDep, CookieSettingsDep, RulesDep
 from yak_server.v1.helpers.auth import (
-    require_admin,
-    require_refresh_token,
-    require_user,
+    AdminUserDep,
+    CurrentUserDep,
+    RefreshTokenDep,
     user_from_refresh_token,
 )
 from yak_server.v1.helpers.errors import (
@@ -47,16 +38,16 @@ from yak_server.v1.helpers.errors import (
     UserNotFound,
 )
 from yak_server.v1.helpers.rate_limiting import auth_rate_limit
-from yak_server.v1.models.generic import ErrorOut, GenericOut, ValidationErrorOut
+from yak_server.v1.helpers.responses import error_responses
+from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.users import (
+    AuthenticatedUserOut,
     CurrentUserOut,
     LoginIn,
-    LoginOut,
     ModifyUserIn,
     PasswordRequirementsOut,
     RefreshOut,
     SignupIn,
-    SignupOut,
 )
 
 logger = logging.getLogger(__name__)
@@ -67,24 +58,23 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.post(
     "/signup",
     status_code=status.HTTP_201_CREATED,
-    responses={
-        status.HTTP_400_BAD_REQUEST: {"model": ErrorOut},
-        status.HTTP_403_FORBIDDEN: {"model": ErrorOut},
-        status.HTTP_409_CONFLICT: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-        status.HTTP_429_TOO_MANY_REQUESTS: {"model": ErrorOut},
-    },
+    responses=error_responses(
+        status.HTTP_400_BAD_REQUEST,
+        status.HTTP_403_FORBIDDEN,
+        status.HTTP_409_CONFLICT,
+        status.HTTP_429_TOO_MANY_REQUESTS,
+    ),
 )
 @auth_rate_limit
 def signup(
     request: Request,  # ruff:ignore[unused-function-argument]
     signup_in: SignupIn,
     response: Response,
-    db: Annotated[Session, Depends(get_db)],
-    auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
-    cookie_settings: Annotated[CookieSettings, Depends(get_cookie_settings)],
-    rules: Annotated[Rules, Depends(get_rules)],
-) -> GenericOut[SignupOut]:
+    db: SessionDep,
+    auth_settings: AuthSettingsDep,
+    cookie_settings: CookieSettingsDep,
+    rules: RulesDep,
+) -> GenericOut[AuthenticatedUserOut]:
     if not compare_digest(signup_in.signup_token, auth_settings.signup_token):
         raise InvalidSignupToken
 
@@ -130,7 +120,7 @@ def signup(
     )
 
     return GenericOut(
-        result=SignupOut(
+        result=AuthenticatedUserOut(
             id=user.id,
             name=user.name,
             access_token=access_token,
@@ -141,10 +131,7 @@ def signup(
     )
 
 
-@router.get(
-    "/signup/password_requirements",
-    responses={status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut}},
-)
+@router.get("/signup/password_requirements")
 def password_requirements() -> GenericOut[PasswordRequirementsOut]:
     password_requirements = PasswordRequirements()
 
@@ -162,22 +149,17 @@ def password_requirements() -> GenericOut[PasswordRequirementsOut]:
 @router.post(
     "/login",
     status_code=status.HTTP_201_CREATED,
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_409_CONFLICT: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-        status.HTTP_429_TOO_MANY_REQUESTS: {"model": ErrorOut},
-    },
+    responses=error_responses(status.HTTP_401_UNAUTHORIZED, status.HTTP_429_TOO_MANY_REQUESTS),
 )
 @auth_rate_limit
 def login(
     request: Request,  # ruff:ignore[unused-function-argument]
     login_in: LoginIn,
     response: Response,
-    db: Annotated[Session, Depends(get_db)],
-    auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
-    cookie_settings: Annotated[CookieSettings, Depends(get_cookie_settings)],
-) -> GenericOut[LoginOut]:
+    db: SessionDep,
+    auth_settings: AuthSettingsDep,
+    cookie_settings: CookieSettingsDep,
+) -> GenericOut[AuthenticatedUserOut]:
     user = UserModel.authenticate(db, login_in.name, login_in.password)
 
     if not user:
@@ -208,7 +190,7 @@ def login(
     )
 
     return GenericOut(
-        result=LoginOut(
+        result=AuthenticatedUserOut(
             id=user.id,
             name=user.name,
             access_token=access_token,
@@ -222,17 +204,14 @@ def login(
 @router.post(
     "/refresh",
     status_code=status.HTTP_201_CREATED,
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-    },
+    responses=error_responses(status.HTTP_401_UNAUTHORIZED),
 )
 def refresh(
     response: Response,
-    refresh_token_value: Annotated[str, Depends(require_refresh_token)],
-    db: Annotated[Session, Depends(get_db)],
-    auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
-    cookie_settings: Annotated[CookieSettings, Depends(get_cookie_settings)],
+    refresh_token_value: RefreshTokenDep,
+    db: SessionDep,
+    auth_settings: AuthSettingsDep,
+    cookie_settings: CookieSettingsDep,
 ) -> GenericOut[RefreshOut]:
     user, old_jti = user_from_refresh_token(
         db,
@@ -279,18 +258,17 @@ def refresh(
 
 @router.patch(
     "/{user_id}",
-    responses={
-        status.HTTP_400_BAD_REQUEST: {"model": ErrorOut},
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_404_NOT_FOUND: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-    },
+    responses=error_responses(
+        status.HTTP_400_BAD_REQUEST,
+        status.HTTP_401_UNAUTHORIZED,
+        status.HTTP_404_NOT_FOUND,
+    ),
 )
 def modify_user(
     user_id: UUID4,
     modify_user_in: ModifyUserIn,
-    db: Annotated[Session, Depends(get_db)],
-    _: Annotated[UserModel, Depends(require_admin)],
+    db: SessionDep,
+    _: AdminUserDep,
 ) -> GenericOut[CurrentUserOut]:
     user = db.query(UserModel).filter_by(id=user_id).first()
 
@@ -306,31 +284,18 @@ def modify_user(
     return GenericOut(result=CurrentUserOut.model_validate(user))
 
 
-@router.get(
-    "/current",
-    responses={
-        status.HTTP_401_UNAUTHORIZED: {"model": ErrorOut},
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-    },
-)
-def current_user(
-    user: Annotated[UserModel, Depends(require_user)],
-) -> GenericOut[CurrentUserOut]:
+@router.get("/current", responses=error_responses(status.HTTP_401_UNAUTHORIZED))
+def current_user(user: CurrentUserDep) -> GenericOut[CurrentUserOut]:
     return GenericOut(result=CurrentUserOut.model_validate(user))
 
 
-@router.post(
-    "/logout",
-    responses={
-        status.HTTP_422_UNPROCESSABLE_CONTENT: {"model": ValidationErrorOut},
-    },
-)
+@router.post("/logout", responses=error_responses(status.HTTP_401_UNAUTHORIZED))
 def logout(
     response: Response,
-    db: Annotated[Session, Depends(get_db)],
-    auth_settings: Annotated[AuthenticationSettings, Depends(get_authentication_settings)],
-    cookie_settings: Annotated[CookieSettings, Depends(get_cookie_settings)],
-    refresh_token_value: Annotated[str, Depends(require_refresh_token)],
+    db: SessionDep,
+    auth_settings: AuthSettingsDep,
+    cookie_settings: CookieSettingsDep,
+    refresh_token_value: RefreshTokenDep,
 ) -> GenericOut[None]:
     _, current_jti = user_from_refresh_token(
         db,

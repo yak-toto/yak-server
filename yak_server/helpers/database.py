@@ -1,6 +1,8 @@
 from collections.abc import Generator
 from functools import cache
+from typing import Annotated
 
+from fastapi import Depends
 from sqlalchemy.orm import Session, sessionmaker
 
 from yak_server.database.session import build_engine, build_local_session_maker
@@ -17,3 +19,6 @@ def get_db() -> Generator[Session, None, None]:
 
     with local_session_maker() as db:
         yield db
+
+
+SessionDep = Annotated[Session, Depends(get_db)]
