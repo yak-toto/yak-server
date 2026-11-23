@@ -56,12 +56,13 @@ dev = [
     "pytest==9.2.0",
     "pytest-cov==7.1.0",
     "pytest-env==1.8.5",
+    "ty>=0.0.107",
     "uvicorn[standard]==0.54.0",
     "yappi==1.7.6",
 ]
 type-checking = [
     "hatchling==1.33.0",
-    "mypy==2.4.1",
+    "ty==0.0.107",
 ]
 
 [tool.hatch.version]
@@ -114,13 +115,10 @@ max-complexity = 12
 [tool.ruff.lint.pylint]
 max-args = 7
 
-[tool.mypy]
-strict = true
-pretty = true
-plugins = ["pydantic.mypy"]
-exclude = '''(?x)(
-    ^yak_server/database/migrations/.*?\.py$
-)'''
+[tool.ty.src]
+exclude = [
+    "yak_server/database/migrations",
+]
 
 [tool.pytest.ini_options]
 log_file = "yak_test.log"

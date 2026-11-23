@@ -41,5 +41,5 @@ jobs:
         run: uv sync --group type-checking
 
       - name: Run type checking
-        run: uv run mypy .
+        run: uv run ty check
         if: ${{ always() }}

@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from unittest.mock import ANY
 from uuid import uuid4
 
@@ -360,62 +360,64 @@ def test_group_rank(
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
+    expected_group_rank: list[dict[str, Any]] = [
+        {
+            "team": {
+                "id": ANY,
+                "code": "FR",
+                "description": "France",
+                "flag": {"url": ANY},
+            },
+            "won": 0,
+            "drawn": 0,
+            "lost": 0,
+            "goals_for": 0,
+            "goals_against": 0,
+            "goals_difference": 0,
+            "played": 0,
+            "points": 0,
+        },
+        {
+            "team": {
+                "id": ANY,
+                "code": "IE",
+                "description": "Irlande",
+                "flag": {"url": ANY},
+            },
+            "won": 0,
+            "drawn": 0,
+            "lost": 0,
+            "goals_for": 0,
+            "goals_against": 0,
+            "goals_difference": 0,
+            "played": 0,
+            "points": 0,
+        },
+        {
+            "team": {
+                "id": ANY,
+                "code": "IM",
+                "description": "Île de Man",
+                "flag": {"url": ANY},
+            },
+            "won": 0,
+            "drawn": 0,
+            "lost": 0,
+            "goals_for": 0,
+            "goals_against": 0,
+            "goals_difference": 0,
+            "played": 0,
+            "points": 0,
+        },
+    ]
+
     assert sorted(
         response_group_rank_response.json()["result"]["group_rank"],
         key=lambda group_position: group_position["team"]["code"],
     ) == sorted(
-        [
-            {
-                "team": {
-                    "id": ANY,
-                    "code": "FR",
-                    "description": "France",
-                    "flag": {"url": ANY},
-                },
-                "won": 0,
-                "drawn": 0,
-                "lost": 0,
-                "goals_for": 0,
-                "goals_against": 0,
-                "goals_difference": 0,
-                "played": 0,
-                "points": 0,
-            },
-            {
-                "team": {
-                    "id": ANY,
-                    "code": "IE",
-                    "description": "Irlande",
-                    "flag": {"url": ANY},
-                },
-                "won": 0,
-                "drawn": 0,
-                "lost": 0,
-                "goals_for": 0,
-                "goals_against": 0,
-                "goals_difference": 0,
-                "played": 0,
-                "points": 0,
-            },
-            {
-                "team": {
-                    "id": ANY,
-                    "code": "IM",
-                    "description": "Île de Man",
-                    "flag": {"url": ANY},
-                },
-                "won": 0,
-                "drawn": 0,
-                "lost": 0,
-                "goals_for": 0,
-                "goals_against": 0,
-                "goals_difference": 0,
-                "played": 0,
-                "points": 0,
-            },
-        ],
+        expected_group_rank,
         # I know that the order is not important but I want to be sure that the test is consistent
-        key=lambda group_position: group_position["team"]["code"],  # type: ignore[index]
+        key=lambda group_position: group_position["team"]["code"],
     )
 
     response_patch_bet = client.patch(

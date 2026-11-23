@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
@@ -13,10 +12,6 @@ from yak_server.v1.helpers.responses import error_responses
 from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.groups import GroupOut
 from yak_server.v1.models.results import ScoreBoardResponse, ScoreBoardUserResult, UserResult
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
-
 
 router = APIRouter(
     tags=["results"],
@@ -70,9 +65,9 @@ def compute_rank(db: Session, user_id: UUID) -> int:
         .subquery()
     )
 
-    rank: Sequence[int] = db.query(subq.c.rownum).where(subq.c.id == user_id).first()
+    rank = db.query(subq.c.rownum).where(subq.c.id == user_id).first()
 
-    if not rank:
+    if rank is None:
         return 0
 
     return rank[0]
