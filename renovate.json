@@ -54,6 +54,20 @@
                 "lockFileMaintenance"
             ],
             "minimumReleaseAge": null
+        },
+        {
+            "description": "Postgres major upgrades must be approved and merged manually",
+            "matchDatasources": [
+                "docker"
+            ],
+            "matchPackageNames": [
+                "postgres"
+            ],
+            "matchUpdateTypes": [
+                "major"
+            ],
+            "dependencyDashboardApproval": true,
+            "automerge": false
         }
     ]
 }
