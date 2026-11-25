@@ -9,7 +9,7 @@ on:
       - scripts/build_hooks.py
       - Dockerfile
       - docker-entrypoint.sh
-      - .github/docker-compose.ci.yml
+      - docker-compose.ci.yml
       - pyproject.toml
       - uv.lock
       - alembic.ini
