@@ -57,7 +57,6 @@ dev = [
     "pytest-cov==7.1.0",
     "pytest-env==1.8.7",
     "uvicorn[standard]==0.54.0",
-    "yappi==1.7.6",
 ]
 type-checking = [
     "hatchling==1.33.0",
@@ -105,7 +104,7 @@ ignore = [
 max-complexity = 12
 
 [tool.ruff.lint.per-file-ignores]
-"yak_server/database/migrations/*" = ["missing-type-function-argument", "missing-return-type-undocumented-public-function"]
+"yak_server/database/migrations/*" = ["missing-type-function-argument", "missing-return-type-public-function"]
 "yak_server/helpers/errors.py" = ["hardcoded-password-string"]
 "tests/*" = ["assert", "too-many-locals", "magic-value-comparison", "import-private-name"]
 "testing/*" = ["assert"]
