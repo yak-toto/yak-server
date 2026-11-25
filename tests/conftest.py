@@ -9,7 +9,6 @@ import pytest
 from psycopg import sql
 from sqlalchemy import Engine, create_engine
 
-from scripts.profiling import create_app as create_app_with_profiling
 from testing.mock import (
     MockAuthenticationSettings,
     MockCookieSettings,
@@ -132,23 +131,6 @@ def _app(
 
     # Clean database after running test
     delete_database(engine_for_test, debug=True)
-
-
-@pytest.fixture
-def app_with_profiler(signup_token: str) -> Generator["FastAPI", None, None]:
-    os.environ["DEBUG"] = "1"
-
-    app = create_app_with_profiling()
-
-    _apply_standard_overrides(app, signup_token)
-    # The limiter is a module-level singleton shared with the main app —
-    # disable it to prevent cross-test state leakage.
-    limiter.enabled = False
-
-    yield app
-
-    limiter.enabled = False
-    app.dependency_overrides.clear()
 
 
 @pytest.fixture
