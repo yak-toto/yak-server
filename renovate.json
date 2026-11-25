@@ -67,6 +67,7 @@
                 "major"
             ],
             "dependencyDashboardApproval": true,
+            "recreateWhen": "always",
             "automerge": false
         }
     ]
