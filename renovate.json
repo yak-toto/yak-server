@@ -68,6 +68,16 @@
             ],
             "dependencyDashboardApproval": true,
             "automerge": false
+        },
+        {
+            "description": "zizmor-action 'version' input only accepts a plain tag: no digest pinning",
+            "matchManagers": [
+                "github-actions"
+            ],
+            "matchDepNames": [
+                "ghcr.io/zizmorcore/zizmor"
+            ],
+            "pinDigests": false
         }
     ]
 }
