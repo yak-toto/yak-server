@@ -1,10 +1,8 @@
 from importlib.metadata import version
 
-from fastapi import APIRouter, Depends, FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-from yak_server.v1.helpers.rate_limiting import global_rate_limit, limiter
 
 from . import health_check
 from .helpers.logging_helpers import setup_logging
@@ -36,10 +34,7 @@ def create_app() -> FastAPI:
         version=version("yak-server"),
         title="Yak API",
         description="Yak API",
-        dependencies=[Depends(global_rate_limit)],
     )
-
-    app.state.limiter = limiter
 
     api_router = APIRouter(prefix=f"/{GLOBAL_ENDPOINT}")
     api_router.include_router(health_check.router)

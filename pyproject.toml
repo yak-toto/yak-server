@@ -34,7 +34,6 @@ dependencies = [
     "PyJWT ==2.15.1",
     "argon2-cffi ==25.1.0",
     "fastapi ==0.165.0",
-    "slowapi==0.1.10",
     "uvicorn==0.54.0",
     "click ==8.5.1",
     "SQLAlchemy[postgresql-psycopgbinary] ==2.1.9",

@@ -6,7 +6,6 @@ from uuid import UUID
 from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from slowapi.errors import RateLimitExceeded as SlowApiRateLimitExceeded
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -19,7 +18,6 @@ from yak_server.helpers.errors import (
     INVALID_TOKEN_MESSAGE,
     LOCKED_BINARY_BET_MESSAGE,
     LOCKED_SCORE_BET_MESSAGE,
-    RATE_LIMIT_EXCEEDED_MESSAGE,
     UNAUTHORIZED_ACCESS_TO_ADMIN_API_MESSAGE,
     ErrorCode,
     bet_not_found_message,
@@ -217,15 +215,6 @@ class RuleNotFound(YakHTTPException):
         )
 
 
-class RateLimitExceeded(YakHTTPException):
-    def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=RATE_LIMIT_EXCEEDED_MESSAGE,
-            error_code=ErrorCode.RATE_LIMIT_EXCEEDED,
-        )
-
-
 def log_traceback(exception: Exception) -> None:
     """
     Log the traceback of an exception.
@@ -295,10 +284,6 @@ def set_exception_handler(app: "FastAPI") -> None:
                 "description": yak_http_exception.detail,
             },
         )
-
-    @app.exception_handler(SlowApiRateLimitExceeded)
-    def rate_limit_exceeded_handler(request: Request, _: SlowApiRateLimitExceeded) -> JSONResponse:
-        return yak_http_exception_handler(request, RateLimitExceeded())
 
     @app.exception_handler(RequestValidationError)
     def request_validator_error_handler(

@@ -34,7 +34,6 @@ from yak_server.helpers.settings import (
     get_rules,
     get_settings,
 )
-from yak_server.v1.helpers.rate_limiting import limiter
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -134,23 +133,14 @@ def _app(
 
 
 @pytest.fixture
-def app_with_rate_limiter(_app: "FastAPI", signup_token: str) -> Generator["FastAPI", None, None]:
+def app_with_valid_jwt_config(
+    _app: "FastAPI", signup_token: str
+) -> Generator["FastAPI", None, None]:
     _apply_standard_overrides(_app, signup_token)
-
-    limiter.reset()
-    limiter.enabled = True
 
     yield _app
 
-    limiter.enabled = False
     _app.dependency_overrides.clear()
-
-
-@pytest.fixture
-def app_with_valid_jwt_config(app_with_rate_limiter: "FastAPI") -> "FastAPI":
-    limiter.enabled = False
-
-    return app_with_rate_limiter
 
 
 @pytest.fixture

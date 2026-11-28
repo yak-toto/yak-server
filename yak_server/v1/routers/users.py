@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 from secrets import compare_digest
 
-from fastapi import APIRouter, Request, Response, status
+from fastapi import APIRouter, Response, status
 from pydantic import UUID4
 
 from yak_server.database.models import RefreshTokenModel, Role, UserModel
@@ -37,7 +37,6 @@ from yak_server.v1.helpers.errors import (
     UnsatisfiedPasswordRequirements,
     UserNotFound,
 )
-from yak_server.v1.helpers.rate_limiting import auth_rate_limit
 from yak_server.v1.helpers.responses import error_responses
 from yak_server.v1.models.generic import GenericOut
 from yak_server.v1.models.users import (
@@ -62,12 +61,9 @@ router = APIRouter(prefix="/users", tags=["users"])
         status.HTTP_400_BAD_REQUEST,
         status.HTTP_403_FORBIDDEN,
         status.HTTP_409_CONFLICT,
-        status.HTTP_429_TOO_MANY_REQUESTS,
     ),
 )
-@auth_rate_limit
 def signup(
-    request: Request,  # ruff:ignore[unused-function-argument]
     signup_in: SignupIn,
     response: Response,
     db: SessionDep,
@@ -149,11 +145,9 @@ def password_requirements() -> GenericOut[PasswordRequirementsOut]:
 @router.post(
     "/login",
     status_code=status.HTTP_201_CREATED,
-    responses=error_responses(status.HTTP_401_UNAUTHORIZED, status.HTTP_429_TOO_MANY_REQUESTS),
+    responses=error_responses(status.HTTP_401_UNAUTHORIZED),
 )
-@auth_rate_limit
 def login(
-    request: Request,  # ruff:ignore[unused-function-argument]
     login_in: LoginIn,
     response: Response,
     db: SessionDep,
